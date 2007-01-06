@@ -1258,7 +1258,7 @@
 	{
 		if (!/^\[SessionManager\]/m.test(aState))
 		{
-			return "[SessionManager]\nname=" + aName + "\n\n" + aState;
+			return "[SessionManager]\nname=" + aName + "\n" + aState;
 		}
 		return aState.replace(/^(\[SessionManager\])(?:\nname=.*)?/m, function($0, $1) { return $1 + "\nname=" + aName; });
 	},
