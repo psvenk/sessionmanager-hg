@@ -9,7 +9,7 @@
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    NS1:id="{1280606b-2510-4fe0-97ef-9b5a22eafe30}"
                    NS1:name="Session Manager"
-                   NS1:version="0.5"
+                   NS1:version="0.5.2"
                    NS1:description="Saves and restores the state of all windows."
                    NS1:optionsURL="chrome://sessionmanager/content/options.xul"
                    NS1:iconURL="chrome://sessionmanager/skin/icon.png"
