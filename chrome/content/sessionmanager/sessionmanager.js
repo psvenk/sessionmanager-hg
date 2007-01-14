@@ -77,6 +77,7 @@
 		}
 		this.mFullyLoaded = true;
 
+		// Workaround for bug 366986
 		// TabClose event fires too late to use SetTabValue and have it be saved by SessionStore
 		// so make sure our code runs before SessionStore is notified of tab close
 		eval("gBrowser.removeTab = " + gBrowser.removeTab.toString().replace("var evt = document.createEvent(\"Events\");", "gSessionManager.onTabPreClose(aTab); $&"));
@@ -1064,7 +1065,7 @@
 
 	// This results in some kind of closed tab data being restored, but it is incomplete
 	// as all closed tabs show up as "undefined" and they don't restore.  If someone
-	// can fix this feel free.
+	// can fix this feel free, but since it is basically only used once I'm not going to bother.
 	ini_parseCloseTabList: function(aObj, aCloseTabData)
 	{
 		var ClosedTabObject = {};
@@ -1246,6 +1247,28 @@
 	},
 
 /* ........ Auxiliary Functions .............. */
+	// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
+	fixBug350558: function(aState)
+	{
+		aState = eval("(" + aState + ")")
+		aState.windows.forEach(function(aValue, aIndex) {
+			if (aValue._closedTabs) {
+				aValue._closedTabs.forEach(function(bValue, bIndex) {
+					var oldEntries = bValue.state.entries;
+					bValue.state.entries = [];
+					try {
+						for (var i = 0; oldEntries[i]; i++) {
+							bValue.state.entries[i] = oldEntries[i];
+						}
+					}
+					catch (ex) {}
+				}, this);
+			}
+		}, this);
+		aState = aState.toSource();
+		return aState;
+		
+	},
 
 	getSessionState: function(aName, aOneWindow, aNoUndoData)
 	{
@@ -1255,6 +1278,7 @@
 		{
 			state = this.stripTabUndoData(state);
 		}
+		else state = this.fixBug350558(state);
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
@@ -1277,6 +1301,7 @@
 		{
 			aState = this.stripTabUndoData(aState);
 		}
+		else aState = this.fixBug350558(aState);
 
 		this._allowReload = aAllowReload;
 		this._ignoreRemovedTabs = true;
