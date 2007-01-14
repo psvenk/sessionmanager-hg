@@ -8,7 +8,7 @@
 	mIOService: Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabopenclose", "browser:purge-session-history", "quit-application"],
+	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabclose", "browser:purge-session-history", "quit-application"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mPromptSessionName: "?",
@@ -77,6 +77,10 @@
 		}
 		this.mFullyLoaded = true;
 
+		// TabClose event fires too late to use SetTabValue and have it be saved by SessionStore
+		// so make sure our code runs before SessionStore is notified of tab close
+		eval("gBrowser.removeTab = " + gBrowser.removeTab.toString().replace("var evt = document.createEvent(\"Events\");", "gSessionManager.onTabPreClose(aTab); $&"));
+		
 		// Workaround for bug 360408, remove when fixed and uncomment call to onWindowClose in onUnload
 		eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
 	},
@@ -125,12 +129,12 @@
 	{
 		switch (aTopic)
 		{
-		case "sessionmanager:tabopenclose":
+		case "sessionmanager:tabclose":
 			if (aData == "tabclose")
 			{
 				this.mSessionStore.setWindowValue(window, "already_restored", true);
 			}
-			this.updateToolbarButton((this.mSessionStore.getClosedTabCount(window) > 0)?true:undefined);
+			this.updateToolbarButton();
 			break;
 		case "sessionmanager:windowclosed":
 			if (aSubject == window)
@@ -182,9 +186,14 @@
 		}
 	},
 
+	onTabPreClose: function(aTab)
+	{
+		gSessionManager.mSessionStore.setTabValue(aTab, "image", aTab.getAttribute("image"));
+	},
+
 	onTabClose_proxy: function(aEvent)
 	{
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", "tabclose");
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabclose", "tabclose");
 	},
 
 	onTabRestored_proxy: function(aEvent)
@@ -192,7 +201,7 @@
 		var browser = this.getBrowserForTab(aEvent.originalTarget);
 
 		gSessionManager.onTabRestored();
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabclose", null);
 				
 		if (gSessionManager.mPref_reload && gSessionManager._allowReload && !browser.__SS_data && !gSessionManager.mIOService.offline)
 		{
@@ -519,9 +528,9 @@
 		closedTabs = eval(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null }
-			if (/(http:\/\/.+\/).*$/.test(aValue.state.entries[0].url))
+			if (aValue.state.extData && aValue.state.extData.image)
 			{
-				mClosedTabs[aIndex].image = RegExp.$1 + "favicon.ico";
+				mClosedTabs[aIndex].image = aValue.state.extData.image;
 			}
 		}, this);
 
@@ -602,7 +611,7 @@
 		this.setPref("browser.sessionstore.max_tabs_undo", 0, true);
 		this.setPref("browser.sessionstore.max_tabs_undo", max_tabs_undo, true);
 
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabclose", null);
 
 		this.clearUndoData("window");
 	},
@@ -1228,7 +1237,11 @@
 		var button = (document)?document.getElementById("sessionmanager-undo"):null;
 		if (button)
 		{
-			this.setDisabled(button, (aEnable != undefined)?!aEnable:this.mSessionStore.getClosedTabCount(window) == 0 && this.getClosedWindows().length == 0);
+			var tabcount = 0;
+			try {
+				tabcount = this.mSessionStore.getClosedTabCount(window);
+			} catch (ex) {}
+			this.setDisabled(button, (aEnable != undefined)?!aEnable:tabcount == 0 && this.getClosedWindows().length == 0);
 		}
 	},
 
@@ -1270,7 +1283,7 @@
 		this.mSessionStore.setWindowState(aWindow || window, aState, aReplaceTabs || false);
 		this.mSessionStore.setWindowValue(window, "already_restored", true)
 		this._ignoreRemovedTabs = false;
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabclose", null);
 	},
 
 	nameState: function(aState, aName)
