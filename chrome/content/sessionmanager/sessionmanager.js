@@ -14,7 +14,6 @@
 	mPromptSessionName: "?",
 	mSessionExt: ".session",
 
-	mClosedTabs: [],
 	mSessionCache: {},
 
 /* ........ Listeners / Observers.............. */
@@ -113,7 +112,6 @@
 		}
 		
 		this.mBundle = null;
-		this.mClosedTabs = null;
 		this.mFullyLoaded = false;
 
 //		Uncomment the following when bug 360408 is fixed.
@@ -132,8 +130,7 @@
 			{
 				this.mSessionStore.setWindowValue(window, "already_restored", true);
 			}
-			this.populateClosedTabData(window);
-			this.updateToolbarButton((this.mClosedTabs.length > 0)?true:undefined);
+			this.updateToolbarButton((this.mSessionStore.getClosedTabCount(window) > 0)?true:undefined);
 			break;
 		case "sessionmanager:windowclosed":
 			if (aSubject == window)
@@ -517,9 +514,18 @@
 			aPopup.removeChild(item);
 		}
 		
-		this.populateClosedTabData(window);
+		var closedTabs = this.mSessionStore.getClosedTabData(window);
+		var mClosedTabs = [];
+		closedTabs = eval(closedTabs);
+		closedTabs.forEach(function(aValue, aIndex) {
+			mClosedTabs[aIndex] = { title:aValue.title, image:null }
+			if (/(http:\/\/.+\/).*$/.test(aValue.state.entries[0].url))
+			{
+				mClosedTabs[aIndex].image = RegExp.$1 + "favicon.ico";
+			}
+		}, this);
 
-		this.mClosedTabs.forEach(function(aTab, aIx) {
+		mClosedTabs.forEach(function(aTab, aIx) {
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("class", "menuitem-iconic bookmark-item");
 			menuitem.setAttribute("image", aTab.image);
@@ -527,10 +533,10 @@
 			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseTab(' + aIx + ');');
 			aPopup.insertBefore(menuitem, listEnd);
 		});
-		separator.nextSibling.hidden = (this.mClosedTabs.length == 0);
+		separator.nextSibling.hidden = (mClosedTabs.length == 0);
 		separator.hidden = separator.nextSibling.hidden || label.hidden;
 		
-		var showPopup = closedWindows.length + this.mClosedTabs.length > 0;
+		var showPopup = closedWindows.length + mClosedTabs.length > 0;
 		
 		if (aStandAlone)
 		{
@@ -583,7 +589,7 @@
 
 	undoCloseTab: function(aIx)
 	{
-		if (this.mClosedTabs[aIx || 0])
+		if (this.mSessionStore.getClosedTabCount(window) > aIx)
 		{
 			this.mSessionStore.undoCloseTab(window, aIx);
 		}
@@ -599,20 +605,6 @@
 		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
 
 		this.clearUndoData("window");
-	},
-
-	populateClosedTabData: function()
-	{
-		this.mClosedTabs = [];
-		var closedTabs = this.mSessionStore.getClosedTabData(window);
-		closedTabs = eval(closedTabs);
-		closedTabs.forEach(function(aValue, aIndex) {
-			this.mClosedTabs[aIndex] = { title:aValue.title, image:null }
-			if (/(http:\/\/.+\/).*$/.test(aValue.state.entries[0].url))
-			{
-				this.mClosedTabs[aIndex].image = RegExp.$1 + "favicon.ico";
-			}
-		}, this);
 	},
 /* ........ User Prompts .............. */
 
@@ -780,7 +772,7 @@
 		{
 			this.delFile(file);
 		}
-		this.updateToolbarButton(aList.length + this.mClosedTabs.length  > 0);
+		this.updateToolbarButton(aList.length + this.mSessionStore.getClosedTabCount(window)  > 0);
 	},
 
 	appendClosedWindow: function(aState)
@@ -1236,7 +1228,7 @@
 		var button = (document)?document.getElementById("sessionmanager-undo"):null;
 		if (button)
 		{
-			this.setDisabled(button, (aEnable != undefined)?!aEnable:this.mClosedTabs.length == 0 && this.getClosedWindows().length == 0);
+			this.setDisabled(button, (aEnable != undefined)?!aEnable:this.mSessionStore.getClosedTabCount(window) == 0 && this.getClosedWindows().length == 0);
 		}
 	},
 

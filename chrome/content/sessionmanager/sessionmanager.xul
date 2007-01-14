@@ -28,6 +28,8 @@
 						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 						<menuseparator _id="closed-separator"/>
 						<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
+						<menuseparator _id="end-separator"/>
+						<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="gSessionManager.clearUndoListPrompt();"/>
 					</menupopup>
 				</menu>
 			</menupopup>
@@ -38,6 +40,8 @@
 				<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 				<menuseparator _id="closed-separator"/>
 				<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
+				<menuseparator _id="end-separator"/>
+				<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="gSessionManager.clearUndoListPrompt();"/>
 			</menupopup>
 		</toolbarbutton>
 	</toolbarpalette>
@@ -60,6 +64,8 @@
 						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 						<menuseparator _id="closed-separator"/>
 						<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
+						<menuseparator _id="end-separator"/>
+						<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="gSessionManager.clearUndoListPrompt();"/>
 					</menupopup>
 				</menu>
 			</menupopup>
