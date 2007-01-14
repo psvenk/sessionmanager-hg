@@ -132,12 +132,7 @@
 			{
 				this.mSessionStore.setWindowValue(window, "already_restored", true);
 			}
-			this.mClosedTabs = [];
-			var closedTabs = this.mSessionStore.getClosedTabData(window);
-			closedTabs = eval(closedTabs);
-			closedTabs.forEach(function(aValue, aIndex) {
-				this.mClosedTabs[aIndex] = closedTabs[aIndex].title;
-			}, this);
+			this.populateClosedTabData(window);
 			this.updateToolbarButton((this.mClosedTabs.length > 0)?true:undefined);
 			break;
 		case "sessionmanager:windowclosed":
@@ -522,16 +517,13 @@
 			aPopup.removeChild(item);
 		}
 		
-		this.mClosedTabs = [];
-		var closedTabs = this.mSessionStore.getClosedTabData(window);
-		closedTabs = eval(closedTabs);
-		closedTabs.forEach(function(aValue, aIndex) {
-			this.mClosedTabs[aIndex] = closedTabs[aIndex].title;
-		}, this);
+		this.populateClosedTabData(window);
 
 		this.mClosedTabs.forEach(function(aTab, aIx) {
 			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", aTab);
+			menuitem.setAttribute("class", "menuitem-iconic bookmark-item");
+			menuitem.setAttribute("image", aTab.image);
+			menuitem.setAttribute("label", aTab.title);
 			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseTab(' + aIx + ');');
 			aPopup.insertBefore(menuitem, listEnd);
 		});
@@ -609,6 +601,19 @@
 		this.clearUndoData("window");
 	},
 
+	populateClosedTabData: function()
+	{
+		this.mClosedTabs = [];
+		var closedTabs = this.mSessionStore.getClosedTabData(window);
+		closedTabs = eval(closedTabs);
+		closedTabs.forEach(function(aValue, aIndex) {
+			this.mClosedTabs[aIndex] = { title:aValue.title, image:null }
+			if (/(http:\/\/.+\/).*$/.test(aValue.state.entries[0].url))
+			{
+				this.mClosedTabs[aIndex].image = RegExp.$1 + "favicon.ico";
+			}
+		}, this);
+	},
 /* ........ User Prompts .............. */
 
 	prompt: function(aSessionLabel, aAcceptLabel, aValues, aTextLabel, aAcceptExistingLabel)
