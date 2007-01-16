@@ -8,7 +8,7 @@
 	mIOService: Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabclose", "browser:purge-session-history", "quit-application"],
+	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabopenclose", "browser:purge-session-history", "quit-application"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mPromptSessionName: "?",
@@ -78,12 +78,18 @@
 		this.mFullyLoaded = true;
 
 		// Workaround for bug 366986
-		// TabClose event fires too late to use SetTabValue and have it be saved by SessionStore
-		// so make sure our code runs before SessionStore is notified of tab close
-		eval("gBrowser.removeTab = " + gBrowser.removeTab.toString().replace("var evt = document.createEvent(\"Events\");", "gSessionManager.onTabPreClose(aTab); $&"));
+		// TabClose event fires too late to use SetTabValue to save the "image" attribute value and have it be saved by SessionStore
+		// so make the image tag persistant so it can be read later from the xultab variable.
+		this.mSessionStore.persistTabAttribute("image");
 		
 		// Workaround for bug 360408, remove when fixed and uncomment call to onWindowClose in onUnload
 		eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
+		
+		// Have Tab Mix Plus use browser's built in undoCloseTab function.
+		if (gBrowser.undoRemoveTab)
+		{
+			gBrowser.undoRemoveTab = function() { undoCloseTab(); }
+		}
 	},
 
 	onUnload_proxy: function()
@@ -130,7 +136,7 @@
 	{
 		switch (aTopic)
 		{
-		case "sessionmanager:tabclose":
+		case "sessionmanager:tabopenclose":
 			if (aData == "tabclose")
 			{
 				this.mSessionStore.setWindowValue(window, "already_restored", true);
@@ -142,10 +148,7 @@
 			{
 				this.appendClosedWindow(aData);
 			}
-			else if (this.mPref_max_closed_undo > 0)
-			{
-				this.updateToolbarButton(true);
-			}
+			this.updateToolbarButton();
 			break;
 		case "browser:purge-session-history":
 			this.clearUndoData("all");
@@ -187,14 +190,9 @@
 		}
 	},
 
-	onTabPreClose: function(aTab)
-	{
-		gSessionManager.mSessionStore.setTabValue(aTab, "image", aTab.getAttribute("image"));
-	},
-
 	onTabClose_proxy: function(aEvent)
 	{
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabclose", "tabclose");
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", "tabclose");
 	},
 
 	onTabRestored_proxy: function(aEvent)
@@ -202,7 +200,7 @@
 		var browser = this.getBrowserForTab(aEvent.originalTarget);
 
 		gSessionManager.onTabRestored();
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabclose", null);
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
 				
 		if (gSessionManager.mPref_reload && gSessionManager._allowReload && !browser.__SS_data && !gSessionManager.mIOService.offline)
 		{
@@ -529,9 +527,15 @@
 		closedTabs = eval(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null }
-			if (aValue.state.extData && aValue.state.extData.image)
+			if (aValue.state.xultab)
 			{
-				mClosedTabs[aIndex].image = aValue.state.extData.image;
+				var xultabData = aValue.state.xultab.split(" ");
+				xultabData.forEach(function(bValue, bIndex) {
+					var data = bValue.split("=");
+					if (data[0] == "image") {
+						mClosedTabs[aIndex].image = data[1];
+					}
+				}, this);
 			}
 		}, this);
 
@@ -540,7 +544,7 @@
 			menuitem.setAttribute("class", "menuitem-iconic bookmark-item");
 			menuitem.setAttribute("image", aTab.image);
 			menuitem.setAttribute("label", aTab.title);
-			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseTab(' + aIx + ');');
+			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
 			aPopup.insertBefore(menuitem, listEnd);
 		});
 		separator.nextSibling.hidden = (mClosedTabs.length == 0);
@@ -597,14 +601,6 @@
 		}
 	},
 
-	undoCloseTab: function(aIx)
-	{
-		if (this.mSessionStore.getClosedTabCount(window) > aIx)
-		{
-			this.mSessionStore.undoCloseTab(window, aIx);
-		}
-	},
-
 	clearUndoList: function()
 	{
 		var max_tabs_undo = this.getPref("browser.sessionstore.max_tabs_undo", 10, true);
@@ -612,7 +608,7 @@
 		this.setPref("browser.sessionstore.max_tabs_undo", 0, true);
 		this.setPref("browser.sessionstore.max_tabs_undo", max_tabs_undo, true);
 
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabclose", null);
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
 
 		this.clearUndoData("window");
 	},
@@ -1308,7 +1304,7 @@
 		this.mSessionStore.setWindowState(aWindow || window, aState, aReplaceTabs || false);
 		this.mSessionStore.setWindowValue(window, "already_restored", true)
 		this._ignoreRemovedTabs = false;
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabclose", null);
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
 	},
 
 	nameState: function(aState, aName)
