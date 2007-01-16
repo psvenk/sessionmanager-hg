@@ -35,7 +35,7 @@
 			</menupopup>
 		</toolbarbutton>
 		
-		<toolbarbutton id="sessionmanager-undo" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&toolbar.undo.label;" oncommand="if (event.shiftKey) gSessionManager.undoCloseWindow(); else if (gSessionManager.mSessionStore.getClosedTabCount(window)) gSessionManager.undoCloseTab(0); else this.open = true;" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.undo.tooltip;" contextmenu="">
+		<toolbarbutton id="sessionmanager-undo" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&toolbar.undo.label;" oncommand="if (event.shiftKey) gSessionManager.undoCloseWindow(); else if (gSessionManager.mSessionStore.getClosedTabCount(window)) undoCloseTab(); else this.open = true;" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.undo.tooltip;" contextmenu="">
 			<menupopup onpopupshowing="gSessionManager.initUndo(this, true);" onpopuphiding="gSessionManager.uninitUndo(this);" onmousemove="event.stopPropagation();" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
 				<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 				<menuseparator _id="closed-separator"/>
