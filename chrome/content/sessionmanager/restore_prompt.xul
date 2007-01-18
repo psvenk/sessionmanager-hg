@@ -18,7 +18,7 @@
 			var params = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
 			params.SetInt(0, 0);
 			
-			var values = { name: "*", addCurrentSession: true, ignorable: true }
+			var values = { name: "*", addCurrentSession: true, ignorable: false }
 			var fileName = (location.search != "?cancel")?this.selectSession(this._string("recover_session"), this._string("recover_session_ok"), values):"";
 			if (fileName != "*")
 			{
@@ -31,10 +31,6 @@
 					this.clearUndoData("window", true);
 				}
 				params.SetInt(0, 1); // don't recover the crashed session
-			}
-			if (values.ignore)
-			{
-				params.SetInt(1, 1); // don't prompt again
 			}
 			
 			// save crashed session
