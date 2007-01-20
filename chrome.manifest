@@ -3,6 +3,7 @@ content	sessionmanager	jar:chrome/sessionmanager.jar!/content/sessionmanager/
 skin	sessionmanager	classic/1.0	jar:chrome/sessionmanager.jar!/skin/classic/sessionmanager/
 
 locale	sessionmanager	en-US	jar:chrome/sessionmanager.jar!/locale/en-US/sessionmanager/
+locale	sessionmanager	da-DK	jar:chrome/sessionmanager.jar!/locale/da-DK/sessionmanager/
 locale	sessionmanager	de-CH	jar:chrome/sessionmanager.jar!/locale/de-CH/sessionmanager/
 locale	sessionmanager	it-IT	jar:chrome/sessionmanager.jar!/locale/it-IT/sessionmanager/
 locale	sessionmanager	zh-CN	jar:chrome/sessionmanager.jar!/locale/zh-CN/sessionmanager/
