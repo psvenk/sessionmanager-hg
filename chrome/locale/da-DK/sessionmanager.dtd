@@ -1,0 +1,30 @@
+<!ENTITY sessionManager "Session Manager">
+<!ENTITY toolsmenu.accesskey "M">
+<!ENTITY save.label "Gem session...">
+<!ENTITY save.accesskey "s">
+<!ENTITY saveOne.label "Gem vindue...">
+<!ENTITY saveOne.accesskey "v">
+<!ENTITY rename.label "Omdøb session...">
+<!ENTITY rename.accesskey "O">
+<!ENTITY remove.label "Slet session(er)...">
+<!ENTITY remove.accesskey "t">
+<!ENTITY openFolder.label "Åbn sessionsmappe">
+<!ENTITY openFolder.accesskey "b">
+<!ENTITY options.label "&sessionManager; indstillinger">
+<!ENTITY options.accesskey "i">
+<!ENTITY resume.label "Genoptag nuværende session ved opstart">
+<!ENTITY resume.accesskey "G">
+<!ENTITY reload.label "Genindlæs alle genskabte vinduer">
+<!ENTITY reload.accesskey "æ">
+<!ENTITY overwrite.label "Erstat eksisterende vinduer">
+<!ENTITY overwrite.accesskey "E">
+<!ENTITY undoClosed.label "Genåbn lukkede...">
+<!ENTITY undoClosed.accesskey "l">
+<!ENTITY closedWindows "Lukkede vinduer:">
+<!ENTITY closedTabs "Lukkede faneblade:">
+<!ENTITY clearList.label "Slet &apos;Lukket&apos; liste...">
+<!ENTITY clearList.accesskey "S">
+<!ENTITY toolbar.tooltip "Gem nuværende session...">
+<!ENTITY toolbar.undo.label "Fortryd lukning">
+<!ENTITY toolbar.undo.tooltip "Genåbn de senest lukkede faneblade">
+<!ENTITY prompt.ignore.label "Vis ikke denne besked igen">
