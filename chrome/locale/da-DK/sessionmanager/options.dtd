@@ -1,0 +1,54 @@
+<!ENTITY options.title "Indstillinger">
+<!ENTITY options.width "42em">
+<!ENTITY general.caption "Generelt">
+<!ENTITY startNend.caption "Opstart &amp; nedlukning">
+<!ENTITY resume_sess.label "Hent altid følgende session ved opstart:">
+<!ENTITY resume_sess.accesskey "h">
+<!ENTITY backup_sess.label "Ved nedlukning">
+<!ENTITY backup_sess.accesskey "l">
+<!ENTITY backup_session.label0 "kassér nuværende session">
+<!ENTITY backup_session.label1 "gem nuværende session">
+<!ENTITY backup_session.label2 "spørg om nuværende session skal gemmes eller kasséres">
+<!ENTITY restoring.caption "Sessionsgenskabelse">
+<!ENTITY sessionList.caption "Sessionsliste">
+<!ENTITY orderList.label "Sortér sessionslisten">
+<!ENTITY orderList.accesskey "t">
+<!ENTITY orderList.label1 "alfabetisk">
+<!ENTITY orderList.label2 "ældste til nyeste">
+<!ENTITY orderList.label_2 "nyeste til ældste">
+<!ENTITY max_backup.label "Antal gamle (nedbrudte) sessioner der skal gemmes:">
+<!ENTITY max_backup.accesskey "A">
+<!ENTITY undoClose.caption "Fortryd lukning">
+<!ENTITY windowsNtabs.caption "Lukkede vinduer &amp; faneblade">
+<!ENTITY max_closed.label "Maksimalt antal huskede vinduer:">
+<!ENTITY max_closed.accesskey "v">
+<!ENTITY max_tabs.label "Maksimalt antal huskede faneblade (per vindue):">
+<!ENTITY max_tabs.accesskey "b">
+<!ENTITY submenu.label "Vis lukkede vinduer og faneblade i undermenu">
+<!ENTITY submenu.accesskey "u">
+<!ENTITY persistence.caption "Hukommelse">
+<!ENTITY closed_tabs.label "Genskab listen med vinduer og faneblade der kan genskabes:">
+<!ENTITY closed_tabs.accesskey "G">
+<!ENTITY closed_tabs.label0 "aldrig">
+<!ENTITY closed_tabs.label1 "ved opstart">
+<!ENTITY closed_tabs.label2 "altid">
+<!ENTITY window_list.label "Slet ikke listen med lukkede vinduer ved nedlukning">
+<!ENTITY window_list.accesskey "n">
+<!ENTITY clear_list.label "Slet liste">
+<!ENTITY clear_list.accesskey "S">
+<!ENTITY advanced.caption "Avanceret">
+<!ENTITY name_format.caption "Sessionsnavne">
+<!ENTITY name_format.label "Format for foreslåede sessionsnavne:">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "Brug &#37;t for det aktive faneblads overskrift, &#37;d for dagsdato og &#37;m for tidspunkt; overskriftens kan begrænses til # tegn: &#37;#t.">
+<!ENTITY service.caption "&quot;Nedbruds&quot; indstillinger">
+<!ENTITY service.description "Ændr kun på disse hvis du ved hvad du laver:">
+<!ENTITY interval.label "Minimalt tidsinterval imellem at to tilstande gemmes (i sekunder):">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "Maksimalt antal POSTDATA der kan gemmes (i bytes; -1 for alt):">
+<!ENTITY postdata.accesskey "P">
+<!ENTITY privacy.label "Gem følsomme data (form data, POSTDATA og cookies) for">
+<!ENTITY privacy.accesskey "d">
+<!ENTITY privacy.level0 "alle websteder">
+<!ENTITY privacy.level1 "kun ukrypterede websteder">
+<!ENTITY privacy.level2 "ingen websteder">
