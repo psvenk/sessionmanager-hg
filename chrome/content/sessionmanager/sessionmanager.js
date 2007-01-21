@@ -358,6 +358,7 @@
 		var newWindow = false;
 		var overwriteTabs = true;
 		var tabsToMove = null;
+		var stripClosedTabs = !this.mPref_save_closed_tabs || (this.mPref_save_closed_tabs == 1 && (aMode != "startup"));
 
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
 		var TMP_SingleWindowMode = false;
@@ -392,7 +393,7 @@
 		
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, aMode == "startup");
+			gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, stripClosedTabs);
 			if (tabsToMove)
 			{
 				var endPos = gBrowser.mTabs.length - 1;
@@ -597,7 +598,7 @@
 				state = this.stripTabUndoData(state);
 			}
 			
-			this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append");
+			this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append", false, (this.mPref_save_closed_tabs < 2));
 		}
 	},
 
@@ -1279,21 +1280,21 @@
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStartup)
+	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs)
 	{
 		if (!aWindow)
 		{
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
 			aWindow.__SM_restore = function() {
-				this.removeEventListener("load", this.__SM_restore, true, aStartup);
-				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aAllowReload);
+				this.removeEventListener("load", this.__SM_restore, true);
+				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aAllowReload, aStripClosedTabs);
 				delete this.__SM_restore;
 			};
 			aWindow.addEventListener("load", aWindow.__SM_restore, true);
 			return;
 		}
 
-		if (!this.mPref_save_closed_tabs || (this.mPref_save_closed_tabs == 1 && !aStartup))
+		if (aStripClosedTabs)
 		{
 			aState = this.stripTabUndoData(aState);
 		}
