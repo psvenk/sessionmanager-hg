@@ -1,0 +1,54 @@
+<!ENTITY options.title "Seçenekler">
+<!ENTITY options.width "42em">
+<!ENTITY general.caption "Genel">
+<!ENTITY startNend.caption "Başlangıç &amp; Kapatma">
+<!ENTITY resume_sess.label "Açılışta daima belirli oturumu yükle:">
+<!ENTITY resume_sess.accesskey "S">
+<!ENTITY backup_sess.label "Kapanışta">
+<!ENTITY backup_sess.accesskey "h">
+<!ENTITY backup_session.label0 "şimdiki oturumu iptal et">
+<!ENTITY backup_session.label1 "geçerli oturumu yedekle">
+<!ENTITY backup_session.label2 "geçerli oturumu yedeklemeyi sor">
+<!ENTITY restoring.caption "Oturum Geri yükleme">
+<!ENTITY sessionList.caption "Oturum Listesi">
+<!ENTITY orderList.label "Oturum listesini al">
+<!ENTITY orderList.accesskey "d">
+<!ENTITY orderList.label1 "Alfabetik">
+<!ENTITY orderList.label2 "eskiden yeniye">
+<!ENTITY orderList.label_2 "yeniden eskiye">
+<!ENTITY max_backup.label "yedeği tutulacak eski (çökmüş) oturumların sayısı:">
+<!ENTITY max_backup.accesskey "N">
+<!ENTITY undoClose.caption "Kapamayı Geri al">
+<!ENTITY windowsNtabs.caption "Kapatılmış Pencereler &amp; Sekmeler">
+<!ENTITY max_closed.label "En fazla Hatırlanacak kapatılmış pencere sayısı">
+<!ENTITY max_closed.accesskey "w">
+<!ENTITY max_tabs.label "En fazla hatırlanmış kapatılmış sekme numarası (her pencereye):">
+<!ENTITY max_tabs.accesskey "t">
+<!ENTITY submenu.label "Kapatılmış pencere ve sekmeleri ana menüde listele">
+<!ENTITY submenu.accesskey "c">
+<!ENTITY persistence.caption "ısrarlı">
+<!ENTITY closed_tabs.label "tekrar açılabilir kapatılmış tüm pencerelerin listesini düzelt:">
+<!ENTITY closed_tabs.accesskey "e">
+<!ENTITY closed_tabs.label0 "asla">
+<!ENTITY closed_tabs.label1 "başlangıçta">
+<!ENTITY closed_tabs.label2 "daima">
+<!ENTITY window_list.label "kapanışta kapatılmış pencerelerin listesini temizleme">
+<!ENTITY window_list.accesskey "o">
+<!ENTITY clear_list.label "Listeyi temizle">
+<!ENTITY clear_list.accesskey "r">
+<!ENTITY advanced.caption "Gelişmiş">
+<!ENTITY name_format.caption "Oturum isimleri">
+<!ENTITY name_format.label "Oturum isimleri için öneri:">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "Aktif Sekme başlaığı için &#37;t, Bugun tarih ve saaati icin &#37;m, Ek başlık uzunlukları için &#37;#t.">
+<!ENTITY service.caption "&quot;Oturum Kurtarma&quot;Ayarlar">
+<!ENTITY service.description "Ne yaptığınızı bilmiyorsanız buraya dokunmayın">
+<!ENTITY interval.label "iki durum kaydı arasındaki en fazla zaman aralığı (saniye olarak):">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "Kaydedilecek En fazla POSTDATA miktarı (bayt olarak; hepsi için -1)">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Önemli bilgiyi kaydet (POSTDATA ve Çerezler)">
+<!ENTITY privacy.accesskey "v">
+<!ENTITY privacy.level0 "tüm siteler">
+<!ENTITY privacy.level1 "yanlızca şifrelenmemiş siteler">
+<!ENTITY privacy.level2 "Hiç bir site">
