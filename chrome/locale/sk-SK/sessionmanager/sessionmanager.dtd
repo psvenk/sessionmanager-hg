@@ -1,0 +1,30 @@
+<!ENTITY sessionManager "Session Manager">
+<!ENTITY toolsmenu.accesskey "M">
+<!ENTITY save.label "Uložiť reláciu...">
+<!ENTITY save.accesskey "U">
+<!ENTITY saveOne.label "Uložiť aktuálne okno...">
+<!ENTITY saveOne.accesskey "a">
+<!ENTITY rename.label "Premenovať reláciu...">
+<!ENTITY rename.accesskey "r">
+<!ENTITY remove.label "Odstrániť relácie...">
+<!ENTITY remove.accesskey "d">
+<!ENTITY openFolder.label "Otvoriť priečinok relácií">
+<!ENTITY openFolder.accesskey "p">
+<!ENTITY options.label "Nastavenia rozšírenia &sessionManager;">
+<!ENTITY options.accesskey "n">
+<!ENTITY resume.label "Obnoviť aktuálne reláciu po spustení">
+<!ENTITY resume.accesskey "b">
+<!ENTITY reload.label "Obnoviť obsah všetkých obnovených okien">
+<!ENTITY reload.accesskey "i">
+<!ENTITY overwrite.label "Nahradiť existujúce okná">
+<!ENTITY overwrite.accesskey "h">
+<!ENTITY undoClosed.label "Znova otvoriť zatvorené...">
+<!ENTITY undoClosed.accesskey "z">
+<!ENTITY closedWindows "Zatvorené okná:">
+<!ENTITY closedTabs "Zatvorené karty:">
+<!ENTITY clearList.label "Vymazať zoznam &apos;Zatvorené&apos;...">
+<!ENTITY clearList.accesskey "v">
+<!ENTITY toolbar.tooltip "Uložiť aktuálnu reláciu prehliadača...">
+<!ENTITY toolbar.undo.label "Znova otvoriť zatvorené">
+<!ENTITY toolbar.undo.tooltip "Znova otvorí naposledy zatvorené karty">
+<!ENTITY prompt.ignore.label "Toto dialógové okno už nezobrazovať">
