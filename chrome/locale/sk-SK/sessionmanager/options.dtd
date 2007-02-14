@@ -1,0 +1,54 @@
+<!ENTITY options.title "Nastavenia">
+<!ENTITY options.width "60em">
+<!ENTITY general.caption "Všeobecné">
+<!ENTITY startNend.caption "Spustenie &amp; ukončenie">
+<!ENTITY resume_sess.label "Pri spustení vždy načítať nasledujúce reláciu:">
+<!ENTITY resume_sess.accesskey "s">
+<!ENTITY backup_sess.label "Pri ukončení">
+<!ENTITY backup_sess.accesskey "u">
+<!ENTITY backup_session.label0 "zrušiť aktuálnu reláciu">
+<!ENTITY backup_session.label1 "vytvoriť zálohu aktuálnej relácie">
+<!ENTITY backup_session.label2 "opýtať sa, či vytvoriť zálohu aktuálnej relácie">
+<!ENTITY restoring.caption "Obnova relácií">
+<!ENTITY sessionList.caption "Zoznam relácií">
+<!ENTITY orderList.label "Usporiadať zoznam relácií">
+<!ENTITY orderList.accesskey "s">
+<!ENTITY orderList.label1 "abecedne">
+<!ENTITY orderList.label2 "od najstaršej po najnovšiu">
+<!ENTITY orderList.label_2 "od najnovšej po najstaršiu">
+<!ENTITY max_backup.label "Počet uchovávaných záloh starších relácií:">
+<!ENTITY max_backup.accesskey "P">
+<!ENTITY undoClose.caption "Znova otvoriť zatvorené">
+<!ENTITY windowsNtabs.caption "Zatvorené okná &amp; karty">
+<!ENTITY max_closed.label "Maximálne množstvo zapamätaných zatvorených okien:">
+<!ENTITY max_closed.accesskey "m">
+<!ENTITY max_tabs.label "Maximálne množstvo zapamätaných kariet (pre každé okno)">
+<!ENTITY max_tabs.accesskey "k">
+<!ENTITY submenu.label "Zobraziť zoznam všetkých zatvorených okien a kariet v podponuke">
+<!ENTITY submenu.accesskey "Z">
+<!ENTITY persistence.caption "Trvanie">
+<!ENTITY closed_tabs.label "Obnoviť zoznam kariet, ktoré je možné znova otvoriť, pre všetky okná:">
+<!ENTITY closed_tabs.accesskey "e">
+<!ENTITY closed_tabs.label0 "nikdy">
+<!ENTITY closed_tabs.label1 "pri sputení">
+<!ENTITY closed_tabs.label2 "vždy">
+<!ENTITY window_list.label "Pri ukončení nemazať zoznam zatvorených okien">
+<!ENTITY window_list.accesskey "o">
+<!ENTITY clear_list.label "Vymazať zoznam">
+<!ENTITY clear_list.accesskey "v">
+<!ENTITY advanced.caption "Rozšírené">
+<!ENTITY name_format.caption "Názvy relácii">
+<!ENTITY name_format.label "Formát návrhov názvov relácií:">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "Môžete použiť &#37;t ako skratku pre titulok aktívnej karty, &#37;d dnešný dátum a &#37;m pre čas. Titulok môžete bude obmedzený na počet # znakov: &#37;#t.">
+<!ENTITY service.caption "Nastavenia &quot;obnovy po páde&quot;">
+<!ENTITY service.description "Nemeňte tieto nastavenia, ak neviete čo robíte.">
+<!ENTITY interval.label "Minimálny časový interval medzi ukladaním stavu (v sekundách):">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "Maximálne množstvo uložených údajov POSTDATA (v bytoch; -1 pre všetkých):">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Uložiť citlivé údaje (údaje formulárov, POSTDATA a cookies) pre">
+<!ENTITY privacy.accesskey "c">
+<!ENTITY privacy.level0 "všetky stránky">
+<!ENTITY privacy.level1 "len nezabezpečené stránky">
+<!ENTITY privacy.level2 "žiadne stránky">
