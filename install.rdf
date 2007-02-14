@@ -5,7 +5,7 @@
   <RDF:Description RDF:about="rdf:#$Ye57y3"
                    NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
                    NS1:minVersion="2.0"
-                   NS1:maxVersion="3.0a2" />
+                   NS1:maxVersion="3.0a3" />
   <RDF:Description RDF:about="urn:mozilla:install-manifest"
                    NS1:id="{1280606b-2510-4fe0-97ef-9b5a22eafe30}"
                    NS1:name="Session Manager"
