@@ -16,6 +16,7 @@ locale	sessionmanager	ja-JP	jar:chrome/sessionmanager.jar!/locale/ja-JP/sessionm
 locale	sessionmanager	ru-RU	jar:chrome/sessionmanager.jar!/locale/ru-RU/sessionmanager/
 locale	sessionmanager	nl-NL	jar:chrome/sessionmanager.jar!/locale/nl-NL/sessionmanager/
 locale	sessionmanager	tr-TR	jar:chrome/sessionmanager.jar!/locale/tr-TR/sessionmanager/
+locale	sessionmanager	sk-SK	jar:chrome/sessionmanager.jar!/locale/sk-SK/sessionmanager/
 
 overlay	chrome://browser/content/browser.xul			chrome://sessionmanager/content/sessionmanager.xul
 style	chrome://global/content/customizeToolbar.xul			chrome://sessionmanager/skin/sessionmanager.css
