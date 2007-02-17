@@ -1,38 +1,45 @@
 <?xml version="1.0"?>
-<RDF:RDF xmlns:NS1="http://www.mozilla.org/2004/em-rdf#"
-         xmlns:NC="http://home.netscape.com/NC-rdf#"
-         xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
-  <RDF:Description RDF:about="rdf:#$Ye57y3"
-                   NS1:id="{ec8030f7-c20a-464f-9b0e-13a3a9e97384}"
-                   NS1:minVersion="2.0"
-                   NS1:maxVersion="3.0a3" />
-  <RDF:Description RDF:about="urn:mozilla:install-manifest"
-                   NS1:id="{1280606b-2510-4fe0-97ef-9b5a22eafe30}"
-                   NS1:name="Session Manager"
-                   NS1:version="0.5.3.3"
-                   NS1:description="Saves and restores the state of all windows."
-                   NS1:optionsURL="chrome://sessionmanager/content/options.xul"
-                   NS1:iconURL="chrome://sessionmanager/skin/icon.png"
-                   NS1:homepageURL="http://sessionmanager.mozdev.org/"
-                   NS1:creator="zeniko">
-    <NS1:contributor>Morac (Converted to use FF 2.0 SessionStore)</NS1:contributor>
-    <NS1:contributor>Danil Ivanov (Cache Fixer)</NS1:contributor>
-    <NS1:contributor>dougeeebear (Session Manager icon)</NS1:contributor>
-    <NS1:contributor>&amp;</NS1:contributor>
-    <NS1:contributor>BabelZilla translators:</NS1:contributor>
-    <NS1:contributor>Andrea (Italian)</NS1:contributor>
-    <NS1:contributor>Rick Cart (Chinese [zh-CN])</NS1:contributor>
-    <NS1:contributor>Teboga (Portuguese)</NS1:contributor>
-    <NS1:contributor>jojaba (French)</NS1:contributor>
-    <NS1:contributor>Edgaras Janušauskas (Lithuanian)</NS1:contributor>
-    <NS1:contributor>Proyecto Nave (Spanish)</NS1:contributor>
-    <NS1:contributor>Leszek (teo) Życzkowski (Polish)</NS1:contributor>
-    <NS1:contributor>Haebaru (Japanese)</NS1:contributor>
-    <NS1:contributor>stoneflash (Russian)</NS1:contributor>
-    <NS1:contributor>JW_00000 (Dutch)</NS1:contributor>
-    <NS1:contributor>Ossipoff (Danish)</NS1:contributor>
-    <NS1:contributor>SerdarSahin (Turkish)</NS1:contributor>
-    <NS1:contributor>Wladow (Slovak)</NS1:contributor>
-    <NS1:targetApplication RDF:resource="rdf:#$Ye57y3"/>
-  </RDF:Description>
-</RDF:RDF>
+<RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+  <Description about="urn:mozilla:install-manifest">
+    <em:id>{1280606b-2510-4fe0-97ef-9b5a22eafe30}</em:id>
+    <em:version>0.5.3.3</em:version>
+    
+    <!-- Firefox -->
+    <em:targetApplication>
+      <Description>
+        <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+        <em:minVersion>2.0</em:minVersion>
+        <em:maxVersion>3.0a3</em:maxVersion>
+      </Description>
+    </em:targetApplication>
+    
+    <!-- Front End MetaData -->
+    <em:name>Session Manager</em:name>
+    <em:description>Saves and restores the state of all windows.</em:description>
+    <em:creator>zeniko</em:creator>
+    <em:contributor>Morac (Converted to use FF 2.0 SessionStore)</em:contributor>
+    <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+    <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+    <em:contributor>&amp;</em:contributor>
+    <em:contributor>BabelZilla translators:</em:contributor>
+    <em:contributor>Andrea (Italian)</em:contributor>
+    <em:contributor>Rick Cart (Chinese [zh-CN])</em:contributor>
+    <em:contributor>Teboga (Portuguese)</em:contributor>
+    <em:contributor>jojaba (French)</em:contributor>
+    <em:contributor>Edgaras Janušauskas (Lithuanian)</em:contributor>
+    <em:contributor>Proyecto Nave (Spanish)</em:contributor>
+    <em:contributor>Leszek (teo) Życzkowski (Polish)</em:contributor>
+    <em:contributor>Haebaru (Japanese)</em:contributor>
+    <em:contributor>stoneflash (Russian)</em:contributor>
+    <em:contributor>JW_00000 (Dutch)</em:contributor>
+    <em:contributor>Ossipoff (Danish)</em:contributor>
+    <em:contributor>SerdarSahin (Turkish)</em:contributor>
+    <em:contributor>Wladow (Slovak)</em:contributor>
+    <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
+    
+    <!-- Front End Integration Hooks (used by Extension Manager)-->
+    <em:optionsURL>chrome://sessionmanager/content/options.xul</em:optionsURL>
+    <em:iconURL>chrome://sessionmanager/skin/icon.png</em:iconURL>  
+    
+  </Description>
+</RDF>
