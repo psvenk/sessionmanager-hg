@@ -26,8 +26,8 @@
     <em:contributor>Rick Cart (Chinese [zh-CN])</em:contributor>
     <em:contributor>Teboga (Portuguese)</em:contributor>
     <em:contributor>jojaba (French)</em:contributor>
-    <em:contributor>Edgaras Janušauskas (Lithuanian)</em:contributor>
-    <em:contributor>Proyecto Nave (Spanish)</em:contributor>
+    <em:contributor>Edgaras Janušauskas, garas (Lithuanian)</em:contributor>
+    <em:contributor>Proyecto Nave, chuzo (Spanish)</em:contributor>
     <em:contributor>Leszek (teo) Życzkowski (Polish)</em:contributor>
     <em:contributor>Haebaru (Japanese)</em:contributor>
     <em:contributor>stoneflash (Russian)</em:contributor>
@@ -35,6 +35,8 @@
     <em:contributor>Ossipoff (Danish)</em:contributor>
     <em:contributor>SerdarSahin (Turkish)</em:contributor>
     <em:contributor>Wladow (Slovak)</em:contributor>
+    <em:contributor>Team erweiterungen.de, ReinekeFux (German)</em:contributor>
+    <em:contributor>Cashman (Hungarian)</em:contributor>
     <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
     
     <!-- Front End Integration Hooks (used by Extension Manager)-->
