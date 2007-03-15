@@ -31,10 +31,8 @@
 		this.mEOL = this.getEOL();
 		
 		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
-		// enabled and presumably anyone installing Session Manager actually wants to use it.  It also forces 
-		// resuming from a crash since Session Manager needs that enabled to display the crash dialogue box.
+		// enabled and presumably anyone installing Session Manager actually wants to use it. 
 		this.setPref("browser.sessionstore.enabled", true, true);
-		this.setPref("browser.sessionstore.resume_from_crash", true, true);
 		
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);

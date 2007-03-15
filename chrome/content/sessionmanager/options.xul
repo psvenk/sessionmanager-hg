@@ -11,7 +11,7 @@
 <prefwindow
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	id="sessionmanagerOptions"
-	title="&sessionManager; &options.title;"
+	title="&options.label;"
 	windowtype="SessionManager:Options"
 	style="width: &options.width;;"
 >
@@ -20,6 +20,7 @@
 			<preference id="browser.sessionstore.interval" name="browser.sessionstore.interval" type="int"/>
 			<preference id="browser.sessionstore.postdata" name="browser.sessionstore.postdata" type="int"/>
 			<preference id="browser.sessionstore.privacy_level" name="browser.sessionstore.privacy_level" type="int"/>
+			<preference id="browser.sessionstore.resume_from_crash" name="browser.sessionstore.resume_from_crash" type="bool"/>
 			<preference id="extensions.sessionmanager.backup_session" name="extensions.sessionmanager.backup_session" type="int"/>
 			<preference id="extensions.sessionmanager.max_backup_keep" name="extensions.sessionmanager.max_backup_keep" type="int"/>
 			<preference id="extensions.sessionmanager.max_closed_undo" name="extensions.sessionmanager.max_closed_undo" type="int"/>
@@ -68,6 +69,7 @@
 					<groupbox>
 						<caption label="&restoring.caption;"/>
 						<hbox align="center">
+							<checkbox label="&crashrecovery.label;" accesskey="&crashrecovery.accesskey;" preference="browser.sessionstore.resume_from_crash" flex="1"/>
 							<checkbox label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="extensions.sessionmanager.overwrite" flex="1"/>
 							<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload" flex="1"/>
 						</hbox>
