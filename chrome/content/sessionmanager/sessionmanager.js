@@ -525,7 +525,8 @@
 		var mClosedTabs = [];
 		closedTabs = eval(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
-			mClosedTabs[aIndex] = { title:aValue.title, image:null }
+			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
+				                url:aValue.state.entries[aValue.state.entries.length - 1].url }
 			if (aValue.state.xultab)
 			{
 				var xultabData = aValue.state.xultab.split(" ");
@@ -543,6 +544,8 @@
 			menuitem.setAttribute("class", "menuitem-iconic bookmark-item");
 			menuitem.setAttribute("image", aTab.image);
 			menuitem.setAttribute("label", aTab.title);
+			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
+			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
 			aPopup.insertBefore(menuitem, listEnd);
 		});
