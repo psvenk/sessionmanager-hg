@@ -9,6 +9,8 @@
 <!ENTITY backup_session.label0 "kassér nuværende session">
 <!ENTITY backup_session.label1 "gem nuværende session">
 <!ENTITY backup_session.label2 "spørg om nuværende session skal gemmes eller kasséres">
+<!ENTITY crashrecovery.label "Muliggør genskabelse af nedbrudte sessioner">
+<!ENTITY crashrecovery.accesskey "M">
 <!ENTITY restoring.caption "Sessionsgenskabelse">
 <!ENTITY sessionList.caption "Sessionsliste">
 <!ENTITY orderList.label "Sortér sessionslisten">
