@@ -1,0 +1,30 @@
+<!ENTITY sessionManager "Session Manager">
+<!ENTITY toolsmenu.accesskey "M">
+<!ENTITY save.label "Munkamenet mentése...">
+<!ENTITY save.accesskey "m">
+<!ENTITY saveOne.label "Jelenlegi ablak mentése...">
+<!ENTITY saveOne.accesskey "a">
+<!ENTITY rename.label "Munkamenet átnevezése...">
+<!ENTITY rename.accesskey "á">
+<!ENTITY remove.label "Munkamenet törlése...">
+<!ENTITY remove.accesskey "t">
+<!ENTITY openFolder.label "Munkamenetek mappájának megnyitása">
+<!ENTITY openFolder.accesskey "e">
+<!ENTITY options.label "&sessionManager; - beállítások">
+<!ENTITY options.accesskey "b">
+<!ENTITY resume.label "Jelenlegi munkamenet használata indításkor">
+<!ENTITY resume.accesskey "J">
+<!ENTITY reload.label "Minden ablak újratöltése">
+<!ENTITY reload.accesskey "ú">
+<!ENTITY overwrite.label "Létező ablakok felülírása">
+<!ENTITY overwrite.accesskey "f">
+<!ENTITY undoClosed.label "Bezárt lapok(ablakok) megnyitása...">
+<!ENTITY undoClosed.accesskey "g">
+<!ENTITY closedWindows "Bezárt ablakok:">
+<!ENTITY closedTabs "Bezárt lapok:">
+<!ENTITY clearList.label "&apos;Bezárt&apos; lista törlése...">
+<!ENTITY clearList.accesskey "l">
+<!ENTITY toolbar.tooltip "Jelenlegi munkamenet mentése...">
+<!ENTITY toolbar.undo.label "Bezárás visszavonása">
+<!ENTITY toolbar.undo.tooltip "Legutoljára bezárt lapok megnyitása">
+<!ENTITY prompt.ignore.label "Ez a párbeszédablak ne jelenjen meg többé">

@@ -1,0 +1,56 @@
+<!ENTITY options.title "Beállítások">
+<!ENTITY options.width "55em">
+<!ENTITY general.caption "Általános">
+<!ENTITY startNend.caption "Indítás és bezárás">
+<!ENTITY resume_sess.label "Indításkor a következő munkamenet betöltése:">
+<!ENTITY resume_sess.accesskey "I">
+<!ENTITY backup_sess.label "Bezáráskor">
+<!ENTITY backup_sess.accesskey "B">
+<!ENTITY backup_session.label0 "jelenlegi munkamenet eldobása">
+<!ENTITY backup_session.label1 "jelenlegi munkamenet biztonsági mentése">
+<!ENTITY backup_session.label2 "biztonsági mentésre rákérdez">
+<!ENTITY crashrecovery.label "Visszaállítás engedélyezése összeomlás után">
+<!ENTITY crashrecovery.accesskey "V">
+<!ENTITY restoring.caption "Munkamenet visszaállítása">
+<!ENTITY sessionList.caption "Elérhető munkamenetek">
+<!ENTITY orderList.label "Munkamenetek rendezése">
+<!ENTITY orderList.accesskey "r">
+<!ENTITY orderList.label1 "abc szerint">
+<!ENTITY orderList.label2 "régebbi --&gt; újabb">
+<!ENTITY orderList.label_2 "újabb --&gt; régebbi">
+<!ENTITY max_backup.label "Régebbi munkamenetek megtartott biztonsági mentéseinek száma:">
+<!ENTITY max_backup.accesskey "s">
+<!ENTITY undoClose.caption "Bezárás visszavonása">
+<!ENTITY windowsNtabs.caption "Bezárt ablakok és lapok:">
+<!ENTITY max_closed.label "Megjegyzett bezárt ablakok maximális száma:">
+<!ENTITY max_closed.accesskey "k">
+<!ENTITY max_tabs.label "Megjegyzett bezárt lapok maximális száma (minden ablakban):">
+<!ENTITY max_tabs.accesskey "p">
+<!ENTITY submenu.label "Megjegyzett bezárt ablakok és lapok megjelenítése almenüben">
+<!ENTITY submenu.accesskey "j">
+<!ENTITY persistence.caption "Megtartás">
+<!ENTITY closed_tabs.label "Minden bezárt, megnyitható lap újranyitása (összes ablak):">
+<!ENTITY closed_tabs.accesskey "n">
+<!ENTITY closed_tabs.label0 "soha">
+<!ENTITY closed_tabs.label1 "indításkor">
+<!ENTITY closed_tabs.label2 "mindig">
+<!ENTITY window_list.label "Bezáráskor a bezárt ablakok listájának megtartása">
+<!ENTITY window_list.accesskey "z">
+<!ENTITY clear_list.label "Lista törlése">
+<!ENTITY clear_list.accesskey "ö">
+<!ENTITY advanced.caption "Haladó">
+<!ENTITY name_format.caption "Munkamenetek nevei">
+<!ENTITY name_format.label "Munkamenetek neveinek formátuma:">
+<!ENTITY name_format.accesskey "o">
+<!ENTITY name_format.desc "Használható kapcsolók: az aktív lap neve (&#37;t), mai dátum (&#37;d), idő (&#37;m). A név hossza korlátozva lehet # karakterre (&#37;#t).">
+<!ENTITY service.caption "&quot;Visszaállítás összeomlás után&quot; beállítások">
+<!ENTITY service.description "Ne változtassa meg ezeket a beállításokat, ha nem biztos a következményekben.">
+<!ENTITY interval.label "Az aktuális állapot mentése (másodpercekben):">
+<!ENTITY interval.accesskey "A">
+<!ENTITY postdata.label "Az elmenthető POSTDATA adatok maximális mérete (bájtokban; -1 mindegyiknek):">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Személyes adatok mentése (űrlapadatok, POSTDATA és sütik)">
+<!ENTITY privacy.accesskey "y">
+<!ENTITY privacy.level0 "összes oldal">
+<!ENTITY privacy.level1 "nem titkosított oldal">
+<!ENTITY privacy.level2 "nincs mentés">

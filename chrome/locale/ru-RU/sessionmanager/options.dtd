@@ -9,6 +9,8 @@
 <!ENTITY backup_session.label0 "не учитывать текущую сессию">
 <!ENTITY backup_session.label1 "сохранить текущую сессию">
 <!ENTITY backup_session.label2 "спросить, что делать с текущей сессией">
+<!ENTITY crashrecovery.label "Включить защиту от вылетов">
+<!ENTITY crashrecovery.accesskey "В">
 <!ENTITY restoring.caption "Восстановление сессий">
 <!ENTITY sessionList.caption "Список сессий">
 <!ENTITY orderList.label "Упорядочивать список сессий по">
