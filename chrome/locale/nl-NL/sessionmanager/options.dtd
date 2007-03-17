@@ -1,4 +1,4 @@
-<!ENTITY options.title "Opties">
+<!ENTITY options.title "&sessionManager; Opties">
 <!ENTITY options.width "56em">
 <!ENTITY general.caption "Algemeen">
 <!ENTITY startNend.caption "Opstarten &amp; Afsluiten">
@@ -9,8 +9,6 @@
 <!ENTITY backup_session.label0 "de huidige sessie verwerpen">
 <!ENTITY backup_session.label1 "de huidige sessie opslaan">
 <!ENTITY backup_session.label2 "vragen of de sessie opgeslagen moet worden">
-<!ENTITY crashrecovery.label "Enable Crash Recovery">
-<!ENTITY crashrecovery.accesskey "e">
 <!ENTITY restoring.caption "Sessieherstelling">
 <!ENTITY sessionList.caption "Sessielijst">
 <!ENTITY orderList.label "Rangschik de sessielijst">

@@ -1,4 +1,4 @@
-<!ENTITY options.title "- Einstellungen">
+<!ENTITY options.title "&sessionManager; - Einstellungen">
 <!ENTITY options.width "45em">
 <!ENTITY general.caption "Allgemein">
 <!ENTITY startNend.caption "Start &amp; Beenden">
@@ -44,7 +44,7 @@
 <!ENTITY name_format.accesskey "o">
 <!ENTITY name_format.desc "&#37;t steht für den aktuellen Seitentitel, &#37;d für das Datum und &#37;m für die Zeit; die Länge des Titels kann zudem auf # Zeichen beschränkt werden: &#37;#t.">
 <!ENTITY service.caption "Einstellungen für die Wiederherstellung nach Absturz">
-<!ENTITY service.description "Ändern Sie diese Einstellungen nur, wenn Sie wissen, was sie bewirken:">
+<!ENTITY service.description "Ändern Sie diese Einstellungen nur, wenn Sie wissen, was sie bewirken!">
 <!ENTITY interval.label "Minimales Zeitintervall zwischen zwei Sicherungsvorgängen (in Sekunden):">
 <!ENTITY interval.accesskey "i">
 <!ENTITY postdata.label "Maximale Anzahl an gesicherten POST-Daten (in Bytes, -1 = alle):">

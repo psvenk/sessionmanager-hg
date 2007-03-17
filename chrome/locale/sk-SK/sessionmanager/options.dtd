@@ -1,4 +1,4 @@
-<!ENTITY options.title "Nastavenia">
+<!ENTITY options.title "&sessionManager; Nastavenia">
 <!ENTITY options.width "60em">
 <!ENTITY general.caption "Všeobecné">
 <!ENTITY startNend.caption "Spustenie &amp; ukončenie">

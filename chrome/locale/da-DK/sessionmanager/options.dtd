@@ -1,4 +1,4 @@
-<!ENTITY options.title "Indstillinger">
+<!ENTITY options.title "&sessionManager; Indstillinger">
 <!ENTITY options.width "42em">
 <!ENTITY general.caption "Generelt">
 <!ENTITY startNend.caption "Opstart &amp; nedlukning">

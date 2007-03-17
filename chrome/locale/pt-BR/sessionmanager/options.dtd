@@ -1,4 +1,4 @@
-<!ENTITY options.title "Opções">
+<!ENTITY options.title "&sessionManager; Opções">
 <!ENTITY options.width "47em">
 <!ENTITY general.caption "Geral">
 <!ENTITY startNend.caption "Iníciar &amp; Sair">
@@ -9,8 +9,6 @@
 <!ENTITY backup_session.label0 "descartar a seção atual">
 <!ENTITY backup_session.label1 "salvar a seção atual">
 <!ENTITY backup_session.label2 "perguntar se a seção atual deve ser salva">
-<!ENTITY crashrecovery.label "Enable Crash Recovery">
-<!ENTITY crashrecovery.accesskey "e">
 <!ENTITY restoring.caption "Restaurar Seção">
 <!ENTITY sessionList.caption "Lista de Sessões">
 <!ENTITY orderList.label "Ordenar a lista de seções">

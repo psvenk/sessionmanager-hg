@@ -1,4 +1,4 @@
-<!ENTITY options.title "Beállítások">
+<!ENTITY options.title "&sessionManager; Beállítások">
 <!ENTITY options.width "55em">
 <!ENTITY general.caption "Általános">
 <!ENTITY startNend.caption "Indítás és bezárás">

@@ -1,4 +1,4 @@
-<!ENTITY options.title "Настройки">
+<!ENTITY options.title "&sessionManager; Настройки">
 <!ENTITY options.width "57em">
 <!ENTITY general.caption "Основные">
 <!ENTITY startNend.caption "Запуск/Выход">

@@ -1,4 +1,4 @@
-<!ENTITY options.title "- opcje">
+<!ENTITY options.title "&sessionManager; - opcje">
 <!ENTITY options.width "47em">
 <!ENTITY general.caption "Ogólne">
 <!ENTITY startNend.caption "Otwieranie i zamykanie">

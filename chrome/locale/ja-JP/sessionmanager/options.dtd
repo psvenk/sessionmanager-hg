@@ -1,4 +1,4 @@
-<!ENTITY options.title "オプション">
+<!ENTITY options.title "&sessionManager; オプション">
 <!ENTITY options.width "48em">
 <!ENTITY general.caption "一般">
 <!ENTITY startNend.caption "スタートアップとシャットダウン">

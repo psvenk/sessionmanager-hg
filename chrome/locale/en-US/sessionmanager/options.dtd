@@ -1,4 +1,4 @@
-<!ENTITY options.title "Options">
+<!ENTITY options.title "&sessionManager; Options">
 <!ENTITY options.width "42em">
 <!ENTITY general.caption "General">
 <!ENTITY startNend.caption "Startup &amp; Shutdown">
