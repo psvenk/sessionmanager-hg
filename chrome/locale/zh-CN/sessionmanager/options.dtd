@@ -9,7 +9,7 @@
 <!ENTITY backup_session.label0 "舍弃当前会话">
 <!ENTITY backup_session.label1 "备份当前会话">
 <!ENTITY backup_session.label2 "询问是否备份当前会话">
-<!ENTITY crashrecovery.label "Enable Crash Recovery">
+<!ENTITY crashrecovery.label "启用崩溃恢复">
 <!ENTITY crashrecovery.accesskey "e">
 <!ENTITY restoring.caption "会话恢复">
 <!ENTITY sessionList.caption "会话列表">

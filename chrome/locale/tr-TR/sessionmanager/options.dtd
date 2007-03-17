@@ -9,7 +9,7 @@
 <!ENTITY backup_session.label0 "şimdiki oturumu iptal et">
 <!ENTITY backup_session.label1 "geçerli oturumu yedekle">
 <!ENTITY backup_session.label2 "geçerli oturumu yedeklemeyi sor">
-<!ENTITY crashrecovery.label "Enable Crash Recovery">
+<!ENTITY crashrecovery.label "Çökme Kurtarması Aktif">
 <!ENTITY crashrecovery.accesskey "e">
 <!ENTITY restoring.caption "Oturum Geri yükleme">
 <!ENTITY sessionList.caption "Oturum Listesi">
