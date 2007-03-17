@@ -11,7 +11,7 @@
 <prefwindow
 	xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 	id="sessionmanagerOptions"
-	title="&options.label;"
+	title="&options.title;"
 	windowtype="SessionManager:Options"
 	style="width: &options.width;;"
 >
@@ -69,10 +69,10 @@
 					<groupbox>
 						<caption label="&restoring.caption;"/>
 						<hbox align="center">
-							<checkbox label="&crashrecovery.label;" accesskey="&crashrecovery.accesskey;" preference="browser.sessionstore.resume_from_crash" flex="1"/>
 							<checkbox label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="extensions.sessionmanager.overwrite" flex="1"/>
 							<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload" flex="1"/>
 						</hbox>
+						<checkbox label="&crashrecovery.label;" accesskey="&crashrecovery.accesskey;" preference="browser.sessionstore.resume_from_crash" flex="1"/>
 					</groupbox>
 					<groupbox>
 						<caption label="&sessionList.caption;"/>
