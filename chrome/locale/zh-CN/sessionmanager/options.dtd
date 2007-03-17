@@ -1,4 +1,4 @@
-<!ENTITY options.title "选项">
+<!ENTITY options.title "&sessionManager; 选项">
 <!ENTITY options.width "42em">
 <!ENTITY general.caption "常规选项">
 <!ENTITY startNend.caption "开启和关闭">
