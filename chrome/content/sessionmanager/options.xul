@@ -48,7 +48,7 @@
 				<tab label="&general.caption;"/>
 				<tab label="&undoClose.caption;"/>
 				<tab label="&advanced.caption;"/>
-				<tab label="More Advanced Options"/>
+				<tab label="&moreadvanced.caption;"/>
 			</tabs>
 			<tabpanels flex="1">
 				<tabpanel orient="vertical">
