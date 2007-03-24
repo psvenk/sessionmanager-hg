@@ -689,10 +689,38 @@
 		file.append(aFileName);
 		return file;
 	},
+	
+	getUserDir: function(aFileName)
+	{
+		var dir = null;
+		var dirname = this.getPref("sessions_dir", "");
+		try {
+			if (dirname != "") {
+				var dir = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+				dir.initWithPath(dirname);
+				if (dir.isDirectory && dir.isWritable()) {
+					dir.append(aFileName);
+				}
+				else {
+					dir = null;
+				}
+			}
+		} catch (ex) {
+			dir = null;
+		} finally {
+			return dir;
+		}
+	},
 
 	getSessionDir: function(aFileName, aUnique)
 	{
-		var dir = this.getProfileFile("sessions");
+		// allow overriding of location of sessions directory
+		var dir = this.getUserDir("sessions");
+			
+		// use default is not specified or not a writable directory
+		if (dir == null) {
+			dir = this.getProfileFile("sessions");
+		}
 		if (!dir.exists())
 		{
 			dir.create(this.mComponents.interfaces.nsIFile.DIRECTORY_TYPE, 0700);

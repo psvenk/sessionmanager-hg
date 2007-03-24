@@ -75,3 +75,19 @@ function _(aId)
 {
 	return document.getElementById(aId);
 }
+
+function selectSessionDir() {
+	var nsIFilePicker = Components.interfaces.nsIFilePicker;
+	var filepicker = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+
+	filepicker.init(window, "Choose New Saved Session Directory", nsIFilePicker.modeGetFolder);
+	filepicker.appendFilters(nsIFilePicker.filterAll);
+	var ret = filepicker.show();
+	if (ret == nsIFilePicker.returnOK) {
+		_("extensions.sessionmanager.sessions_dir").value = filepicker.file.path;
+	}
+} 	 
+
+function defaultSessionDir() {
+	_("extensions.sessionmanager.sessions_dir").value = '';
+}

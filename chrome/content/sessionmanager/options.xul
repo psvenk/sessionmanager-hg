@@ -33,6 +33,7 @@
 			<preference id="extensions.sessionmanager.save_closed_tabs" name="extensions.sessionmanager.save_closed_tabs" type="int"/>
 			<preference id="extensions.sessionmanager.save_window_list" name="extensions.sessionmanager.save_window_list" type="bool"/>
 			<preference id="extensions.sessionmanager.session_list_order" name="extensions.sessionmanager.session_list_order" type="int"/>
+			<preference id="extensions.sessionmanager.sessions_dir" name="extensions.sessionmanager.sessions_dir" type="string"/>
 			<preference id="extensions.sessionmanager.submenus" name="extensions.sessionmanager.submenus" type="bool"/>
 		</preferences>
 		
@@ -47,6 +48,7 @@
 				<tab label="&general.caption;"/>
 				<tab label="&undoClose.caption;"/>
 				<tab label="&advanced.caption;"/>
+				<tab label="More Advanced Options"/>
 			</tabs>
 			<tabpanels flex="1">
 				<tabpanel orient="vertical">
@@ -164,6 +166,17 @@
 									<menuitem value="2" label="&privacy.level2;"/>
 								</menupopup>
 							</menulist>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+				<tabpanel>
+					<groupbox>
+						<caption label="&sessiondir.caption;"/>
+						<description class="header">&sessiondir.desc;</description>
+						<hbox>
+						<button label="&change_dir.label;" accesskey="&change_dir.accesskey;" oncommand="selectSessionDir();"/>
+						<button label="&default_dir.label;" accesskey="&default_dir.accesskey;" oncommand="defaultSessionDir();"/>
+						<textbox preference="extensions.sessionmanager.sessions_dir" id="sessions_dir" readonly="true" size="&sessiondirtext.size;"/>
 						</hbox>
 					</groupbox>
 				</tabpanel>
