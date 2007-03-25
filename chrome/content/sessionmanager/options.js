@@ -80,7 +80,7 @@ function selectSessionDir() {
 	var nsIFilePicker = Components.interfaces.nsIFilePicker;
 	var filepicker = Components.classes["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
 
-	filepicker.init(window, "Choose New Saved Session Directory", nsIFilePicker.modeGetFolder);
+	filepicker.init(window, gSessionManager._string("choose_dir"), nsIFilePicker.modeGetFolder);
 	filepicker.appendFilters(nsIFilePicker.filterAll);
 	var ret = filepicker.show();
 	if (ret == nsIFilePicker.returnOK) {
