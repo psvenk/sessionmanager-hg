@@ -524,6 +524,7 @@
 		var closedTabs = this.mSessionStore.getClosedTabData(window);
 		var mClosedTabs = [];
 		closedTabs = eval(closedTabs);
+		this.fixBug350558_ClosedTabs(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
 				                url:aValue.state.entries[aValue.state.entries.length - 1].url }
@@ -1279,21 +1280,25 @@
 		aState = eval("(" + aState + ")")
 		aState.windows.forEach(function(aValue, aIndex) {
 			if (aValue._closedTabs) {
-				aValue._closedTabs.forEach(function(bValue, bIndex) {
-					var oldEntries = bValue.state.entries;
-					bValue.state.entries = [];
-					try {
-						for (var i = 0; oldEntries[i]; i++) {
-							bValue.state.entries[i] = oldEntries[i];
-						}
-					}
-					catch (ex) {}
-				}, this);
+				this.fixBug350558_ClosedTabs(aValue._closedTabs);
 			}
 		}, this);
 		aState = aState.toSource();
 		return aState;
-		
+	},
+	
+	fixBug350558_ClosedTabs: function (aClosedTabs)
+	{
+		aClosedTabs.forEach(function(bValue, bIndex) {
+			var oldEntries = bValue.state.entries;
+			bValue.state.entries = [];
+			try {
+				for (var i = 0; oldEntries[i]; i++) {
+					bValue.state.entries[i] = oldEntries[i];
+				}
+			}
+			catch (ex) {}
+		}, this);
 	},
 
 	getSessionState: function(aName, aOneWindow, aNoUndoData)
