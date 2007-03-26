@@ -59,12 +59,13 @@
 								<column/>
 								<column flex="1"/>
 							</columns>
-							<rows >
+							<rows>
 								<label value="&resume_sess.label;" accesskey="&resume_sess.accesskey;" control="resume_session"/>
-								<menulist id="resume_session" preference="extensions.sessionmanager.resume_session" style="width: 13em;" sizetopopup="none"/>
+								<menulist id="resume_session" preference="extensions.sessionmanager.resume_session"/>
+								<separator style="height: 0.5em;" orient="vertical"/>
 								<row align="center">
 									<label value="&backup_sess.label;" accesskey="&backup_sess.accesskey;" control="backup_session"/>
-									<menulist id="backup_session" preference="extensions.sessionmanager.backup_session" style="width: 13em;" sizetopopup="none">
+									<menulist id="backup_session" preference="extensions.sessionmanager.backup_session">
 										<menupopup>
 											<menuitem value="1" label="&backup_session.label1;"/>
 											<menuitem value="0" label="&backup_session.label0;"/>
