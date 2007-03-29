@@ -93,6 +93,19 @@ var SessionManagerHelperComponent = {
 	// code adapted from Danil Ivanov's "Cache Fixer" extension
 	_restoreCache: function()
 	{
+		try 
+		{
+			var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch2);
+			var disabled = prefroot.getBoolPref("extensions.sessionmanager.disable_cache_fixer");
+			if (disabled)
+			{
+				var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+  				consoleService.logStringMessage("SessionManager: Cache Fixer disabled");
+				return;
+			}
+		}
+		catch (ex) {}
+		
 		var cache = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfLD", Ci.nsILocalFile);
 		cache.append("Cache");
 		cache.append("_CACHE_MAP_");
