@@ -57,7 +57,7 @@
 						<grid>
 							<columns>
 								<column/>
-								<column flex="1"/>
+								<column/>
 							</columns>
 							<rows>
 								<label value="&resume_sess.label;" accesskey="&resume_sess.accesskey;" control="resume_session"/>
@@ -83,7 +83,7 @@
 								<column flex="1" />
 								<column flex="1" />
 							</columns>
-							<rows >
+							<rows>
 								<row>
 									<checkbox label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="extensions.sessionmanager.overwrite"/>
 									<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload"/>
@@ -118,10 +118,10 @@
 						<caption label="&windowsNtabs.caption;"/>
 						<grid>
 							<columns>
-								<column flex="1"/>
-								<column />
+								<column/>
+								<column/>
 							</columns>
-							<rows >
+							<rows>
 								<row align="center">
 									<label value="&max_closed.label;" accesskey="&max_closed.accesskey;" control="max_closed"/>
 									<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo();"/>
@@ -137,8 +137,8 @@
 					<groupbox>
 						<caption label="&persistence.caption;"/>
 						<hbox align="center">
-							<label value="&closed_tabs.label;" accesskey="&closed_tabs.accesskey;" control="save_closed_tabs" flex="1"/>
-							<menulist id="save_closed_tabs" preference="extensions.sessionmanager.save_closed_tabs" sizetopopup="none" flex="2">
+							<label flex="1" style="width: 26em" accesskey="&closed_tabs.accesskey;" control="save_closed_tabs">&closed_tabs.label;</label>
+							<menulist id="save_closed_tabs" preference="extensions.sessionmanager.save_closed_tabs">
 								<menupopup>
 									<menuitem value="1" label="&closed_tabs.label1;"/>
 									<menuitem value="2" label="&closed_tabs.label2;"/>
@@ -146,10 +146,11 @@
 								</menupopup>
 							</menulist>
 						</hbox>
+						<separator style="height: 1.0em;" orient="vertical"/>
 						<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="extensions.sessionmanager.save_window_list"/>
 					</groupbox>
 					<hbox pack="end">
-						<button label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
+						<button  pack="end" label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
 					</hbox>
 				</tabpanel>
 				
@@ -157,20 +158,20 @@
 					<groupbox>
 						<caption label="&name_format.caption;"/>
 						<hbox align="center">
-							<label value="&name_format.label;" accesskey="&name_format.accesskey;" control="name_format" flex="1"/>
-							<textbox flex="1" id="name_format" preference="extensions.sessionmanager.name_format"/>
+							<label value="&name_format.label;" accesskey="&name_format.accesskey;" control="name_format"/>
+							<textbox id="name_format" preference="extensions.sessionmanager.name_format"/>
 						</hbox>
-						<description style="width: 35em;">&name_format.desc;</description>
+						<description style="width: 5em;">&name_format.desc;</description>
 					</groupbox>
 					<groupbox>
 						<caption label="&service.caption;"/>
-						<description class="header">&service.description;</description>
+						<description style="width: 5em;" class="header">&service.description;</description>
 						<grid>
 							<columns>
-								<column flex="1"/>
-								<column />
+								<column/>
+								<column/>
 							</columns>
-							<rows >
+							<rows>
 								<row align="center">
 									<label value="&interval.label;" accesskey="&interval.accesskey;" control="interval"/>
 									<textbox id="interval" preference="browser.sessionstore.interval" size="1" onsyncfrompreference="return readInterval();" onsynctopreference="return writeInterval();"/>
@@ -198,7 +199,7 @@
 						<caption label="&sessiondir.caption;"/>
 						<description>&sessiondir.desc;</description>
 						<textbox preference="extensions.sessionmanager.sessions_dir" id="sessions_dir" readonly="true"/>
-						<hbox>
+						<hbox pack="end">
 							<button label="&change_dir.label;" accesskey="&change_dir.accesskey;" oncommand="selectSessionDir();"/>
 							<button label="&default_dir.label;" accesskey="&default_dir.accesskey;" oncommand="defaultSessionDir();"/>
 						</hbox>
