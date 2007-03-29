@@ -10,6 +10,7 @@ pref("browser.sessionstore.resume_from_crash", true);
 pref("browser.sessionstore.resume_session_once", false);
 
 pref("extensions.sessionmanager.backup_session", 1);
+pref("extensions.sessionmanager.disable_cache_fixer", false);
 pref("extensions.sessionmanager.max_backup_keep", 1);
 pref("extensions.sessionmanager.max_closed_undo", 10);
 pref("extensions.sessionmanager.name_format", "%40t-%d");
