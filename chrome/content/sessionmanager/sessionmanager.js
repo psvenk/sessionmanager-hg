@@ -296,6 +296,12 @@
 			for (item = undoMenu.firstChild.firstChild; item; item = item.nextSibling)
 			{
 				aPopup.appendChild(item.cloneNode(true));
+				
+				// Event handlers aren't copied so need to set them up again to display status bar text
+				if (item.getAttribute("statustext") != "") {
+					aPopup.lastChild.addEventListener("DOMMenuItemActive", function(event) { this.ownerDocument.getElementById("statusbar-display").setAttribute("label",this.getAttribute("statustext")); }, false);
+					aPopup.lastChild.addEventListener("DOMMenuItemInactive",  function(event) { this.ownerDocument.getElementById("statusbar-display").setAttribute("label",''); }, false); 
+				}
 			}
 		}
 		
@@ -545,6 +551,7 @@
 			menuitem.setAttribute("class", "menuitem-iconic bookmark-item");
 			menuitem.setAttribute("image", aTab.image);
 			menuitem.setAttribute("label", aTab.title);
+			menuitem.setAttribute("statustext", aTab.url);
 			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
 			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
