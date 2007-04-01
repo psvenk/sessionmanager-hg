@@ -88,6 +88,9 @@
 		{
 			gBrowser.undoRemoveTab = function() { undoCloseTab(); }
 		}
+		
+		// Don't allow tab to reload when restoring closed tab
+		eval("undoCloseTab = " + undoCloseTab.toString().replace("var tabbrowser", "window.SessionManager._allowReload = false; $&"));
 	},
 
 	onUnload_proxy: function()
