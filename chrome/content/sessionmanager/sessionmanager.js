@@ -145,10 +145,6 @@
 			this.updateToolbarButton();
 			break;
 		case "sessionmanager:windowclosed":
-			if (aSubject == window)
-			{
-				this.appendClosedWindow(aData);
-			}
 			this.updateToolbarButton();
 			break;
 		case "browser:purge-session-history":
@@ -241,6 +237,7 @@
 	{
 		this.mSessionStore.setWindowValue(window, "already_restored", "")
 		var state = this.getSessionState(null, true);
+		this.appendClosedWindow(state);
 		this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", state);
 	},
 
@@ -1221,7 +1218,7 @@
 	recoverSession: function()
 	{
 		var recovering = this.getPref("_recovering");
-		var recoverOnly = recovering || this.mPref__running || this.doResumeCurrent() || this.getPref("browser.sessionstore.resume_session_once", false, true);
+		var recoverOnly = recovering || this.mPref__running || this.doResumeCurrent() || this.getPref("browser.sessionstore.resume_session_once", false, true) || (window.arguments[0] == null);
 		if (recovering)
 		{
 			this.delPref("_recovering");
@@ -1239,6 +1236,9 @@
 			{
 				this.setPref("resume_session", session || "");
 			}
+		}
+		else if (recoverOnly) {
+			this._allowReload = true;
 		}
 	},
 
