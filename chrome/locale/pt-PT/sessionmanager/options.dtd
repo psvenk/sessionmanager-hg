@@ -1,0 +1,62 @@
+<!ENTITY options.title "Opções do &sessionManager;">
+<!ENTITY general.caption "Geral">
+<!ENTITY startNend.caption "Iniciar e Encerrar">
+<!ENTITY resume_sess.label "Ao iniciar carregar sempre a seguinte sessão:">
+<!ENTITY resume_sess.accesskey "s">
+<!ENTITY backup_sess.label "Ao encerrar">
+<!ENTITY backup_sess.accesskey "n">
+<!ENTITY backup_session.label0 "ignorar a sessão actual">
+<!ENTITY backup_session.label1 "guardar a sessão actual">
+<!ENTITY backup_session.label2 "perguntar se guarda a sessão actual">
+<!ENTITY crashrecovery.label "Activar Crash Recovery">
+<!ENTITY crashrecovery.accesskey "i">
+<!ENTITY restoring.caption "Restauro de sessão">
+<!ENTITY sessionList.caption "Lista de sessões">
+<!ENTITY orderList.label "Ordenar a lista de sessões">
+<!ENTITY orderList.accesskey "d">
+<!ENTITY orderList.label1 "alfabéticamente">
+<!ENTITY orderList.label2 "da mais velha para a mais nova">
+<!ENTITY orderList.label_2 "da mais nova para a mais velha">
+<!ENTITY max_backup.label "Número de sessões antigas a manter:">
+<!ENTITY max_backup.accesskey "N">
+<!ENTITY undoClose.caption "Anular Fechar">
+<!ENTITY windowsNtabs.caption "Janelas e Separadores fechados">
+<!ENTITY max_closed.label "Número máximo de janelas fechadas a lembrar:">
+<!ENTITY max_closed.accesskey "x">
+<!ENTITY max_tabs.label "Número máximo de separadores fechados que são lembrados (por janela):">
+<!ENTITY max_tabs.accesskey "f">
+<!ENTITY submenu.label "Listar todas as janelas e separadores fechados num submenu">
+<!ENTITY submenu.accesskey "s">
+<!ENTITY persistence.caption "Persistente">
+<!ENTITY closed_tabs.label "Restaurar a lista de separadores fechados possíveis de reabertura para todas as janelas:">
+<!ENTITY closed_tabs.accesskey "e">
+<!ENTITY closed_tabs.label0 "nunca">
+<!ENTITY closed_tabs.label1 "ao iniciar">
+<!ENTITY closed_tabs.label2 "sempre">
+<!ENTITY window_list.label "Não limpar a lista de janelas fechadas ao encerrar">
+<!ENTITY window_list.accesskey "o">
+<!ENTITY clear_list.label "Limpar Lista">
+<!ENTITY clear_list.accesskey "L">
+<!ENTITY advanced.caption "Avançado">
+<!ENTITY name_format.caption "Nomes das sessões">
+<!ENTITY name_format.label "Formatar as sugestões para os nomes das sessões:">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "Utilize &#37;t para o título dos separadores activos, &#37;d para a data de hoje e &#37;m para a hora; o comprimento do titulo pode ser limitado a # caracteres: &#37;#t.">
+<!ENTITY service.caption "Definições da &quot;Recuperação de Erro&quot;">
+<!ENTITY service.description "Não toque, a não ser que saiba o que está a fazer!">
+<!ENTITY interval.label "Intervalo mínimo para guardar (em segundos):">
+<!ENTITY interval.accesskey "n">
+<!ENTITY postdata.label "Quantidade máxima de POSTDATA a ser guardada (em bytes; -1 para todos):">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Guardar dados sensíveis( formulários, POSTDATA e cookies) para">
+<!ENTITY privacy.accesskey "v">
+<!ENTITY privacy.level0 "todos os sítios">
+<!ENTITY privacy.level1 "apenas para sítios não encriptados">
+<!ENTITY privacy.level2 "nenhum sítio">
+<!ENTITY moreadvanced.caption "Mais Avançado">
+<!ENTITY sessiondir.caption "Localização das sessões guardadas">
+<!ENTITY sessiondir.desc "A localização pré-definida das sessões guardadas pode ser substituída aqui.">
+<!ENTITY change_dir.label "Mudar">
+<!ENTITY change_dir.accesskey "M">
+<!ENTITY default_dir.label "Pré-definido">
+<!ENTITY default_dir.accesskey "P">
