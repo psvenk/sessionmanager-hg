@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; Opções">
-<!ENTITY options.width "47em">
 <!ENTITY general.caption "Geral">
 <!ENTITY startNend.caption "Iníciar &amp; Sair">
 <!ENTITY resume_sess.label "Quando iniciar sempre carregar a seção a seguir:">
@@ -9,6 +8,8 @@
 <!ENTITY backup_session.label0 "descartar a seção atual">
 <!ENTITY backup_session.label1 "salvar a seção atual">
 <!ENTITY backup_session.label2 "perguntar se a seção atual deve ser salva">
+<!ENTITY crashrecovery.label "Activar Crash Recovery">
+<!ENTITY crashrecovery.accesskey "i">
 <!ENTITY restoring.caption "Restaurar Seção">
 <!ENTITY sessionList.caption "Lista de Sessões">
 <!ENTITY orderList.label "Ordenar a lista de seções">
@@ -52,3 +53,10 @@
 <!ENTITY privacy.level0 "todos os sites">
 <!ENTITY privacy.level1 "sites não encriptados">
 <!ENTITY privacy.level2 "nenhum site">
+<!ENTITY moreadvanced.caption "Mais Avançado">
+<!ENTITY sessiondir.caption "Localização das sessões guardadas">
+<!ENTITY sessiondir.desc "A localização pré-definida das sessões guardadas pode ser substituída aqui.">
+<!ENTITY change_dir.label "Mudar">
+<!ENTITY change_dir.accesskey "M">
+<!ENTITY default_dir.label "Pré-definido">
+<!ENTITY default_dir.accesskey "P">
