@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; Seçenekler">
-<!ENTITY options.width "42em">
 <!ENTITY general.caption "Genel">
 <!ENTITY startNend.caption "Başlangıç &amp; Kapatma">
 <!ENTITY resume_sess.label "Açılışta daima belirli oturumu yükle:">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "tüm siteler">
 <!ENTITY privacy.level1 "yanlızca şifrelenmemiş siteler">
 <!ENTITY privacy.level2 "Hiç bir site">
+<!ENTITY moreadvanced.caption "Daha Gelişmiş">
+<!ENTITY sessiondir.caption "Kayıtlı Oturumun Bölgesi">
+<!ENTITY sessiondir.desc "Kayıtlı Oturumların varsayılan Bölgesi olmalı">
+<!ENTITY change_dir.label "Değiştir">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "Varsayılan">
+<!ENTITY default_dir.accesskey "D">

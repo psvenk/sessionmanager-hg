@@ -1,5 +1,4 @@
-<!ENTITY options.title "&sessionManager; Настройки">
-<!ENTITY options.width "57em">
+<!ENTITY options.title "Настройки Менеджера сессий">
 <!ENTITY general.caption "Основные">
 <!ENTITY startNend.caption "Запуск/Выход">
 <!ENTITY resume_sess.label "При запуске всегда загружать эту сессию:">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "для всех сайтов">
 <!ENTITY privacy.level1 "только для незашифрованных сайтов">
 <!ENTITY privacy.level2 "не сохранять">
+<!ENTITY moreadvanced.caption "Дополнительно">
+<!ENTITY sessiondir.caption "Папка сохраняемых сессий">
+<!ENTITY sessiondir.desc "Папка по умолчанию для сохраняемых сессий может быть указана здесь.">
+<!ENTITY change_dir.label "Изменить">
+<!ENTITY change_dir.accesskey "И">
+<!ENTITY default_dir.label "Вернуть по умолчанию">
+<!ENTITY default_dir.accesskey "п">

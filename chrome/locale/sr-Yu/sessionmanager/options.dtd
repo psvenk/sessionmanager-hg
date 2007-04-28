@@ -1,0 +1,62 @@
+<!ENTITY options.title "&sessionManager; opcije">
+<!ENTITY general.caption "Glavne">
+<!ENTITY startNend.caption "Pokretanje &amp; Gašenje">
+<!ENTITY resume_sess.label "Prilikom pokretanja uvek učitaj izabranu sesiju:">
+<!ENTITY resume_sess.accesskey "s">
+<!ENTITY backup_sess.label "Prilikom gašenja">
+<!ENTITY backup_sess.accesskey "h">
+<!ENTITY backup_session.label0 "odbaci trenutnu sesiju">
+<!ENTITY backup_session.label1 "bekapuj trenutnu sesiju">
+<!ENTITY backup_session.label2 "pitaj da li da se bekapuje trenutna sesija">
+<!ENTITY crashrecovery.label "Omogući oporavak prilikom nasilnog gašenja">
+<!ENTITY crashrecovery.accesskey "e">
+<!ENTITY restoring.caption "Obnavljanje sesije">
+<!ENTITY sessionList.caption "Lista sesija">
+<!ENTITY orderList.label "Uredi listu sesija">
+<!ENTITY orderList.accesskey "d">
+<!ENTITY orderList.label1 "abecedno">
+<!ENTITY orderList.label2 "starije ka novijim">
+<!ENTITY orderList.label_2 "novije ka starijim">
+<!ENTITY max_backup.label "Broj bekapa starijih (naslino gašenih) sesija za čuvanje:">
+<!ENTITY max_backup.accesskey "N">
+<!ENTITY undoClose.caption "Poništi zatvaranje">
+<!ENTITY windowsNtabs.caption "Zatvoreni prozori &amp; tabovi">
+<!ENTITY max_closed.label "Maksimalni broj zapamćenih zatvorenih prozora:">
+<!ENTITY max_closed.accesskey "w">
+<!ENTITY max_tabs.label "Maksimalni broj zapaćenih zatvorenih tabova (po prozoru):">
+<!ENTITY max_tabs.accesskey "t">
+<!ENTITY submenu.label "Lista svih zatvorenih prozora i tabova u podmeniju">
+<!ENTITY submenu.accesskey "c">
+<!ENTITY persistence.caption "Perzistencija">
+<!ENTITY closed_tabs.label "Obnovi listu zatvorenih tabova koje je moguće ponovo otvoriti za sve prozore:">
+<!ENTITY closed_tabs.accesskey "e">
+<!ENTITY closed_tabs.label0 "nikad">
+<!ENTITY closed_tabs.label1 "prilikom pokretanja">
+<!ENTITY closed_tabs.label2 "uvek">
+<!ENTITY window_list.label "Nemoj čistiti listu zatvorenih prozora prilikom gašenja">
+<!ENTITY window_list.accesskey "o">
+<!ENTITY clear_list.label "Očisti listu">
+<!ENTITY clear_list.accesskey "r">
+<!ENTITY advanced.caption "Napredno">
+<!ENTITY name_format.caption "Imena sesija">
+<!ENTITY name_format.label "Format predloga za ime sesija:">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "Upotrebi &#37;t za nazive aktivnih tabova, &#37;d za trenutni datum, &#37;m za vreme; dodatno je moguće ograničiti broj karaktera u nazivu sa: &#37;#t">
+<!ENTITY service.caption "Setovanja za &quot;nasilno gašenje&quot;">
+<!ENTITY service.description "Ne dirati ova setovanja, osim ukoliko znate šta radite:">
+<!ENTITY interval.label "Minimalni interval vremena između dva snimanja stanja (u sekundama):">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "Maksimalna veličina POSTDATA varijable koja se snima (u bajtovima; -1 za sve):">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Snimaj osetljive podatke (podatke forme, POSTDATA i kolačiće) za">
+<!ENTITY privacy.accesskey "v">
+<!ENTITY privacy.level0 "sve sajtove">
+<!ENTITY privacy.level1 "samo za neekriptovane sajtove">
+<!ENTITY privacy.level2 "ni za jedan sajt">
+<!ENTITY moreadvanced.caption "Još naprednije">
+<!ENTITY sessiondir.caption "Lokacija snimljenih sesija">
+<!ENTITY sessiondir.desc "Podrazumevana lokacija snimljenih sesija može biti presetovana ovde.">
+<!ENTITY change_dir.label "Promeni">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "Vrati podrazumevana">
+<!ENTITY default_dir.accesskey "D">

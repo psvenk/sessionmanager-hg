@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; Nastavenia">
-<!ENTITY options.width "60em">
 <!ENTITY general.caption "Všeobecné">
 <!ENTITY startNend.caption "Spustenie &amp; ukončenie">
 <!ENTITY resume_sess.label "Pri spustení vždy načítať nasledujúce reláciu:">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "všetky stránky">
 <!ENTITY privacy.level1 "len nezabezpečené stránky">
 <!ENTITY privacy.level2 "žiadne stránky">
+<!ENTITY moreadvanced.caption "Ďalšie rozšírené">
+<!ENTITY sessiondir.caption "Umiestnenie pre uložené relácie">
+<!ENTITY sessiondir.desc "Predvolené umiestnenie pre uložené relácie môže byť zmenené.">
+<!ENTITY change_dir.label "Zmeniť">
+<!ENTITY change_dir.accesskey "Z">
+<!ENTITY default_dir.label "Obnoviť predvolené">
+<!ENTITY default_dir.accesskey "b">
