@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; 选项">
-<!ENTITY options.width "42em">
 <!ENTITY general.caption "常规选项">
 <!ENTITY startNend.caption "开启和关闭">
 <!ENTITY resume_sess.label "开启浏览器时总是打开如下会话：">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "全部网站">
 <!ENTITY privacy.level1 "仅未加密网站">
 <!ENTITY privacy.level2 "全都不保存">
+<!ENTITY moreadvanced.caption "更加高级的选择">
+<!ENTITY sessiondir.caption "保存会议文件夹">
+<!ENTITY sessiondir.desc "预定义保存会议文件夹可以是改变这里">
+<!ENTITY change_dir.label "变动">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "恢复原物文件夹">
+<!ENTITY default_dir.accesskey "D">
