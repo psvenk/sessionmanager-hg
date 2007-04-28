@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; - Einstellungen">
-<!ENTITY options.width "45em">
 <!ENTITY general.caption "Allgemein">
 <!ENTITY startNend.caption "Start &amp; Beenden">
 <!ENTITY resume_sess.label "Beim Start des Browsers folgende Sitzung laden:">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "für alle Websites">
 <!ENTITY privacy.level1 "nur für unverschlüsselte Websites">
 <!ENTITY privacy.level2 "nie">
+<!ENTITY moreadvanced.caption "Sitzungsordner">
+<!ENTITY sessiondir.caption "Zielordner für gesicherte Sitzungen">
+<!ENTITY sessiondir.desc "Der Standard-Zielordner für die gesicherten Sitzungen kann hier geändert werden.">
+<!ENTITY change_dir.label "Ändern...">
+<!ENTITY change_dir.accesskey "n">
+<!ENTITY default_dir.label "Standard wiederherstellen">
+<!ENTITY default_dir.accesskey "w">

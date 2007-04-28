@@ -8,7 +8,7 @@
 	<Description about="urn:mozilla:locale:de-DE"
 		chrome:name="de-DE"
 		chrome:displayName="Deutsch (DE)"
-		chrome:author="erweiterungen.de"
+		chrome:author="ReinekeFux"
 	>
 		<chrome:packages>
 			<Seq about="urn:mozilla:locale:de-DE:packages">

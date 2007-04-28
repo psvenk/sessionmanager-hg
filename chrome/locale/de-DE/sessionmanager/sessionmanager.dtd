@@ -8,7 +8,7 @@
 <!ENTITY rename.accesskey "u">
 <!ENTITY remove.label "Sitzung(en) löschen...">
 <!ENTITY remove.accesskey "l">
-<!ENTITY openFolder.label "Sitzungs-Ordner öffnen...">
+<!ENTITY openFolder.label "Sitzungsordner öffnen...">
 <!ENTITY openFolder.accesskey "O">
 <!ENTITY options.label "&sessionManager;-Einstellungen...">
 <!ENTITY options.accesskey "E">

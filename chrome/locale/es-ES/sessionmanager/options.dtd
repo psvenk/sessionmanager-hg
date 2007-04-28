@@ -1,5 +1,4 @@
-<!ENTITY options.title "&sessionManager; Opciones">
-<!ENTITY options.width "50em">
+<!ENTITY options.title "&sessionManager; - Opciones">
 <!ENTITY general.caption "General">
 <!ENTITY startNend.caption "Inicio &amp; Cierre">
 <!ENTITY resume_sess.label "Cargar siempre la siguiente sesión al iniciar:">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "todos los sitios">
 <!ENTITY privacy.level1 "sólo sitios no cifrados">
 <!ENTITY privacy.level2 "ningún sitio">
+<!ENTITY moreadvanced.caption "Más avanzadas">
+<!ENTITY sessiondir.caption "Guardar ubicación de las sesiones">
+<!ENTITY sessiondir.desc "Aquí puede cambiar la ubicación por defecto para las sesiones guardadas.">
+<!ENTITY change_dir.label "Cambiar">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "Restaurar valores por defecto">
+<!ENTITY default_dir.accesskey "R">

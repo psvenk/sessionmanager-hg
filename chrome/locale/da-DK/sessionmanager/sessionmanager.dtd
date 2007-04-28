@@ -14,9 +14,9 @@
 <!ENTITY options.accesskey "i">
 <!ENTITY resume.label "Genoptag nuværende session ved opstart">
 <!ENTITY resume.accesskey "G">
-<!ENTITY reload.label "Genindlæs alle genskabte vinduer">
+<!ENTITY reload.label "Genindlæs genskabte">
 <!ENTITY reload.accesskey "æ">
-<!ENTITY overwrite.label "Erstat eksisterende vinduer">
+<!ENTITY overwrite.label "Erstat vinduer">
 <!ENTITY overwrite.accesskey "E">
 <!ENTITY undoClosed.label "Genåbn lukkede...">
 <!ENTITY undoClosed.accesskey "l">

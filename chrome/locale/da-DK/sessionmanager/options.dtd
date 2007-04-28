@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; Indstillinger">
-<!ENTITY options.width "42em">
 <!ENTITY general.caption "Generelt">
 <!ENTITY startNend.caption "Opstart &amp; nedlukning">
 <!ENTITY resume_sess.label "Hent altid følgende session ved opstart:">
@@ -9,8 +8,8 @@
 <!ENTITY backup_session.label0 "kassér nuværende session">
 <!ENTITY backup_session.label1 "gem nuværende session">
 <!ENTITY backup_session.label2 "spørg om nuværende session skal gemmes eller kasséres">
-<!ENTITY crashrecovery.label "Muliggør genskabelse af nedbrudte sessioner">
-<!ENTITY crashrecovery.accesskey "M">
+<!ENTITY crashrecovery.label "Nedbrudsretablering">
+<!ENTITY crashrecovery.accesskey "N">
 <!ENTITY restoring.caption "Sessionsgenskabelse">
 <!ENTITY sessionList.caption "Sessionsliste">
 <!ENTITY orderList.label "Sortér sessionslisten">
@@ -43,7 +42,7 @@
 <!ENTITY name_format.label "Format for foreslåede sessionsnavne:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Brug &#37;t for det aktive faneblads overskrift, &#37;d for dagsdato og &#37;m for tidspunkt; overskriftens kan begrænses til # tegn: &#37;#t.">
-<!ENTITY service.caption "&quot;Nedbruds&quot; indstillinger">
+<!ENTITY service.caption "&quot;Nedbrudsretablering&quot; Indstillinger">
 <!ENTITY service.description "Ændr kun på disse hvis du ved hvad du laver:">
 <!ENTITY interval.label "Minimalt tidsinterval imellem at to tilstande gemmes (i sekunder):">
 <!ENTITY interval.accesskey "i">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "alle websteder">
 <!ENTITY privacy.level1 "kun ukrypterede websteder">
 <!ENTITY privacy.level2 "ingen websteder">
+<!ENTITY moreadvanced.caption "Mere avanceret">
+<!ENTITY sessiondir.caption "Placering af gemte sessioner">
+<!ENTITY sessiondir.desc "Standard placeringen af gemte sessioner kan overskrives her.">
+<!ENTITY change_dir.label "Ændr">
+<!ENTITY change_dir.accesskey "Æ">
+<!ENTITY default_dir.label "Genskab standard">
+<!ENTITY default_dir.accesskey "k">

@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; Opties">
-<!ENTITY options.width "56em">
 <!ENTITY general.caption "Algemeen">
 <!ENTITY startNend.caption "Opstarten &amp; Afsluiten">
 <!ENTITY resume_sess.label "Bij opstarten altijd de volgende sessie laden:">
@@ -9,6 +8,8 @@
 <!ENTITY backup_session.label0 "de huidige sessie verwerpen">
 <!ENTITY backup_session.label1 "de huidige sessie opslaan">
 <!ENTITY backup_session.label2 "vragen of de sessie opgeslagen moet worden">
+<!ENTITY crashrecovery.label "Crashherstelling aanzetten">
+<!ENTITY crashrecovery.accesskey "h">
 <!ENTITY restoring.caption "Sessieherstelling">
 <!ENTITY sessionList.caption "Sessielijst">
 <!ENTITY orderList.label "Rangschik de sessielijst">
@@ -52,3 +53,10 @@
 <!ENTITY privacy.level0 "alle sites">
 <!ENTITY privacy.level1 "alleen onversleutelde sites">
 <!ENTITY privacy.level2 "geen enkele site">
+<!ENTITY moreadvanced.caption "Meer geavanceerd">
+<!ENTITY sessiondir.caption "Locatie van de opgeslagen sessies">
+<!ENTITY sessiondir.desc "De standaard locatie van de opgeslagen sessie kan hier overschreven worden.">
+<!ENTITY change_dir.label "Wijzigen">
+<!ENTITY change_dir.accesskey "W">
+<!ENTITY default_dir.label "Standaard herstellen">
+<!ENTITY default_dir.accesskey "S">

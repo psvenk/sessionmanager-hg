@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; Nustatymai">
-<!ENTITY options.width "42em">
 <!ENTITY general.caption "Bendra">
 <!ENTITY startNend.caption "Paleistis ir uždarymas">
 <!ENTITY resume_sess.label "Paleidžiant visada įkelti šią sesiją:">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "visoms svetainėms">
 <!ENTITY privacy.level1 "tik nešifruotoms svetainėms">
 <!ENTITY privacy.level2 "jokioms svetainėms">
+<!ENTITY moreadvanced.caption "Dar išsamiau">
+<!ENTITY sessiondir.caption "Saugomų sesijų vieta">
+<!ENTITY sessiondir.desc "Numatytoji saugomų sesijų vieta čia gali būti pakeista.">
+<!ENTITY change_dir.label "Keisti">
+<!ENTITY change_dir.accesskey "K">
+<!ENTITY default_dir.label "Atstatyti numatytąją">
+<!ENTITY default_dir.accesskey "A">

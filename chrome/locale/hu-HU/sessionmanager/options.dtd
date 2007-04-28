@@ -1,5 +1,4 @@
-<!ENTITY options.title "&sessionManager; Beállítások">
-<!ENTITY options.width "55em">
+<!ENTITY options.title "&sessionManager; - beállítások">
 <!ENTITY general.caption "Általános">
 <!ENTITY startNend.caption "Indítás és bezárás">
 <!ENTITY resume_sess.label "Indításkor a következő munkamenet betöltése:">
@@ -19,9 +18,9 @@
 <!ENTITY orderList.label2 "régebbi --&gt; újabb">
 <!ENTITY orderList.label_2 "újabb --&gt; régebbi">
 <!ENTITY max_backup.label "Régebbi munkamenetek megtartott biztonsági mentéseinek száma:">
-<!ENTITY max_backup.accesskey "s">
+<!ENTITY max_backup.accesskey "z">
 <!ENTITY undoClose.caption "Bezárás visszavonása">
-<!ENTITY windowsNtabs.caption "Bezárt ablakok és lapok:">
+<!ENTITY windowsNtabs.caption "Bezárt ablakok és lapok">
 <!ENTITY max_closed.label "Megjegyzett bezárt ablakok maximális száma:">
 <!ENTITY max_closed.accesskey "k">
 <!ENTITY max_tabs.label "Megjegyzett bezárt lapok maximális száma (minden ablakban):">
@@ -37,7 +36,7 @@
 <!ENTITY window_list.label "Bezáráskor a bezárt ablakok listájának megtartása">
 <!ENTITY window_list.accesskey "z">
 <!ENTITY clear_list.label "Lista törlése">
-<!ENTITY clear_list.accesskey "ö">
+<!ENTITY clear_list.accesskey "L">
 <!ENTITY advanced.caption "Haladó">
 <!ENTITY name_format.caption "Munkamenetek nevei">
 <!ENTITY name_format.label "Munkamenetek neveinek formátuma:">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "összes oldal">
 <!ENTITY privacy.level1 "nem titkosított oldal">
 <!ENTITY privacy.level2 "nincs mentés">
+<!ENTITY moreadvanced.caption "Több haladó">
+<!ENTITY sessiondir.caption "Mentett munkamenetek mappája">
+<!ENTITY sessiondir.desc "Mentett munkamenetek alapértelmezett mappáját változtathatja meg itt.">
+<!ENTITY change_dir.label "Változtat">
+<!ENTITY change_dir.accesskey "V">
+<!ENTITY default_dir.label "Alapértelmezett visszaállítása">
+<!ENTITY default_dir.accesskey "A">

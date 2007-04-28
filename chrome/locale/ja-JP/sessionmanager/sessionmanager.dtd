@@ -1,4 +1,4 @@
-<!ENTITY sessionManager "セッションマネージャー">
+<!ENTITY sessionManager "セッションマネージャ">
 <!ENTITY toolsmenu.accesskey "M">
 <!ENTITY save.label "セッションを保存">
 <!ENTITY save.accesskey "S">
@@ -6,15 +6,15 @@
 <!ENTITY saveOne.accesskey "W">
 <!ENTITY rename.label "セッション名の変更">
 <!ENTITY rename.accesskey "R">
-<!ENTITY remove.label "セッションを消去">
+<!ENTITY remove.label "セッションを削除">
 <!ENTITY remove.accesskey "D">
 <!ENTITY openFolder.label "セッションフォルダを開く">
 <!ENTITY openFolder.accesskey "F">
-<!ENTITY options.label "セッションマネージャーオプション">
+<!ENTITY options.label "セッションマネージャオプション">
 <!ENTITY options.accesskey "O">
 <!ENTITY resume.label "スタートアップ時に現在のセッションを再開する">
 <!ENTITY resume.accesskey "m">
-<!ENTITY reload.label "すべての復旧したウインドウを再読み込みする">
+<!ENTITY reload.label "すべての復元したウインドウを再読み込みする">
 <!ENTITY reload.accesskey "l">
 <!ENTITY overwrite.label "既存のウインドウを取り替える">
 <!ENTITY overwrite.accesskey "p">
@@ -26,5 +26,5 @@
 <!ENTITY clearList.accesskey "C">
 <!ENTITY toolbar.tooltip "現在のブラウジングセッションを保存する">
 <!ENTITY toolbar.undo.label "開きなおす">
-<!ENTITY toolbar.undo.tooltip "最も最近閉じたタブを再開させる">
+<!ENTITY toolbar.undo.tooltip "最近閉じたタブを元に戻す">
 <!ENTITY prompt.ignore.label "再びこのダイアログを表示しない">

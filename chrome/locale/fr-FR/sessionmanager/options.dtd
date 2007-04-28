@@ -1,5 +1,4 @@
-<!ENTITY options.title "&sessionManager; Options">
-<!ENTITY options.width "46em">
+<!ENTITY options.title "Options du &sessionManager;">
 <!ENTITY general.caption "Générales">
 <!ENTITY startNend.caption "Démarrage et Fermeture">
 <!ENTITY resume_sess.label "Au démarrage, toujours charger la session suivante :">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "tous les sites">
 <!ENTITY privacy.level1 "les sites non chiffrés uniquement">
 <!ENTITY privacy.level2 "aucun site">
+<!ENTITY moreadvanced.caption "Plus avancées">
+<!ENTITY sessiondir.caption "Emplacement des sessions enregistrées">
+<!ENTITY sessiondir.desc "L&apos;emplacement de stockage par défaut des sessions enregistrées peut être modifié ici.">
+<!ENTITY change_dir.label "Modifier">
+<!ENTITY change_dir.accesskey "M">
+<!ENTITY default_dir.label "Défaut">
+<!ENTITY default_dir.accesskey "D">

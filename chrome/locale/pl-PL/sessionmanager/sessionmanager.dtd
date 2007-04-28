@@ -15,7 +15,7 @@
 <!ENTITY resume.label "Podczas otwierania odtwórz ostatnią aktywną sesję">
 <!ENTITY resume.accesskey "k">
 <!ENTITY reload.label "Odśwież wszystkie odtworzone okna">
-<!ENTITY reload.accesskey "w">
+<!ENTITY reload.accesskey "i">
 <!ENTITY overwrite.label "Zamień istniejące okna">
 <!ENTITY overwrite.accesskey "a">
 <!ENTITY undoClosed.label "Otwórz ponownie">

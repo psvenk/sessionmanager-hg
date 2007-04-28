@@ -5,7 +5,7 @@
 <!ENTITY saveOne.label "Jelenlegi ablak mentése...">
 <!ENTITY saveOne.accesskey "a">
 <!ENTITY rename.label "Munkamenet átnevezése...">
-<!ENTITY rename.accesskey "á">
+<!ENTITY rename.accesskey "n">
 <!ENTITY remove.label "Munkamenet törlése...">
 <!ENTITY remove.accesskey "t">
 <!ENTITY openFolder.label "Munkamenetek mappájának megnyitása">
@@ -15,10 +15,10 @@
 <!ENTITY resume.label "Jelenlegi munkamenet használata indításkor">
 <!ENTITY resume.accesskey "J">
 <!ENTITY reload.label "Minden ablak újratöltése">
-<!ENTITY reload.accesskey "ú">
+<!ENTITY reload.accesskey "s">
 <!ENTITY overwrite.label "Létező ablakok felülírása">
 <!ENTITY overwrite.accesskey "f">
-<!ENTITY undoClosed.label "Bezárt lapok(ablakok) megnyitása...">
+<!ENTITY undoClosed.label "Bezárt lapok és ablakok megnyitása...">
 <!ENTITY undoClosed.accesskey "g">
 <!ENTITY closedWindows "Bezárt ablakok:">
 <!ENTITY closedTabs "Bezárt lapok:">

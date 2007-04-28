@@ -1,5 +1,4 @@
 <!ENTITY options.title "&sessionManager; Options">
-<!ENTITY options.width "42em">
 <!ENTITY general.caption "General">
 <!ENTITY startNend.caption "Startup &amp; Shutdown">
 <!ENTITY resume_sess.label "At startup always load the following session:">
@@ -44,7 +43,7 @@
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Use &#37;t for the active tab&apos;s title, &#37;d for today&apos;s date and &#37;m for the time; additionally the title&apos;s length can be limited to # characters: &#37;#t.">
 <!ENTITY service.caption "&quot;Crash Recovery&quot; Settings">
-<!ENTITY service.description "Don&apos;t touch these, unless you know what you&apos;re doing:">
+<!ENTITY service.description "Don&apos;t touch these, unless you know what you&apos;re doing!">
 <!ENTITY interval.label "Minimum time interval between two state saves (in seconds):">
 <!ENTITY interval.accesskey "i">
 <!ENTITY postdata.label "Maximum amount of POSTDATA to be stored (in bytes; -1 for all):">
@@ -54,3 +53,10 @@
 <!ENTITY privacy.level0 "all sites">
 <!ENTITY privacy.level1 "unencrypted sites only">
 <!ENTITY privacy.level2 "no sites at all">
+<!ENTITY moreadvanced.caption "More Advanced">
+<!ENTITY sessiondir.caption "Saved Sessions Location">
+<!ENTITY sessiondir.desc "The default location of the saved sessions can be overridden here.">
+<!ENTITY change_dir.label "Change">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "Default">
+<!ENTITY default_dir.accesskey "D">
