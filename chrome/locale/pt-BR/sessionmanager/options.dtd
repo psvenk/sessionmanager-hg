@@ -1,23 +1,23 @@
-<!ENTITY options.title "&sessionManager; Opções">
+<!ENTITY options.title "Opções do &sessionManager;">
 <!ENTITY general.caption "Geral">
-<!ENTITY startNend.caption "Iníciar &amp; Sair">
-<!ENTITY resume_sess.label "Quando iniciar sempre carregar a seção a seguir:">
+<!ENTITY startNend.caption "Iniciar &amp; Sair">
+<!ENTITY resume_sess.label "Ao iniciar sempre carregar a seguinte sessão:">
 <!ENTITY resume_sess.accesskey "s">
 <!ENTITY backup_sess.label "Ao Sair">
 <!ENTITY backup_sess.accesskey "o">
-<!ENTITY backup_session.label0 "descartar a seção atual">
-<!ENTITY backup_session.label1 "salvar a seção atual">
-<!ENTITY backup_session.label2 "perguntar se a seção atual deve ser salva">
-<!ENTITY crashrecovery.label "Activar Crash Recovery">
+<!ENTITY backup_session.label0 "descartar a sessão atual">
+<!ENTITY backup_session.label1 "salvar a sessão atual">
+<!ENTITY backup_session.label2 "perguntar se a sessão atual deve ser salva">
+<!ENTITY crashrecovery.label "Ativar Crash Recovery (Recuperação de Falhas)">
 <!ENTITY crashrecovery.accesskey "i">
-<!ENTITY restoring.caption "Restaurar Seção">
+<!ENTITY restoring.caption "Restaurar Sessão">
 <!ENTITY sessionList.caption "Lista de Sessões">
-<!ENTITY orderList.label "Ordenar a lista de seções">
+<!ENTITY orderList.label "Ordenar a lista de sessões">
 <!ENTITY orderList.accesskey "d">
 <!ENTITY orderList.label1 "alfabeticamente">
-<!ENTITY orderList.label2 "mais antiga para mais nova">
-<!ENTITY orderList.label_2 "mais nova para mais antiga">
-<!ENTITY max_backup.label "Número de backups de seções mais antigas (falhadas) a guardar:">
+<!ENTITY orderList.label2 "da mais antiga para a mais nova">
+<!ENTITY orderList.label_2 "da mais nova para a mais antiga">
+<!ENTITY max_backup.label "Número de sessões mais antigas (falhadas) a guardar:">
 <!ENTITY max_backup.accesskey "N">
 <!ENTITY undoClose.caption "Desfazer Fechar">
 <!ENTITY windowsNtabs.caption "Janelas &amp; Abas Fechadas">
@@ -33,17 +33,17 @@
 <!ENTITY closed_tabs.label0 "nunca">
 <!ENTITY closed_tabs.label1 "ao iniciar">
 <!ENTITY closed_tabs.label2 "sempre">
-<!ENTITY window_list.label "Não limpar a lista de janelas fechadas quando sair">
+<!ENTITY window_list.label "Não limpar a lista de janelas fechadas ao sair">
 <!ENTITY window_list.accesskey "q">
 <!ENTITY clear_list.label "Limpar Lista">
 <!ENTITY clear_list.accesskey "r">
 <!ENTITY advanced.caption "Avançado">
-<!ENTITY name_format.caption "Nomes das Seções">
-<!ENTITY name_format.label "Formato para as sugestões de nomes de seções:">
+<!ENTITY name_format.caption "Nomes das Sessões">
+<!ENTITY name_format.label "Formato sugerido para nomes de sessões:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Use &#37;t para o título da aba ativa, &#37;d para a data de hoje e &#37;m para a hora; além disso o tamanho do título pode ser limitado com caracteres # : &#37;#t.">
-<!ENTITY service.caption "Configurações de &quot;Crash Recovery&quot;">
-<!ENTITY service.description "Não toque nisso, a menos que saiba o que está fazendo:">
+<!ENTITY service.caption "Configurações de &quot;Crash Recovery&quot; (Recuperação de Falhas)">
+<!ENTITY service.description "Não mexa nisso, a menos que saiba o que está fazendo:">
 <!ENTITY interval.label "Intervalo de tempo mínimo entre dois salvamentos de estado (em segundos):">
 <!ENTITY interval.accesskey "i">
 <!ENTITY postdata.label "Quantidade máxima de POSTDATA a armazenar (em bytes; -1 para tudo):">
@@ -54,8 +54,8 @@
 <!ENTITY privacy.level1 "sites não encriptados">
 <!ENTITY privacy.level2 "nenhum site">
 <!ENTITY moreadvanced.caption "Mais Avançado">
-<!ENTITY sessiondir.caption "Localização das sessões guardadas">
-<!ENTITY sessiondir.desc "A localização pré-definida das sessões guardadas pode ser substituída aqui.">
+<!ENTITY sessiondir.caption "Local das sessões guardadas">
+<!ENTITY sessiondir.desc "O local pré-definido das sessões guardadas pode ser substituído aqui.">
 <!ENTITY change_dir.label "Mudar">
 <!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Pré-definido">
