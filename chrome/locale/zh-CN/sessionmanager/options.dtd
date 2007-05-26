@@ -53,10 +53,10 @@
 <!ENTITY privacy.level0 "全部网站">
 <!ENTITY privacy.level1 "仅未加密网站">
 <!ENTITY privacy.level2 "全都不保存">
-<!ENTITY moreadvanced.caption "更加高级的选择">
-<!ENTITY sessiondir.caption "保存会议文件夹">
-<!ENTITY sessiondir.desc "预定义保存会议文件夹可以是改变这里">
-<!ENTITY change_dir.label "变动">
+<!ENTITY moreadvanced.caption "更多高级选项">
+<!ENTITY sessiondir.caption "已保存会话位置">
+<!ENTITY sessiondir.desc "在此已保存会话的默认位置可以被覆盖">
+<!ENTITY change_dir.label "修改">
 <!ENTITY change_dir.accesskey "C">
-<!ENTITY default_dir.label "恢复原物文件夹">
+<!ENTITY default_dir.label "默认">
 <!ENTITY default_dir.accesskey "D">
