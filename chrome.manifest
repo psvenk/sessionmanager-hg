@@ -21,5 +21,10 @@ locale	sessionmanager	sk-SK	jar:chrome/sessionmanager.jar!/locale/sk-SK/sessionm
 locale	sessionmanager	hu-HU	jar:chrome/sessionmanager.jar!/locale/hu-HU/sessionmanager/
 locale	sessionmanager	sr-Yu	jar:chrome/sessionmanager.jar!/locale/sr-Yu/sessionmanager/
 
-overlay	chrome://browser/content/browser.xul			chrome://sessionmanager/content/sessionmanager.xul
-style	chrome://global/content/customizeToolbar.xul			chrome://sessionmanager/skin/sessionmanager.css
+overlay	chrome://browser/content/preferences/preferences.xul	chrome://sessionmanager/content/preferencesOverlay.xul
+overlay  chrome://browser/content/preferences/sanitize.xul		chrome://sessionmanager/content/overlaySanitizeUI.xul
+overlay  chrome://browser/content/sanitize.xul					chrome://sessionmanager/content/overlaySanitizeUI.xul
+overlay	chrome://browser/content/browser.xul					chrome://sessionmanager/content/sessionmanager.xul
+
+style	chrome://global/content/customizeToolbar.xul	chrome://sessionmanager/skin/sessionmanager.css
+

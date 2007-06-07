@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<!--
+  *
+ * The Original Code is downTHEMall
+ *
+ * The Initial Developer of the Original Code is Nils Maier
+ *
+ * -->
+<!DOCTYPE overlay [
+<!ENTITY % tabmixDTD SYSTEM "chrome://sessionmanager/locale/options.dtd" >
+%tabmixDTD;
+]>
+
+ <overlay id="tabmix-sanitize-ui" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
+	<script type="application/x-javascript" src="chrome://sessionmanager/content/preferencesOverlay.js"/>
+	<script type="application/x-javascript">
+		gSessionManager.sanitizeLabel = {
+			label: "&sanitizer.label;",
+			accesskey: "&sanitizer.accesskey;"
+		}
+		window.addEventListener('load', gSessionManager.addSanitizeItem, true);
+		gSessionManager.addMenuItem();
+	</script>
+
+ </overlay>

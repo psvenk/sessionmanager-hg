@@ -7,6 +7,10 @@
 	
 	<Description about="urn:mozilla:package:sessionmanager" chrome:name="sessionmanager"/>
 	
+	<Seq about="chrome://browser/content/preferences/preferences.xul">
+		<li>chrome://sessionmanager/content/preferencesOverlay.xul</li>
+	</Seq>
+  
 	<Seq about="urn:mozilla:overlays">
 		<li resource="chrome://navigator/content/navigator.xul"/>
 	</Seq>

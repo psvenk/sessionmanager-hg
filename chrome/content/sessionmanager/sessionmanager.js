@@ -21,6 +21,10 @@
 	onLoad_proxy: function()
 	{
 		this.removeEventListener("load", gSessionManager.onLoad_proxy, false);
+		if (!window.SessionManager) // if Tab Mix Plus isn't installed
+		{
+			window.SessionManager = gSessionManager;
+		}
 		gSessionManager.onLoad();
 	},
 
@@ -36,6 +40,7 @@
 		
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);
+		this.mPrefBranch3 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.sessionstore.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		
 		if (aDialog || this.mFullyLoaded)
 		{
@@ -60,10 +65,20 @@
 		this.mPref__running = this.getPref("_running", false);
 		this.mPrefBranch.addObserver("", this, false);
 		this.mPrefBranch2.addObserver("page", this, false);
+		this.mPrefBranch3.addObserver("postdata", this, false);
 
 		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
-
+		
+		// Save browser.sessionstore.postdata value and restore it if changed at startup, 
+		// which can change when TMP is installed
+		if (this.getPref("postdata")) {
+			this.setPref("browser.sessionstore.postdata",this.getPref("postdata", -1), true);
+		}
+		else {
+			this.setPref("postdata",this.getPref("browser.sessionstore.postdata", -1, true));
+		}
+		
 		this.synchStartup();
 		this.recoverSession();
 		this.updateToolbarButton();
@@ -90,7 +105,13 @@
 		}
 		
 		// Don't allow tab to reload when restoring closed tab
-		eval("undoCloseTab = " + undoCloseTab.toString().replace("var tabbrowser", "window.SessionManager._allowReload = false; $&"));
+		eval("undoCloseTab = " + undoCloseTab.toString().replace("var tabbrowser", "window.gSessionManager._allowReload = false; $&"));
+		
+		// add call to gSessionManager_Sanitizer (code take from Tab Mix Plus)
+		// nsBrowserGlue.js use loadSubScript to load Sanitizer so we need to add this here for the case
+		// where the user disabled option to prompt before clearing data 
+		var cmd = document.getElementById("Tools:Sanitize");
+		if (cmd) cmd.setAttribute("oncommand", cmd.getAttribute("oncommand") + " gSessionManager.tryToSanitize();");
 	},
 
 	onUnload_proxy: function()
@@ -106,6 +127,7 @@
 		}, this);
 		this.mPrefBranch.removeObserver("", this);
 		this.mPrefBranch2.removeObserver("page", this);
+		this.mPrefBranch3.removeObserver("postdata", this, false);
 		
 		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
@@ -172,6 +194,9 @@
 				break;
 			case "page":
 				this.synchStartup();
+				break;
+			case "postdata":
+				this.setPref("postdata",this.getPref("browser.sessionstore.postdata", -1, true));
 				break;
 			case "resume_session":
 				this.setResumeCurrent(this.mPref_resume_session == this.mBackupSessionName);
@@ -691,6 +716,12 @@
 
 /* ........ File Handling .............. */
 
+	sanitize : function()
+	{
+		// Remove all saved sessions
+		this.getSessionDir().remove(true);
+	},
+
 	getProfileFile: function(aFileName)
 	{
 		var file = this.mProfileDirectory.clone();
@@ -1198,6 +1229,24 @@
 
 /* ........ Miscellaneous Enhancements .............. */
 
+	// Called to handle clearing of private data (stored sessions) when the toolbar item is selected
+	// and when the clear now button is pressed in the privacy options pane.  If the option to promptOnSanitize
+	// is set, this function ignores the request and let's the Firefox Sanitize function call
+	// gSessionManager.santize when Clear Private Data okay button is pressed and Session Manager's checkbox
+	// is selected.
+	tryToSanitize: function ()
+	{
+		// User disabled the prompt before clear option and session manager is checked in the privacy data settings
+		if ( !this.getPref("privacy.sanitize.promptOnSanitize", true, true) &&
+			 this.getPref("privacy.item.extensions-sessionmanager", false, true) ) 
+		{
+			this.sanitize();
+			return true;
+		}
+	
+		return false;
+	},
+		
 	synchStartup: function()
 	{
 		var startup = this.getPref("browser.startup.page", 1, true);
@@ -1448,14 +1497,3 @@
 
 window.addEventListener("load", gSessionManager.onLoad_proxy, false);
 window.addEventListener("unload", gSessionManager.onUnload_proxy, false);
-
-window.addEventListener("load", function() {
-	if (!window.SessionManager) // if Tab Mix Plus isn't installed
-	{
-		window.SessionManager = gSessionManager;
-	}
-	if (typeof tabBarScrollStatus == "function") // hack for a Tab Mix Plus startup issue (fixed in v0.3.0.065)
-	{
-		setTimeout(tabBarScrollStatus, 0);
-	}
-}, false);
