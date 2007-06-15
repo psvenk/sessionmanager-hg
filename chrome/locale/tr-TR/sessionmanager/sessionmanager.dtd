@@ -10,7 +10,7 @@
 <!ENTITY remove.accesskey "D">
 <!ENTITY openFolder.label "Oturum Klasötünü Aç">
 <!ENTITY openFolder.accesskey "F">
-<!ENTITY options.label "&OturumYöneticisi; Seçenekler">
+<!ENTITY options.label "&sessionManager; Seçenekler">
 <!ENTITY options.accesskey "O">
 <!ENTITY resume.label "Geçerli Oturume Başlangıçta devam et">
 <!ENTITY resume.accesskey "m">
