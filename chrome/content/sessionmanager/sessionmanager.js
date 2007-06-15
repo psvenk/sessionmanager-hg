@@ -8,7 +8,8 @@
 	mIOService: Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabopenclose", "browser:purge-session-history", "quit-application"],
+	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabopenclose", "browser:purge-session-history", 
+	             "quit-application-granted"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mPromptSessionName: "?",
@@ -203,7 +204,7 @@
 				break;
 			}
 			break;
-		case "quit-application":
+		case "quit-application-granted":
 			if (this.getPref("_running"))
 			{
 				this.shutDown();
@@ -852,7 +853,8 @@
 
 	appendClosedWindow: function(aState)
 	{
-		if (this.mPref_max_closed_undo == 0 || Array.every(gBrowser.browsers, this.isCleanBrowser))
+		if (this.mPref_max_closed_undo == 0 || Array.every(gBrowser.browsers, this.isCleanBrowser) ||
+		    !this.getPref("_running", false))
 		{
 			return;
 		}
