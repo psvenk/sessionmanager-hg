@@ -4,11 +4,11 @@
 <!ENTITY resume_sess.label "All&apos;avvio caricare sempre la seguente sessione:">
 <!ENTITY resume_sess.accesskey "A">
 <!ENTITY backup_sess.label "Alla chiusura">
-<!ENTITY backup_sess.accesskey "h">
+<!ENTITY backup_sess.accesskey "u">
 <!ENTITY backup_session.label0 "scartare la sessione corrente">
 <!ENTITY backup_session.label1 "fare il backup della sessione corrente">
 <!ENTITY backup_session.label2 "chiedere se fare il backup della sessione corrente">
-<!ENTITY crashrecovery.label "Attiva il ripristino dopo crash">
+<!ENTITY crashrecovery.label "Attivare il ripristino dopo crash">
 <!ENTITY crashrecovery.accesskey "h">
 <!ENTITY restoring.caption "Ripristino sessioni">
 <!ENTITY sessionList.caption "Lista sessioni">
@@ -22,7 +22,7 @@
 <!ENTITY undoClose.caption "Riapri">
 <!ENTITY windowsNtabs.caption "Finestre e schede chiuse">
 <!ENTITY max_closed.label "Numero massimo di finestre chiuse in memoria:">
-<!ENTITY max_closed.accesskey "u">
+<!ENTITY max_closed.accesskey "ss">
 <!ENTITY max_tabs.label "Numero massimo di schede chiuse in memoria (per finestra):">
 <!ENTITY max_tabs.accesskey "t">
 <!ENTITY submenu.label "Elencare tutte le finestre e le schede chiuse in un sottomenu">
@@ -60,3 +60,5 @@
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "Ripristina predefinita">
 <!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "Sessioni salvate">
+<!ENTITY sanitizer.accesskey "i">

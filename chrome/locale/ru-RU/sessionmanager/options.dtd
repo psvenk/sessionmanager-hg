@@ -60,3 +60,5 @@
 <!ENTITY change_dir.accesskey "И">
 <!ENTITY default_dir.label "Вернуть по умолчанию">
 <!ENTITY default_dir.accesskey "п">
+<!ENTITY sanitizer.label "Сохраненные сессии Session Manager">
+<!ENTITY sanitizer.accesskey "M">

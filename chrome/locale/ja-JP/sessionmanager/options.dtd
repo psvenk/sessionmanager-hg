@@ -60,3 +60,5 @@
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "既定に戻す">
 <!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "セッションマネージャの保存したセッション">
+<!ENTITY sanitizer.accesskey "M">

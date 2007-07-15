@@ -1,0 +1,30 @@
+<!ENTITY sessionManager "Správce relací">
+<!ENTITY toolsmenu.accesskey "r">
+<!ENTITY save.label "Uložit relaci...">
+<!ENTITY save.accesskey "U">
+<!ENTITY saveOne.label "Uložit aktuální okno...">
+<!ENTITY saveOne.accesskey "o">
+<!ENTITY rename.label "Přejmenovat relaci...">
+<!ENTITY rename.accesskey "P">
+<!ENTITY remove.label "Smazat relaci(e)">
+<!ENTITY remove.accesskey "m">
+<!ENTITY openFolder.label "Otevřít složku s relacemi">
+<!ENTITY openFolder.accesskey "s">
+<!ENTITY options.label "Možnosti Správce relací">
+<!ENTITY options.accesskey "N">
+<!ENTITY resume.label "Přejmenovat poslední relaci při startu">
+<!ENTITY resume.accesskey "e">
+<!ENTITY reload.label "Znovu načíst všechna obnovená okna">
+<!ENTITY reload.accesskey "v">
+<!ENTITY overwrite.label "Nahradit existující okna">
+<!ENTITY overwrite.accesskey "h">
+<!ENTITY undoClosed.label "Znovu otevřít zavřené...">
+<!ENTITY undoClosed.accesskey "z">
+<!ENTITY closedWindows "Zavřená okna:">
+<!ENTITY closedTabs "Zavřené panely:">
+<!ENTITY clearList.label "Vyčistit seznam zavřených panelů...">
+<!ENTITY clearList.accesskey "y">
+<!ENTITY toolbar.tooltip "Uloží aktuální relaci...">
+<!ENTITY toolbar.undo.label "Znovu otevřít zavřené panely">
+<!ENTITY toolbar.undo.tooltip "Znovu otevře poslední zavřený panel">
+<!ENTITY prompt.ignore.label "Toto dialogové okno již znovu nezobrazovat">

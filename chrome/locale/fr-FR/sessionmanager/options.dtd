@@ -60,3 +60,5 @@
 <!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Défaut">
 <!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "Sessions enregistrées dans le gestionnaire">
+<!ENTITY sanitizer.accesskey "G">

@@ -60,3 +60,5 @@
 <!ENTITY change_dir.accesskey "K">
 <!ENTITY default_dir.label "Atstatyti numatytąją">
 <!ENTITY default_dir.accesskey "A">
+<!ENTITY sanitizer.label "Sesijų tvarkytojo išsaugotos sesijos">
+<!ENTITY sanitizer.accesskey "i">

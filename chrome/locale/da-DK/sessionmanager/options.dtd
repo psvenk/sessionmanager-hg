@@ -60,3 +60,5 @@
 <!ENTITY change_dir.accesskey "Æ">
 <!ENTITY default_dir.label "Genskab standard">
 <!ENTITY default_dir.accesskey "k">
+<!ENTITY sanitizer.label "Session Manager Gemte Sessioner">
+<!ENTITY sanitizer.accesskey "G">

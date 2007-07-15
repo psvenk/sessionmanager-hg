@@ -60,3 +60,5 @@
 <!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Pré-definido">
 <!ENTITY default_dir.accesskey "P">
+<!ENTITY sanitizer.label "Session Manager Saved Sessions">
+<!ENTITY sanitizer.accesskey "M">

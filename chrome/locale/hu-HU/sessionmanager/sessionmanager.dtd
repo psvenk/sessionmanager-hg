@@ -22,7 +22,7 @@
 <!ENTITY undoClosed.accesskey "g">
 <!ENTITY closedWindows "Bezárt ablakok:">
 <!ENTITY closedTabs "Bezárt lapok:">
-<!ENTITY clearList.label "&apos;Bezárt&apos; lista törlése...">
+<!ENTITY clearList.label "&apos;Bezárt lapok&apos; lista törlése...">
 <!ENTITY clearList.accesskey "l">
 <!ENTITY toolbar.tooltip "Jelenlegi munkamenet mentése...">
 <!ENTITY toolbar.undo.label "Bezárás visszavonása">

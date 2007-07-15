@@ -60,3 +60,5 @@
 <!ENTITY change_dir.accesskey "n">
 <!ENTITY default_dir.label "Standard wiederherstellen">
 <!ENTITY default_dir.accesskey "w">
+<!ENTITY sanitizer.label "Gespeicherte Sitzungen des Sitzungs-Managers">
+<!ENTITY sanitizer.accesskey "z">
