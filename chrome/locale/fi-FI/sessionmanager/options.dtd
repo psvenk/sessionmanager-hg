@@ -1,0 +1,64 @@
+<!ENTITY options.title "Istuntojenhallinnan asetukset">
+<!ENTITY general.caption "Yleiset">
+<!ENTITY startNend.caption "Selaimen käynnistys &amp; sulkeminen">
+<!ENTITY resume_sess.label "Avaa käynnistyksen yhteydessä aina seuraava istunto:">
+<!ENTITY resume_sess.accesskey "k">
+<!ENTITY backup_sess.label "Suljettaessa">
+<!ENTITY backup_sess.accesskey "S">
+<!ENTITY backup_session.label0 "hylkää nykyinen istunto">
+<!ENTITY backup_session.label1 "ota varmuuskopio nykyisestä istunnosta">
+<!ENTITY backup_session.label2 "kysy otetaanko nykyisestä istunnosta varmuuskopio">
+<!ENTITY crashrecovery.label "Ota käyttöön kaatumisesta palautuminen">
+<!ENTITY crashrecovery.accesskey "p">
+<!ENTITY restoring.caption "Istunnon palautus">
+<!ENTITY sessionList.caption "Istuntolista">
+<!ENTITY orderList.label "Järjestä istuntolista">
+<!ENTITY orderList.accesskey "J">
+<!ENTITY orderList.label1 "aakkosjärjestykseen">
+<!ENTITY orderList.label2 "vanhimmasta uusimpaan">
+<!ENTITY orderList.label_2 "uusimmasta vanhimpaan">
+<!ENTITY max_backup.label "Varmuuskopioina säilytettävien vanhojen (kaatuneiden) istuntojen lukumäärä:">
+<!ENTITY max_backup.accesskey "o">
+<!ENTITY undoClose.caption "Sulkemisen peruuttaminen">
+<!ENTITY windowsNtabs.caption "Suljetut ikkunat &amp; välilehdet">
+<!ENTITY max_closed.label "Muistettavien suljettujen ikkunoiden lukumäärä:">
+<!ENTITY max_closed.accesskey "i">
+<!ENTITY max_tabs.label "Muistettavien suljettujen välilehtien lukumäärä (per ikkuna):">
+<!ENTITY max_tabs.accesskey "v">
+<!ENTITY submenu.label "Listaa suljetut ikkunat ja välilehdet alavalikossa">
+<!ENTITY submenu.accesskey "L">
+<!ENTITY persistence.caption "Jatkuvuus">
+<!ENTITY closed_tabs.label "Palauta uudelleenavattavissaolevien suljettujen välilehtien lista kaikille ikkunoille:">
+<!ENTITY closed_tabs.accesskey "u">
+<!ENTITY closed_tabs.label0 "ei koskaan">
+<!ENTITY closed_tabs.label1 "käynnistyksen yhteydessä">
+<!ENTITY closed_tabs.label2 "aina">
+<!ENTITY window_list.label "Älä tyhjennä suljettujen ikkunoiden listaa selainta suljettaessa">
+<!ENTITY window_list.accesskey "y">
+<!ENTITY clear_list.label "Tyhjennä lista">
+<!ENTITY clear_list.accesskey "t">
+<!ENTITY advanced.caption "Lisäasetukset">
+<!ENTITY name_format.caption "Istuntojen nimet">
+<!ENTITY name_format.label "Istuntojen nimeämisehdotuksen muoto:">
+<!ENTITY name_format.accesskey "m">
+<!ENTITY name_format.desc "&#37;t = aktiivisen välilehden otsikko, &#37;d = päivämäärä ja &#37;m = kellonaika; lisäksi otsikon voi rajoittaa tietyn mittaiseksi antamalla sen muodossa &#37;#t, jossa # on haluttu pituus.">
+<!ENTITY service.caption "Kaatumisesta palautumisen asetukset">
+<!ENTITY service.description "Älä koske näihin ellet tiedä mitä teet!">
+<!ENTITY interval.label "Tilatallennusten välinen vähimmäisaika (sekunteina):">
+<!ENTITY interval.accesskey "a">
+<!ENTITY postdata.label "Talletettavan POSTDATA:n enimmäismäärä (tavuina, -1 = tallenna kaikki)">
+<!ENTITY postdata.accesskey "e">
+<!ENTITY privacy.label "Tallenna arkaluontoiset tiedot (lomaketiedot, POSTDATA ja evästeet):">
+<!ENTITY privacy.accesskey "n">
+<!ENTITY privacy.level0 "kaikille sivustoille">
+<!ENTITY privacy.level1 "vain suojaamattomille sivustoille">
+<!ENTITY privacy.level2 "älä tallenna koskaan">
+<!ENTITY moreadvanced.caption "Lisää lisäasetuksia">
+<!ENTITY sessiondir.caption "Tallennettujen istuntojen sijainti">
+<!ENTITY sessiondir.desc "Tallennettujen istuntojen oletusarvoinen sijainti voidaan muuttaa tästä.">
+<!ENTITY change_dir.label "Muuta sijaintia">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "Palauta alkuperäinen sijainti">
+<!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "Istuntojenhallinnan tallennetut istunnot">
+<!ENTITY sanitizer.accesskey "h">

@@ -1,0 +1,30 @@
+<!ENTITY sessionManager "Менаџер на сесијата">
+<!ENTITY toolsmenu.accesskey "М">
+<!ENTITY save.label "Зачувај ја сесијата...">
+<!ENTITY save.accesskey "З">
+<!ENTITY saveOne.label "Зачувај го моменталниот прозорец...">
+<!ENTITY saveOne.accesskey "М">
+<!ENTITY rename.label "Преименувај ја сесијата..">
+<!ENTITY rename.accesskey "П">
+<!ENTITY remove.label "Избриши сеси(и)ја">
+<!ENTITY remove.accesskey "И">
+<!ENTITY openFolder.label "Отвори го фолдерот со сесијата">
+<!ENTITY openFolder.accesskey "Ф">
+<!ENTITY options.label "&sessionManager; Опции">
+<!ENTITY options.accesskey "О">
+<!ENTITY resume.label "Продолжи ја моменталната сесија при стартовањето">
+<!ENTITY resume.accesskey "р">
+<!ENTITY reload.label "Превчитај ги сите обновени прозорци">
+<!ENTITY reload.accesskey "е">
+<!ENTITY overwrite.label "Замени ги постоечките прозорци">
+<!ENTITY overwrite.accesskey "а">
+<!ENTITY undoClosed.label "Повторно отвори ги затворените...">
+<!ENTITY undoClosed.accesskey "н">
+<!ENTITY closedWindows "Затворени прозорци:">
+<!ENTITY closedTabs "Затворени јазичиња:">
+<!ENTITY clearList.label "Исчисти ја &apos;затворената&apos; листа">
+<!ENTITY clearList.accesskey "ч">
+<!ENTITY toolbar.tooltip "Зачувај ја моменталната сурферска сесија...">
+<!ENTITY toolbar.undo.label "Отповикај го затворањето">
+<!ENTITY toolbar.undo.tooltip "Повторно отвори ги неодамнешните затворени јазичиња">
+<!ENTITY prompt.ignore.label "Не го покажувај овај дијалог повторно">

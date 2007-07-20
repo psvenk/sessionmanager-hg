@@ -1,0 +1,64 @@
+<!ENTITY options.title "&sessionManager; Опции">
+<!ENTITY general.caption "Општо">
+<!ENTITY startNend.caption "Стартување &amp; Исклучување">
+<!ENTITY resume_sess.label "При стартување секогаш вчитувај ја следната сесија:">
+<!ENTITY resume_sess.accesskey "њ">
+<!ENTITY backup_sess.label "При исклучување">
+<!ENTITY backup_sess.accesskey "в">
+<!ENTITY backup_session.label0 "поништи ја моменталната сесија">
+<!ENTITY backup_session.label1 "Направи резерва копија на моменталната сесија">
+<!ENTITY backup_session.label2 "прашај дали да се направи резервна копија на моменталната сесија">
+<!ENTITY crashrecovery.label "Овозможи обнова од срушување">
+<!ENTITY crashrecovery.accesskey "њ">
+<!ENTITY restoring.caption "Обновување на сесијата">
+<!ENTITY sessionList.caption "Листа на сесијата">
+<!ENTITY orderList.label "Сортирај ја листата на сесијата">
+<!ENTITY orderList.accesskey "т">
+<!ENTITY orderList.label1 "алфабетски">
+<!ENTITY orderList.label2 "најстари кон најнови">
+<!ENTITY orderList.label_2 "најнови кон најстари">
+<!ENTITY max_backup.label "Број на резервни копии на стари(срушени) сесии да бидат чувани:">
+<!ENTITY max_backup.accesskey "Б">
+<!ENTITY undoClose.caption "Отповикај затворање">
+<!ENTITY windowsNtabs.caption "Затворени Прозорци &amp; Јазичиња">
+<!ENTITY max_closed.label "Максимален број на запаметени затворени прозорци:">
+<!ENTITY max_closed.accesskey "б">
+<!ENTITY max_tabs.label "Максимален број на запаметени затворени јазичиња(по прозорец):">
+<!ENTITY max_tabs.accesskey "ј">
+<!ENTITY submenu.label "Состави список на сите затворени прозорци и јазичиња во подмени">
+<!ENTITY submenu.accesskey "с">
+<!ENTITY persistence.caption "Постојаност">
+<!ENTITY closed_tabs.label "Обнови ја листата на затворени јазичиња кои е можно да се отворат повторно за сите прозорци:">
+<!ENTITY closed_tabs.accesskey "ж">
+<!ENTITY closed_tabs.label0 "никогаш">
+<!ENTITY closed_tabs.label1 "при стартување">
+<!ENTITY closed_tabs.label2 "секогаш">
+<!ENTITY window_list.label "Не ја чисти листата на затворени прозорци при исклучувањето">
+<!ENTITY window_list.accesskey "л">
+<!ENTITY clear_list.label "Исчисти ја листата">
+<!ENTITY clear_list.accesskey "а">
+<!ENTITY advanced.caption "Напредно">
+<!ENTITY name_format.caption "Имиња на сесиите">
+<!ENTITY name_format.label "Формат за предлозите за имиња на сесијата:">
+<!ENTITY name_format.accesskey "п">
+<!ENTITY name_format.desc "Користи &#37;t за наслови на активните јазичиња, &#37;d за денешниот датум, &#37;m за време; додатно може да се ограничи должината на насловот на # знаци: &#37;#t.">
+<!ENTITY service.caption "Поставки за &quot;Обнова од срушување&quot;">
+<!ENTITY service.description "Не ги допирај овие, освен ако знаеш што правиш!">
+<!ENTITY interval.label "Минимум временски интервал помеѓу две зачувувања на состојбата(во секунди):">
+<!ENTITY interval.accesskey "в">
+<!ENTITY postdata.label "Максимална количина на POSTDATA да биде зачувана (во бајти; -1 за сите):">
+<!ENTITY postdata.accesskey "к">
+<!ENTITY privacy.label "Зачувај ги чувствителните податоци(податоци за формата, POSTDATA и колачињата) за">
+<!ENTITY privacy.accesskey "ч">
+<!ENTITY privacy.level0 "сите сајтови">
+<!ENTITY privacy.level1 "само нешифрирани сајтови">
+<!ENTITY privacy.level2 "ниеден сајт">
+<!ENTITY moreadvanced.caption "Уште понапредно">
+<!ENTITY sessiondir.caption "Локација на зачуваните сесии">
+<!ENTITY sessiondir.desc "Тука може да се премине преку зададената локација на зачуваните сесии.">
+<!ENTITY change_dir.label "Промени">
+<!ENTITY change_dir.accesskey "и">
+<!ENTITY default_dir.label "Стандардни вредности">
+<!ENTITY default_dir.accesskey "д">
+<!ENTITY sanitizer.label "Зачувани сесии на Менаџерот на Сесијата">
+<!ENTITY sanitizer.accesskey "с">
