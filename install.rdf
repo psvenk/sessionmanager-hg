@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>{1280606b-2510-4fe0-97ef-9b5a22eafe30}</em:id>
-    <em:version>0.5.4</em:version>
+    <em:version>0.5.4.1</em:version>
     
     <!-- Firefox -->
     <em:targetApplication>
@@ -40,6 +40,8 @@
     <em:contributor>Kape123 (Serbian)</em:contributor>
     <em:contributor>lloco (Portuguese)</em:contributor>
     <em:contributor>PetrTwo (Czech)</em:contributor>
+    <em:contributor>Kenmooda (Finish)</em:contributor>
+    <em:contributor>Ivan Jonoski (Macedonian)</em:contributor>
     <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
     
     <!-- Front End Integration Hooks (used by Extension Manager)-->
