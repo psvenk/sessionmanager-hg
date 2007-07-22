@@ -61,4 +61,4 @@
 <!ENTITY default_dir.label "Alapértelmezett visszaállítása">
 <!ENTITY default_dir.accesskey "A">
 <!ENTITY sanitizer.label "Mentett munkamenetek (Session Manager)">
-<!ENTITY sanitizer.accesskey "M">
+<!ENTITY sanitizer.accesskey "e">
