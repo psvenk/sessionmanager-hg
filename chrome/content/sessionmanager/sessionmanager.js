@@ -64,12 +64,17 @@
 		this.mPref_session_list_order = this.getPref("session_list_order", 1);
 		this.mPref_submenus = this.getPref("submenus", false);
 		this.mPref__running = this.getPref("_running", false);
+		this.mPref__title = this.getPref("_title", "");
 		this.mPrefBranch.addObserver("", this, false);
 		this.mPrefBranch2.addObserver("page", this, false);
 		this.mPrefBranch3.addObserver("postdata", this, false);
 
 		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+		
+		gBrowser.addEventListener("DOMTitleChanged", this.onTitleChange, false);
+		gBrowser.tabContainer.addEventListener("TabSelect", this.onTitleChange, false);
+
 		
 		// Save browser.sessionstore.postdata value and restore it if changed at startup, 
 		// which can change when TMP is installed
@@ -90,6 +95,9 @@
 			this.setPref("_running", true);
 		}
 		this.mFullyLoaded = true;
+		
+		// update current title
+		this.onTitleChange();
 
 		// Workaround for bug 366986
 		// TabClose event fires too late to use SetTabValue to save the "image" attribute value and have it be saved by SessionStore
@@ -132,6 +140,9 @@
 		
 		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+		
+		gBrowser.removeEventListener("DOMTitleChanged", this.onTitleChange, false);
+		gBrowser.tabContainer.removeEventListener("TabSelect", this.onTitleChange, false);
 		
 		if (this.mPref__running && this.getBrowserWindows().length == 0)
 		{
@@ -202,6 +213,9 @@
 			case "resume_session":
 				this.setResumeCurrent(this.mPref_resume_session == this.mBackupSessionName);
 				break;
+			case "_title":
+				this.onTitleChange();
+				break;
 			}
 			break;
 		case "quit-application-granted":
@@ -266,6 +280,17 @@
 		this.appendClosedWindow(state);
 		this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", state);
 	},
+	
+	// Put current session name in browser titlebar
+	onTitleChange: function()
+	{
+		if (gSessionManager.mPref__title == "") {
+			gBrowser.updateTitlebar()
+		}
+		else if (gBrowser.ownerDocument.title.indexOf(gSessionManager.mPref__title) == -1) {
+			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title + gSessionManager.mPref__title;
+		}
+	},
 
 /* ........ Menu Event Handlers .............. */
 
@@ -275,11 +300,14 @@
 		
 		var separator = get_("separator");
 		var startSep = get_("start-separator");
+		var closer = get_("closer");
 		
 		for (var item = startSep.nextSibling; item != separator; item = startSep.nextSibling)
 		{
 			aPopup.removeChild(item);
 		}
+		
+		closer.hidden = (this.mPref__title=="");
 		
 		var sessions = this.getSessions();
 		sessions.forEach(function(aSession, aIx) {
@@ -370,6 +398,12 @@
 	{
 		this.save(aName, aFileName, true);
 	},
+	
+	closeSession: function()
+	{
+		this.setPref("_title","");
+		this.onTitleChange();
+	},
 
 	load: function(aFileName, aMode)
 	{
@@ -382,6 +416,7 @@
 
 		if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(state))
 		{
+			this.setPref("_title", " - (" + RegExp.$1 + ")");
 			state = state.split("\n")[3];
 		}
 		
@@ -883,6 +918,7 @@
 			this.clearUndoData("window", true);
 		}
 		this.backupCurrentSession();
+		this.delPref("_title");
 		this.delPref("_running");
 		this.mPref__running = false;
 

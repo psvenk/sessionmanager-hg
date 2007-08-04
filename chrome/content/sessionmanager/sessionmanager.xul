@@ -15,6 +15,7 @@
 			<menupopup onpopupshowing="gSessionManager.init(this, true);" onpopuphiding="gSessionManager.uninit(this);" onmousemove="event.stopPropagation();" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
 				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
+				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
 				<menuseparator _id="start-separator"/>
 				<menuseparator _id="separator"/>
 				<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
@@ -51,6 +52,7 @@
 			<menupopup onpopupshowing="gSessionManager.init(this);" onpopuphiding="gSessionManager.uninit(this);">
 				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
+				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
 				<menuseparator _id="start-separator"/>
 				<menuseparator _id="separator"/>
 				<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
@@ -77,6 +79,7 @@
 			<menupopup onpopupshowing="gSessionManager.init(this);" onpopuphiding="gSessionManager.uninit(this);">
 				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
+				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
 				<menuseparator _id="start-separator"/>
 				<menuseparator _id="separator"/>
 				<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
