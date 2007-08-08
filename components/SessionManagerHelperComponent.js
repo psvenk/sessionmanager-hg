@@ -71,6 +71,7 @@ var SessionManagerHelperComponent = {
 		{
 		case "app-startup":
 			os.addObserver(this, "profile-after-change", false);
+			os.addObserver(this, "final-ui-startup", false);
 			break;
 		case "profile-after-change":
 			os.removeObserver(this, aTopic);
@@ -85,10 +86,33 @@ var SessionManagerHelperComponent = {
 			}
 			catch (ex) { report(ex); }
 			break;
+		case "final-ui-startup":
+			os.removeObserver(this, aTopic);
+			try
+			{
+				this._handle_crash();
+			}
+			catch (ex) {}
+			break;
 		}
 	},
 
 /* ........ private methods .............. */
+
+	// this will handle the case where user turned off crash recovery and browser crashed and
+	// preference indicates there is an active session, but there really isn't
+	_handle_crash: function()
+	{
+		var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch2);
+		var crash_resume = prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
+		var sm_running = prefroot.getBoolPref("extensions.sessionmanager._running");
+		
+		if (sm_running && !crash_resume)
+		{
+			dump("SessionManager: Removing active session");
+			prefroot.deleteBranch("extensions.sessionmanager._autosave_name");
+		}
+	},
 
 	// code adapted from Danil Ivanov's "Cache Fixer" extension
 	_restoreCache: function()
