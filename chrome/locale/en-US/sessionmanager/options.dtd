@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "ask whether to backup the current session">
 <!ENTITY crashrecovery.label "Enable Crash Recovery">
 <!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "Automatically save replaced session">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Session Restoring">
 <!ENTITY sessionList.caption "Session List">
 <!ENTITY orderList.label "Order the session list">

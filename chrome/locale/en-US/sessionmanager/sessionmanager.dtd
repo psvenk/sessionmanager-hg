@@ -4,8 +4,10 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Save Current Window...">
 <!ENTITY saveOne.accesskey "W">
-<!ENTITY closeSession.label "Close Current Session">
-<!ENTITY closeSession.accesskey "E">
+<!ENTITY closeSession.label "Save and Close Current Session">
+<!ENTITY closeSession.accesskey "C">
+<!ENTITY abandonSession.label "Abandon Current Session">
+<!ENTITY abandonSession.accesskey "A">
 <!ENTITY rename.label "Rename Session...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Delete Session(s)...">
@@ -30,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Undo Close">
 <!ENTITY toolbar.undo.tooltip "Reopen the most recently closed tab">
 <!ENTITY prompt.ignore.label "Don&apos;t show this dialog again">
+<!ENTITY prompt.autosave.label "Make this an auto-save session">
