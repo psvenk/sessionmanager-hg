@@ -9,6 +9,7 @@ pref("browser.sessionstore.restore_prompt_uri", "chrome://sessionmanager/content
 pref("browser.sessionstore.resume_from_crash", true);
 pref("browser.sessionstore.resume_session_once", false);
 
+pref("extensions.sessionmanager.autosave_session", true);
 pref("extensions.sessionmanager.backup_session", 2);
 pref("extensions.sessionmanager.disable_cache_fixer", false);
 pref("extensions.sessionmanager.max_backup_keep", 1);
