@@ -36,6 +36,16 @@
  * * Haebaru (Japanese)
  * * stoneflash (Russian)
  * * JW_00000 (Dutch)
+ * * Ossipoff (Danish)
+ * * SerdarSahin (Turkish)
+ * * Wladow (Slovak)
+ * * Team erweiterungen.de, ReinekeFux (German)
+ * * Mikes Kaszmán István (Cashman) (Hungarian)
+ * * Kape123 (Serbian)
+ * * lloco (Portuguese)
+ * * PetrTwo (Czech)
+ * * Kenmooda (Finish)
+ * * Ivan Jonoski (Macedonian)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or
