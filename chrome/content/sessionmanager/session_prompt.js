@@ -45,16 +45,25 @@ gSessionManager.onLoad = function() {
 	}
 	if (gParams.GetInt(1) & 4) // show the "Don't show [...] again" checkbox
 	{
-		_("checkbox_container").hidden = false;
+		_("checkbox_ignore").hidden = false;
+	}
+
+	if (gParams.GetInt(1) & 8) // show the Autosave checkbox
+	{
+		_("checkbox_autosave").hidden = false;
 	}
 	
 	sessions.forEach(function(aSession) {
-		var item = gSessionList.appendItem(aSession.name, aSession.fileName);
-		if (aSession.fileName == gParams.GetString(3))
+		if (!(gParams.GetInt(1) & 16) || aSession.name != this.getPref("_autosave_name"))
 		{
-			setTimeout(function(aItem) { gSessionList.selectItem(aItem); }, 0, item);
+			var item = gSessionList.appendItem(aSession.name, aSession.fileName);
+			if (aSession.autosave) item.setAttribute("style", "font-weight: bold;");
+			if (aSession.fileName == gParams.GetString(3))
+			{
+				setTimeout(function(aItem) { gSessionList.selectItem(aItem); }, 0, item);
+			}
 		}
-	});
+	}, this);
 	
 	if ((gNeedSelection = !gTextBox || !gParams.GetString(5)) || (gParams.GetInt(1) & 256)) // when no textbox or renaming
 	{
@@ -105,7 +114,7 @@ gSessionManager.onUnload = function() {
 	}
 	persist(gSessionList, "height", gSessionList.boxObject.height);
 	
-	gParams.SetInt(1, (_("checkbox").checked)?1:0);
+	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0));
 };
 
 function onListboxSelect()

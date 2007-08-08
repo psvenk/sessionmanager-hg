@@ -11,7 +11,7 @@
 	id="sessionmanagerPrompt"
 	title="&sessionManager;"
 	ondialogaccept="return onAcceptDialog();"
-	style="min-width: 35em; -moz-user-focus: ignore;"
+	style="min-width: 40em; -moz-user-focus: ignore;"
 	persist="width"
 >
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
@@ -41,9 +41,10 @@
 				<textbox id="text_box" oninput="onTextboxInput();"/>
 				<separator class="thin"/>
 			</vbox>
-			<vbox id="checkbox_container" hidden="true">
-				<checkbox id="checkbox" label="&prompt.ignore.label;"/>
-			</vbox>
+			<hbox id="checkbox_container">
+				<checkbox id="checkbox_ignore" label="&prompt.ignore.label;" hidden="true"/>
+				<checkbox id="checkbox_autosave" label="&prompt.autosave.label;" hidden="true"/>
+			</hbox>
 		</vbox>
 	</hbox>
 </dialog>

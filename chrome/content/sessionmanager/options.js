@@ -11,8 +11,11 @@ gSessionManager.onLoad = function() {
 		resume_session.appendItem(this._string("startup_resume"), this.mBackupSessionName, "");
 	}
 	sessions.forEach(function(aSession) {
-		resume_session.appendItem(aSession.name, aSession.fileName, "");
-	});
+		if (aSession.fileName != this.mAutoSaveSessionName)
+		{
+			resume_session.appendItem(aSession.name, aSession.fileName, "");
+		}
+	}, this);
 	resume_session.value = _("extensions.sessionmanager.resume_session").value;
 	
 	_("SessionManagerPrefs").selectedIndex = _("extensions.sessionmanager.options_selected_tab").value;

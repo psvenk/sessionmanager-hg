@@ -38,8 +38,23 @@
 			if (file.exists())
 			{
 				var name = this.getFormattedName("", new Date(), this._string("crashed_session"));
-				var state = this.nameState(this.readFile(file), name + "\ntimestamp=" + file.lastModifiedTime);
+				var state = this.nameState(this.readFile(file), name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false");
 				this.writeFile(this.getSessionDir(this.mBackupSessionName, true), state);
+				
+				// if not recovering last session and there was an autosave session active, save it
+				if (/_sm_autosave_name:\"([^\"]+)\"/m.test(state))
+				{
+					var autosave_name = RegExp.$1;
+					if (autosave_name != "")
+					{
+						var autosave_state = this.nameState(this.readFile(file), autosave_name + 
+						                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=true");
+						this.writeFile(this.getSessionDir(this.makeFileName(autosave_name), false), autosave_state);
+						if (!this.getPref("_recovering")) this.setPref("_autosave_name", autosave_name);
+					}
+				}
+				// crashed before preferences were saved so delete the _autosave_name preference
+				else this.delPref("_autosave_name");
 			}
 		};
 		

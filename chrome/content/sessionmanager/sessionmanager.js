@@ -8,10 +8,10 @@
 	mIOService: Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabopenclose", "browser:purge-session-history", 
-	             "quit-application-granted"],
+	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabopenclose", "browser:purge-session-history"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
+	mAutoSaveSessionName: "autosave.session",
 	mPromptSessionName: "?",
 	mSessionExt: ".session",
 
@@ -51,7 +51,10 @@
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.addObserver(this, aTopic, false);
 		}, this);
+		this.mObserverService.addObserver(this, "quit-application", false);
+		this.mObserverService.addObserver(this, "quit-application-granted", false);
 		
+		this.mPref_autosave_session = this.getPref("autosave_session", true);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
 		this.mPref_max_backup_keep = this.getPref("max_backup_keep", 0);
 		this.mPref_max_closed_undo = this.getPref("max_closed_undo", 10);
@@ -64,17 +67,13 @@
 		this.mPref_session_list_order = this.getPref("session_list_order", 1);
 		this.mPref_submenus = this.getPref("submenus", false);
 		this.mPref__running = this.getPref("_running", false);
-		this.mPref__title = this.getPref("_title", "");
+		this.mPref__autosave_name = this.getPref("_autosave_name", "");
 		this.mPrefBranch.addObserver("", this, false);
 		this.mPrefBranch2.addObserver("page", this, false);
 		this.mPrefBranch3.addObserver("postdata", this, false);
-
+		
 		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
-		
-		gBrowser.addEventListener("DOMTitleChanged", this.onTitleChange, false);
-		gBrowser.tabContainer.addEventListener("TabSelect", this.onTitleChange, false);
-
 		
 		// Save browser.sessionstore.postdata value and restore it if changed at startup, 
 		// which can change when TMP is installed
@@ -96,8 +95,10 @@
 		}
 		this.mFullyLoaded = true;
 		
-		// update current title
-		this.onTitleChange();
+		// Add sessionname to title when browser updates titlebar. Need to hook browser since 
+		// DOMTitleChanged doesn't fire every time the title changes in the titlebar.
+		eval("gBrowser.updateTitlebar = " + gBrowser.updateTitlebar.toString().replace("this.ownerDocument.title = newTitle;", "$&gSessionManager.updateTitlebar();"));
+		gBrowser.updateTitlebar();
 
 		// Workaround for bug 366986
 		// TabClose event fires too late to use SetTabValue to save the "image" attribute value and have it be saved by SessionStore
@@ -121,6 +122,9 @@
 		// where the user disabled option to prompt before clearing data 
 		var cmd = document.getElementById("Tools:Sanitize");
 		if (cmd) cmd.setAttribute("oncommand", cmd.getAttribute("oncommand") + " gSessionManager.tryToSanitize();");
+		
+		// set autosave_name window value (used on browser crash)
+		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);
 	},
 
 	onUnload_proxy: function()
@@ -141,30 +145,17 @@
 		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
 		
-		gBrowser.removeEventListener("DOMTitleChanged", this.onTitleChange, false);
-		gBrowser.tabContainer.removeEventListener("TabSelect", this.onTitleChange, false);
-		
-		if (this.mPref__running && this.getBrowserWindows().length == 0)
-		{
-			this._string_preserve_session = this._string("preserve_session");
-			this._string_backup_session = this._string("backup_session");
-			this._string_old_backup_session = this._string("old_backup_session");
-			this._string_prompt_not_again = this._string("prompt_not_again");
-			
-			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
-			this.mBundle = null;
-			
-			this.shutDown();
-		}
-		
 		this.mBundle = null;
 		this.mFullyLoaded = false;
 
 //		Uncomment the following when bug 360408 is fixed.
-//		this.mSessionStore.setWindowValue(window, "already_restored", "")
-//		var state = this.getSessionState(null, true);
-//		this.appendClosedWindow(state);
-//		this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", state);
+//      if (this.mPref__running && this.getBrowserWindows().length != 0)
+//		{
+//			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
+//			var state = this.getSessionState(null, true);
+//			this.appendClosedWindow(state);
+//			this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", state);
+//		}
 	},
 
 	observe: function(aSubject, aTopic, aData)
@@ -172,10 +163,6 @@
 		switch (aTopic)
 		{
 		case "sessionmanager:tabopenclose":
-			if (aData == "tabclose")
-			{
-				this.mSessionStore.setWindowValue(window, "already_restored", true);
-			}
 			this.updateToolbarButton();
 			break;
 		case "sessionmanager:windowclosed":
@@ -184,6 +171,7 @@
 		case "browser:purge-session-history":
 			this.clearUndoData("all");
 			this.delFile(this.getSessionDir(this.mBackupSessionName));
+			this.delFile(this.getSessionDir(this.mAutoSaveSessionName));
 			break;
 		case "nsPref:changed":
 			this["mPref_" + aData] = this.getPref(aData);
@@ -213,12 +201,23 @@
 			case "resume_session":
 				this.setResumeCurrent(this.mPref_resume_session == this.mBackupSessionName);
 				break;
-			case "_title":
-				this.onTitleChange();
+			case "_autosave_name":
+				this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);
+				gBrowser.updateTitlebar();
 				break;
 			}
 			break;
+		case "quit-application":
+ 			if (aData == "restart") 
+ 			{
+	 			// Not all the windows will set the shutdown_session variable correctly since
+	 			// one window might clear the autosave_name before another window reads it, therefore
+	 			// only set the preference if the shutdown_session is actually set to something.
+	 			if (this.shutdown_session != "") this.setPref("_autosave_name", this.shutdown_session);
+ 			}
+ 			break;
 		case "quit-application-granted":
+			this.shutdown_session = this.mPref__autosave_name;
 			if (this.getPref("_running"))
 			{
 				this.shutDown();
@@ -236,9 +235,7 @@
 	{
 		var browser = this.getBrowserForTab(aEvent.originalTarget);
 
-		gSessionManager.onTabRestored();
 		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
-				
 		if (gSessionManager.mPref_reload && gSessionManager._allowReload && !browser.__SS_data && !gSessionManager.mIOService.offline)
 		{
 			var nsIWebNavigation = Components.interfaces.nsIWebNavigation;
@@ -249,15 +246,6 @@
 			}
 			catch (ex) { }
 			webNav.reload(nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE);
-		}
-	},
-
-	onTabRestored: function()
-	{
-		if (!this.mPref_save_closed_tabs && !this.mSessionStore.getWindowValue(window, "already_restored"))
-		{
-			this.mSessionStore.setWindowValue(window, "already_restored", true)
-			this.mSessionStore.setWindowState(window, this.stripTabUndoData(this.mSessionStore.getWindowState(window)), true);
 		}
 	},
 
@@ -275,20 +263,21 @@
 
 	onWindowClose: function()
 	{
-		this.mSessionStore.setWindowValue(window, "already_restored", "")
-		var state = this.getSessionState(null, true);
-		this.appendClosedWindow(state);
-		this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", state);
+		if (this.mPref__running && this.getBrowserWindows().length != 0)
+		{
+			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
+			var state = this.getSessionState(null, true);
+			this.appendClosedWindow(state);
+			this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", state);
+		}
 	},
 	
 	// Put current session name in browser titlebar
-	onTitleChange: function()
+	updateTitlebar: function()
 	{
-		if (gSessionManager.mPref__title == "") {
-			gBrowser.updateTitlebar()
-		}
-		else if (gBrowser.ownerDocument.title.indexOf(gSessionManager.mPref__title) == -1) {
-			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title + gSessionManager.mPref__title;
+		var titleName = " - (" + this._string("current_session2") + " " + gSessionManager.mPref__autosave_name + ")";
+		if (this.mPref__autosave_name != "" && gBrowser.ownerDocument.title.indexOf(titleName) == -1) {
+			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title + titleName;
 		}
 	},
 
@@ -301,13 +290,14 @@
 		var separator = get_("separator");
 		var startSep = get_("start-separator");
 		var closer = get_("closer");
+		var abandon = get_("abandon");
 		
 		for (var item = startSep.nextSibling; item != separator; item = startSep.nextSibling)
 		{
 			aPopup.removeChild(item);
 		}
 		
-		closer.hidden = (this.mPref__title=="");
+		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
 		
 		var sessions = this.getSessions();
 		sessions.forEach(function(aSession, aIx) {
@@ -317,8 +307,10 @@
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && event.ctrlKey)?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("accesskey", key);
+			if (aSession.autosave) menuitem.setAttribute("style", "font-weight: bold;");
+			if (aSession.name == this.mPref__autosave_name) menuitem.setAttribute("disabled", true);
 			aPopup.insertBefore(menuitem, separator);
-		});
+		}, this);
 		separator.hidden = (sessions.length == 0);
 		this.setDisabled(separator.nextSibling, separator.hidden);
 		this.setDisabled(separator.nextSibling.nextSibling, separator.hidden);
@@ -370,7 +362,8 @@
 
 	save: function(aName, aFileName, aOneWindow)
 	{
-		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString() };
+		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString(), 
+		               autoSaveable : true };
 		if (!aName)
 		{
 			if (!this.prompt(this._string("save2_session"), this._string("save_" + ((aOneWindow)?"window":"session") + "_ok"), values, this._string("save_" + ((aOneWindow)?"window":"session")), this._string("save_session_ok2")))
@@ -385,12 +378,16 @@
 			var file = this.getSessionDir(aFileName || this.makeFileName(aName), !aFileName);
 			try
 			{
-				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.mPref_save_closed_tabs < 2));
+				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.mPref_save_closed_tabs < 2, values.autoSave));
 			}
 			catch (ex)
 			{
 				this.ioError(ex);
 			}
+		}
+		if (values.autoSave)
+		{
+			this.setPref("_autosave_name",aName);
 		}
 	},
 
@@ -401,8 +398,34 @@
 	
 	closeSession: function()
 	{
-		this.setPref("_title","");
-		this.onTitleChange();
+		var name = this.mPref__autosave_name;
+		if (name != "")
+		{
+			var file = this.getSessionDir(this.makeFileName(name));
+			try
+			{
+				this.writeFile(file, this.getSessionState(name, false, this.mPref_save_closed_tabs < 2, true));
+			}
+			catch (ex)
+			{
+				this.ioError(ex);
+			}
+		
+			this.setPref("_autosave_name","");
+		}
+	},
+	
+	abandonSession: function()
+	{
+		var dontPrompt = { value: false };
+		if (this.getPref("no_abandon_prompt") || this.mPromptService.confirmEx(null, this.mTitle, this._string("abandom_prompt"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
+		{
+			this.setPref("_autosave_name","");
+			if (dontPrompt.value)
+			{
+				this.setPref("no_abandon_prompt", true);
+			}
+		}
 	},
 
 	load: function(aFileName, aMode)
@@ -414,10 +437,28 @@
 			return;
 		}
 
-		if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(state))
+		if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|true))?/m.test(state))
 		{
-			this.setPref("_title", " - (" + RegExp.$1 + ")");
-			state = state.split("\n")[3];
+			var name = RegExp.$1;
+			var autosave = RegExp.$3;
+			state = state.split("\n")[4];
+			
+			// close current autosave session if open
+			// if shift or contrl key held down, don't close current session
+			if (this.mPref__autosave_name != "" && aMode != "newwindow" && aMode != "append") 
+			{
+				this.closeSession();
+			}
+			else 
+			{
+				if (this.mPref_autosave_session) this.autoSaveCurrentSession();
+			}
+			
+			// If this is an autosave session, keep track of it if there is not already an active session
+			if (autosave == "true" && this.mPref__autosave_name=="") 
+			{
+				this.setPref("_autosave_name", name);
+			}
 		}
 		
 		var newWindow = false;
@@ -448,17 +489,10 @@
 		{
 			newWindow = true;
 		}
-		else
-		{
-			this.getBrowserWindows().forEach(function(aWindow) {
-				if (aWindow != window) { aWindow.close(); }
-			});
-			this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", this.getSessionState(null, true));
-		}
-		
+
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, stripClosedTabs);
+			gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, stripClosedTabs, (overwriteTabs && !newWindow));
 			if (tabsToMove)
 			{
 				var endPos = gBrowser.mTabs.length - 1;
@@ -493,11 +527,17 @@
 			this.writeFile(newFile || file, this.nameState(this.readSessionFile(file), values.text));
 			if (newFile)
 			{
-				if (this.mPref_resume_session == file.leafName && this.mPref_resume_session != this.mBackupSessionName)
+				if (this.mPref_resume_session == file.leafName && this.mPref_resume_session != this.mBackupSessionName &&
+				    this.mPref_resume_session != this.mAutoSaveSessionName)
 				{
 					this.setPref("resume_session", filename);
 				}
 				this.delFile(file);
+			}
+			// Renamed active session
+			if ((this.mPref__autosave_name + this.mSessionExt) == values.name)
+			{
+				this.setPref("_autosave_name", values.text);
 			}
 		}
 		catch (ex)
@@ -510,7 +550,7 @@
 	{
 		if (!aSession)
 		{
-			aSession = this.selectSession(this._string("remove_session"), this._string("remove_session_ok"), { multiSelect: true });
+			aSession = this.selectSession(this._string("remove_session"), this._string("remove_session_ok"), { multiSelect: true, remove: true });
 		}
 		if (aSession)
 		{
@@ -591,7 +631,7 @@
 		var closedTabs = this.mSessionStore.getClosedTabData(window);
 		var mClosedTabs = [];
 		closedTabs = eval(closedTabs);
-		this.fixBug350558_ClosedTabs(closedTabs);
+		this.fixBug350558(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
 				                url:aValue.state.entries[aValue.state.entries.length - 1].url }
@@ -663,12 +703,8 @@
 			{
 				this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", this.getSessionState(null, true));
 			}
-			else if (aMode == "append")
-			{
-				state = this.stripTabUndoData(state);
-			}
 			
-			this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append", false, (this.mPref_save_closed_tabs < 2));
+			this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append", false);
 		}
 	},
 
@@ -697,14 +733,15 @@
 		params.SetString(4, aTextLabel || "");
 		params.SetString(5, aAcceptExistingLabel || "");
 		params.SetString(6, aValues.text || "");
-		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | ((aValues.allowNamedReplace)?256:0));
+		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
+		                  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.allowNamedReplace)?256:0));
 		
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, (this.mFullyLoaded)?window:null);
 		
 		aValues.name = params.GetString(3);
 		aValues.text = params.GetString(6);
-		aValues.ignore = params.GetInt(1);
-		
+		aValues.ignore = (params.GetInt(1) && 4)?1:0;
+		aValues.autoSave = (params.GetInt(1) && 8)?1:0;
 		return !params.GetInt(0);
 	},
 
@@ -833,14 +870,15 @@
 			var cached = this.mSessionCache[fileName] || null;
 			if (cached && cached.time == file.lastModifiedTime)
 			{
-				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp });
+				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave });
 				continue;
 			}
-			if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(this.readSessionFile(file)))
+			if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|true))?/m.test(this.readSessionFile(file)))
 			{
 				var timestamp = parseInt(RegExp.$2) || file.lastModifiedTime;
-				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp });
-				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, time: file.lastModifiedTime };
+				var autosave = (RegExp.$3 == "true");
+				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: autosave });
+				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: autosave, time: file.lastModifiedTime };
 			}
 		}
 		
@@ -917,17 +955,36 @@
 		{
 			this.clearUndoData("window", true);
 		}
+		
+		// save the currently opened session (if there is one)
+		this.closeSession();
+
 		this.backupCurrentSession();
-		this.delPref("_title");
 		this.delPref("_running");
+		this.delPref("_autosave_name");
 		this.mPref__running = false;
 
+		this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
+		
 		// Cleanup left over files from Crash Recovery
 		if (this.getPref("extensions.crashrecovery.resume_session_once", false, true))
 		{	
 			this.delFile(this.getProfileFile("crashrecovery.dat"), true);
 			this.delFile(this.getProfileFile("crashrecovery.bak"), true);
 			this.delPref("extensions.crashrecovery.resume_session_once", true);
+		}
+	},
+	
+	autoSaveCurrentSession: function()
+	{
+		try
+		{
+			var state = this.getSessionState(this._string("autosave_session"));
+			this.writeFile(this.getSessionDir(this.mAutoSaveSessionName), state);
+		}
+		catch (ex)
+		{
+			this.ioError(ex);
 		}
 	},
 
@@ -937,7 +994,7 @@
 		if (backup == 2 && !this.getPref("browser.sessionstore.resume_session_once", false, true))
 		{
 			var dontPrompt = { value: false };
-			backup = (this.mPromptService.confirmEx(null, this.mTitle, this._string_preserve_session || this._string("preserve_session"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string_prompt_not_again || this._string("prompt_not_again"), dontPrompt) == 1)?-1:1;
+			backup = (this.mPromptService.confirmEx(null, this.mTitle, this._string("preserve_session"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 1)?-1:1;
 			if (dontPrompt.value)
 			{
 				this.setPref("backup_session", (backup == -1)?0:1);
@@ -948,7 +1005,7 @@
 			this.keepOldBackups();
 			try
 			{
-				var state = this.getSessionState(this._string_backup_session || this._string("backup_session"));
+				var state = this.getSessionState(this._string("backup_session"));
 				this.writeFile(this.getSessionDir(this.mBackupSessionName), state);
 			}
 			catch (ex)
@@ -969,7 +1026,7 @@
 		if (backup.exists() && this.mPref_max_backup_keep)
 		{
 			var oldBackup = this.getSessionDir(this.mBackupSessionName, true);
-			var name = this.getFormattedName("", new Date(), this._string_old_backup_session || this._string("old_backup_session"));
+			var name = this.getFormattedName("", new Date(), this._string("old_backup_session"));
 			this.writeFile(oldBackup, this.nameState(this.readSessionFile(backup), name));
 		}
 		
@@ -1000,6 +1057,16 @@
 			state = state.substring(1,state.length-1);
 			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\n" + state;
 			this.writeFile(aFile, state);
+		}
+		// pre autosave
+		else if ((/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?/m.test(state)) &&
+		         !(/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?autosave=(false|true)\n/m.test(state)))
+		{
+			var match = /\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)/m.exec(state);
+			if (match.index != null) {
+				state = state.substring(0, match[0].length-1) + "\nautosave=false" + state.substring(match[0].length,state.length);
+				this.writeFile(aFile, state);
+			}
 		}
 		
 		return state;
@@ -1306,9 +1373,12 @@
 	{
 		var recovering = this.getPref("_recovering");
 		var recoverOnly = recovering || this.mPref__running || this.doResumeCurrent() || this.getPref("browser.sessionstore.resume_session_once", false, true) || (window.arguments[0] == null);
+		// handle crash where user chose a specific session
 		if (recovering)
 		{
 			this.delPref("_recovering");
+			this.delPref("_autosave_name");   // if user chooses another session, forget current session
+			this.mPref__autosave_name = "";
 			this.load(recovering, "startup");
 		}
 		else if (!recoverOnly && this.mPref_resume_session && this.getSessions().length > 0)
@@ -1324,8 +1394,12 @@
 				this.setPref("resume_session", session || "");
 			}
 		}
+		// handle browser reload with same session
 		else if (recoverOnly) {
 			this._allowReload = true;
+			setTimeout(function() {
+				gSessionManager.mSessionStore.setWindowValue(window,"_sm_autosave_name",gSessionManager.mPref__autosave_name);			
+			}, 100);
 		}
 	},
 
@@ -1372,20 +1446,14 @@
 
 /* ........ Auxiliary Functions .............. */
 	// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
-	fixBug350558: function(aState)
+	fixBug350558: function (aClosedTabs)
 	{
-		aState = eval("(" + aState + ")")
-		aState.windows.forEach(function(aValue, aIndex) {
-			if (aValue._closedTabs) {
-				this.fixBug350558_ClosedTabs(aValue._closedTabs);
-			}
-		}, this);
-		aState = aState.toSource();
-		return aState;
-	},
-	
-	fixBug350558_ClosedTabs: function (aClosedTabs)
-	{
+		// if bug fixed just return
+		if ((aClosedTabs.length == 0) || (aClosedTabs[0].state.entries instanceof Array))
+		{
+			return;
+		}
+		
 		aClosedTabs.forEach(function(bValue, bIndex) {
 			var oldEntries = bValue.state.entries;
 			bValue.state.entries = [];
@@ -1398,20 +1466,17 @@
 		}, this);
 	},
 
-	getSessionState: function(aName, aOneWindow, aNoUndoData)
+	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave)
 	{
 		var state = (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
 		
-		if (aNoUndoData)
-		{
-			state = this.stripTabUndoData(state);
-		}
-		else state = this.fixBug350558(state);
+		state = this.handleTabUndoData(state, aNoUndoData);
 		
-		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
+		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
+		        "\nautosave=" + ((aAutoSave)?"true":"false") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs)
+	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession)
 	{
 		if (!aWindow)
 		{
@@ -1425,18 +1490,20 @@
 			return;
 		}
 
-		if (aStripClosedTabs)
-		{
-			aState = this.stripTabUndoData(aState);
-		}
-		else aState = this.fixBug350558(aState);
-
+		aState = this.handleTabUndoData(aState, aStripClosedTabs);
+		
 		this._allowReload = aAllowReload;
-		this._ignoreRemovedTabs = true;
-		this.mSessionStore.setWindowState(aWindow || window, aState, aReplaceTabs || false);
-		this.mSessionStore.setWindowValue(window, "already_restored", true)
-		this._ignoreRemovedTabs = false;
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
+		if (aEntireSession)
+		{
+			this.mSessionStore.setBrowserState(aState);
+			this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);			
+		}
+		else
+		{
+			this.mSessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
+			this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);			
+			gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
+		}
 	},
 
 	nameState: function(aState, aName)
@@ -1447,11 +1514,18 @@
 		}
 		return aState.replace(/^(\[SessionManager\])(?:\nname=.*)?/m, function($0, $1) { return $1 + "\nname=" + aName; });
 	},
-
-	stripTabUndoData: function(aState)
+	
+	handleTabUndoData: function(aState, aStrip)
 	{
 		aState = eval("(" + aState + ")")
-		aState.windows[0]._closedTabs = [];
+		aState.windows.forEach(function(aWindow) {
+			if (aStrip) aWindow._closedTabs = [];
+			else if (aWindow._closedTabs) 
+			{
+				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
+				this.fixBug350558(aWindow._closedTabs);
+			}
+		}, this);
 		return aState.toSource();
 	},
 
