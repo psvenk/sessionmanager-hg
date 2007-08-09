@@ -16,12 +16,12 @@
  * The Original Code is the Session Manager extension.
  *
  * The Initial Developer of the Original Code is
- * zeniko (http://sessionmanager.mozdev.org/).
- * Portions created by the Initial Developer are Copyright (C) 2006
+ * Morac (http://sessionmanager.mozdev.org/).
+ * Portions created by the Initial Developer are Copyright (C) 2007
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
- * * Morac (Converted to use FF 2.0 SessionStore)
+ * * Morac (Original Author)
  * * Danil Ivanov (Cache Fixer)
  * * dougeeebear (Session Manager icon)
  *   &

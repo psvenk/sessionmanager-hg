@@ -16,8 +16,8 @@
     <!-- Front End MetaData -->
     <em:name>Session Manager</em:name>
     <em:description>Saves and restores the state of all windows.</em:description>
-    <em:creator>zeniko</em:creator>
-    <em:contributor>Morac (Converted to use FF 2.0 SessionStore)</em:contributor>
+    <em:creator>Morac</em:creator>
+    <em:contributor>zeniko (Original Author)</em:contributor>
     <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
     <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
     <em:contributor>&amp;</em:contributor>
