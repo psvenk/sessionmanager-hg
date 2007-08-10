@@ -1448,22 +1448,17 @@
 	// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
 	fixBug350558: function (aClosedTabs)
 	{
-		// if bug fixed just return
-		if ((aClosedTabs.length == 0) || (aClosedTabs[0].state.entries instanceof Array))
-		{
-			return;
-		}
-		
 		aClosedTabs.forEach(function(bValue, bIndex) {
-			var oldEntries = bValue.state.entries;
-			bValue.state.entries = [];
-			try {
+			// If "fake" array exists, make it a real one
+			if (!(bValue.state.entries instanceof Array))
+			{
+				var oldEntries = bValue.state.entries;
+				bValue.state.entries = [];
 				for (var i = 0; oldEntries[i]; i++) {
 					bValue.state.entries[i] = oldEntries[i];
 				}
 			}
-			catch (ex) {}
-		}, this);
+		});
 	},
 
 	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave)
