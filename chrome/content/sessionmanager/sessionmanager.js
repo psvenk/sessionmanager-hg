@@ -498,16 +498,6 @@
 				var endPos = gBrowser.mTabs.length - 1;
 				tabsToMove.forEach(function(aTab) { gBrowser.moveTabTo(aTab, endPos); });
 			}
-			else if (!overwriteTabs && gBrowser.mTabs[tabcount])
-			{
-				if (/^\[Window1\]\n(?:(?!\[).*\n)*selected=(\d+)/m.test(state))
-				{
-					tabcount += parseInt(RegExp.$1) - 1;
-				}
-				setTimeout(function(aTab) {
-					gBrowser.selectedTab = aTab;
-				}, 100, gBrowser.mTabs[tabcount]);
-			}
 		}, 0);
 	},
 
@@ -1491,14 +1481,14 @@
 		if (aEntireSession)
 		{
 			this.mSessionStore.setBrowserState(aState);
-			this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);			
 		}
 		else
 		{
+			if (!aReplaceTabs) aState = this.makeOneWindow(aState);
 			this.mSessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
-			this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);			
-			gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
 		}
+		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);			
+		this.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
 	},
 
 	nameState: function(aState, aName)
@@ -1508,6 +1498,27 @@
 			return "[SessionManager]\nname=" + aName + "\n" + aState;
 		}
 		return aState.replace(/^(\[SessionManager\])(?:\nname=.*)?/m, function($0, $1) { return $1 + "\nname=" + aName; });
+	},
+	
+	makeOneWindow: function(aState)
+	{
+		aState = eval("(" + aState + ")")
+		if (aState.windows.length > 1)
+		{
+			// take off first window
+			var firstWindow = aState.windows.shift();
+			// Move tabs to first window
+			aState.windows.forEach(function(aWindow) {
+				while (aWindow.tabs.length > 0)
+				{
+					this.tabs.push(aWindow.tabs.shift());
+				}
+			}, firstWindow);
+			// Remove all but first window
+			aState.windows = [];
+			aState.windows[0] = firstWindow;
+		}
+		return aState.toSource();
 	},
 	
 	handleTabUndoData: function(aState, aStrip)
