@@ -70,19 +70,9 @@
 		this.mPref__autosave_name = this.getPref("_autosave_name", "");
 		this.mPrefBranch.addObserver("", this, false);
 		this.mPrefBranch2.addObserver("page", this, false);
-		this.mPrefBranch3.addObserver("postdata", this, false);
 		
 		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
-		
-		// Save browser.sessionstore.postdata value and restore it if changed at startup, 
-		// which can change when TMP is installed
-		if (this.getPref("postdata")) {
-			this.setPref("browser.sessionstore.postdata",this.getPref("postdata", -1), true);
-		}
-		else {
-			this.setPref("postdata",this.getPref("browser.sessionstore.postdata", -1, true));
-		}
 		
 		this.synchStartup();
 		this.recoverSession();
@@ -140,7 +130,6 @@
 		}, this);
 		this.mPrefBranch.removeObserver("", this);
 		this.mPrefBranch2.removeObserver("page", this);
-		this.mPrefBranch3.removeObserver("postdata", this, false);
 		
 		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
@@ -194,9 +183,6 @@
 				break;
 			case "page":
 				this.synchStartup();
-				break;
-			case "postdata":
-				this.setPref("postdata",this.getPref("browser.sessionstore.postdata", -1, true));
 				break;
 			case "resume_session":
 				this.setResumeCurrent(this.mPref_resume_session == this.mBackupSessionName);
