@@ -14,6 +14,7 @@
 	mAutoSaveSessionName: "autosave.session",
 	mPromptSessionName: "?",
 	mSessionExt: ".session",
+	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
 
 	mSessionCache: {},
 
@@ -115,6 +116,24 @@
 		
 		// set autosave_name window value (used on browser crash)
 		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);
+		
+		// One time message on update
+		if (this.getPref("version", "") != "0.6")
+		{
+			this.setPref("version", "0.6");
+			setTimeout(function() {
+				var tBrowser = top.document.getElementById("content");
+				if (tBrowser.mCurrentTab.linkedBrowser && 
+	                (tBrowser.mCurrentTab.linkedBrowser.contentDocument.location == "about:blank"))
+    	        {
+        	    	tBrowser.loadURI(gSessionManager.mFirstUrl);
+	            }
+    	        else
+        		{
+        			tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
+        		}
+        	},1000);
+		}
 	},
 
 	onUnload_proxy: function()
