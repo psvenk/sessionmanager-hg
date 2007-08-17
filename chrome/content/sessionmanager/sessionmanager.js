@@ -6,6 +6,7 @@
 	mPromptService: Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService),
 	mProfileDirectory: Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile),
 	mIOService: Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService),
+	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mComponents: Components,
 
 	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabopenclose", "browser:purge-session-history"],
@@ -57,6 +58,7 @@
 		
 		this.mPref_autosave_session = this.getPref("autosave_session", true);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
+		this.mPref_encrypt_sessions = this.getPref("encrypt_sessions", false);
 		this.mPref_max_backup_keep = this.getPref("max_backup_keep", 0);
 		this.mPref_max_closed_undo = this.getPref("max_closed_undo", 10);
 		this.mPref_name_format = this.getPref("name_format", "%40t-%d");
@@ -198,6 +200,9 @@
 			
 			switch (aData)
 			{
+			case "encrypt_sessions":
+				this.encryptionChange();
+				break;
 			case "max_closed_undo":
 				if (this.mPref_max_closed_undo == 0)
 				{
@@ -909,10 +914,14 @@
 	getClosedWindows: function()
 	{
 		var data = this.readFile(this.getProfileFile(this.mClosedWindowFile));
-		return (data)?data.split("\n\n").map(function(aEntry) {
-			var parts = aEntry.split("\n");
-			return { name: parts.shift(), state: parts.join("\n") };
-		}):[];
+		if (data && data.indexOf("[SessionManager\]\n") == 0) {
+			data = data.substring("[SessionManager\]\n".length);
+			return (data)?data.split("\n\n").map(function(aEntry) {
+				var parts = aEntry.split("\n");
+				return { name: parts.shift(), state: parts.join("\n") };
+			}):[];
+		}
+		return [];
 	},
 
 	storeClosedWindows: function(aList)
@@ -920,7 +929,7 @@
 		var file = this.getProfileFile(this.mClosedWindowFile);
 		if (aList.length > 0)
 		{
-			this.writeFile(file, aList.map(function(aEntry) {
+			this.writeFile(file, "[SessionManager]\n" + aList.map(function(aEntry) {
 				return aEntry.name + "\n" + aEntry.state;
 			}).join("\n\n"));
 		}
@@ -969,6 +978,7 @@
 		this.backupCurrentSession();
 		this.delPref("_running");
 		this.delPref("_autosave_name");
+		this.delPref("_encrypted");
 		this.mPref__running = false;
 
 		this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
@@ -1034,7 +1044,8 @@
 		{
 			var oldBackup = this.getSessionDir(this.mBackupSessionName, true);
 			var name = this.getFormattedName("", new Date(), this._string_old_backup_session || this._string("old_backup_session"));
-			this.writeFile(oldBackup, this.nameState(this.readSessionFile(backup), name));
+			var state = this.readSessionFile(backup);
+			if (state) this.writeFile(oldBackup, this.nameState(state, name));
 		}
 		
 		if (this.mPref_max_backup_keep != -1)
@@ -1070,13 +1081,29 @@
 		         (!/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?autosave=(false|true)\n/m.test(state)))
 		{
 			var match = /\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)/m.exec(state);
-			if (match.index != null) {
+			if (match && match.index != null) {
 				state = state.substring(0, match[0].length-1) + "\nautosave=false" + state.substring(match[0].length,state.length);
 				this.writeFile(aFile, state);
 			}
 		}
 		
 		return state;
+	},
+	
+	encryptionChange: function()
+	{
+		if (this.getPref("_encrypted","") != this.mPref_encrypt_sessions) {
+			this.setPref("_encrypted",this.mPref_encrypt_sessions);
+			var sessions = this.getSessions();
+			sessions.forEach(function(aSession) {
+				var fileName = this.getSessionDir(aSession.fileName);
+				var state = this.readFile(fileName);
+				if (state) this.writeFile(fileName, state);
+			}, this);
+		
+			var data = this.readFile(this.getProfileFile(this.mClosedWindowFile));
+			if (data) this.writeFile(this.getProfileFile(this.mClosedWindowFile), data);
+		}
 	},
 
 	readFile: function(aFile)
@@ -1096,7 +1123,13 @@
 			}
 			cvstream.close();
 			
-			return content.replace(/\r\n?/g, "\n");
+			content = content.replace(/\r\n?/g, "\n");
+			// decrypt file if encrypted
+			if (!/^\[SessionManager\]/m.test(content))
+			{
+				content = this.mSecretDecoderRing.decryptString(content);
+			}
+			return content;
 		}
 		catch (ex) { }
 		
@@ -1105,6 +1138,11 @@
 
 	writeFile: function(aFile, aData)
 	{
+		//encrypt session file
+		if (this.mPref_encrypt_sessions) {
+			aData = this.mSecretDecoderRing.encryptString(aData);
+		}
+		
 		var stream = this.mComponents.classes["@mozilla.org/network/file-output-stream;1"].createInstance(this.mComponents.interfaces.nsIFileOutputStream);
 		stream.init(aFile, 0x02 | 0x08 | 0x20, 0600, 0);
 		var cvstream = this.mComponents.classes["@mozilla.org/intl/converter-output-stream;1"].createInstance(this.mComponents.interfaces.nsIConverterOutputStream);
@@ -1379,7 +1417,7 @@
 	recoverSession: function()
 	{
 		var recovering = this.getPref("_recovering");
-		var recoverOnly = recovering || this.mPref__running || this.doResumeCurrent() || this.getPref("browser.sessionstore.resume_session_once", false, true) || (window.arguments[0] == null);
+		var recoverOnly = recovering || this.mPref__running || this.doResumeCurrent() || this.getPref("browser.sessionstore.resume_session_once", false, true) || !window.arguments || (window.arguments[0] == null);
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
