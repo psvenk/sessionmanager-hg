@@ -153,6 +153,18 @@
 		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
 		
+		if (this.mPref__running && this.getBrowserWindows().length == 0)
+		{
+			this._string_preserve_session = this._string("preserve_session");
+			this._string_backup_session = this._string("backup_session");
+			this._string_old_backup_session = this._string("old_backup_session");
+			this._string_prompt_not_again = this._string("prompt_not_again");
+			
+			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
+			this.mBundle = null;
+			
+			this.shutDown();
+		}
 		this.mBundle = null;
 		this.mFullyLoaded = false;
 
@@ -989,7 +1001,7 @@
 		if (backup == 2 && !this.getPref("browser.sessionstore.resume_session_once", false, true))
 		{
 			var dontPrompt = { value: false };
-			backup = (this.mPromptService.confirmEx(null, this.mTitle, this._string("preserve_session"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 1)?-1:1;
+			backup = (this.mPromptService.confirmEx(null, this.mTitle, this._string_preserve_session || this._string("preserve_session"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string_prompt_not_again || this._string("prompt_not_again"), dontPrompt) == 1)?-1:1;
 			if (dontPrompt.value)
 			{
 				this.setPref("backup_session", (backup == -1)?0:1);
@@ -1000,7 +1012,7 @@
 			this.keepOldBackups();
 			try
 			{
-				var state = this.getSessionState(this._string("backup_session"));
+				var state = this.getSessionState(this._string_backup_session || this._string("backup_session"));
 				this.writeFile(this.getSessionDir(this.mBackupSessionName), state);
 			}
 			catch (ex)
@@ -1021,7 +1033,7 @@
 		if (backup.exists() && this.mPref_max_backup_keep)
 		{
 			var oldBackup = this.getSessionDir(this.mBackupSessionName, true);
-			var name = this.getFormattedName("", new Date(), this._string("old_backup_session"));
+			var name = this.getFormattedName("", new Date(), this._string_old_backup_session || this._string("old_backup_session"));
 			this.writeFile(oldBackup, this.nameState(this.readSessionFile(backup), name));
 		}
 		
