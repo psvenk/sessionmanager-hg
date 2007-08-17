@@ -5,6 +5,7 @@ pref("browser.sessionstore.restore_prompt_uri", "chrome://sessionmanager/content
 pref("extensions.sessionmanager.autosave_session", true);
 pref("extensions.sessionmanager.backup_session", 1);
 pref("extensions.sessionmanager.disable_cache_fixer", false);
+pref("extensions.sessionmanager.encrypt_sessions", false);
 pref("extensions.sessionmanager.max_backup_keep", 2);
 pref("extensions.sessionmanager.max_closed_undo", 10);
 pref("extensions.sessionmanager.name_format", "%40t-%d");
