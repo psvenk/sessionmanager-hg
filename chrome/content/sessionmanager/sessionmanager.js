@@ -1067,7 +1067,7 @@
 		}
 		// pre autosave
 		else if ((/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?/m.test(state)) &&
-		         !(/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?autosave=(false|true)\n/m.test(state)))
+		         (!/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?autosave=(false|true)\n/m.test(state)))
 		{
 			var match = /\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)/m.exec(state);
 			if (match.index != null) {
