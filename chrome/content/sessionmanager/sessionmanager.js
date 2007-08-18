@@ -9,7 +9,7 @@
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowclosed", "sessionmanager:tabopenclose", "browser:purge-session-history"],
+	mObserving: ["sessionmanager:windowtabopenclose", "browser:purge-session-history"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mAutoSaveSessionName: "autosave.session",
@@ -18,6 +18,7 @@
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
 
 	mSessionCache: {},
+	mClosedWindowsCache: { timestamp: 0, data: null },
 
 /* ........ Listeners / Observers.............. */
 
@@ -176,7 +177,7 @@
 //			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
 //			var state = this.getSessionState(null, true);
 //			this.appendClosedWindow(state);
-//			this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", state);
+//			this.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", null);
 //		}
 	},
 
@@ -184,10 +185,7 @@
 	{
 		switch (aTopic)
 		{
-		case "sessionmanager:tabopenclose":
-			this.updateToolbarButton();
-			break;
-		case "sessionmanager:windowclosed":
+		case "sessionmanager:windowtabopenclose":
 			this.updateToolbarButton();
 			break;
 		case "browser:purge-session-history":
@@ -250,14 +248,14 @@
 
 	onTabClose_proxy: function(aEvent)
 	{
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", "tabclose");
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 	},
 
 	onTabRestored_proxy: function(aEvent)
 	{
 		var browser = this.getBrowserForTab(aEvent.originalTarget);
 
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 		if (gSessionManager.mPref_reload && gSessionManager._allowReload && !browser.__SS_data && !gSessionManager.mIOService.offline)
 		{
 			var nsIWebNavigation = Components.interfaces.nsIWebNavigation;
@@ -290,7 +288,7 @@
 			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
 			var state = this.getSessionState(null, true);
 			this.appendClosedWindow(state);
-			this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", state);
+			gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 		}
 	},
 	
@@ -514,11 +512,15 @@
 
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, stripClosedTabs, (overwriteTabs && !newWindow));
-			if (tabsToMove)
-			{
-				var endPos = gBrowser.mTabs.length - 1;
-				tabsToMove.forEach(function(aTab) { gBrowser.moveTabTo(aTab, endPos); });
+			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, stripClosedTabs, (overwriteTabs && !newWindow));
+			if (okay) {
+				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+
+				if (tabsToMove)
+				{
+					var endPos = gBrowser.mTabs.length - 1;
+					tabsToMove.forEach(function(aTab) { gBrowser.moveTabTo(aTab, endPos); });
+				}
 			}
 		}, 0);
 	},
@@ -702,7 +704,6 @@
 		if (closedWindows[aIx || 0])
 		{
 			var state = closedWindows.splice(aIx || 0, 1)[0].state;
-			this.storeClosedWindows(closedWindows);
 			
 			// gSingleWindowMode is set if Tab Mix Plus's single window mode is active
 			try
@@ -713,10 +714,14 @@
 
 			if (aMode == "overwrite")
 			{
-				this.mObserverService.notifyObservers(window, "sessionmanager:windowclosed", this.getSessionState(null, true));
+				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 			}
 			
-			this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append", false);
+			var okay = this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append", false);
+			if (okay) {
+				this.storeClosedWindows(closedWindows);
+				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+			}
 		}
 	},
 
@@ -727,9 +732,9 @@
 		this.setPref("browser.sessionstore.max_tabs_undo", 0, true);
 		this.setPref("browser.sessionstore.max_tabs_undo", max_tabs_undo, true);
 
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
-
 		this.clearUndoData("window");
+
+		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 	},
 /* ........ User Prompts .............. */
 
@@ -913,15 +918,19 @@
 
 	getClosedWindows: function()
 	{
-		var data = this.readFile(this.getProfileFile(this.mClosedWindowFile));
-		if (data && data.indexOf("[SessionManager\]\n") == 0) {
-			data = data.substring("[SessionManager\]\n".length);
-			return (data)?data.split("\n\n").map(function(aEntry) {
-				var parts = aEntry.split("\n");
-				return { name: parts.shift(), state: parts.join("\n") };
-			}):[];
+		// Use cached data unless file has changed or was deleted
+		var data = this.mClosedWindowsCache.data;
+		var file = this.getProfileFile(this.mClosedWindowFile);
+		if (!file.exists()) return [];
+		else if (file.lastModifiedTime > this.mClosedWindowsCache.timestamp) {
+			data = this.readFile(this.getProfileFile(this.mClosedWindowFile));
+			this.mClosedWindowsCache.data = data;
+			if (data) this.mClosedWindowsCache.timestamp = file.lastModifiedTime;
 		}
-		return [];
+		return (data)?data.split("\n\n").map(function(aEntry) {
+			var parts = aEntry.split("\n");
+			return { name: parts.shift(), state: parts.join("\n") };
+		}):[];
 	},
 
 	storeClosedWindows: function(aList)
@@ -929,13 +938,18 @@
 		var file = this.getProfileFile(this.mClosedWindowFile);
 		if (aList.length > 0)
 		{
-			this.writeFile(file, "[SessionManager]\n" + aList.map(function(aEntry) {
-				return aEntry.name + "\n" + aEntry.state;
-			}).join("\n\n"));
+			var data = aList.map(function(aEntry) {
+				return aEntry.name + "\n" + aEntry.state
+			}).join("\n\n");
+			this.writeFile(file, data);
+			this.mClosedWindowsCache.data = data;
+			this.mClosedWindowsCache.timestamp = file.lastModifiedTime;
 		}
 		else
 		{
 			this.delFile(file);
+			this.mClosedWindowsCache.data = null;
+			this.mClosedWindowsCache.timestamp = 0;
 		}
 		this.updateToolbarButton(aList.length + this.mSessionStore.getClosedTabCount(window)  > 0);
 	},
@@ -1044,8 +1058,7 @@
 		{
 			var oldBackup = this.getSessionDir(this.mBackupSessionName, true);
 			var name = this.getFormattedName("", new Date(), this._string_old_backup_session || this._string("old_backup_session"));
-			var state = this.readSessionFile(backup);
-			if (state) this.writeFile(oldBackup, this.nameState(state, name));
+			this.writeFile(oldBackup, this.nameState(this.readSessionFile(backup), name));
 		}
 		
 		if (this.mPref_max_backup_keep != -1)
@@ -1090,22 +1103,6 @@
 		return state;
 	},
 	
-	encryptionChange: function()
-	{
-		if (this.getPref("_encrypted","") != this.mPref_encrypt_sessions) {
-			this.setPref("_encrypted",this.mPref_encrypt_sessions);
-			var sessions = this.getSessions();
-			sessions.forEach(function(aSession) {
-				var fileName = this.getSessionDir(aSession.fileName);
-				var state = this.readFile(fileName);
-				if (state) this.writeFile(fileName, state);
-			}, this);
-		
-			var data = this.readFile(this.getProfileFile(this.mClosedWindowFile));
-			if (data) this.writeFile(this.getProfileFile(this.mClosedWindowFile), data);
-		}
-	},
-
 	readFile: function(aFile)
 	{
 		try
@@ -1123,13 +1120,7 @@
 			}
 			cvstream.close();
 			
-			content = content.replace(/\r\n?/g, "\n");
-			// decrypt file if encrypted
-			if (!/^\[SessionManager\]/m.test(content))
-			{
-				content = this.mSecretDecoderRing.decryptString(content);
-			}
-			return content;
+			return content.replace(/\r\n?/g, "\n");
 		}
 		catch (ex) { }
 		
@@ -1138,11 +1129,6 @@
 
 	writeFile: function(aFile, aData)
 	{
-		//encrypt session file
-		if (this.mPref_encrypt_sessions) {
-			aData = this.mSecretDecoderRing.encryptString(aData);
-		}
-		
 		var stream = this.mComponents.classes["@mozilla.org/network/file-output-stream;1"].createInstance(this.mComponents.interfaces.nsIFileOutputStream);
 		stream.init(aFile, 0x02 | 0x08 | 0x20, 0600, 0);
 		var cvstream = this.mComponents.classes["@mozilla.org/intl/converter-output-stream;1"].createInstance(this.mComponents.interfaces.nsIConverterOutputStream);
@@ -1167,6 +1153,93 @@
 				{
 					this.ioError(ex);
 				}
+			}
+		}
+	},
+
+/* ........ Encryption functions .............. */
+
+	cryptError: function(aText)
+	{
+		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, aText);
+	},
+
+	decrypt: function(aData)
+	{
+		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
+		if (aData.indexOf(":") == -1)
+		{
+			dump("decrypting\n");
+			try {
+				aData = this.mSecretDecoderRing.decryptString(aData);
+			}
+			catch (ex) { 
+				this.cryptError("You must enter your master password for Session Manager to procede."); 
+				return null;
+			}
+		}
+		return aData;
+	},
+
+	// This function will encrypt the data if the encryption preference is set.
+	// It will also decrypt encrypted data if the encryption preference is not set.
+	decryptEncryptByPreference: function(aData)
+	{
+		dump("function called\n");
+		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
+		var encryped = (aData.indexOf(":") == -1);
+		try {
+			if (this.mPref_encrypt_sessions && !encryped)
+			{
+				dump("writing encrypted data\n");
+				aData = this.mSecretDecoderRing.encryptString(aData);
+			}
+			else if (!this.mPref_encrypt_sessions && encryped)
+			{
+				dump("writing decrypted data\n");
+				aData = this.mSecretDecoderRing.decryptString(aData);
+			}
+		}
+		catch (ex) { this.cryptError("You did not enter your master password, so session/window data was not encrypted."); }
+		return aData;
+	},
+
+	encryptionChange: function()
+	{
+		if (this.getPref("_encrypted","no") != this.mPref_encrypt_sessions) {
+			this.setPref("_encrypted",this.mPref_encrypt_sessions);
+			
+			try {
+				// force a master password prompt so we don't waste time if user cancels it
+				this.mSecretDecoderRing.encryptString("");
+				
+				var sessions = this.getSessions();
+				sessions.forEach(function(aSession) {
+					var file = this.getSessionDir(aSession.fileName);
+					var state = this.readSessionFile(file);
+					if (state) 
+					{
+						if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|true))?/m.test(state))
+						{
+							state = state.split("\n")
+							state[4] = this.decryptEncryptByPreference(state[4]);
+							state = state.join("\n");
+							this.writeFile(file, state);
+						}
+					}
+				}, this);
+		
+				var windows = this.getClosedWindows();
+				windows.forEach(function(aWindow) {
+					aWindow.state = this.decryptEncryptByPreference(aWindow.state);
+				}, this);
+				this.storeClosedWindows(windows);
+			}
+			// failed to encrypt/decrypt so revert setting
+			catch (ex) {
+				this.crypt_Error("You must enter your master password for Session Manager to procede.");
+				this.setPref("_encrypted",!this.mPref_encrypt_sessions);
+				this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
 			}
 		}
 	},
@@ -1512,12 +1585,19 @@
 		
 		state = this.handleTabUndoData(state, aNoUndoData);
 		
+		// encrypt state if encryption preference set
+		state = this.decryptEncryptByPreference(state); 
+		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
 		        "\nautosave=" + ((aAutoSave)?"true":"false") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
 	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession)
 	{
+		// decrypt state if encrypted
+		aState = this.decrypt(aState);
+		if (!aState) return false;
+		
 		if (!aWindow)
 		{
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
@@ -1527,7 +1607,7 @@
 				delete this.__SM_restore;
 			};
 			aWindow.addEventListener("load", aWindow.__SM_restore, true);
-			return;
+			return true;
 		}
 
 		aState = this.handleTabUndoData(aState, aStripClosedTabs);
@@ -1543,7 +1623,7 @@
 			this.mSessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
 		}
 		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);			
-		this.mObserverService.notifyObservers(null, "sessionmanager:tabopenclose", null);
+		return true;
 	},
 
 	nameState: function(aState, aName)
