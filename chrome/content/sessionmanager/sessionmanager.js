@@ -1236,7 +1236,7 @@
 			}
 			// failed to encrypt/decrypt so revert setting
 			catch (ex) {
-				this.crypt_Error("You must enter your master password for Session Manager to procede.");
+				this.cryptError("You must enter your master password for Session Manager to procede.");
 				this.setPref("_encrypted",!this.mPref_encrypt_sessions);
 				this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
 			}
