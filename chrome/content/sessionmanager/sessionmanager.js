@@ -526,6 +526,8 @@
 					tabsToMove.forEach(function(aTab) { gBrowser.moveTabTo(aTab, endPos); });
 				}
 			}
+			// failed to load so clear autosession in case user tried to load one
+			else gSessionManager.setPref("_autosave_name", "");
 		}, 0);
 	},
 
