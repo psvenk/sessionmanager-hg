@@ -1185,7 +1185,6 @@
 	// It will also decrypt encrypted data if the encryption preference is not set.
 	decryptEncryptByPreference: function(aData)
 	{
-		dump("function called\n");
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
 		var encryped = (aData.indexOf(":") == -1);
 		try {
