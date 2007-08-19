@@ -48,8 +48,8 @@
 			<tabs>
 				<tab label="&general.caption;"/>
 				<tab label="&undoClose.caption;"/>
-				<tab label="&advanced.caption;"/>
-				<tab label="&moreadvanced.caption;"/>
+				<tab label="&advanced.caption; (1)"/>
+				<tab label="&advanced.caption; (2)"/>
 			</tabs>
 			<tabpanels>
 				<tabpanel orient="vertical">
@@ -91,7 +91,6 @@
 								</row>
 								<row>
 									<checkbox label="&autosave_session.label;" accesskey="&autosave_session.accesskey;" preference="extensions.sessionmanager.autosave_session"/>
-									<checkbox label="&crashrecovery.label;" accesskey="&crashrecovery.accesskey;" preference="browser.sessionstore.resume_from_crash"/>
 								</row>
 							</rows>
 						</grid>
@@ -167,6 +166,8 @@
 					</groupbox>
 					<groupbox>
 						<caption label="&service.caption;"/>
+						<checkbox label="&crashrecovery.label;" accesskey="&crashrecovery.accesskey;" preference="browser.sessionstore.resume_from_crash"/>
+						<separator style="height: 1.0em;" orient="vertical"/>
 						<description style="width: 5em;" class="header">&service.description;</description>
 						<grid>
 							<columns>

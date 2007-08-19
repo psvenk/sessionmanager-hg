@@ -41,20 +41,37 @@
 				var state = this.nameState(this.readFile(file), name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false");
 				this.writeFile(this.getSessionDir(this.mBackupSessionName, true), state);
 				
-				// if not recovering last session and there was an autosave session active, save it
-				if (/_sm_autosave_name:\"([^\"]+)\"/m.test(state))
+				// if not recovering last session
+				if (fileName != "*")
 				{
-					var autosave_name = RegExp.$1;
-					if (autosave_name != "")
+					// find if there was an autosave session active at time of crash and get its name
+					if (/_sm_autosave_name:\"([^\"]+)\"/m.test(state))
 					{
-						var autosave_state = this.nameState(this.readFile(file), autosave_name + 
-						                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=true");
-						this.writeFile(this.getSessionDir(this.makeFileName(autosave_name), false), autosave_state);
-						if (!this.getPref("_recovering")) this.setPref("_autosave_name", autosave_name);
+						var autosave_name = RegExp.$1;
+						if (autosave_name != "")
+						{
+							// not recovering autosave session
+							if (fileName != this.makeFileName(autosave_name))
+							{
+								var autosave_state = this.nameState(this.readFile(file), autosave_name + 
+								                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=true");
+								this.writeFile(this.getSessionDir(this.makeFileName(autosave_name), false), autosave_state);
+								this.delPref("_autosave_name");
+							}
+							// choose to recover autosave session so just recover last session
+							else 
+							{
+								this.delPref("_recovering");
+								this.setPref("_autosave_name", autosave_name);
+								params.SetInt(0, 0);
+							}
+						}
+						// name was blank somehow so delete preference in case its there
+						else this.delPref("_autosave_name");
 					}
+					// crashed before preferences were saved so delete the _autosave_name preference
+					else this.delPref("_autosave_name");
 				}
-				// crashed before preferences were saved so delete the _autosave_name preference
-				else this.delPref("_autosave_name");
 			}
 		};
 		

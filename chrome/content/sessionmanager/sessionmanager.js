@@ -162,17 +162,15 @@
 			this._string_backup_session = this._string("backup_session");
 			this._string_old_backup_session = this._string("old_backup_session");
 			this._string_prompt_not_again = this._string("prompt_not_again");
+			this._string_encrypt_fail = this._string("encrypt_fail");
 			
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
-			this.mBundle = null;
-			
-			this.shutDown();
 		}
 		this.mBundle = null;
 		this.mFullyLoaded = false;
 
 //		Uncomment the following when bug 360408 is fixed.
-//      if (this.mPref__running && this.getBrowserWindows().length != 0)
+//      if (this.mPref__running && !this.mPref__stopping && this.getBrowserWindows().length != 0)
 //		{
 //			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
 //			var state = this.getSessionState(null, true);
@@ -228,20 +226,15 @@
 			}
 			break;
 		case "quit-application":
- 			if (aData == "restart") 
- 			{
-	 			// Not all the windows will set the shutdown_session variable correctly since
-	 			// one window might clear the autosave_name before another window reads it, therefore
-	 			// only set the preference if the shutdown_session is actually set to something.
-	 			if (this.shutdown_session != "") this.setPref("_autosave_name", this.shutdown_session);
- 			}
- 			break;
-		case "quit-application-granted":
-			this.shutdown_session = this.mPref__autosave_name;
-			if (this.getPref("_running"))
+			// only run shutdown for one window and if not restarting browser
+			if (this.getPref("_running") && (aData != "restart"))
 			{
 				this.shutDown();
 			}
+ 			break;
+		case "quit-application-granted":
+			// quit granted so stop listening for closed windows
+			this.mPref__stopping = true;
 			break;
 		}
 	},
@@ -283,7 +276,7 @@
 
 	onWindowClose: function()
 	{
-		if (this.mPref__running && this.getBrowserWindows().length != 0)
+		if (this.mPref__running && !this.mPref__stopping && this.getBrowserWindows().length != 0)
 		{
 			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
 			var state = this.getSessionState(null, true);
@@ -382,8 +375,7 @@
 
 	save: function(aName, aFileName, aOneWindow)
 	{
-		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString(), 
-		               autoSaveable : true };
+		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString(), autoSaveable : true };
 		if (!aName)
 		{
 			if (!this.prompt(this._string("save2_session"), this._string("save_" + ((aOneWindow)?"window":"session") + "_ok"), values, this._string("save_" + ((aOneWindow)?"window":"session")), this._string("save_session_ok2")))
@@ -432,7 +424,9 @@
 			}
 		
 			this.setPref("_autosave_name","");
+			return true;
 		}
+		return false;
 	},
 	
 	abandonSession: function()
@@ -963,7 +957,7 @@
 	appendClosedWindow: function(aState)
 	{
 		if (this.mPref_max_closed_undo == 0 || Array.every(gBrowser.browsers, this.isCleanBrowser) ||
-		    !this.getPref("_running", false))
+		    !this.getPref("_running", false) || this.mPref__stopping)
 		{
 			return;
 		}
@@ -993,13 +987,16 @@
 		}
 		
 		// save the currently opened session (if there is one)
-		this.closeSession();
-
-		this.backupCurrentSession();
-		this.delPref("_running");
-		this.delPref("_autosave_name");
+		if (!this.closeSession())
+		{
+			this.backupCurrentSession();
+		}
+		else
+		{
+			this.keepOldBackups();
+		}
 		this.delPref("_encrypted");
-		this.mPref__running = false;
+		this.delPref("_running");
 
 		this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
 		
@@ -1165,9 +1162,22 @@
 
 /* ........ Encryption functions .............. */
 
-	cryptError: function(aText)
+	cryptError: function(aException)
 	{
-		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, aText);
+		var text;
+		dump(aException.message);
+		if (aException.message.indexOf("decryptString") != -1) {
+			if (aException.message.indexOf("NS_ERROR_FAILURE") != -1) {
+				text = this._string("decrypt_fail1");
+			}
+			else {
+				text = this._string("decrypt_fail2");
+			}
+		}
+		else {
+			text = this._string_encrypt_fail || this._string("encrypt_fail");
+		}
+		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, text);
 	},
 
 	decrypt: function(aData)
@@ -1180,7 +1190,7 @@
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 			catch (ex) { 
-				this.cryptError("You must enter your master password for Session Manager to procede."); 
+				this.cryptError(ex); 
 				return null;
 			}
 		}
@@ -1205,7 +1215,7 @@
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 		}
-		catch (ex) { this.cryptError("You did not enter your master password, so session/window data was not encrypted."); }
+		catch (ex) { this.cryptError(ex); }
 		return aData;
 	},
 
@@ -1242,7 +1252,7 @@
 			}
 			// failed to encrypt/decrypt so revert setting
 			catch (ex) {
-				this.cryptError("You must enter your master password for Session Manager to procede.");
+				this.cryptError(ex);
 				this.setPref("_encrypted",!this.mPref_encrypt_sessions);
 				this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
 			}
