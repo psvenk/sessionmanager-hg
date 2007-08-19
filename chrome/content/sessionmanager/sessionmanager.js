@@ -463,15 +463,19 @@
 			var autosave = RegExp.$3;
 			state = state.split("\n")[4];
 			
-			// close current autosave session if open
-			// if shift or contrl key held down, don't close current session
-			if (this.mPref__autosave_name != "" && aMode != "newwindow" && aMode != "append") 
+			// Don't save current session on startup since there isn't any.
+			if (aMode != "startup")
 			{
-				this.closeSession();
-			}
-			else 
-			{
-				if (this.mPref_autosave_session) this.autoSaveCurrentSession();
+				// close current autosave session if open
+				// if shift or contrl key held down, don't close current session
+				if (this.mPref__autosave_name != "" && aMode != "newwindow" && aMode != "append") 
+				{
+					this.closeSession();
+				}
+				else 
+				{
+					if (this.mPref_autosave_session) this.autoSaveCurrentSession();
+				}
 			}
 			
 			// If this is an autosave session, keep track of it if there is not already an active session
