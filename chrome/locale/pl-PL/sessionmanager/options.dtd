@@ -1,15 +1,17 @@
 <!ENTITY options.title "&sessionManager; - opcje">
 <!ENTITY general.caption "Ogólne">
-<!ENTITY startNend.caption "Otwieranie i zamykanie">
+<!ENTITY startNend.caption "Otwieranie i zamykanie przeglądarki">
 <!ENTITY resume_sess.label "Podczas uruchamiania wczytuj następującą sesję:">
 <!ENTITY resume_sess.accesskey "t">
 <!ENTITY backup_sess.label "Podczas zamykania">
 <!ENTITY backup_sess.accesskey "c">
-<!ENTITY backup_session.label0 "nie zapisuj aktualnej sesji">
-<!ENTITY backup_session.label1 "utwórz kopię zapasową aktualnej sesji">
-<!ENTITY backup_session.label2 "pytaj gdzie zapisać kopię aktualnej sesji">
+<!ENTITY backup_session.label0 "nie zapisuj sesji">
+<!ENTITY backup_session.label1 "utwórz kopię zapasową sesji">
+<!ENTITY backup_session.label2 "pytaj gdzie zapisać kopię zapasową sesji">
 <!ENTITY crashrecovery.label "Włącz odzyskiwanie sesji">
 <!ENTITY crashrecovery.accesskey "k">
+<!ENTITY autosave_session.label "Zapisz automatycznie zastąpioną sesję">
+<!ENTITY autosave_session.accesskey "Z">
 <!ENTITY restoring.caption "Odtwarzanie sesji">
 <!ENTITY sessionList.caption "Lista sesji">
 <!ENTITY orderList.label "Sortuj listę sesji">
@@ -28,7 +30,7 @@
 <!ENTITY submenu.label "Wyświetl listę zamkniętych okien i kart w menu podręcznym">
 <!ENTITY submenu.accesskey "w">
 <!ENTITY persistence.caption "Podtrzymywanie">
-<!ENTITY closed_tabs.label "Odtwarzaj listę zamkniętych kart dla wszystkich okien:">
+<!ENTITY closed_tabs.label "Odtwarzaj listę zamkniętych kart dla wszystkich okien">
 <!ENTITY closed_tabs.accesskey "d">
 <!ENTITY closed_tabs.label0 "nigdy">
 <!ENTITY closed_tabs.label1 "podczas uruchamiania">

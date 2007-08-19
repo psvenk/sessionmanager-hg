@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Aktuelles Fenster sichern...">
 <!ENTITY saveOne.accesskey "F">
+<!ENTITY closeSession.label "Aktuelle Sitzung sichern und schließen">
+<!ENTITY closeSession.accesskey "k">
+<!ENTITY abandonSession.label "Aktuelle Sitzung verlassen">
+<!ENTITY abandonSession.accesskey "v">
 <!ENTITY rename.label "Sitzung umbenennen...">
 <!ENTITY rename.accesskey "u">
 <!ENTITY remove.label "Sitzung(en) löschen...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Wiederherstellen">
 <!ENTITY toolbar.undo.tooltip "Zuletzt geschlossenen Tab wiederherstellen">
 <!ENTITY prompt.ignore.label "Diesen Dialog nicht mehr anzeigen">
+<!ENTITY prompt.autosave.label "Diese Sitzung immer automatisch sichern">

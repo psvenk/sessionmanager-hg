@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "現在のセッションをバックアップするか確認する">
 <!ENTITY crashrecovery.label "Crash Recoveryを有効にする">
 <!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "自動的に取り替えたセッションを保存する">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "セッションを復元">
 <!ENTITY sessionList.caption "セッションリスト">
 <!ENTITY orderList.label "セッションリストをオーダーする">
@@ -37,7 +39,7 @@
 <!ENTITY window_list.accesskey "o">
 <!ENTITY clear_list.label "リストを削除する">
 <!ENTITY clear_list.accesskey "r">
-<!ENTITY advanced.caption "高度な設定">
+<!ENTITY advanced.caption "詳細">
 <!ENTITY name_format.caption "セッション名">
 <!ENTITY name_format.label "セッションの提案のため名前をフォーマットしてください">
 <!ENTITY name_format.accesskey "F">
@@ -53,7 +55,7 @@
 <!ENTITY privacy.level0 "すべてのサイト">
 <!ENTITY privacy.level1 "暗号化していないサイトのみ">
 <!ENTITY privacy.level2 "すべてのサイトで保存しない">
-<!ENTITY moreadvanced.caption "より高度な設定">
+<!ENTITY moreadvanced.caption "より詳細な設定">
 <!ENTITY sessiondir.caption "セッションの保存場所">
 <!ENTITY sessiondir.desc "セッションの保存場所をここで変更することができます">
 <!ENTITY change_dir.label "変更">

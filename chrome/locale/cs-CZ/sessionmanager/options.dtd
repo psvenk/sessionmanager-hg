@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "se dotázat na uložení aktuální relace">
 <!ENTITY crashrecovery.label "Zapnout obnovu po pádu aplikace">
 <!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "Automaticky uložit nahrazenou relaci">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Obnovení relace">
 <!ENTITY sessionList.caption "Seznam relací">
 <!ENTITY orderList.label "Seřadit seznam relací">
@@ -60,5 +62,5 @@
 <!ENTITY change_dir.accesskey "Z">
 <!ENTITY default_dir.label "Výchozí">
 <!ENTITY default_dir.accesskey "V">
-<!ENTITY sanitizer.label "Uložené relace ve správci ukládaných relací">
+<!ENTITY sanitizer.label "Uložené relace ve Správci ukládaných relací">
 <!ENTITY sanitizer.accesskey "s">

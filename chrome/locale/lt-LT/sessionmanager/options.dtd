@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "klausti, ar saugoti šią sesiją">
 <!ENTITY crashrecovery.label "Įjungti Nulūžimo atstatymą">
 <!ENTITY crashrecovery.accesskey "a">
+<!ENTITY autosave_session.label "Automatiškai išsaugoti pakeistą sesiją">
+<!ENTITY autosave_session.accesskey "p">
 <!ENTITY restoring.caption "Sesijų atkūrimas">
 <!ENTITY sessionList.caption "Sesijų sąrašas">
 <!ENTITY orderList.label "Rikiuoti sesijų sąrašą">

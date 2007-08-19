@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "opýtať sa, či vytvoriť zálohu aktuálnej relácie">
 <!ENTITY crashrecovery.label "Povoliť obnovenie po páde">
 <!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "Automaticky uložiť nahradenú reláciu">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Obnova relácií">
 <!ENTITY sessionList.caption "Zoznam relácií">
 <!ENTITY orderList.label "Usporiadať zoznam relácií">

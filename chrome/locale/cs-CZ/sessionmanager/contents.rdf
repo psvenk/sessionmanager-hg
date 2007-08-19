@@ -7,7 +7,7 @@
 	
 	<Description about="urn:mozilla:locale:cs-CZ"
 		chrome:name="cs-CZ"
-		chrome:displayName="Czech"
+		chrome:displayName="Czech (US)"
 		chrome:author="PetrTwo"
 	>
 		<chrome:packages>

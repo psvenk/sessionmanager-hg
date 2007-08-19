@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "s">
 <!ENTITY saveOne.label "Gem vindue...">
 <!ENTITY saveOne.accesskey "v">
+<!ENTITY closeSession.label "Gem og luk session">
+<!ENTITY closeSession.accesskey "G">
+<!ENTITY abandonSession.label "Forlad nuværende session">
+<!ENTITY abandonSession.accesskey "F">
 <!ENTITY rename.label "Omdøb session...">
 <!ENTITY rename.accesskey "O">
 <!ENTITY remove.label "Slet session(er)...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Fortryd lukning">
 <!ENTITY toolbar.undo.tooltip "Genåbn de senest lukkede faneblade">
 <!ENTITY prompt.ignore.label "Vis ikke denne besked igen">
+<!ENTITY prompt.autosave.label "Gør til auto-gem session">

@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "T">
 <!ENTITY saveOne.label "Tallenna nykyinen ikkuna...">
 <!ENTITY saveOne.accesskey "i">
+<!ENTITY closeSession.label "Tallenna ja sulje nykyinen istunto">
+<!ENTITY closeSession.accesskey "j">
+<!ENTITY abandonSession.label "Hylkää nykyinen istunto">
+<!ENTITY abandonSession.accesskey "y">
 <!ENTITY rename.label "Nimeä istunto uudelleen...">
 <!ENTITY rename.accesskey "N">
 <!ENTITY remove.label "Poista istuntoja...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Peruuta sulkeminen">
 <!ENTITY toolbar.undo.tooltip "Avaa uudelleen viimeksi suljettu välilehti">
 <!ENTITY prompt.ignore.label "Älä näytä tätä valintaikkunaa uudelleen">
+<!ENTITY prompt.autosave.label "Tallenna tämä istunto automaattisesti">

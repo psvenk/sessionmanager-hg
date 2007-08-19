@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "nachfragen, ob die aktuelle Sitzung gesichert werden soll">
 <!ENTITY crashrecovery.label "Wiederherstellung nach Absturz aktivieren">
 <!ENTITY crashrecovery.accesskey "W">
+<!ENTITY autosave_session.label "Ersetzte Sitzung automatisch sichern">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Sitzungs-Wiederherstellung">
 <!ENTITY sessionList.caption "Sitzungs-Liste">
 <!ENTITY orderList.label "Die Sitzungen folgendermaßen sortieren:">

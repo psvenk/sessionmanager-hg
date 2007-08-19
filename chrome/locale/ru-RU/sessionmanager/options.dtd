@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "спросить, что делать с текущей сессией">
 <!ENTITY crashrecovery.label "Включить защиту от вылетов">
 <!ENTITY crashrecovery.accesskey "В">
+<!ENTITY autosave_session.label "Автоматически сохранять замененную сессию">
+<!ENTITY autosave_session.accesskey "А">
 <!ENTITY restoring.caption "Восстановление сессий">
 <!ENTITY sessionList.caption "Список сессий">
 <!ENTITY orderList.label "Упорядочивать список сессий по">

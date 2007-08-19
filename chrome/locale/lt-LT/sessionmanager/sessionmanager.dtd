@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Saugoti šį langą...">
 <!ENTITY saveOne.accesskey "l">
+<!ENTITY closeSession.label "Išsaugoti ir užverti dabartinę sesiją">
+<!ENTITY closeSession.accesskey "s">
+<!ENTITY abandonSession.label "Atsisakyti dabartinės sesijos">
+<!ENTITY abandonSession.accesskey "A">
 <!ENTITY rename.label "Pervardyti sesiją...">
 <!ENTITY rename.accesskey "P">
 <!ENTITY remove.label "Trinti sesiją(-as)...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Atšaukti uždarymą">
 <!ENTITY toolbar.undo.tooltip "Iš naujo atverti paskiausiai užvertą skirtuką">
 <!ENTITY prompt.ignore.label "Nerodyti šio lango vėl">
+<!ENTITY prompt.autosave.label "Padaryti tai automatiškai išsisaugančia sesija">

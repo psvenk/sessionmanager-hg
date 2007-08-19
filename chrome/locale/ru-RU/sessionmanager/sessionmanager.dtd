@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "С">
 <!ENTITY saveOne.label "Сохранить текущее окно...">
 <!ENTITY saveOne.accesskey "о">
+<!ENTITY closeSession.label "Закрыть и сохранить текущую сессию">
+<!ENTITY closeSession.accesskey "З">
+<!ENTITY abandonSession.label "Удалить эту сессию">
+<!ENTITY abandonSession.accesskey "У">
 <!ENTITY rename.label "Переименовать сессию">
 <!ENTITY rename.accesskey "П">
 <!ENTITY remove.label "Удаление сессий...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Восстановить закрытую вкладку">
 <!ENTITY toolbar.undo.tooltip "Восстановить последнюю закрытую вкладку">
 <!ENTITY prompt.ignore.label "Не показывать это сообщение в дальнейшем">
+<!ENTITY prompt.autosave.label "Сделать автосохраняемую сессию">

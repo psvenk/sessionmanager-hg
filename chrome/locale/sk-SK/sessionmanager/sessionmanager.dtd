@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "U">
 <!ENTITY saveOne.label "Uložiť aktuálne okno...">
 <!ENTITY saveOne.accesskey "a">
+<!ENTITY closeSession.label "Uložiť a zavrieť aktuálnu reláciu">
+<!ENTITY closeSession.accesskey "z">
+<!ENTITY abandonSession.label "Prerušiť aktuálnu reláciu">
+<!ENTITY abandonSession.accesskey "a">
 <!ENTITY rename.label "Premenovať reláciu...">
 <!ENTITY rename.accesskey "r">
 <!ENTITY remove.label "Odstrániť relácie...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Znova otvoriť zatvorené">
 <!ENTITY toolbar.undo.tooltip "Znova otvorí naposledy zatvorené karty">
 <!ENTITY prompt.ignore.label "Toto dialógové okno už nezobrazovať">
+<!ENTITY prompt.autosave.label "Nastaviť ako reláciu, ktorá bude ukladaná automaticky">

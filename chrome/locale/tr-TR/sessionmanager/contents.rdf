@@ -8,7 +8,7 @@
 	<Description about="urn:mozilla:locale:tr-TR"
 		chrome:name="tr-TR"
 		chrome:displayName="Türkçe (TR)"
-		chrome:author="SerdarSahin"
+		chrome:author="Serdar Þahin - www.serdarsahin.net"
 	>
 		<chrome:packages>
 			<Seq about="urn:mozilla:locale:tr-TR:packages">

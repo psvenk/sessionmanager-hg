@@ -2,7 +2,7 @@
 <!ENTITY general.caption "Algemeen">
 <!ENTITY startNend.caption "Opstarten &amp; Afsluiten">
 <!ENTITY resume_sess.label "Bij opstarten altijd de volgende sessie laden:">
-<!ENTITY resume_sess.accesskey "s">
+<!ENTITY resume_sess.accesskey "o">
 <!ENTITY backup_sess.label "Bij afsluiten">
 <!ENTITY backup_sess.accesskey "u">
 <!ENTITY backup_session.label0 "de huidige sessie verwerpen">
@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "vragen of de sessie opgeslagen moet worden">
 <!ENTITY crashrecovery.label "Crashherstelling aanzetten">
 <!ENTITY crashrecovery.accesskey "h">
+<!ENTITY autosave_session.label "Vervangen sessies automatisch opslaan">
+<!ENTITY autosave_session.accesskey "s">
 <!ENTITY restoring.caption "Sessieherstelling">
 <!ENTITY sessionList.caption "Sessielijst">
 <!ENTITY orderList.label "Rangschik de sessielijst">

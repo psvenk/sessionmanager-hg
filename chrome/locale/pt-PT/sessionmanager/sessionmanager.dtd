@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Guardar a Janela Actual...">
 <!ENTITY saveOne.accesskey "G">
+<!ENTITY closeSession.label "Guardar e Fechar a Sessão Actual">
+<!ENTITY closeSession.accesskey "G">
+<!ENTITY abandonSession.label "Abandonar a Sessão Actual">
+<!ENTITY abandonSession.accesskey "b">
 <!ENTITY rename.label "Renomear Sessão">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Apagar Sessão...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Anular Fechar">
 <!ENTITY toolbar.undo.tooltip "Re-abrir o separador fechado mais recente">
 <!ENTITY prompt.ignore.label "Não mostrar este diálogo novamente">
+<!ENTITY prompt.autosave.label "Tornar isto numa sessão de guardar auto">

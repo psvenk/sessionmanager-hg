@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "biztonsági mentésre rákérdez">
 <!ENTITY crashrecovery.label "Visszaállítás engedélyezése összeomlás után">
 <!ENTITY crashrecovery.accesskey "V">
+<!ENTITY autosave_session.label "Lecserélt munkamenet automatikus mentése">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Munkamenet visszaállítása">
 <!ENTITY sessionList.caption "Elérhető munkamenetek">
 <!ENTITY orderList.label "Munkamenetek rendezése">

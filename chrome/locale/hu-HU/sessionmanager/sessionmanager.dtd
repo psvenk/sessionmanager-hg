@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "m">
 <!ENTITY saveOne.label "Jelenlegi ablak mentése...">
 <!ENTITY saveOne.accesskey "a">
+<!ENTITY closeSession.label "Jelenlegi munkamenet mentése és bezárása">
+<!ENTITY closeSession.accesskey "s">
+<!ENTITY abandonSession.label "Jelenlegi munkamenet elhagyása">
+<!ENTITY abandonSession.accesskey "h">
 <!ENTITY rename.label "Munkamenet átnevezése...">
 <!ENTITY rename.accesskey "n">
 <!ENTITY remove.label "Munkamenet törlése...">
@@ -16,7 +20,7 @@
 <!ENTITY resume.accesskey "J">
 <!ENTITY reload.label "Minden ablak újratöltése">
 <!ENTITY reload.accesskey "s">
-<!ENTITY overwrite.label "Létező ablakok felülírása">
+<!ENTITY overwrite.label "Létező ablakok lecserélése">
 <!ENTITY overwrite.accesskey "f">
 <!ENTITY undoClosed.label "Bezárt lapok és ablakok megnyitása...">
 <!ENTITY undoClosed.accesskey "g">
@@ -27,4 +31,5 @@
 <!ENTITY toolbar.tooltip "Jelenlegi munkamenet mentése...">
 <!ENTITY toolbar.undo.label "Bezárás visszavonása">
 <!ENTITY toolbar.undo.tooltip "Legutoljára bezárt lapok megnyitása">
-<!ENTITY prompt.ignore.label "Ez a párbeszédablak ne jelenjen meg többé">
+<!ENTITY prompt.ignore.label "Ez a párbeszédablak ne jelenjen meg többet">
+<!ENTITY prompt.autosave.label "Ezután e munkamenet automatikus mentése">

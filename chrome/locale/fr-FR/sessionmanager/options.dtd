@@ -1,6 +1,6 @@
 <!ENTITY options.title "Options du &sessionManager;">
 <!ENTITY general.caption "Générales">
-<!ENTITY startNend.caption "Démarrage et Fermeture">
+<!ENTITY startNend.caption "Démarrage et fermeture">
 <!ENTITY resume_sess.label "Au démarrage, toujours charger la session suivante :">
 <!ENTITY resume_sess.accesskey "s">
 <!ENTITY backup_sess.label "À la fermeture">
@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "demander s&apos;il faut sauvegarder la session courante">
 <!ENTITY crashrecovery.label "Activer Crash recovery">
 <!ENTITY crashrecovery.accesskey "c">
+<!ENTITY autosave_session.label "Enregistrer automatiquement les sessions remplacées">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Rétablissement de session">
 <!ENTITY sessionList.caption "Liste des sessions">
 <!ENTITY orderList.label "Trier la liste des sessions">
@@ -43,8 +45,8 @@
 <!ENTITY name_format.accesskey "e">
 <!ENTITY name_format.desc "Utiliser &#37;t pour le titre de l&apos;onglet actif, &#37;d pour la date du jour et &#37;m pour l&apos;horaire ; de plus, la longueur du titre peut être limitée à # caractères : &#37;#t.">
 <!ENTITY service.caption "Paramètres de rétablissement pour &quot;Crash Recovery&quot;">
-<!ENTITY service.description "Ne modifiez rien, tant que vous ne savez pas ce que vous faites :">
-<!ENTITY interval.label "Intervalle mimimum entre deux sauvegardes d&apos;état (en secondes) :">
+<!ENTITY service.description "Ne modifiez rien, tant que vous ne savez pas ce que vous faites !">
+<!ENTITY interval.label "Intervalle mimimum entre deux enregistrements d&apos;état (en secondes) :">
 <!ENTITY interval.accesskey "i">
 <!ENTITY postdata.label "Nombre maximum de POSTDATA stockés (en bytes ; -1 pour tous) :">
 <!ENTITY postdata.accesskey "y">
@@ -55,7 +57,7 @@
 <!ENTITY privacy.level2 "aucun site">
 <!ENTITY moreadvanced.caption "Plus avancées">
 <!ENTITY sessiondir.caption "Emplacement des sessions enregistrées">
-<!ENTITY sessiondir.desc "L&apos;emplacement de stockage par défaut des sessions enregistrées peut être modifié ici.">
+<!ENTITY sessiondir.desc "L&apos;emplacement de stockage des sessions enregistrées par défaut peut être modifié ici.">
 <!ENTITY change_dir.label "Modifier">
 <!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Défaut">

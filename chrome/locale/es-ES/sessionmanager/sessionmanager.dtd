@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "G">
 <!ENTITY saveOne.label "Guardar la ventana actual">
 <!ENTITY saveOne.accesskey "v">
+<!ENTITY closeSession.label "Guardar y cerrar la sesión actual">
+<!ENTITY closeSession.accesskey "c">
+<!ENTITY abandonSession.label "Abandonar la sesión actual">
+<!ENTITY abandonSession.accesskey "A">
 <!ENTITY rename.label "Renombrar sesión...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Borrar sesión(es)...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Deshacer cerrar">
 <!ENTITY toolbar.undo.tooltip "Vuelve a abrir la pestaña cerrada más recientemente">
 <!ENTITY prompt.ignore.label "No volver a mostrar este mensaje">
+<!ENTITY prompt.autosave.label "Guardar esta sesión automáticamente">

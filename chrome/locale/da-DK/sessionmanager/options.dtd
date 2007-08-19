@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "spørg om nuværende session skal gemmes eller kasséres">
 <!ENTITY crashrecovery.label "Nedbrudsretablering">
 <!ENTITY crashrecovery.accesskey "N">
+<!ENTITY autosave_session.label "Gem automatisk overskrevet session">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Sessionsgenskabelse">
 <!ENTITY sessionList.caption "Sessionsliste">
 <!ENTITY orderList.label "Sortér sessionslisten">

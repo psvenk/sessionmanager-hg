@@ -1,9 +1,13 @@
 <!ENTITY sessionManager "Session Manager">
-<!ENTITY toolsmenu.accesskey "M">
+<!ENTITY toolsmenu.accesskey "o">
 <!ENTITY save.label "Sessie opslaan...">
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Huidig venster opslaan...">
 <!ENTITY saveOne.accesskey "v">
+<!ENTITY closeSession.label "Huidige sessie opslaan en sluiten">
+<!ENTITY closeSession.accesskey "H">
+<!ENTITY abandonSession.label "Huidige sessie verlaten">
+<!ENTITY abandonSession.accesskey "l">
 <!ENTITY rename.label "Sessie hernoemen...">
 <!ENTITY rename.accesskey "r">
 <!ENTITY remove.label "Sessie(s) verwijderen...">
@@ -13,13 +17,13 @@
 <!ENTITY options.label "&sessionManager; opties">
 <!ENTITY options.accesskey "o">
 <!ENTITY resume.label "Huidige sessie hernemen bij opstarten">
-<!ENTITY resume.accesskey "h">
+<!ENTITY resume.accesskey "n">
 <!ENTITY reload.label "Alle herstelde vensters vernieuwen">
 <!ENTITY reload.accesskey "w">
 <!ENTITY overwrite.label "Bestaande vensters vervangen">
 <!ENTITY overwrite.accesskey "e">
 <!ENTITY undoClosed.label "Heropen gesloten ...">
-<!ENTITY undoClosed.accesskey "l">
+<!ENTITY undoClosed.accesskey "p">
 <!ENTITY closedWindows "Gesloten vensters:">
 <!ENTITY closedTabs "Gesloten tabs:">
 <!ENTITY clearList.label "&apos;Gesloten&apos;-lijst leegmaken...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Sluiten ongedaan maken">
 <!ENTITY toolbar.undo.tooltip "Heropen de laatst gesloten tab">
 <!ENTITY prompt.ignore.label "Toon dit dialoogvenster niet meer">
+<!ENTITY prompt.autosave.label "Deze sessie automatisch opslaan">

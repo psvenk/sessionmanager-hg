@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "U">
 <!ENTITY saveOne.label "Uložit aktuální okno...">
 <!ENTITY saveOne.accesskey "o">
+<!ENTITY closeSession.label "Uložit a zavřít aktuální relaci">
+<!ENTITY closeSession.accesskey "z">
+<!ENTITY abandonSession.label "Přerušit aktuální relaci">
+<!ENTITY abandonSession.accesskey "P">
 <!ENTITY rename.label "Přejmenovat relaci...">
 <!ENTITY rename.accesskey "P">
 <!ENTITY remove.label "Smazat relaci(e)">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Znovu otevřít zavřené panely">
 <!ENTITY toolbar.undo.tooltip "Znovu otevře poslední zavřený panel">
 <!ENTITY prompt.ignore.label "Toto dialogové okno již znovu nezobrazovat">
+<!ENTITY prompt.autosave.label "Automatické ukládání této relace">

@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "preguntar si hacer una copia de seguridad de la sesión actual">
 <!ENTITY crashrecovery.label "Habilitar la recuperación de fallos">
 <!ENTITY crashrecovery.accesskey "H">
+<!ENTITY autosave_session.label "Guardar automáticamente la sesión reemplazada">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Restaurar sesiones">
 <!ENTITY sessionList.caption "Lista de sesiones">
 <!ENTITY orderList.label "Ordenar la lista de sesiones">

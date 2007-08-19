@@ -10,11 +10,13 @@
 <!ENTITY backup_session.label2 "perguntar se guarda a sessão actual">
 <!ENTITY crashrecovery.label "Activar Crash Recovery">
 <!ENTITY crashrecovery.accesskey "i">
+<!ENTITY autosave_session.label "Guardar automaticamente  a sessão substituida">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Restauro de sessão">
 <!ENTITY sessionList.caption "Lista de sessões">
 <!ENTITY orderList.label "Ordenar a lista de sessões">
 <!ENTITY orderList.accesskey "d">
-<!ENTITY orderList.label1 "alfabéticamente">
+<!ENTITY orderList.label1 "alfabeticamente">
 <!ENTITY orderList.label2 "da mais velha para a mais nova">
 <!ENTITY orderList.label_2 "da mais nova para a mais velha">
 <!ENTITY max_backup.label "Número de sessões antigas a manter:">

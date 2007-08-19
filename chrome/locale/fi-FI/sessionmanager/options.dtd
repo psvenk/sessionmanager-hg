@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "kysy otetaanko nykyisestä istunnosta varmuuskopio">
 <!ENTITY crashrecovery.label "Ota käyttöön kaatumisesta palautuminen">
 <!ENTITY crashrecovery.accesskey "p">
+<!ENTITY autosave_session.label "Tallenna korvattu istunto automaattisesti">
+<!ENTITY autosave_session.accesskey "r">
 <!ENTITY restoring.caption "Istunnon palautus">
 <!ENTITY sessionList.caption "Istuntolista">
 <!ENTITY orderList.label "Järjestä istuntolista">

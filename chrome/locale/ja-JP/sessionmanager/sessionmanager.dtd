@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "現在のウインドウを保存">
 <!ENTITY saveOne.accesskey "W">
+<!ENTITY closeSession.label "現在のセッションを保存して終了">
+<!ENTITY closeSession.accesskey "C">
+<!ENTITY abandonSession.label "現在のセッションを廃棄">
+<!ENTITY abandonSession.accesskey "A">
 <!ENTITY rename.label "セッション名の変更">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "セッションを削除">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "開きなおす">
 <!ENTITY toolbar.undo.tooltip "最近閉じたタブを元に戻す">
 <!ENTITY prompt.ignore.label "再びこのダイアログを表示しない">
+<!ENTITY prompt.autosave.label "セッションを自動保存する">

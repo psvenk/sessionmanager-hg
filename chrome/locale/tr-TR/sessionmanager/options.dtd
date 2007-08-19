@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "geçerli oturumu yedeklemeyi sor">
 <!ENTITY crashrecovery.label "Çökme Kurtarması Aktif">
 <!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "Değiştirilen oturumu otomatik kaydet">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Oturum Geri yükleme">
 <!ENTITY sessionList.caption "Oturum Listesi">
 <!ENTITY orderList.label "Oturum listesini al">
@@ -60,5 +62,5 @@
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "Varsayılan">
 <!ENTITY default_dir.accesskey "D">
-<!ENTITY sanitizer.label "Session Manager Saved Sessions">
+<!ENTITY sanitizer.label "Oturum Yöneticisi Kayıtlı Oturumlar">
 <!ENTITY sanitizer.accesskey "M">

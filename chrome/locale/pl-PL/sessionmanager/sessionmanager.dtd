@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "Z">
 <!ENTITY saveOne.label "Zapisz aktywne okno">
 <!ENTITY saveOne.accesskey "S">
+<!ENTITY closeSession.label "Zapisz i zamknij aktywną sesję">
+<!ENTITY closeSession.accesskey "K">
+<!ENTITY abandonSession.label "Nie zapisuj aktywnej sesji">
+<!ENTITY abandonSession.accesskey "N">
 <!ENTITY rename.label "Zmień nazwę sesji">
 <!ENTITY rename.accesskey "N">
 <!ENTITY remove.label "Usuń sesję(e)">
@@ -24,7 +28,8 @@
 <!ENTITY closedTabs "Zamknięte karty:">
 <!ENTITY clearList.label "Wyczyść listę">
 <!ENTITY clearList.accesskey "l">
-<!ENTITY toolbar.tooltip "Zapisuje aktualną sesję">
+<!ENTITY toolbar.tooltip "Zapisuje aktywną sesję">
 <!ENTITY toolbar.undo.label "Cofnij">
 <!ENTITY toolbar.undo.tooltip "Otwiera ponownie ostatnio zamknięte karty">
 <!ENTITY prompt.ignore.label "Nie pokazuj tego okna ponownie">
+<!ENTITY prompt.autosave.label "Ustanów jako automatycznie zapisywaną sesję">

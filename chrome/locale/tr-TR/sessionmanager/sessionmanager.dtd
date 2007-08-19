@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Geçerli Pencereyi KAydet...">
 <!ENTITY saveOne.accesskey "W">
+<!ENTITY closeSession.label "Kaydet ve Oturumu kaat">
+<!ENTITY closeSession.accesskey "C">
+<!ENTITY abandonSession.label "Oturumu iptal et">
+<!ENTITY abandonSession.accesskey "A">
 <!ENTITY rename.label "Otutumu yeniden adlandır...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Oturum(ları) Sil...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Kapatmayı Geri A">
 <!ENTITY toolbar.undo.tooltip "Önceki kapatılmış sekmeleri yeniden aç">
 <!ENTITY prompt.ignore.label "Bu uyarıyı artık gösterme">
+<!ENTITY prompt.autosave.label "Otomatik kayıt yap">
