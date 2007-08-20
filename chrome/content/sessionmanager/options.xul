@@ -35,6 +35,7 @@
 			<preference id="extensions.sessionmanager.session_list_order" name="extensions.sessionmanager.session_list_order" type="int"/>
 			<preference id="extensions.sessionmanager.sessions_dir" name="extensions.sessionmanager.sessions_dir" type="string"/>
 			<preference id="extensions.sessionmanager.submenus" name="extensions.sessionmanager.submenus" type="bool"/>
+			<preference id="extensions.sessionmanager.encrypt_sessions" name="extensions.sessionmanager.encrypt_sessions" type="bool"/>
 		</preferences>
 		
 		<stringbundleset id="stringbundleset">
@@ -205,6 +206,16 @@
 						<hbox pack="end">
 							<button label="&change_dir.label;" accesskey="&change_dir.accesskey;" oncommand="selectSessionDir();"/>
 							<button label="&default_dir.label;" accesskey="&default_dir.accesskey;" oncommand="defaultSessionDir();"/>
+						</hbox>
+					</groupbox>
+					<groupbox>
+						<caption label="&encrypt.caption;"/>
+						<description style="width: 26em" class="header">&encrypt.desc;</description>
+						<separator style="height: 0.5em;" orient="vertical"/>
+						<hbox pack="end">
+							<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" 
+							 preference="extensions.sessionmanager.encrypt_sessions" 
+							 oncommand="this.checked = checkEncryption(this.checked);"/>
 						</hbox>
 					</groupbox>
 				</tabpanel>

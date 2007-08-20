@@ -1165,18 +1165,20 @@
 	cryptError: function(aException)
 	{
 		var text;
-		dump(aException.message);
-		if (aException.message.indexOf("decryptString") != -1) {
-			if (aException.message.indexOf("NS_ERROR_FAILURE") != -1) {
-				text = this._string("decrypt_fail1");
+		if (aException.message) {
+			if (aException.message.indexOf("decryptString") != -1) {
+				if (aException.message.indexOf("NS_ERROR_FAILURE") != -1) {
+					text = this._string("decrypt_fail1");
+				}
+				else {
+					text = this._string("decrypt_fail2");
+				}
 			}
 			else {
-				text = this._string("decrypt_fail2");
+				text = this._string_encrypt_fail || this._string("encrypt_fail");
 			}
 		}
-		else {
-			text = this._string_encrypt_fail || this._string("encrypt_fail");
-		}
+		else text = aException;
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, text);
 	},
 
@@ -1185,7 +1187,6 @@
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
 		if (aData.indexOf(":") == -1)
 		{
-			dump("decrypting\n");
 			try {
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
@@ -1206,12 +1207,10 @@
 		try {
 			if (this.mPref_encrypt_sessions && !encryped)
 			{
-				dump("writing encrypted data\n");
 				aData = this.mSecretDecoderRing.encryptString(aData);
 			}
 			else if (!this.mPref_encrypt_sessions && encryped)
 			{
-				dump("writing decrypted data\n");
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 		}
@@ -1252,9 +1251,9 @@
 			}
 			// failed to encrypt/decrypt so revert setting
 			catch (ex) {
-				this.cryptError(ex);
 				this.setPref("_encrypted",!this.mPref_encrypt_sessions);
 				this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
+				this.cryptError(this._string("change_encryption_fail"));
 			}
 		}
 	},

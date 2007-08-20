@@ -55,9 +55,12 @@
 <!ENTITY privacy.level0 "all sites">
 <!ENTITY privacy.level1 "unencrypted sites only">
 <!ENTITY privacy.level2 "no sites at all">
-<!ENTITY moreadvanced.caption "More Advanced">
 <!ENTITY sessiondir.caption "Saved Sessions Location">
 <!ENTITY sessiondir.desc "The default location of the saved sessions can be overridden here.">
+<!ENTITY encrypt.caption "Encryption">
+<!ENTITY encrypt.desc "Warning: Encrypted session data can only be opened in profiles with identical key3.db and cert8.db files.  Additionally if a master password is set, sessions cannot be encrypted or decrypted if the master password is not entered.">
+<!ENTITY encrypt.label "Encrypt saved session and closed window data">
+<!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Change">
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "Default">

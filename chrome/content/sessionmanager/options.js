@@ -94,3 +94,15 @@ function selectSessionDir() {
 function defaultSessionDir() {
 	_("extensions.sessionmanager.sessions_dir").value = '';
 }
+
+function checkEncryption(aState) {
+	try {
+		// force a master password prompt so we don't waste time if user cancels it
+		gSessionManager.mSecretDecoderRing.encryptString("");
+	}
+	catch (ex) {
+		gSessionManager.cryptError(gSessionManager._string("change_encryption_fail"));
+		return !aState;
+	}
+	return aState;
+}
