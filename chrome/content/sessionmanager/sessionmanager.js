@@ -9,7 +9,7 @@
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowtabopenclose", "browser:purge-session-history"],
+	mObserving: ["sessionmanager:windowtabopenclose", "browser:purge-session-history", "quit-application-granted"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mAutoSaveSessionName: "autosave.session",
@@ -51,11 +51,13 @@
 			return;
 		}
 		
+		// Set flag to determine if running Firefox 3.0 or later (document.getElementsByAttributeNS only valid in FF3+)
+		this.mFF3 = (document.getElementsByAttributeNS) ? true : false;
+		
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.addObserver(this, aTopic, false);
 		}, this);
 		this.mObserverService.addObserver(this, "quit-application", false);
-		this.mObserverService.addObserver(this, "quit-application-granted", false);
 		
 		this.mPref_autosave_session = this.getPref("autosave_session", true);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
@@ -99,8 +101,8 @@
 		// so make the image tag persistant so it can be read later from the xultab variable.
 		this.mSessionStore.persistTabAttribute("image");
 		
-		// Workaround for bug 360408, remove when fixed and uncomment call to onWindowClose in onUnload
-		eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
+		// Workaround for bug 360408 in Firefox 2.0, remove when fixed and uncomment call to onWindowClose in onUnload
+		if (!this.mFF3) eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
 		
 		// Have Tab Mix Plus use browser's built in undoCloseTab function.
 		if (gBrowser.undoRemoveTab)
@@ -147,6 +149,8 @@
 
 	onUnload: function()
 	{
+		var numWindows = this.getBrowserWindows().length;
+		
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.removeObserver(this, aTopic);
 		}, this);
@@ -156,27 +160,36 @@
 		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
 		
-		if (this.mPref__running && this.getBrowserWindows().length == 0)
+		// Last window closing will leaks briefly since "quit-application" observer is not removed from it 
+		// until after shutdown is run, but since browser is closing anyway, who cares?
+		if (numWindows != 0) this.mObserverService.removeObserver(this, "quit-application", false);
+		
+		if (this.mPref__running && numWindows == 0)
 		{
 			this._string_preserve_session = this._string("preserve_session");
 			this._string_backup_session = this._string("backup_session");
 			this._string_old_backup_session = this._string("old_backup_session");
 			this._string_prompt_not_again = this._string("prompt_not_again");
-			this._string_encrypt_fail = this._string("encrypt_fail");
 			
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
+			this.mBundle = null;
+			
+			if (!this.mPref__stopping) {
+				this.mObserverService.removeObserver(this, "quit-application", false);
+				this.shutDown();
+			}
 		}
 		this.mBundle = null;
 		this.mFullyLoaded = false;
 
-//		Uncomment the following when bug 360408 is fixed.
-//      if (this.mPref__running && !this.mPref__stopping && this.getBrowserWindows().length != 0)
-//		{
-//			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
-//			var state = this.getSessionState(null, true);
-//			this.appendClosedWindow(state);
-//			this.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", null);
-//		}
+//		Only do the following in Firefox 3.0 and above where bug 360408 is fixed.
+		if (this.mFF3 && this.mPref__running && !this.mPref__stopping && numWindows != 0)
+		{
+			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
+			var state = this.getSessionState(null, true);
+			this.appendClosedWindow(state);
+			this.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", null);
+		}
 	},
 
 	observe: function(aSubject, aTopic, aData)
@@ -226,8 +239,9 @@
 			}
 			break;
 		case "quit-application":
+			this.mObserverService.removeObserver(this, "quit-application", false);
 			// only run shutdown for one window and if not restarting browser
-			if (this.getPref("_running") && (aData != "restart"))
+			if (aData != "restart")
 			{
 				this.shutDown();
 			}
@@ -507,6 +521,15 @@
 		{
 			newWindow = true;
 		}
+		else
+		{
+			// Don't save closed windows when loading session
+			this.getBrowserWindows().forEach(function(aWindow) {
+				if (aWindow != window) { 
+					aWindow.gSessionManager.mPref__stopping = true; 
+				}
+			});
+		}
 
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
@@ -645,7 +668,7 @@
 		var closedTabs = this.mSessionStore.getClosedTabData(window);
 		var mClosedTabs = [];
 		closedTabs = eval(closedTabs);
-		this.fixBug350558(closedTabs);
+		if (!this.mFF3) this.fixBug350558(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
 				                url:aValue.state.entries[aValue.state.entries.length - 1].url }
@@ -956,8 +979,7 @@
 
 	appendClosedWindow: function(aState)
 	{
-		if (this.mPref_max_closed_undo == 0 || Array.every(gBrowser.browsers, this.isCleanBrowser) ||
-		    !this.getPref("_running", false) || this.mPref__stopping)
+		if (this.mPref_max_closed_undo == 0 || Array.every(gBrowser.browsers, this.isCleanBrowser))
 		{
 			return;
 		}
@@ -1162,24 +1184,9 @@
 
 /* ........ Encryption functions .............. */
 
-	cryptError: function(aException)
+	cryptError: function(aText)
 	{
-		var text;
-		if (aException.message) {
-			if (aException.message.indexOf("decryptString") != -1) {
-				if (aException.message.indexOf("NS_ERROR_FAILURE") != -1) {
-					text = this._string("decrypt_fail1");
-				}
-				else {
-					text = this._string("decrypt_fail2");
-				}
-			}
-			else {
-				text = this._string_encrypt_fail || this._string("encrypt_fail");
-			}
-		}
-		else text = aException;
-		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, text);
+		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, aText);
 	},
 
 	decrypt: function(aData)
@@ -1191,7 +1198,7 @@
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 			catch (ex) { 
-				this.cryptError(ex); 
+				this.cryptError("You must enter your master password for Session Manager to procede."); 
 				return null;
 			}
 		}
@@ -1214,7 +1221,7 @@
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 		}
-		catch (ex) { this.cryptError(ex); }
+		catch (ex) { this.cryptError("You did not enter your master password, so session/window data was not encrypted."); }
 		return aData;
 	},
 
@@ -1251,9 +1258,9 @@
 			}
 			// failed to encrypt/decrypt so revert setting
 			catch (ex) {
+				this.cryptError("You must enter your master password for Session Manager to procede.");
 				this.setPref("_encrypted",!this.mPref_encrypt_sessions);
 				this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
-				this.cryptError(this._string("change_encryption_fail"));
 			}
 		}
 	},
@@ -1678,7 +1685,7 @@
 			else if (aWindow._closedTabs) 
 			{
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
-				this.fixBug350558(aWindow._closedTabs);
+				if (!this.mFF3) this.fixBug350558(aWindow._closedTabs);
 			}
 		}, this);
 		return aState.toSource();
