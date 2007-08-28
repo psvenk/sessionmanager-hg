@@ -16,6 +16,7 @@
 	mPromptSessionName: "?",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
+	mSessionRegExp: /^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|true)\t)?(count=([0-9]+)\/([0-9]+))?/m,
 
 	mSessionCache: {},
 	mClosedWindowsCache: { timestamp: 0, data: null },
@@ -80,6 +81,12 @@
 		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
 		
+		// Undo close tab if middle click on tab bar - only do this if Tab Clicking Options
+		// or Tab Mix Plus are not installed.
+		if ((typeof(tabClicking) == "undefined") && (typeof(TM_checkClick) == "undefined")) {
+			gBrowser.mStrip.addEventListener("click", this.onTabBarClick, false);
+		}
+		
 		this.synchStartup();
 		this.recoverSession();
 		this.updateToolbarButton();
@@ -122,10 +129,16 @@
 		// set autosave_name window value (used on browser crash)
 		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);
 		
-		// One time message on update
-		if (this.getPref("version", "") != "0.6")
+		// Remove change made in 0.6 (only do this once)
+		if (this.getPref("version", "") == "0.6")
 		{
-			this.setPref("version", "0.6");
+			this.delPref("browser.warnOnQuit", true);
+		}
+		
+		// One time message on update
+		if (this.getPref("version", "") != "0.6.1")
+		{
+			this.setPref("version", "0.6.1");
 			setTimeout(function() {
 				var tBrowser = top.document.getElementById("content");
 				if (tBrowser.mCurrentTab.linkedBrowser && 
@@ -159,6 +172,7 @@
 		
 		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+		gBrowser.mStrip.removeEventListener("click", this.onTabBarClick, false);
 		
 		// Last window closing will leaks briefly since "quit-application" observer is not removed from it 
 		// until after shutdown is run, but since browser is closing anyway, who cares?
@@ -170,10 +184,13 @@
 			this._string_backup_session = this._string("backup_session");
 			this._string_old_backup_session = this._string("old_backup_session");
 			this._string_prompt_not_again = this._string("prompt_not_again");
+			this._string_encrypt_fail = this._string("encrypt_fail");
 			
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 			this.mBundle = null;
 			
+			// This executes in Firefox 2.x if last browser window closes and non-browser windows are still open.
+			// In Firefox 3.0, it executes whenever the last browser window is closed
 			if (!this.mPref__stopping) {
 				this.mObserverService.removeObserver(this, "quit-application", false);
 				this.shutDown();
@@ -275,6 +292,15 @@
 			webNav.reload(nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE);
 		}
 	},
+	
+	onTabBarClick: function(aEvent)
+	{
+		//undo close tab on middle click on tab bar
+		if (aEvent.button == 1 && aEvent.target.localName != "tab")
+		{
+			undoCloseTab();
+		}
+	},
 
 	onToolbarClick: function(aEvent, aButton)
 	{
@@ -330,7 +356,7 @@
 		sessions.forEach(function(aSession, aIx) {
 			var key = (aIx < 9)?aIx + 1:(aIx == 9)?"0":"";
 			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", ((key)?key + ") ":"") + aSession.name);
+			menuitem.setAttribute("label", ((key)?key + ") ":"") + aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")");
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && event.ctrlKey)?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("accesskey", key);
@@ -465,7 +491,7 @@
 			return;
 		}
 
-		if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|true))?/m.test(state))
+		if (this.mSessionRegExp.test(state))
 		{
 			var name = RegExp.$1;
 			var autosave = RegExp.$3;
@@ -592,6 +618,8 @@
 		if (aSession)
 		{
 			aSession.split("\n").forEach(function(aFileName) {
+				// If deleted autoload session, revert to no autoload session
+				if (aFileName == this.mPref_resume_session) this.setPref("resume_session", "");
 				this.delFile(this.getSessionDir(aFileName));
 			}, this);
 		}
@@ -910,15 +938,15 @@
 			var cached = this.mSessionCache[fileName] || null;
 			if (cached && cached.time == file.lastModifiedTime)
 			{
-				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave });
+				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs });
 				continue;
 			}
-			if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|true))?/m.test(this.readSessionFile(file)))
+			if (this.mSessionRegExp.test(this.readSessionFile(file)))
 			{
 				var timestamp = parseInt(RegExp.$2) || file.lastModifiedTime;
 				var autosave = (RegExp.$3 == "true");
-				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: autosave });
-				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: autosave, time: file.lastModifiedTime };
+				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: autosave, windows: RegExp.$5, tabs: RegExp.$6 });
+				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: autosave, time: file.lastModifiedTime, windows: RegExp.$5, tabs: RegExp.$6 };
 			}
 		}
 		
@@ -1019,7 +1047,8 @@
 		}
 		this.delPref("_encrypted");
 		this.delPref("_running");
-
+		this.mPref__running = false;
+		
 		this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
 		
 		// Cleanup left over files from Crash Recovery
@@ -1114,14 +1143,29 @@
 			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\n" + state;
 			this.writeFile(aFile, state);
 		}
-		// pre autosave
+		// pre autosave and tab/window count
 		else if ((/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?/m.test(state)) &&
-		         (!/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?autosave=(false|true)\n/m.test(state)))
+		         (!/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|true))\t(count=[0-9]+\/[0-9]+)\n/m.test(state)))
 		{
-			var match = /\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)/m.exec(state);
-			if (match && match.index != null) {
-				state = state.substring(0, match[0].length-1) + "\nautosave=false" + state.substring(match[0].length,state.length);
-				this.writeFile(aFile, state);
+			// pre tab/window count
+			if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|true))\n/m.test(state))
+			{
+				var match = /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+\n)?(autosave=(false|true))/m.exec(state);
+				if (match && match.index != null) {
+					var count = this.getCount(state.substring(match[0].length+1,state.length-1));
+					state = match[0] + "\tcount=" + count.windows + "/" + count.tabs + state.substring(match[0].length,state.length);
+					this.writeFile(aFile, state);
+				}
+			}
+			// pre autosave
+			else if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?/m.test(state))
+			{
+				var match = /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)/m.exec(state);
+				if (match && match.index != null) {
+					var count = this.getCount(state.substring(match[0].length+1,state.length-1));
+					state = match[0] + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + state.substring(match[0].length,state.length);
+					this.writeFile(aFile, state);
+				}
 			}
 		}
 		
@@ -1184,9 +1228,24 @@
 
 /* ........ Encryption functions .............. */
 
-	cryptError: function(aText)
+	cryptError: function(aException)
 	{
-		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, aText);
+		var text;
+		if (aException.message) {
+			if (aException.message.indexOf("decryptString") != -1) {
+				if (aException.message.indexOf("NS_ERROR_FAILURE") != -1) {
+					text = this._string("decrypt_fail1");
+				}
+				else {
+					text = this._string("decrypt_fail2");
+				}
+			}
+			else {
+				text = this._string_encrypt_fail || this._string("encrypt_fail");
+			}
+		}
+		else text = aException;
+		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, text);
 	},
 
 	decrypt: function(aData)
@@ -1198,7 +1257,7 @@
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 			catch (ex) { 
-				this.cryptError("You must enter your master password for Session Manager to procede."); 
+				this.cryptError(ex); 
 				return null;
 			}
 		}
@@ -1221,7 +1280,7 @@
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 		}
-		catch (ex) { this.cryptError("You did not enter your master password, so session/window data was not encrypted."); }
+		catch (ex) { this.cryptError(ex); }
 		return aData;
 	},
 
@@ -1240,7 +1299,7 @@
 					var state = this.readSessionFile(file);
 					if (state) 
 					{
-						if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|true))?/m.test(state))
+						if (this.mSessionRegExp.test(state))
 						{
 							state = state.split("\n")
 							state[4] = this.decryptEncryptByPreference(state[4]);
@@ -1258,9 +1317,9 @@
 			}
 			// failed to encrypt/decrypt so revert setting
 			catch (ex) {
-				this.cryptError("You must enter your master password for Session Manager to procede.");
 				this.setPref("_encrypted",!this.mPref_encrypt_sessions);
 				this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
+				this.cryptError(this._string("change_encryption_fail"));
 			}
 		}
 	},
@@ -1584,6 +1643,21 @@
 	},
 
 /* ........ Auxiliary Functions .............. */
+	// count windows and tabs
+	getCount: function (aState)
+	{
+		var windows = 0, tabs = 0;
+		aState = this.decrypt(aState);
+		
+		aState = eval("(" + aState + ")");
+		aState.windows.forEach(function(aWindow) {
+			windows = windows + 1;
+			tabs = tabs + aWindow.tabs.length;
+		});
+
+		return { windows: windows, tabs: tabs };
+	},
+	
 	// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
 	fixBug350558: function (aClosedTabs)
 	{
@@ -1605,12 +1679,13 @@
 		var state = (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
 		
 		state = this.handleTabUndoData(state, aNoUndoData);
+		var count = this.getCount(state);
 		
 		// encrypt state if encryption preference set
 		state = this.decryptEncryptByPreference(state); 
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
-		        "\nautosave=" + ((aAutoSave)?"true":"false") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
+		        "\nautosave=" + ((aAutoSave)?"true":"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
 	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession)
@@ -1658,7 +1733,7 @@
 	
 	makeOneWindow: function(aState)
 	{
-		aState = eval("(" + aState + ")")
+		aState = eval("(" + aState + ")");
 		if (aState.windows.length > 1)
 		{
 			// take off first window
@@ -1679,7 +1754,7 @@
 	
 	handleTabUndoData: function(aState, aStrip)
 	{
-		aState = eval("(" + aState + ")")
+		aState = eval("(" + aState + ")");
 		aState.windows.forEach(function(aWindow) {
 			if (aStrip) aWindow._closedTabs = [];
 			else if (aWindow._closedTabs) 
