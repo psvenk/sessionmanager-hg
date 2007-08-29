@@ -262,6 +262,11 @@
 			{
 				this.shutDown();
 			}
+			else
+			{
+				// don't reload tabs after restart
+				this.setPref("_no_reload", true);
+			}
  			break;
 		case "quit-application-granted":
 			// quit granted so stop listening for closed windows
@@ -280,16 +285,10 @@
 		var browser = this.getBrowserForTab(aEvent.originalTarget);
 
 		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
-		if (gSessionManager.mPref_reload && gSessionManager._allowReload && !browser.__SS_data && !gSessionManager.mIOService.offline)
+		if (gSessionManager.mPref_reload && gSessionManager._allowReload && !gSessionManager.mIOService.offline)
 		{
 			var nsIWebNavigation = Components.interfaces.nsIWebNavigation;
-			var webNav = browser.webNavigation;
-			try
-			{
-				webNav = webNav.sessionHistory.QueryInterface(nsIWebNavigation);
-			}
-			catch (ex) { }
-			webNav.reload(nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE);
+			browser.reloadWithFlags(nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE);
 		}
 	},
 	
@@ -1171,7 +1170,7 @@
 			{
 				var match = /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+\n)?(autosave=(false|true))/m.exec(state);
 				if (match && match.index != null) {
-					var count = this.getCount(state.substring(match[0].length+1,state.length-1));
+					var count = this.getCount(state.substring(match[0].length,state.length));
 					state = match[0] + "\tcount=" + count.windows + "/" + count.tabs + state.substring(match[0].length,state.length);
 					this.writeFile(aFile, state);
 				}
@@ -1181,7 +1180,7 @@
 			{
 				var match = /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)/m.exec(state);
 				if (match && match.index != null) {
-					var count = this.getCount(state.substring(match[0].length+1,state.length-1));
+					var count = this.getCount(state.substring(match[0].length,state.length));
 					state = match[0] + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + state.substring(match[0].length,state.length);
 					this.writeFile(aFile, state);
 				}
@@ -1590,6 +1589,8 @@
 	{
 		var recovering = this.getPref("_recovering");
 		var recoverOnly = recovering || this.mPref__running || this.doResumeCurrent() || this.getPref("browser.sessionstore.resume_session_once", false, true) || !window.arguments || (window.arguments[0] == null);
+		var no_reload = this.getPref("_no_reload");
+		if (no_reload) this.delPref("_no_reload");
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
@@ -1613,7 +1614,8 @@
 		}
 		// handle browser reload with same session
 		else if (recoverOnly) {
-			this._allowReload = true;
+			// only reload if didn't recover from crash
+			if (!no_reload) this._allowReload = true;
 			setTimeout(function() {
 				gSessionManager.mSessionStore.setWindowValue(window,"_sm_autosave_name",gSessionManager.mPref__autosave_name);			
 			}, 100);
