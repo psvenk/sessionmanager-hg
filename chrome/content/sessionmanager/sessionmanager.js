@@ -1668,13 +1668,17 @@
 	getCount: function (aState)
 	{
 		var windows = 0, tabs = 0;
-		aState = this.decrypt(aState);
 		
-		aState = eval("(" + aState + ")");
-		aState.windows.forEach(function(aWindow) {
-			windows = windows + 1;
-			tabs = tabs + aWindow.tabs.length;
-		});
+		try {
+			aState = this.decrypt(aState);
+		
+			aState = eval("(" + aState + ")");
+			aState.windows.forEach(function(aWindow) {
+				windows = windows + 1;
+				tabs = tabs + aWindow.tabs.length;
+			});
+		}
+		catch (ex) {};
 
 		return { windows: windows, tabs: tabs };
 	},
