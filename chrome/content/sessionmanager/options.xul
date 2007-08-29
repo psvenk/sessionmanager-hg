@@ -10,7 +10,7 @@
 
 <prefwindow id="sessionmanagerOptions" title="&options.title;"  
             xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-            onload="sizeToContent;"
+            onload="fixSize(); sizeToContent;"
             windowtype="SessionManager:Options"
             persist="screenX screenY">
 	
@@ -49,8 +49,8 @@
 			<tabs>
 				<tab label="&general.caption;"/>
 				<tab label="&undoClose.caption;"/>
-				<tab label="&advanced.caption; (1)"/>
-				<tab label="&advanced.caption; (2)"/>
+				<tab label="&advanced.caption;"/>
+				<tab label="&sessionstore.caption;"/>
 			</tabs>
 			<tabpanels>
 				<tabpanel orient="vertical">
@@ -155,7 +155,6 @@
 						<button  pack="end" label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
 					</hbox>
 				</tabpanel>
-				
 				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&name_format.caption;"/>
@@ -165,6 +164,24 @@
 						</hbox>
 						<description style="width: 5em;">&name_format.desc;</description>
 					</groupbox>
+					<groupbox>
+						<caption label="&sessiondir.caption;"/>
+						<description>&sessiondir.desc;</description>
+						<textbox preference="extensions.sessionmanager.sessions_dir" id="sessions_dir" readonly="true"/>
+						<hbox pack="end">
+							<button label="&change_dir.label;" accesskey="&change_dir.accesskey;" oncommand="selectSessionDir();"/>
+							<button label="&default_dir.label;" accesskey="&default_dir.accesskey;" oncommand="defaultSessionDir();"/>
+						</hbox>
+					</groupbox>
+					<groupbox>
+						<caption label="&encrypt.caption;"/>
+						<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" preference="extensions.sessionmanager.encrypt_sessions" 
+						          oncommand="this.checked = checkEncryption(this.checked);"/>
+						<separator style="height: 0.5em;" orient="vertical"/>
+						<description style="width: 26em; color:red;" class="indent">&encrypt.desc;</description>
+					</groupbox>
+				</tabpanel>
+				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&service.caption;"/>
 						<checkbox label="&crashrecovery.label;" accesskey="&crashrecovery.accesskey;" preference="browser.sessionstore.resume_from_crash"/>
@@ -195,27 +212,6 @@
 									<menuitem value="2" label="&privacy.level2;"/>
 								</menupopup>
 							</menulist>
-						</hbox>
-					</groupbox>
-				</tabpanel>
-				<tabpanel orient="vertical">
-					<groupbox>
-						<caption label="&sessiondir.caption;"/>
-						<description>&sessiondir.desc;</description>
-						<textbox preference="extensions.sessionmanager.sessions_dir" id="sessions_dir" readonly="true"/>
-						<hbox pack="end">
-							<button label="&change_dir.label;" accesskey="&change_dir.accesskey;" oncommand="selectSessionDir();"/>
-							<button label="&default_dir.label;" accesskey="&default_dir.accesskey;" oncommand="defaultSessionDir();"/>
-						</hbox>
-					</groupbox>
-					<groupbox>
-						<caption label="&encrypt.caption;"/>
-						<description style="width: 26em" class="header">&encrypt.desc;</description>
-						<separator style="height: 0.5em;" orient="vertical"/>
-						<hbox pack="end">
-							<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" 
-							 preference="extensions.sessionmanager.encrypt_sessions" 
-							 oncommand="this.checked = checkEncryption(this.checked);"/>
 						</hbox>
 					</groupbox>
 				</tabpanel>

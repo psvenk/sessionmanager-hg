@@ -18,6 +18,11 @@ gSessionManager.onLoad = function() {
 	}, this);
 	resume_session.value = _("extensions.sessionmanager.resume_session").value;
 	
+	// current load session no longer there
+	if (resume_session.selectedIndex == -1) {
+		resume_session.value = "";
+	}
+	
 	_("SessionManagerPrefs").selectedIndex = _("extensions.sessionmanager.options_selected_tab").value;
 };
 gSessionManager.onUnload = function() {
@@ -105,4 +110,10 @@ function checkEncryption(aState) {
 		return !aState;
 	}
 	return aState;
+}
+
+// For whatever reason the prefpane won't be sized correctly unless the tabbox's style.height value is explicitly set
+// so just set it to it's current computed height
+function fixSize() {
+	_("SessionManagerPrefs").style.height=document.defaultView.getComputedStyle(_("SessionManagerPrefs"), null).getPropertyValue("height");
 }
