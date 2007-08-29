@@ -5,10 +5,14 @@ var gAcceptButton = null;
 var gSessionNames = {};
 var gExistingName = 0;
 var gNeedSelection = false;
+var gAutoSaveName = null;
 
 gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
 	this._onLoad(true);
+	
+	// Get autosave name if any
+	gAutoSaveName = this.getPref("_autosave_name");
 	
 	_("mac_title").hidden = !/mac/i.test(navigator.platform);
 	setDescription(_("session_label"), gParams.GetString(1));
@@ -54,10 +58,13 @@ gSessionManager.onLoad = function() {
 	}
 	
 	sessions.forEach(function(aSession) {
-		if (!(gParams.GetInt(1) & 16) || aSession.name != this.getPref("_autosave_name"))
+		if (!(gParams.GetInt(1) & 16) || aSession.name != gAutoSaveName)
 		{
 			var item = gSessionList.appendItem(aSession.name, aSession.fileName);
-			if (aSession.autosave) item.setAttribute("style", "font-weight: bold;");
+			var menuitemStyle = "";
+			if (aSession.autosave) menuitemStyle = "font-weight: bold; ";
+			if (sessions.latestName == aSession.name) menuitemStyle = menuitemStyle + "color: blue;";
+			if (menuitemStyle != "") item.setAttribute("style", menuitemStyle);
 			if (aSession.fileName == gParams.GetString(3))
 			{
 				setTimeout(function(aItem) { gSessionList.selectItem(aItem); }, 0, item);
@@ -142,6 +149,8 @@ function onTextboxInput(aNewValue)
 	
 	gExistingName = gSessionNames[input] || 0;
 	var newWeight = gExistingName || ((gParams.GetInt(1) & 256) && gSessionList.selectedCount > 0);
+	
+	_("checkbox_autosave").checked = (gTextBox.value == gAutoSaveName);
 	
 	if (!gNeedSelection && oldWeight != newWeight)
 	{
