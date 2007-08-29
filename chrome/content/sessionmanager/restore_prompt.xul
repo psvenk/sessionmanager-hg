@@ -32,6 +32,11 @@
 				}
 				params.SetInt(0, 1); // don't recover the crashed session
 			}
+			else
+			{
+				// don't reload tabs after resume from crash
+				this.setPref("_no_reload", true);
+			}
 			
 			// save crashed session
 			var file = this.getProfileFile("sessionstore.js");
@@ -61,6 +66,8 @@
 							// choose to recover autosave session so just recover last session
 							else 
 							{
+								// don't reload tabs after resume from crash
+								this.setPref("_no_reload", true);
 								this.delPref("_recovering");
 								this.setPref("_autosave_name", autosave_name);
 								params.SetInt(0, 0);
