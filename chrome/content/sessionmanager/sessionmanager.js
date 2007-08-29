@@ -360,7 +360,10 @@
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && event.ctrlKey)?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("accesskey", key);
-			if (aSession.autosave) menuitem.setAttribute("style", "font-weight: bold;");
+			var menuitemStyle = "";
+			if (aSession.autosave) menuitemStyle = "font-weight: bold; ";
+			if (sessions.latestName == aSession.name) menuitemStyle = menuitemStyle + "color: blue;";
+			if (menuitemStyle != "") menuitem.setAttribute("style", menuitemStyle);
 			if (aSession.name == this.mPref__autosave_name) menuitem.setAttribute("disabled", true);
 			aPopup.insertBefore(menuitem, separator);
 		}, this);
@@ -440,6 +443,11 @@
 		if (values.autoSave)
 		{
 			this.setPref("_autosave_name",aName);
+		}
+		else if (this.mPref__autosave_name == aName)
+		{
+			// If in auto-save session and user saves on top of it as manual turn off autosave
+			this.setPref("_autosave_name","");
 		}
 	},
 
@@ -929,6 +937,7 @@
 	getSessions: function()
 	{
 		var sessions = [];
+		var latest = 0;
 		
 		var filesEnum = this.getSessionDir().directoryEntries.QueryInterface(this.mComponents.interfaces.nsISimpleEnumerator);
 		while (filesEnum.hasMoreElements())
@@ -938,6 +947,11 @@
 			var cached = this.mSessionCache[fileName] || null;
 			if (cached && cached.time == file.lastModifiedTime)
 			{
+				if (latest < cached.timestamp) 
+				{
+					sessions.latestName = cached.name;
+					latest = cached.timestamp;
+				}
 				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs });
 				continue;
 			}
@@ -945,6 +959,11 @@
 			{
 				var timestamp = parseInt(RegExp.$2) || file.lastModifiedTime;
 				var autosave = (RegExp.$3 == "true");
+				if (latest < timestamp) 
+				{
+					sessions.latestName = RegExp.$1;
+					latest = timestamp;
+				}
 				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: autosave, windows: RegExp.$5, tabs: RegExp.$6 });
 				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: autosave, time: file.lastModifiedTime, windows: RegExp.$5, tabs: RegExp.$6 };
 			}
