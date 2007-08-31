@@ -356,7 +356,7 @@
 			var key = (aIx < 9)?aIx + 1:(aIx == 9)?"0":"";
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", ((key)?key + ") ":"") + aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")");
-			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && event.ctrlKey)?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey)?"append":"");');
+			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("accesskey", key);
 			var menuitemStyle = "";
@@ -689,7 +689,7 @@
 		closedWindows.forEach(function(aWindow, aIx) {
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", aWindow.name);
-			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && event.ctrlKey)?"overwrite":(event.ctrlKey)?"append":"");');
+			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey)?"append":"");');
 			aPopup.insertBefore(menuitem, separator);
 		});
 		label.hidden = (closedWindows.length == 0);
