@@ -5,14 +5,10 @@ var gAcceptButton = null;
 var gSessionNames = {};
 var gExistingName = 0;
 var gNeedSelection = false;
-var gAutoSaveName = null;
 
 gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
 	this._onLoad(true);
-	
-	// Get autosave name if any
-	gAutoSaveName = this.getPref("_autosave_name");
 	
 	_("mac_title").hidden = !/mac/i.test(navigator.platform);
 	setDescription(_("session_label"), gParams.GetString(1));
@@ -58,10 +54,11 @@ gSessionManager.onLoad = function() {
 	}
 	
 	sessions.forEach(function(aSession) {
-		if (!(gParams.GetInt(1) & 16) || aSession.name != gAutoSaveName)
+		if (!((gParams.GetInt(1) & 16) || (gParams.GetInt(1) & 8)) || aSession.name != this.getPref("_autosave_name"))
 		{
 			var item = gSessionList.appendItem(aSession.name, aSession.fileName);
 			var menuitemStyle = "";
+			item.setAttribute("autosave", aSession.autosave);
 			if (aSession.autosave) menuitemStyle = "font-weight: bold; ";
 			if (sessions.latestName == aSession.name) menuitemStyle = menuitemStyle + "color: blue;";
 			if (menuitemStyle != "") item.setAttribute("style", menuitemStyle);
@@ -81,10 +78,10 @@ gSessionManager.onLoad = function() {
 	// add accessibility shortcuts (single-click / double-click / return)
 	for (var i = 0; i < gSessionList.childNodes.length; i++)
 	{
-		gSessionList.childNodes[i].setAttribute("ondblclick", "if (event.button == 0 && !event.ctrlKey && !event.shiftKey && !event.altKey) gAcceptButton.doCommand();");
+		gSessionList.childNodes[i].setAttribute("ondblclick", "if (event.button == 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) gAcceptButton.doCommand();");
 		if (gTextBox && !(gParams.GetInt(1) & 256))
 		{
-			gSessionList.childNodes[i].setAttribute("onclick", "if (event.button == 0 && !event.ctrlKey && !event.shiftKey && !event.altKey) onTextboxInput(gSessionList.childNodes[gSessionList.selectedIndex].label);");
+			gSessionList.childNodes[i].setAttribute("onclick", "if (event.button == 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) onTextboxInput(gSessionList.childNodes[gSessionList.selectedIndex].label);");
 		}
 	}
 	if (gTextBox)
@@ -150,7 +147,7 @@ function onTextboxInput(aNewValue)
 	gExistingName = gSessionNames[input] || 0;
 	var newWeight = gExistingName || ((gParams.GetInt(1) & 256) && gSessionList.selectedCount > 0);
 	
-	_("checkbox_autosave").checked = (gTextBox.value == gAutoSaveName);
+	_("checkbox_autosave").checked = (gExistingName && gSessionList.childNodes[gExistingName - 1])? (gSessionList.childNodes[gExistingName - 1].getAttribute("autosave") == "true") : false;
 	
 	if (!gNeedSelection && oldWeight != newWeight)
 	{
