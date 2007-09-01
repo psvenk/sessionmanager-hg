@@ -3,7 +3,7 @@ gSessionManager.onLoad = function() {
 	this._onLoad(true);
 	
 	var resume_session = _("resume_session");
-	var sessions = this.getSessions();
+	var sessions = this.getSessions(true);
 	resume_session.appendItem(this._string("startup_none"), "", "");
 	resume_session.appendItem(this._string("startup_prompt"), this.mPromptSessionName, "");
 	if (!sessions.some(function(aSession) { return aSession.fileName == this.mBackupSessionName; }, this))

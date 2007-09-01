@@ -16,7 +16,7 @@ gSessionManager.onLoad = function() {
 	gAcceptButton = document.documentElement.getButton("accept");
 	gAcceptButton.label = gParams.GetString(2) || gAcceptButton.label;
 	
-	var sessions = this.getSessions();
+	var sessions = this.getSessions(true);
 	if (gParams.GetInt(1) & 1) // add a "virtual" current session
 	{
 		sessions.unshift({ name: this._string("current_session"), fileName: "*" });

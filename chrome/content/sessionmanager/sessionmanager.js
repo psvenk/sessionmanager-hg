@@ -351,7 +351,7 @@
 		
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
 		
-		var sessions = this.getSessions();
+		var sessions = this.getSessions(true);
 		sessions.forEach(function(aSession, aIx) {
 			var key = (aIx < 9)?aIx + 1:(aIx == 9)?"0":"";
 			var menuitem = document.createElement("menuitem");
@@ -933,7 +933,7 @@
 		return dir.QueryInterface(this.mComponents.interfaces.nsILocalFile);
 	},
 
-	getSessions: function()
+	getSessions: function(headerOnly)
 	{
 		var sessions = [];
 		var latest = 0;
@@ -954,7 +954,7 @@
 				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs });
 				continue;
 			}
-			if (this.mSessionRegExp.test(this.readSessionFile(file)))
+			if (this.mSessionRegExp.test(this.readSessionFile(file, headerOnly)))
 			{
 				var timestamp = parseInt(RegExp.$2) || file.lastModifiedTime;
 				var autosave = (RegExp.$3 == "true");
@@ -1145,9 +1145,9 @@
 		}
 	},
 
-	readSessionFile: function(aFile)
+	readSessionFile: function(aFile,headerOnly)
 	{
-		var state = this.readFile(aFile);
+		var state = this.readFile(aFile,headerOnly);
 		
 		// old crashrecovery file format
 		if ((/\n\[Window1\]\n/.test(state)) && 
@@ -1165,6 +1165,9 @@
 		else if ((/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?/m.test(state)) &&
 		         (!/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|true))\t(count=[0-9]+\/[0-9]+)\n/m.test(state)))
 		{
+			// read entire file if only read header
+			if (headerOnly) state = this.readFile(aFile);
+			
 			// pre tab/window count
 			if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|true))\n/m.test(state))
 			{
@@ -1190,7 +1193,7 @@
 		return state;
 	},
 	
-	readFile: function(aFile)
+	readFile: function(aFile,headerOnly)
 	{
 		try
 		{
@@ -1204,6 +1207,7 @@
 			while (cvstream.readString(4096, data))
 			{
 				content += data.value;
+				if (headerOnly) break;
 			}
 			cvstream.close();
 			
@@ -1599,7 +1603,7 @@
 			this.mPref__autosave_name = "";
 			this.load(recovering, "startup");
 		}
-		else if (!recoverOnly && this.mPref_resume_session && this.getSessions().length > 0)
+		else if (!recoverOnly && this.mPref_resume_session && this.getSessions(true).length > 0)
 		{
 			var values = { ignorable: true };
 			var session = (this.mPref_resume_session == this.mPromptSessionName)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session;
