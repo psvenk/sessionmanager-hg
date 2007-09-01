@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Formatar as sugestões para os nomes das sessões:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Utilize &#37;t para o título dos separadores activos, &#37;d para a data de hoje e &#37;m para a hora; o comprimento do titulo pode ser limitado a # caracteres: &#37;#t.">
-<!ENTITY service.caption "Definições da &quot;Recuperação de Erro&quot;">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "Definições do &quot;SessionStore&quot;">
 <!ENTITY service.description "Não toque, a não ser que saiba o que está a fazer!">
 <!ENTITY interval.label "Intervalo mínimo para guardar (em segundos):">
 <!ENTITY interval.accesskey "n">
@@ -55,9 +56,12 @@
 <!ENTITY privacy.level0 "todos os sítios">
 <!ENTITY privacy.level1 "apenas para sítios não encriptados">
 <!ENTITY privacy.level2 "nenhum sítio">
-<!ENTITY moreadvanced.caption "Mais Avançado">
 <!ENTITY sessiondir.caption "Localização das sessões guardadas">
 <!ENTITY sessiondir.desc "A localização pré-definida das sessões guardadas pode ser substituída aqui.">
+<!ENTITY encrypt.caption "Cifra">
+<!ENTITY encrypt.desc "Atenção: Dados de sessão cifrados apenas podem ser abertos em perfis com os ficheiros  Key3.db e cert8.db correspondentes. Adicionalmente se tiver uma senha mestra, as sessões não podem ser cifradas ou decifradas se não introduzir a senha mestra.">
+<!ENTITY encrypt.label "Cifrar a sessão guardada e fechar a janela de dados">
+<!ENTITY encrypt.accesskey "i">
 <!ENTITY change_dir.label "Mudar">
 <!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Pré-definido">

@@ -8,7 +8,7 @@
 <!ENTITY backup_session.label0 "jelenlegi munkamenet eldobása">
 <!ENTITY backup_session.label1 "jelenlegi munkamenet biztonsági mentése">
 <!ENTITY backup_session.label2 "biztonsági mentésre rákérdez">
-<!ENTITY crashrecovery.label "Visszaállítás engedélyezése összeomlás után">
+<!ENTITY crashrecovery.label "Helyreállítás engedélyezése összeomlás után">
 <!ENTITY crashrecovery.accesskey "V">
 <!ENTITY autosave_session.label "Lecserélt munkamenet automatikus mentése">
 <!ENTITY autosave_session.accesskey "a">
@@ -16,7 +16,7 @@
 <!ENTITY sessionList.caption "Elérhető munkamenetek">
 <!ENTITY orderList.label "Munkamenetek rendezése">
 <!ENTITY orderList.accesskey "r">
-<!ENTITY orderList.label1 "abc szerint">
+<!ENTITY orderList.label1 "ABC szerint">
 <!ENTITY orderList.label2 "régebbi --&gt; újabb">
 <!ENTITY orderList.label_2 "újabb --&gt; régebbi">
 <!ENTITY max_backup.label "Régebbi munkamenetek megtartott biztonsági mentéseinek száma:">
@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Munkamenetek neveinek formátuma:">
 <!ENTITY name_format.accesskey "o">
 <!ENTITY name_format.desc "Használható kapcsolók: az aktív lap neve (&#37;t), mai dátum (&#37;d), idő (&#37;m). A név hossza korlátozva lehet # karakterre (&#37;#t).">
-<!ENTITY service.caption "&quot;Visszaállítás összeomlás után&quot; beállítások">
+<!ENTITY sessionstore.caption "Munkamenet helyreállítása">
+<!ENTITY service.caption "A munkamenetek helyreállításának beállításai">
 <!ENTITY service.description "Ne változtassa meg ezeket a beállításokat, ha nem biztos a következményekben.">
 <!ENTITY interval.label "Az aktuális állapot mentése (másodpercekben):">
 <!ENTITY interval.accesskey "A">
@@ -55,9 +56,12 @@
 <!ENTITY privacy.level0 "összes oldal">
 <!ENTITY privacy.level1 "nem titkosított oldal">
 <!ENTITY privacy.level2 "nincs mentés">
-<!ENTITY moreadvanced.caption "Több haladó">
 <!ENTITY sessiondir.caption "Mentett munkamenetek mappája">
 <!ENTITY sessiondir.desc "Mentett munkamenetek alapértelmezett mappáját változtathatja meg itt.">
+<!ENTITY encrypt.caption "Titkosítás">
+<!ENTITY encrypt.desc "Figyelmeztetés: A titkosított munkamenet adatai csak azonos key3.db és cert8.db fájlokat tartalamazó profilokban nyithatóak meg. Amennyiben adott a mesterjelszó, a munkamenetek nem titkosíthatók/dekódolhatók a megfelelő mesterjelszó megadásáig.">
+<!ENTITY encrypt.label "Mentett munkamenet és bezárt ablak adatainak titkosítása">
+<!ENTITY encrypt.accesskey "t">
 <!ENTITY change_dir.label "Változtat">
 <!ENTITY change_dir.accesskey "V">
 <!ENTITY default_dir.label "Alapértelmezett visszaállítása">

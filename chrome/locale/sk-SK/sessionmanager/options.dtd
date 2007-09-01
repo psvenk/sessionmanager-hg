@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Formát návrhov názvov relácií:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Môžete použiť &#37;t ako skratku pre titulok aktívnej karty, &#37;d dnešný dátum a &#37;m pre čas. Titulok môžete bude obmedzený na počet # znakov: &#37;#t.">
-<!ENTITY service.caption "Nastavenia &quot;obnovy po páde&quot;">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "Nastavenia pre &quot;SessionStore&quot;">
 <!ENTITY service.description "Nemeňte tieto nastavenia, ak neviete čo robíte.">
 <!ENTITY interval.label "Minimálny časový interval medzi ukladaním stavu (v sekundách):">
 <!ENTITY interval.accesskey "i">
@@ -55,9 +56,12 @@
 <!ENTITY privacy.level0 "všetky stránky">
 <!ENTITY privacy.level1 "len nezabezpečené stránky">
 <!ENTITY privacy.level2 "žiadne stránky">
-<!ENTITY moreadvanced.caption "Ďalšie rozšírené">
 <!ENTITY sessiondir.caption "Umiestnenie pre uložené relácie">
 <!ENTITY sessiondir.desc "Predvolené umiestnenie pre uložené relácie môže byť zmenené.">
+<!ENTITY encrypt.caption "Zašifrovanie">
+<!ENTITY encrypt.desc "Upozornenie: Zašifrované údaje relácií je možné otvoriť len v profiloch s identickými súbormi key3.db a cert8.db. Ak je nastavené aj hlavné heslo, relácie nemôžu byť zašifrované alebo dešifrované bez jeho zadania.">
+<!ENTITY encrypt.label "Zašifrovať údaje o uložených reláciách a zatvorených oknách">
+<!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Zmeniť">
 <!ENTITY change_dir.accesskey "Z">
 <!ENTITY default_dir.label "Obnoviť predvolené">

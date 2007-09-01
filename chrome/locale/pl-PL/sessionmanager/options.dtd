@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Sugerowany format nazwy sesji:">
 <!ENTITY name_format.accesskey "f">
 <!ENTITY name_format.desc "Użyj &#37;t dla nazw aktywnych kart, &#37;d dla dzisiejszej daty i &#37;m dla czasu. Można także ograniczyć długość nazwy do określonej ilości znaków: &#37;#t.">
-<!ENTITY service.caption "Odzyskiwanie sesji - ustawienia">
+<!ENTITY sessionstore.caption "Przechowywanie sesji">
+<!ENTITY service.caption "Przechowywanie sesji - ustawienia">
 <!ENTITY service.description "Nie zmieniaj tych ustawień jeżeli nie wiesz o co chodzi">
 <!ENTITY interval.label "Minimalna przerwa pomiędzy kolejnymi zapisami (sek.):">
 <!ENTITY interval.accesskey "M">
@@ -55,9 +56,12 @@
 <!ENTITY privacy.level0 "wszystkich witryn">
 <!ENTITY privacy.level1 "tylko nieszyfrowanych witryn">
 <!ENTITY privacy.level2 "(nie zapisuj)">
-<!ENTITY moreadvanced.caption "Lokalizacja">
 <!ENTITY sessiondir.caption "Lokalizacja zapisanych sesji">
 <!ENTITY sessiondir.desc "Tutaj można zmienić domyślną lokalizację zapisanych sesji">
+<!ENTITY encrypt.caption "Szyfrowanie">
+<!ENTITY encrypt.desc "Uwaga: Dane zaszyfrowanej sesji mogą być otwarte tylko w profilu, w którym znajdują się identyczne pliki key3.db i cert8.db. Ponadto sesja nie może być zaszyfrowana/odszyfrowana, gdy jest ustanowione hasło główne, a nie zostało wprowadzone.">
+<!ENTITY encrypt.label "Zaszyfruj zapisaną sesję i dane zamkniętych okien">
+<!ENTITY encrypt.accesskey "s">
 <!ENTITY change_dir.label "Zmień">
 <!ENTITY change_dir.accesskey "Z">
 <!ENTITY default_dir.label "Domyślna">

@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Formato para las sugerencias de los nombres de las sesiones:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Use &#37;t para el título de la pestaña activa, &#37;d para la fecha de hoy y &#37;m para la hora; además la longitud del título puede limitarse a # caracteres: &#37;#t.">
-<!ENTITY service.caption "Opciones de &quot;Crash Recovery&quot;">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "Opciones &quot;SessionStore&quot;">
 <!ENTITY service.description "No cambie estas opciones, a menos que sepa lo que está haciendo:">
 <!ENTITY interval.label "Intervalo de tiempo mínimo para guardar dos estados (en segundos):">
 <!ENTITY interval.accesskey "t">
@@ -55,9 +56,12 @@
 <!ENTITY privacy.level0 "todos los sitios">
 <!ENTITY privacy.level1 "sólo sitios no cifrados">
 <!ENTITY privacy.level2 "ningún sitio">
-<!ENTITY moreadvanced.caption "Más avanzadas">
 <!ENTITY sessiondir.caption "Guardar ubicación de las sesiones">
 <!ENTITY sessiondir.desc "Aquí puede cambiar la ubicación por defecto para las sesiones guardadas.">
+<!ENTITY encrypt.caption "Cifrado">
+<!ENTITY encrypt.desc "Atención: Las sesiones con datos cifrados sólo podrán ser abiertas en perfiles con archivos key3.db y cert8.db idénticos. Además, si se ha establecido una contraseña maestra, las sesiones no se podrán cifrar si no la introduce.">
+<!ENTITY encrypt.label "Cifrar los datos de la sesión guardada y cerrada">
+<!ENTITY encrypt.accesskey "i">
 <!ENTITY change_dir.label "Cambiar">
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "Restaurar valores por defecto">

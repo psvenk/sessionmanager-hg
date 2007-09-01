@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Oturum isimleri için öneri:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Aktif Sekme başlaığı için &#37;t, Bugun tarih ve saaati icin &#37;m, Ek başlık uzunlukları için &#37;#t.">
-<!ENTITY service.caption "&quot;Oturum Kurtarma&quot;Ayarlar">
+<!ENTITY sessionstore.caption "Oturum Kayıt">
+<!ENTITY service.caption "&quot;Oturum Kayıt&quot; Ayarları">
 <!ENTITY service.description "Ne yaptığınızı bilmiyorsanız buraya dokunmayın">
 <!ENTITY interval.label "iki durum kaydı arasındaki en fazla zaman aralığı (saniye olarak):">
 <!ENTITY interval.accesskey "i">
@@ -55,9 +56,11 @@
 <!ENTITY privacy.level0 "tüm siteler">
 <!ENTITY privacy.level1 "yanlızca şifrelenmemiş siteler">
 <!ENTITY privacy.level2 "Hiç bir site">
-<!ENTITY moreadvanced.caption "Daha Gelişmiş">
 <!ENTITY sessiondir.caption "Kayıtlı Oturumun Bölgesi">
 <!ENTITY sessiondir.desc "Kayıtlı Oturumların varsayılan Bölgesi olmalı">
+<!ENTITY encrypt.caption "Şifreleme">
+<!ENTITY encrypt.label "Kapatılan pencere ve kaydedilen otorumları şifrele">
+<!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Değiştir">
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "Varsayılan">

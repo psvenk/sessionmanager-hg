@@ -44,7 +44,6 @@
 <!ENTITY name_format.label "Formatvorgabe für die vorgeschlagenen Sitzungs-Namen:">
 <!ENTITY name_format.accesskey "o">
 <!ENTITY name_format.desc "&#37;t steht für den aktuellen Seitentitel, &#37;d für das Datum und &#37;m für die Zeit; die Länge des Titels kann zudem auf # Zeichen beschränkt werden: &#37;#t.">
-<!ENTITY service.caption "Einstellungen für die Wiederherstellung nach Absturz">
 <!ENTITY service.description "Ändern Sie diese Einstellungen nur, wenn Sie wissen, was sie bewirken!">
 <!ENTITY interval.label "Minimales Zeitintervall zwischen zwei Sicherungsvorgängen (in Sekunden):">
 <!ENTITY interval.accesskey "i">
@@ -55,9 +54,12 @@
 <!ENTITY privacy.level0 "für alle Websites">
 <!ENTITY privacy.level1 "nur für unverschlüsselte Websites">
 <!ENTITY privacy.level2 "nie">
-<!ENTITY moreadvanced.caption "Sitzungsordner">
 <!ENTITY sessiondir.caption "Zielordner für gesicherte Sitzungen">
 <!ENTITY sessiondir.desc "Der Standard-Zielordner für die gesicherten Sitzungen kann hier geändert werden.">
+<!ENTITY encrypt.caption "Verschlüsselung">
+<!ENTITY encrypt.desc "Achtung: Verschlüsselte Sitzungsdaten können nur in Profilen mit identischen key3.db- und cert8.db-Dateien geöffnet werden! Wenn zudem ein Master-Passwort gesetzt wurde, können die Sitzungen nicht ohne Eingabe des Master-Passworts ver- oder entschlüsselt werden.">
+<!ENTITY encrypt.label "Gesicherte Sitzungen und Daten für geschlossene Fenster verschlüsseln">
+<!ENTITY encrypt.accesskey "v">
 <!ENTITY change_dir.label "Ändern...">
 <!ENTITY change_dir.accesskey "n">
 <!ENTITY default_dir.label "Standard wiederherstellen">

@@ -42,7 +42,6 @@
 <!ENTITY name_format.label "Formato del suggerimento per il nome della sessione:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Usa &#37;t per il titolo della scheda attiva, &#37;d per la data odierna e &#37;m per l&apos;orario; in più la lunghezza del titolo può essere limitata a # caratteri: &#37;#t.">
-<!ENTITY service.caption "Impostazioni di &apos;Crash Recovery&apos;">
 <!ENTITY service.description "Non modificare queste impostazioni se non sai cosa stai facendo!">
 <!ENTITY interval.label "Intervallo minimo tra due salvataggi dello stato (in secondi):">
 <!ENTITY interval.accesskey "m">
@@ -53,7 +52,6 @@
 <!ENTITY privacy.level0 "tutti i siti">
 <!ENTITY privacy.level1 "i siti non cifrati">
 <!ENTITY privacy.level2 "nessun sito">
-<!ENTITY moreadvanced.caption "Per esperti">
 <!ENTITY sessiondir.caption "Cartella delle sessioni salvate">
 <!ENTITY sessiondir.desc "La cartella predefinita delle sessioni salvate può essere sovrascritta qui.">
 <!ENTITY change_dir.label "Cambia">

@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Formaat voor de suggesties van sessienamen:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Gebruik &#37;t voor de titel van de actieve tab, &#37;d voor de datum en &#37;m voor de tijd. Bovendien kan de lengte van de titel gelimiteerd worden tot # karakters door bvb. &#37;#t te gebruiken.">
-<!ENTITY service.caption "Instellingen voor herstel na vastlopen">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "SessionStore-instellingen">
 <!ENTITY service.description "Gelieve dit niet te veranderen, tenzij u weet wat u doet.">
 <!ENTITY interval.label "Minimum tijdsinterval tussen het opslaan van de status (in seconden):">
 <!ENTITY interval.accesskey "i">
@@ -55,9 +56,12 @@
 <!ENTITY privacy.level0 "alle sites">
 <!ENTITY privacy.level1 "alleen onversleutelde sites">
 <!ENTITY privacy.level2 "geen enkele site">
-<!ENTITY moreadvanced.caption "Meer geavanceerd">
 <!ENTITY sessiondir.caption "Locatie van de opgeslagen sessies">
 <!ENTITY sessiondir.desc "De standaard locatie van de opgeslagen sessie kan hier overschreven worden.">
+<!ENTITY encrypt.caption "Versleuteling">
+<!ENTITY encrypt.desc "Waarschuwing: versleutelde sessiedata kan enkel geopend worden in profielen waarin de bestanden key3.db en cert8.db identiek zijn. Als een hoofdwachtwoord is ingesteld in de Privacy-instellingen, zullen versleutelde sessies bovendien niet geopend of gesloten kunnen worden zonder dat dit wachtwoord opgegeven wordt.">
+<!ENTITY encrypt.label "Opgeslagen sessiedata versleutelen">
+<!ENTITY encrypt.accesskey "v">
 <!ENTITY change_dir.label "Wijzigen">
 <!ENTITY change_dir.accesskey "W">
 <!ENTITY default_dir.label "Standaard herstellen">

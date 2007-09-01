@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Format for the suggestions of session names:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Use &#37;t for the active tab&apos;s title, &#37;d for today&apos;s date and &#37;m for the time; additionally the title&apos;s length can be limited to # characters: &#37;#t.">
-<!ENTITY service.caption "&quot;Crash Recovery&quot; Settings">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "&quot;SessionStore&quot; Settings">
 <!ENTITY service.description "Don&apos;t touch these, unless you know what you&apos;re doing!">
 <!ENTITY interval.label "Minimum time interval between two state saves (in seconds):">
 <!ENTITY interval.accesskey "i">

@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Format pour le nom de session suggéré :">
 <!ENTITY name_format.accesskey "e">
 <!ENTITY name_format.desc "Utiliser &#37;t pour le titre de l&apos;onglet actif, &#37;d pour la date du jour et &#37;m pour l&apos;horaire ; de plus, la longueur du titre peut être limitée à # caractères : &#37;#t.">
-<!ENTITY service.caption "Paramètres de rétablissement pour &quot;Crash Recovery&quot;">
+<!ENTITY sessionstore.caption "Stockage de session">
+<!ENTITY service.caption "Paramètres de stockage de session">
 <!ENTITY service.description "Ne modifiez rien, tant que vous ne savez pas ce que vous faites !">
 <!ENTITY interval.label "Intervalle mimimum entre deux enregistrements d&apos;état (en secondes) :">
 <!ENTITY interval.accesskey "i">
@@ -55,9 +56,12 @@
 <!ENTITY privacy.level0 "tous les sites">
 <!ENTITY privacy.level1 "les sites non chiffrés uniquement">
 <!ENTITY privacy.level2 "aucun site">
-<!ENTITY moreadvanced.caption "Plus avancées">
 <!ENTITY sessiondir.caption "Emplacement des sessions enregistrées">
 <!ENTITY sessiondir.desc "L&apos;emplacement de stockage des sessions enregistrées par défaut peut être modifié ici.">
+<!ENTITY encrypt.caption "Chiffrement">
+<!ENTITY encrypt.desc "Avertissement : Les données de session chiffrées ne peuvent être lues qu&apos;avec des fichiers key3.db et cert8.db identiques. De plus, si un mot de passe principal a été défini, les sessions ne peuvent ni être chiffrées, ni être déchiffrées si ce mot de passe n&apos;est pas donné.">
+<!ENTITY encrypt.label "Chiffrer la session enregistrée et les données de la fenêtre fermée">
+<!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Modifier">
 <!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Défaut">

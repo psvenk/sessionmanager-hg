@@ -44,7 +44,6 @@
 <!ENTITY name_format.label "Istuntojen nimeämisehdotuksen muoto:">
 <!ENTITY name_format.accesskey "m">
 <!ENTITY name_format.desc "&#37;t = aktiivisen välilehden otsikko, &#37;d = päivämäärä ja &#37;m = kellonaika; lisäksi otsikon voi rajoittaa tietyn mittaiseksi antamalla sen muodossa &#37;#t, jossa # on haluttu pituus.">
-<!ENTITY service.caption "Kaatumisesta palautumisen asetukset">
 <!ENTITY service.description "Älä koske näihin ellet tiedä mitä teet!">
 <!ENTITY interval.label "Tilatallennusten välinen vähimmäisaika (sekunteina):">
 <!ENTITY interval.accesskey "a">
@@ -55,9 +54,12 @@
 <!ENTITY privacy.level0 "kaikille sivustoille">
 <!ENTITY privacy.level1 "vain suojaamattomille sivustoille">
 <!ENTITY privacy.level2 "älä tallenna koskaan">
-<!ENTITY moreadvanced.caption "Lisää lisäasetuksia">
 <!ENTITY sessiondir.caption "Tallennettujen istuntojen sijainti">
 <!ENTITY sessiondir.desc "Tallennettujen istuntojen oletusarvoinen sijainti voidaan muuttaa tästä.">
+<!ENTITY encrypt.caption "Salaus">
+<!ENTITY encrypt.desc "Varoitus: Salatut istuntotiedot voidaan avata vain niissä käyttäjäprofiileissa joissa on samat key3.db- ja cert8.db-tiedostot. Lisäksi jos pääsalasana on asetettu, istuntotietoja ei voida salata eikä purkaa jos pääsalasanaa ei syötetä.">
+<!ENTITY encrypt.label "Salaa tallennettujen istuntojen ja suljettujen ikkunoiden tiedot">
+<!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Muuta sijaintia">
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "Palauta alkuperäinen sijainti">

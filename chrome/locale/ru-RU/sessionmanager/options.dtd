@@ -44,7 +44,8 @@
 <!ENTITY name_format.label "Формат имён сессий:">
 <!ENTITY name_format.accesskey "Ф">
 <!ENTITY name_format.desc "Используйте &#37;t для заголовка текущей активной вкладки, &#37;d для сегодняшней даты и &#37;m для времени. Длина заголовка вкладки может быть ограничена # символами: &#37;#t.">
-<!ENTITY service.caption "Настройки защиты от вылетов">
+<!ENTITY sessionstore.caption "Хранение сессий">
+<!ENTITY service.caption "Настройка хранения сессий">
 <!ENTITY service.description "Изменяйте эти настройки, только если вы полностью уверены в своих действиях:">
 <!ENTITY interval.label "Минимальный интервал между двумя сохранениями (в секундах):">
 <!ENTITY interval.accesskey "и">
@@ -55,9 +56,12 @@
 <!ENTITY privacy.level0 "для всех сайтов">
 <!ENTITY privacy.level1 "только для незашифрованных сайтов">
 <!ENTITY privacy.level2 "не сохранять">
-<!ENTITY moreadvanced.caption "Дополнительно">
 <!ENTITY sessiondir.caption "Папка сохраняемых сессий">
 <!ENTITY sessiondir.desc "Папка по умолчанию для сохраняемых сессий может быть указана здесь.">
+<!ENTITY encrypt.caption "Шифрование">
+<!ENTITY encrypt.desc "Внимание: Зашифрованные данные сессий могут быть открыты только в профилях с одинаковыми файлами key3.db и cert8.db. Но если установлен мастер-пароль, данные не могут шифрованы или дешифрованы без его ввода.">
+<!ENTITY encrypt.label "Шифровать сохраненные сессии и закрытые окна.">
+<!ENTITY encrypt.accesskey "Ш">
 <!ENTITY change_dir.label "Изменить">
 <!ENTITY change_dir.accesskey "И">
 <!ENTITY default_dir.label "Вернуть по умолчанию">

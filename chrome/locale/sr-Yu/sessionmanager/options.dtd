@@ -42,7 +42,6 @@
 <!ENTITY name_format.label "Format predloga za ime sesija:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Upotrebi &#37;t za nazive aktivnih tabova, &#37;d za trenutni datum, &#37;m za vreme; dodatno je moguće ograničiti broj karaktera u nazivu sa: &#37;#t">
-<!ENTITY service.caption "Setovanja za &quot;nasilno gašenje&quot;">
 <!ENTITY service.description "Ne dirati ova setovanja, osim ukoliko znate šta radite:">
 <!ENTITY interval.label "Minimalni interval vremena između dva snimanja stanja (u sekundama):">
 <!ENTITY interval.accesskey "i">
@@ -53,7 +52,6 @@
 <!ENTITY privacy.level0 "sve sajtove">
 <!ENTITY privacy.level1 "samo za neekriptovane sajtove">
 <!ENTITY privacy.level2 "ni za jedan sajt">
-<!ENTITY moreadvanced.caption "Još naprednije">
 <!ENTITY sessiondir.caption "Lokacija snimljenih sesija">
 <!ENTITY sessiondir.desc "Podrazumevana lokacija snimljenih sesija može biti presetovana ovde.">
 <!ENTITY change_dir.label "Promeni">

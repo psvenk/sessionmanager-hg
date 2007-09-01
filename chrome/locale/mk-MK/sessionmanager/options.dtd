@@ -42,7 +42,6 @@
 <!ENTITY name_format.label "Формат за предлозите за имиња на сесијата:">
 <!ENTITY name_format.accesskey "п">
 <!ENTITY name_format.desc "Користи &#37;t за наслови на активните јазичиња, &#37;d за денешниот датум, &#37;m за време; додатно може да се ограничи должината на насловот на # знаци: &#37;#t.">
-<!ENTITY service.caption "Поставки за &quot;Обнова од срушување&quot;">
 <!ENTITY service.description "Не ги допирај овие, освен ако знаеш што правиш!">
 <!ENTITY interval.label "Минимум временски интервал помеѓу две зачувувања на состојбата(во секунди):">
 <!ENTITY interval.accesskey "в">
@@ -53,7 +52,6 @@
 <!ENTITY privacy.level0 "сите сајтови">
 <!ENTITY privacy.level1 "само нешифрирани сајтови">
 <!ENTITY privacy.level2 "ниеден сајт">
-<!ENTITY moreadvanced.caption "Уште понапредно">
 <!ENTITY sessiondir.caption "Локација на зачуваните сесии">
 <!ENTITY sessiondir.desc "Тука може да се премине преку зададената локација на зачуваните сесии.">
 <!ENTITY change_dir.label "Промени">

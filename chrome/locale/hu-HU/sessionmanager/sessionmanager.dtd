@@ -32,4 +32,4 @@
 <!ENTITY toolbar.undo.label "Bezárás visszavonása">
 <!ENTITY toolbar.undo.tooltip "Legutoljára bezárt lapok megnyitása">
 <!ENTITY prompt.ignore.label "Ez a párbeszédablak ne jelenjen meg többet">
-<!ENTITY prompt.autosave.label "Ezután e munkamenet automatikus mentése">
+<!ENTITY prompt.autosave.label "Automatikus mentés mostantól">

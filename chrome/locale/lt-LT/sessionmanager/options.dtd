@@ -44,7 +44,6 @@
 <!ENTITY name_format.label "Siūlomas sesijų vardų formatas:">
 <!ENTITY name_format.accesskey "f">
 <!ENTITY name_format.desc "Naudokite &#37;t aktyvaus skirtuko pavadinimui, &#37;d šiandienos datai ir &#37;m laikui; papildomai pavadinimo ilgis gali būti trumpinamas iki # simbolių: &#37;#t.">
-<!ENTITY service.caption "&quot;Crash Recovery&quot; nustatymai">
 <!ENTITY service.description "Nekeiskite nieko, nebent žinote, ką darote:">
 <!ENTITY interval.label "Mažiausias laiko intervalas tarp būsenos išsaugojimų (sekundėmis):">
 <!ENTITY interval.accesskey "M">
@@ -55,9 +54,12 @@
 <!ENTITY privacy.level0 "visoms svetainėms">
 <!ENTITY privacy.level1 "tik nešifruotoms svetainėms">
 <!ENTITY privacy.level2 "jokioms svetainėms">
-<!ENTITY moreadvanced.caption "Dar išsamiau">
 <!ENTITY sessiondir.caption "Saugomų sesijų vieta">
 <!ENTITY sessiondir.desc "Numatytoji saugomų sesijų vieta čia gali būti pakeista.">
+<!ENTITY encrypt.caption "Užkodavimas">
+<!ENTITY encrypt.desc "Įspėjimas: Užkoduoti sesijos duomenys gali būti atverti tik profiliuose su identiškais key3.db ir cert8.db failais. Taip pat, jei pagrindinis slaptažodis yra nustatytas, sesijos negali būti užkoduotos ar atkoduotos, jei pagrindinis slaptažodis neįvestas.">
+<!ENTITY encrypt.label "Užkoduotos išsaugotos sesijos ir užvertų langų duomenys">
+<!ENTITY encrypt.accesskey "k">
 <!ENTITY change_dir.label "Keisti">
 <!ENTITY change_dir.accesskey "K">
 <!ENTITY default_dir.label "Atstatyti numatytąją">
