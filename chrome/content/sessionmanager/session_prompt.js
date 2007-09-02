@@ -56,7 +56,7 @@ gSessionManager.onLoad = function() {
 	sessions.forEach(function(aSession) {
 		if (!((gParams.GetInt(1) & 16) || (gParams.GetInt(1) & 8)) || aSession.name != this.getPref("_autosave_name"))
 		{
-			var item = gSessionList.appendItem(aSession.name, aSession.fileName);
+			var item = gSessionList.appendItem(aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")", aSession.fileName);
 			var menuitemStyle = "";
 			item.setAttribute("autosave", aSession.autosave);
 			if (aSession.autosave) menuitemStyle = "font-weight: bold; ";
@@ -137,6 +137,11 @@ function onTextboxInput(aNewValue)
 {
 	if (aNewValue)
 	{
+		var match = /   \([0-9]+\/[0-9]+\)$/m.exec(aNewValue);
+		if (match)
+		{
+			aNewValue = aNewValue.substring(0,match.index);
+		}
 		gTextBox.value = aNewValue;
 		setTimeout(function() { gTextBox.select(); gTextBox.focus(); }, 0);
 	}
