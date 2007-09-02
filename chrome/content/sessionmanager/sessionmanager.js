@@ -721,7 +721,7 @@
 
 		mClosedTabs.forEach(function(aTab, aIx) {
 			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("class", "menuitem-iconic bookmark-item");
+			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.setAttribute("image", aTab.image);
 			menuitem.setAttribute("label", aTab.title);
 			menuitem.setAttribute("statustext", aTab.url);
