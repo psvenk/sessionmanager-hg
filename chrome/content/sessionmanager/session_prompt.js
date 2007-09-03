@@ -56,12 +56,13 @@ gSessionManager.onLoad = function() {
 	sessions.forEach(function(aSession) {
 		if (!((gParams.GetInt(1) & 16) || (gParams.GetInt(1) & 8)) || aSession.name != this.getPref("_autosave_name"))
 		{
-			var item = gSessionList.appendItem(aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")", aSession.fileName);
-			var menuitemStyle = "";
+			var label;
+			// add counts if not current browsing session since current session has no counts.
+			if (aSession.fileName != "*") label = aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")";
+			else label = aSession.name;
+			var item = gSessionList.appendItem(label, aSession.fileName);
 			item.setAttribute("autosave", aSession.autosave);
-			if (aSession.autosave) menuitemStyle = "font-weight: bold; ";
-			if (sessions.latestName == aSession.name) menuitemStyle = menuitemStyle + "color: blue;";
-			if (menuitemStyle != "") item.setAttribute("style", menuitemStyle);
+			if (((sessions.latestName == aSession.name) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) item.setAttribute("latest",true);
 			if (aSession.fileName == gParams.GetString(3))
 			{
 				setTimeout(function(aItem) { gSessionList.selectItem(aItem); }, 0, item);

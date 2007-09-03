@@ -359,10 +359,8 @@
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("accesskey", key);
-			var menuitemStyle = "";
-			if (aSession.autosave) menuitemStyle = "font-weight: bold; ";
-			if (sessions.latestName == aSession.name) menuitemStyle = menuitemStyle + "color: blue;";
-			if (menuitemStyle != "") menuitem.setAttribute("style", menuitemStyle);
+			if (aSession.autosave) menuitem.setAttribute("autosave", true);
+			if (sessions.latestName == aSession.name) menuitem.setAttribute("latest", true);
 			if (aSession.name == this.mPref__autosave_name) menuitem.setAttribute("disabled", true);
 			aPopup.insertBefore(menuitem, separator);
 		}, this);

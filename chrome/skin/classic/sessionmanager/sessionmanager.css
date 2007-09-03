@@ -44,8 +44,30 @@ toolbar[iconsize="small"] #sessionmanager-undo[disabled="true"] {
 toolbar[iconsize="small"] #sessionmanager-toolbar {
 	-moz-image-region: rect(15px, 72px, 31px, 56px);
 }
+
+/* Make closed tabs have icons, but not display entire graphic for images */
 .sessionmanager-closedtab-item > .menu-iconic-left > .menu-iconic-icon {
   width: 16px;
   height: 16px;
   -moz-padding-start: 0px;
 }
+
+/* Latest session is blue */
+#sessionmanager-menu menuitem[latest="true"],
+#sessionmanager-toolbar menuitem[latest="true"],
+#session_list listitem[latest="true"] {
+	color: blue;
+}
+
+/* Adjust to light blue when highlited */
+#session_list:focus listitem[latest="true"][selected="true"] {
+	color: lightblue;
+}
+
+/* Autosave sessions are bold */
+#sessionmanager-menu menuitem[autosave="true"],
+#sessionmanager-toolbar menuitem[autosave="true"],
+#session_list listitem[autosave="true"] {
+	font-weight: bold;
+}
+
