@@ -111,10 +111,10 @@
 		// Workaround for bug 360408 in Firefox 2.0, remove when fixed and uncomment call to onWindowClose in onUnload
 		if (!this.mFF3) eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
 		
-		// Have Tab Mix Plus use browser's built in undoCloseTab function.
+		// Have Tab Mix Plus call our function to update our toolbar button.
 		if (gBrowser.undoRemoveTab)
 		{
-			gBrowser.undoRemoveTab = function() { undoCloseTab(); }
+			eval("gBrowser.undoRemoveTab = " + gBrowser.undoRemoveTab.toString().replace("return this", "gSessionManager.mObserverService.notifyObservers(window, 'sessionmanager:windowtabopenclose', 'tab'); $&"));
 		}
 		
 		// Don't allow tab to reload when restoring closed tab
@@ -214,7 +214,8 @@
 		switch (aTopic)
 		{
 		case "sessionmanager:windowtabopenclose":
-			this.updateToolbarButton();
+			// only update all windows if window state changed.
+			if ((aData != "tab") || (window == aSubject)) this.updateToolbarButton();
 			break;
 		case "browser:purge-session-history":
 			this.clearUndoData("all");
@@ -277,14 +278,13 @@
 
 	onTabClose_proxy: function(aEvent)
 	{
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+		gSessionManager.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", "tab");
 	},
 
 	onTabRestored_proxy: function(aEvent)
 	{
 		var browser = this.getBrowserForTab(aEvent.originalTarget);
 
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 		if (gSessionManager.mPref_reload && gSessionManager._allowReload && !gSessionManager.mIOService.offline)
 		{
 			var nsIWebNavigation = Components.interfaces.nsIWebNavigation;
@@ -689,7 +689,8 @@
 		closedWindows.forEach(function(aWindow, aIx) {
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", aWindow.name);
-			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey)?"append":"");');
+			menuitem.setAttribute("index", "window" + aIx);
+			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedWindowMenuItem(event);');
 			aPopup.insertBefore(menuitem, separator);
 		});
 		label.hidden = (closedWindows.length == 0);
@@ -724,10 +725,11 @@
 			menuitem.setAttribute("class", "menuitem-iconic");
 			menuitem.setAttribute("image", aTab.image);
 			menuitem.setAttribute("label", aTab.title);
+			menuitem.setAttribute("index", "tab" + aIx);
 			menuitem.setAttribute("statustext", aTab.url);
 			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
 			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
-			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
+			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedTabMenuItem(event);');
 			aPopup.insertBefore(menuitem, listEnd);
 		});
 		separator.nextSibling.hidden = (mClosedTabs.length == 0);
@@ -779,6 +781,84 @@
 			if (okay) {
 				this.storeClosedWindows(closedWindows);
 				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+			}
+		}
+	},
+
+	clickClosedWindowMenuItem: function(aEvent)
+	{	
+		// get index
+		var aIx = aEvent.originalTarget.getAttribute("index").substring(6);
+
+		// left click reopen closed window
+		if (aEvent.button == 0)
+		{
+			this.undoCloseWindow(aIx, (aEvent.shiftKey && (aEvent.ctrlKey || aEvent.metaKey))?"overwrite":(aEvent.ctrlKey)?"append":"");
+		}
+		// if shift right click, remove tab from list
+		else if ((aEvent.button == 2) && aEvent.shiftKey)
+		{
+			dump("remove closed window item here\n");
+		}
+	},
+	
+	clickClosedTabMenuItem: function(aEvent)
+	{	
+		// get index
+		var aIx = aEvent.originalTarget.getAttribute("index").substring(3);
+		
+		// left click reopen closed tab
+		if (aEvent.button == 0) 
+		{
+			undoCloseTab(aIx);
+		}
+		// if shift right click, remove tab from list
+		else if ((aEvent.button == 2) && aEvent.shiftKey)
+		{
+			// This code is based off of code in Tab Mix Plus
+			var state = { windows: [], _firstTabs: true };
+			state.windows[0] = { _closedTabs: [] };
+
+			if (aIx >= 0) {
+				// get closed-tabs from nsSessionStore
+				var closedTabs = eval("(" + this.mSessionStore.getClosedTabData(window) + ")");
+				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
+				if (!this.mFF3) this.fixBug350558(closedTabs);
+				// purge closed tab at aIndex
+				closedTabs.splice(aIx, 1);
+				state.windows[0]._closedTabs = closedTabs;
+			}
+
+			// replace existing _closedTabs
+			this.mSessionStore.setWindowState(window, state.toSource(), false);
+
+			// Get menu popup
+			var popup = aEvent.originalTarget.parentNode;
+
+			// remove item from list
+			aEvent.originalTarget.parentNode.removeChild(aEvent.originalTarget);
+					
+        	// Update toolbar button if no more tabs
+			if (state.windows[0]._closedTabs.length == 0) 
+			{
+				popup.hidePopup();
+				this.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", "tab");
+			}
+			// otherwise adjust indexes
+			else 
+			{
+				for (var i=0; i<popup.childNodes.length; i++)
+				{ 
+					var index = popup.childNodes[i].getAttribute("index");
+					if (index && index.substring(0,3) == "tab")
+					{
+						var indexNo = index.substring(3);
+						if (parseInt(indexNo) > parseInt(aIx))
+						{
+							popup.childNodes[i].setAttribute("index","tab" + (parseInt(indexNo) - 1).toString());
+						}
+					}
+				}
 			}
 		}
 	},
