@@ -44,3 +44,8 @@ toolbar[iconsize="small"] #sessionmanager-undo[disabled="true"] {
 toolbar[iconsize="small"] #sessionmanager-toolbar {
 	-moz-image-region: rect(15px, 72px, 31px, 56px);
 }
+.sessionmanager-closedtab-item > .menu-iconic-left > .menu-iconic-icon {
+  width: 16px;
+  height: 16px;
+  -moz-padding-start: 0px;
+}

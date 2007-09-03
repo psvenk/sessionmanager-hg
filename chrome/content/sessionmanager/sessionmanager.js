@@ -722,7 +722,7 @@
 
 		mClosedTabs.forEach(function(aTab, aIx) {
 			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("class", "menuitem-iconic");
+			menuitem.setAttribute("class", "menuitem-iconic sessionmanager-closedtab-item");
 			menuitem.setAttribute("image", aTab.image);
 			menuitem.setAttribute("label", aTab.title);
 			menuitem.setAttribute("index", "tab" + aIx);
