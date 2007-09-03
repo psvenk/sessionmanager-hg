@@ -44,6 +44,8 @@
 <!ENTITY name_format.label "Istuntojen nimeämisehdotuksen muoto:">
 <!ENTITY name_format.accesskey "m">
 <!ENTITY name_format.desc "&#37;t = aktiivisen välilehden otsikko, &#37;d = päivämäärä ja &#37;m = kellonaika; lisäksi otsikon voi rajoittaa tietyn mittaiseksi antamalla sen muodossa &#37;#t, jossa # on haluttu pituus.">
+<!ENTITY sessionstore.caption "Istuntosäilö">
+<!ENTITY service.caption "Istuntosäilön asetukset">
 <!ENTITY service.description "Älä koske näihin ellet tiedä mitä teet!">
 <!ENTITY interval.label "Tilatallennusten välinen vähimmäisaika (sekunteina):">
 <!ENTITY interval.accesskey "a">
