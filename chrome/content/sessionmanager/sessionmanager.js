@@ -796,7 +796,13 @@
 		// if ctrl/command right click, remove tab from list
 		else if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
 		{
-			dump("remove closed window item here\n");
+			var closedWindows = this.getClosedWindows();
+			closedWindows.splice(aIx, 1)[0].state;
+			this.storeClosedWindows(closedWindows);
+			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+
+			// update the remaining entries
+			this.updateClosedList(aEvent.originalTarget, aIx, closedWindows.length, "window");
 		}
 	},
 	
@@ -829,32 +835,38 @@
 
 			// replace existing _closedTabs
 			this.mSessionStore.setWindowState(window, state.toSource(), false);
+			
+			// update the remaining entries
+			this.updateClosedList(aEvent.originalTarget, aIx, state.windows[0]._closedTabs.length, "tab");
+		}
+	},
+	
+	updateClosedList: function(aMenuItem, aIx, aClosedListLength, aType) 
+	{
+		// Get menu popup
+		var popup = aMenuItem.parentNode;
 
-			// Get menu popup
-			var popup = aEvent.originalTarget.parentNode;
-
-			// remove item from list
-			aEvent.originalTarget.parentNode.removeChild(aEvent.originalTarget);
+		// remove item from list
+		popup.removeChild(aMenuItem);
 					
-        	// Update toolbar button if no more tabs
-			if (state.windows[0]._closedTabs.length == 0) 
-			{
-				popup.hidePopup();
-				this.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", "tab");
-			}
-			// otherwise adjust indexes
-			else 
-			{
-				for (var i=0; i<popup.childNodes.length; i++)
-				{ 
-					var index = popup.childNodes[i].getAttribute("index");
-					if (index && index.substring(0,3) == "tab")
+       	// Update toolbar button if no more tabs
+		if (aClosedListLength == 0) 
+		{
+			popup.hidePopup();
+			this.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", aType);
+		}
+		// otherwise adjust indexes
+		else 
+		{
+			for (var i=0; i<popup.childNodes.length; i++)
+			{ 
+				var index = popup.childNodes[i].getAttribute("index");
+				if (index && index.substring(0,aType.length) == aType)
+				{
+					var indexNo = index.substring(aType.length);
+					if (parseInt(indexNo) > parseInt(aIx))
 					{
-						var indexNo = index.substring(3);
-						if (parseInt(indexNo) > parseInt(aIx))
-						{
-							popup.childNodes[i].setAttribute("index","tab" + (parseInt(indexNo) - 1).toString());
-						}
+						popup.childNodes[i].setAttribute("index",aType + (parseInt(indexNo) - 1).toString());
 					}
 				}
 			}
