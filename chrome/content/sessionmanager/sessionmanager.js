@@ -1247,24 +1247,18 @@
 			if (headerOnly) state = this.readFile(aFile);
 			
 			// pre tab/window count
-			if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|true))\n/m.test(state))
+			if (/(^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|true))\n)(.*)/m.test(state))
 			{
-				var match = /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+\n)?(autosave=(false|true))/m.exec(state);
-				if (match && match.index != null) {
-					var count = this.getCount(state.substring(match[0].length,state.length));
-					state = match[0] + "\tcount=" + count.windows + "/" + count.tabs + state.substring(match[0].length,state.length);
-					this.writeFile(aFile, state);
-				}
+				var count = this.getCount(RegExp.$6);
+				state = RegExp.$1.substring(0,RegExp.$1.length-1) + "\tcount=" + count.windows + "/" + count.tabs + "\n" + RegExp.$6;
+				this.writeFile(aFile, state);
 			}
 			// pre autosave
-			else if (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?/m.test(state))
+			else if (/(^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?)(.*)/m.test(state))
 			{
-				var match = /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)/m.exec(state);
-				if (match && match.index != null) {
-					var count = this.getCount(state.substring(match[0].length,state.length));
-					state = match[0] + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + state.substring(match[0].length,state.length);
-					this.writeFile(aFile, state);
-				}
+				var count = this.getCount(RegExp.$4);
+				state = RegExp.$1 + "autosave=false\tcount=" + count.windows + "/" + count.tabs + "\n" + RegExp.$4;
+				this.writeFile(aFile, state);
 			}
 		}
 		
