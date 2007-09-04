@@ -794,7 +794,7 @@
 			this.undoCloseWindow(aIx, (aEvent.shiftKey && (aEvent.ctrlKey || aEvent.metaKey))?"overwrite":(aEvent.ctrlKey)?"append":"");
 		}
 		// if ctrl/command right click, remove tab from list
-		else if ((aEvent.button == 2) && (event.ctrlKey || event.metaKey))
+		else if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
 		{
 			dump("remove closed window item here\n");
 		}
@@ -811,7 +811,7 @@
 			undoCloseTab(aIx);
 		}
 		// if ctrl/command right click, remove tab from list
-		else if ((aEvent.button == 2) && (event.ctrlKey || event.metaKey))
+		else if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
 		{
 			// This code is based off of code in Tab Mix Plus
 			var state = { windows: [], _firstTabs: true };
