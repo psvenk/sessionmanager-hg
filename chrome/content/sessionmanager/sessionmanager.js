@@ -130,8 +130,8 @@
 		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
 
 		// read current window session		
-		this.__window_session_name = this.mSessionStore.getWindowValue(window,"_sm_window_session_name");
-		if (this.__window_session_name) escape(this.__window_session_name);
+		//this.__window_session_name = this.mSessionStore.getWindowValue(window,"_sm_window_session_name");
+		//if (this.__window_session_name) escape(this.__window_session_name);
 		dump("restore done " + this.__window_session_name + "\n");
 
 		
@@ -322,6 +322,7 @@
 		if (this.__window_session_name) 
 		{
 			this.closeSession(true);
+			this.mSessionStore.setWindowValue(window,"_sm_window_session_name","");
 		}
 			
 		if (this.mPref__running && !this.mPref__stopping && this.getBrowserWindows().length != 0)
@@ -331,7 +332,6 @@
 			this.appendClosedWindow(state);
 			gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 		}
-		this.mSessionStore.setWindowValue(window,"_sm_window_session_name","");
 	},
 	
 	// Put current session name in browser titlebar
@@ -628,7 +628,12 @@
 			if (/^(\[SessionManager\])(?:\nname=(.*))?/m.test(state)) oldname = RegExp.$2;
 			// if window session file update _sm_window_session_name data
 			if (/\nautosave=window\t/m.test(state)) {
-				state = state.replace(/_sm_window_session_name:\"[^\s]*\"/, '_sm_window_session_name:\"' + escape(values.text) + '\"');
+				state = state.split("\n")
+				state[4] = this.decrypt(state[4]);
+				if (!state[4]) return;
+				state[4] = state[4].replace(/_sm_window_session_name:\"[^\s]*\"/, '_sm_window_session_name:\"' + escape(values.text) + '\"');
+				state[4] = this.decryptEncryptByPreference(state[4]); 
+				state = state.join("\n");
 			}
 			this.writeFile(newFile || file, this.nameState(state, values.text));
 			if (newFile)
@@ -1866,7 +1871,7 @@
 			aWindow.__SM_restore = function() {
 				this.removeEventListener("load", this.__SM_restore, true);
 				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aAllowReload, aStripClosedTabs);
-				//this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore.getWindowValue(aWindow,"_sm_window_session_name"));
+				this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore.getWindowValue(aWindow,"_sm_window_session_name"));
 				dump("restore win " + this.gSessionManager.__window_session_name + "\n");
 				delete this.__SM_restore;
 			};
@@ -1887,7 +1892,7 @@
 			this.mSessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
 		}
 		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
-		this.__window_session_name = unescape(this.mSessionStore.getWindowValue(window,"_sm_window_session_name"));
+		//this.__window_session_name = unescape(this.mSessionStore.getWindowValue(window,"_sm_window_session_name"));
 		dump("restore done " + this.__window_session_name + "\n");
 		return true;
 	},
