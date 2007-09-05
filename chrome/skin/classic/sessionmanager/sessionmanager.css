@@ -65,9 +65,23 @@ toolbar[iconsize="small"] #sessionmanager-toolbar {
 }
 
 /* Autosave sessions are bold */
-#sessionmanager-menu menuitem[autosave="true"],
-#sessionmanager-toolbar menuitem[autosave="true"],
-#session_list listitem[autosave="true"] {
+#sessionmanager-menu menuitem[autosave="session"],
+#sessionmanager-toolbar menuitem[autosave="session"],
+#session_list listitem[autosave="session"] {
 	font-weight: bold;
 }
 
+/* Window Autosave sessions are bold green */
+#sessionmanager-menu menuitem[autosave="window"],
+#sessionmanager-toolbar menuitem[autosave="window"],
+#session_list listitem[autosave="window"] {
+	font-weight: bold;
+	font-style: oblique;
+}
+
+/* Disabled sessions are gray */
+#sessionmanager-menu menuitem[disabled="true"],
+#sessionmanager-toolbar menuitem[disabled="true"],
+#session_list listitem[session_loaded="true"] {
+	color: gray;
+}
