@@ -3,8 +3,24 @@ var gSessionList = null;
 var gTextBox = null;
 var gAcceptButton = null;
 var gSessionNames = {};
+var gBannedNames = [];
 var gExistingName = 0;
 var gNeedSelection = false;
+
+// GetInt bit values
+// 1   = add current session - used when recovering from crash
+// 2   = multiselect enable  - true if allowed to choose multiple sessions (used for deleting)
+// 4   = ignorable           - Displays ignore checkbox
+// 8   = autosaveable        - Displays autosave checkbox
+// 16  = remove              - true if deleting session(s)
+// 256 = allow name replace  - true if session cannot be overwritten (not currently used)
+
+// GetString values
+// 1 = Session Label         - Label at top of window
+// 2 = Accept Label          - Okay Button label for normal accept
+// 3 = Default Session Name  - (used when saving and name doesn't already exist)
+// 4 = Text Label            - Label above text box
+// 5 = Accept Existing Label - Okay button label when overwriting existing session
 
 gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
@@ -24,6 +40,11 @@ gSessionManager.onLoad = function() {
 	
 	gSessionList = _("session_list");
 	gSessionList.selType = (gParams.GetInt(1) & 2)?"multiple":"single";
+	
+	// Do not allow overwriting of open window or browser sessions
+	gBannedNames = this.getWindowSessions();
+	var currentSession = this.getPref("_autosave_name");
+	if (currentSession) gBannedNames[currentSession.trim().toLowerCase()] = true;
 	
 	if (gParams.GetString(4)) // enable text box
 	{
@@ -54,7 +75,8 @@ gSessionManager.onLoad = function() {
 	}
 	
 	sessions.forEach(function(aSession) {
-		if (!((gParams.GetInt(1) & 16) || (gParams.GetInt(1) & 8)) || aSession.name != this.getPref("_autosave_name"))
+		// Don't display current browser session or window sessions in list for delete or save
+		if (!((gParams.GetInt(1) & 16) || (gParams.GetInt(1) & 8)) || !gBannedNames[aSession.name.trim().toLowerCase()])
 		{
 			var label;
 			// add counts if not current browsing session since current session has no counts.
@@ -62,6 +84,7 @@ gSessionManager.onLoad = function() {
 			else label = aSession.name;
 			var item = gSessionList.appendItem(label, aSession.fileName);
 			item.setAttribute("autosave", aSession.autosave);
+			item.setAttribute("session_loaded", gBannedNames[aSession.name.trim().toLowerCase()]);
 			if (((sessions.latestName == aSession.name) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) item.setAttribute("latest",true);
 			if (aSession.fileName == gParams.GetString(3))
 			{
@@ -160,7 +183,7 @@ function onTextboxInput(aNewValue)
 		gAcceptButton.label = (newWeight)?gParams.GetString(5):gParams.GetString(2);
 		gAcceptButton.style.fontWeight = (newWeight)?"bold":"";
 	}
-	gAcceptButton.disabled = !input || gNeedSelection && (gSessionList.selectedCount == 0 || gExistingName);
+	gAcceptButton.disabled = !input || gBannedNames[input] || gNeedSelection && (gSessionList.selectedCount == 0 || gExistingName);
 }
 
 function onAcceptDialog()
@@ -180,10 +203,6 @@ function onAcceptDialog()
 	}
 	gParams.SetString(6, _("text_box").value.trim());
 }
-
-String.prototype.trim = function() {
-	return this.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
-};
 
 function setDescription(aObj, aValue)
 {
