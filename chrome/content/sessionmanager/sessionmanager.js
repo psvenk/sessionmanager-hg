@@ -9,14 +9,14 @@
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowtabopenclose", "browser:purge-session-history", "quit-application-granted"],
+	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mAutoSaveSessionName: "autosave.session",
 	mPromptSessionName: "?",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
-	mSessionRegExp: /^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|true)\t)?(count=([0-9]+)\/([0-9]+))?/m,
+	mSessionRegExp: /^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|session|window)\t)?(count=([0-9]+)\/([0-9]+))?/m,
 
 	mSessionCache: {},
 	mClosedWindowsCache: { timestamp: 0, data: null },
@@ -127,7 +127,13 @@
 		if (cmd) cmd.setAttribute("oncommand", cmd.getAttribute("oncommand") + " gSessionManager.tryToSanitize();");
 		
 		// set autosave_name window value (used on browser crash)
-		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);
+		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
+
+		// read current window session		
+		this.__window_session_name = this.mSessionStore.getWindowValue(window,"_sm_window_session_name");
+		if (this.__window_session_name) escape(this.__window_session_name);
+		dump("restore done " + this.__window_session_name + "\n");
+
 		
 		// Remove change made in 0.6 (only do this once)
 		if (this.getPref("version", "") == "0.6")
@@ -177,7 +183,10 @@
 		// Last window closing will leaks briefly since "quit-application" observer is not removed from it 
 		// until after shutdown is run, but since browser is closing anyway, who cares?
 		if (numWindows != 0) this.mObserverService.removeObserver(this, "quit-application", false);
-		
+
+		// Only do the following in Firefox 3.0 and above where bug 360408 is fixed.
+		if (this.mFF3) this.onWindowClose();
+				
 		if (this.mPref__running && numWindows == 0)
 		{
 			this._string_preserve_session = this._string("preserve_session");
@@ -198,15 +207,6 @@
 		}
 		this.mBundle = null;
 		this.mFullyLoaded = false;
-
-//		Only do the following in Firefox 3.0 and above where bug 360408 is fixed.
-		if (this.mFF3 && this.mPref__running && !this.mPref__stopping && numWindows != 0)
-		{
-			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
-			var state = this.getSessionState(null, true);
-			this.appendClosedWindow(state);
-			this.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", null);
-		}
 	},
 
 	observe: function(aSubject, aTopic, aData)
@@ -216,6 +216,9 @@
 		case "sessionmanager:windowtabopenclose":
 			// only update all windows if window state changed.
 			if ((aData != "tab") || (window == aSubject)) this.updateToolbarButton();
+			break;
+		case "sessionmanager:updatetitlebar":
+			gBrowser.updateTitlebar();
 			break;
 		case "browser:purge-session-history":
 			this.clearUndoData("all");
@@ -251,7 +254,7 @@
 				this.setResumeCurrent(this.mPref_resume_session == this.mBackupSessionName);
 				break;
 			case "_autosave_name":
-				this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);
+				this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
 				gBrowser.updateTitlebar();
 				break;
 			}
@@ -315,6 +318,12 @@
 
 	onWindowClose: function()
 	{
+		// if there is a window session save it
+		if (this.__window_session_name) 
+		{
+			this.closeSession(true);
+		}
+			
 		if (this.mPref__running && !this.mPref__stopping && this.getBrowserWindows().length != 0)
 		{
 			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
@@ -322,14 +331,19 @@
 			this.appendClosedWindow(state);
 			gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 		}
+		this.mSessionStore.setWindowValue(window,"_sm_window_session_name","");
 	},
 	
 	// Put current session name in browser titlebar
 	updateTitlebar: function()
 	{
-		var titleName = " - (" + this._string("current_session2") + " " + gSessionManager.mPref__autosave_name + ")";
-		if (this.mPref__autosave_name != "" && gBrowser.ownerDocument.title.indexOf(titleName) == -1) {
-			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title + titleName;
+		var sessionTitleName = " - (" + this._string("current_session2") + " " + this.mPref__autosave_name + ")";
+		var windowTitleName = " - (" + this._string("current_session2") + " " + this.__window_session_name + ")";
+		if (this.__window_session_name && this.__window_session_name != "" && gBrowser.ownerDocument.title.indexOf(windowTitleName) == -1) {
+			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title + windowTitleName;
+		}
+		else if (this.mPref__autosave_name != "" && gBrowser.ownerDocument.title.indexOf(sessionTitleName) == -1) {
+			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title + sessionTitleName;
 		}
 	},
 
@@ -351,6 +365,7 @@
 		
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
 		
+		var windowSessions = this.getWindowSessions();
 		var sessions = this.getSessions(true);
 		sessions.forEach(function(aSession, aIx) {
 			var key = (aIx < 9)?aIx + 1:(aIx == 9)?"0":"";
@@ -359,7 +374,8 @@
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("accesskey", key);
-			if (aSession.autosave) menuitem.setAttribute("autosave", true);
+			menuitem.setAttribute("autosave", aSession.autosave);
+			menuitem.setAttribute("disabled", windowSessions[aSession.name.trim().toLowerCase()]);
 			if (sessions.latestName == aSession.name) menuitem.setAttribute("latest", true);
 			if (aSession.name == this.mPref__autosave_name) menuitem.setAttribute("disabled", true);
 			aPopup.insertBefore(menuitem, separator);
@@ -427,6 +443,8 @@
 		}
 		if (aName)
 		{
+			if (aOneWindow) this.mSessionStore.setWindowValue(window,"_sm_window_session_name",(values.autoSave)?escape(aName):"");
+			
 			var file = this.getSessionDir(aFileName || this.makeFileName(aName), !aFileName);
 			try
 			{
@@ -437,14 +455,22 @@
 				this.ioError(ex);
 			}
 		}
-		if (values.autoSave)
+		if (!aOneWindow)
 		{
-			this.setPref("_autosave_name",aName);
+			if (values.autoSave)
+			{
+				this.setPref("_autosave_name",aName);
+			}
+			else if (this.mPref__autosave_name == aName)
+			{
+				// If in auto-save session and user saves on top of it as manual turn off autosave
+				this.setPref("_autosave_name","");
+			}
 		}
-		else if (this.mPref__autosave_name == aName)
+		else 
 		{
-			// If in auto-save session and user saves on top of it as manual turn off autosave
-			this.setPref("_autosave_name","");
+			this.__window_session_name = (values.autoSave) ? aName : null;
+			gBrowser.updateTitlebar();
 		}
 	},
 
@@ -453,22 +479,24 @@
 		this.save(aName, aFileName, true);
 	},
 	
-	closeSession: function()
+	// if aOneWindow is true, then close the window session otherwise close the browser session
+	closeSession: function(aOneWindow)
 	{
-		var name = this.mPref__autosave_name;
+		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
 		if (name != "")
 		{
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
 			{
-				this.writeFile(file, this.getSessionState(name, false, this.mPref_save_closed_tabs < 2, true));
+				this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true));
 			}
 			catch (ex)
 			{
 				this.ioError(ex);
 			}
 		
-			this.setPref("_autosave_name","");
+			if (!aOneWindow) this.setPref("_autosave_name","");
+			else this.__window_session_name = null;
 			return true;
 		}
 		return false;
@@ -502,14 +530,14 @@
 			var autosave = RegExp.$3;
 			state = state.split("\n")[4];
 			
-			// Don't save current session on startup since there isn't any.
-			if (aMode != "startup")
+			// Don't save current session on startup since there isn't any.  Don't save if opening
+			// new window or appending to current session since nothing is lost in that case.
+			if (aMode != "startup" && aMode != "newwindow" && aMode != "append")
 			{
 				// close current autosave session if open
-				// if shift or contrl key held down, don't close current session
 				if (this.mPref__autosave_name != "" && aMode != "newwindow" && aMode != "append") 
 				{
-					this.closeSession();
+					this.closeSession(false);
 				}
 				else 
 				{
@@ -518,7 +546,7 @@
 			}
 			
 			// If this is an autosave session, keep track of it if there is not already an active session
-			if (autosave == "true" && this.mPref__autosave_name=="") 
+			if (autosave == "session" && this.mPref__autosave_name=="") 
 			{
 				this.setPref("_autosave_name", name);
 			}
@@ -558,6 +586,8 @@
 			this.getBrowserWindows().forEach(function(aWindow) {
 				if (aWindow != window) { 
 					aWindow.gSessionManager.mPref__stopping = true; 
+					// If not Firefox 3 call onWindowClose to save current window session since it isn't done in FF2
+					if (!this.mFF3) aWindow.gSessionManager.onWindowClose();
 				}
 			});
 		}
@@ -592,7 +622,15 @@
 		
 		try
 		{
-			this.writeFile(newFile || file, this.nameState(this.readSessionFile(file), values.text));
+			var state = this.readSessionFile(file);
+			var oldname = null;
+			// Get original name
+			if (/^(\[SessionManager\])(?:\nname=(.*))?/m.test(state)) oldname = RegExp.$2;
+			// if window session file update _sm_window_session_name data
+			if (/\nautosave=window\t/m.test(state)) {
+				state = state.replace(/_sm_window_session_name:\"[^\s]*\"/, '_sm_window_session_name:\"' + escape(values.text) + '\"');
+			}
+			this.writeFile(newFile || file, this.nameState(state, values.text));
 			if (newFile)
 			{
 				if (this.mPref_resume_session == file.leafName && this.mPref_resume_session != this.mBackupSessionName &&
@@ -602,11 +640,20 @@
 				}
 				this.delFile(file);
 			}
+
 			// Renamed active session
-			if ((this.mPref__autosave_name + this.mSessionExt) == values.name)
+			if (this.mPref__autosave_name == oldname)
 			{
 				this.setPref("_autosave_name", values.text);
 			}
+			// Renamed window session
+			this.getBrowserWindows().forEach(function(aWindow) {
+				if (aWindow.gSessionManager && (aWindow.gSessionManager.__window_session_name == oldname)) { 
+					aWindow.gSessionManager.__window_session_name = values.text;
+					this.mSessionStore.setWindowValue(window,"_sm_window_session_name",escape(values.text));
+					this.mObserverService.notifyObservers(null, "sessionmanager:updatetitlebar", null);
+				}
+			}, this);
 		}
 		catch (ex)
 		{
@@ -1047,14 +1094,13 @@
 			if (this.mSessionRegExp.test(this.readSessionFile(file, headerOnly)))
 			{
 				var timestamp = parseInt(RegExp.$2) || file.lastModifiedTime;
-				var autosave = (RegExp.$3 == "true");
 				if (latest < timestamp) 
 				{
 					sessions.latestName = RegExp.$1;
 					latest = timestamp;
 				}
-				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: autosave, windows: RegExp.$5, tabs: RegExp.$6 });
-				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: autosave, time: file.lastModifiedTime, windows: RegExp.$5, tabs: RegExp.$6 };
+				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: RegExp.$3, windows: RegExp.$5, tabs: RegExp.$6 });
+				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: RegExp.$3, time: file.lastModifiedTime, windows: RegExp.$5, tabs: RegExp.$6 };
 			}
 		}
 		
@@ -1145,7 +1191,7 @@
 		}
 		
 		// save the currently opened session (if there is one)
-		if (!this.closeSession())
+		if (!this.closeSession(false))
 		{
 			this.backupCurrentSession();
 		}
@@ -1253,23 +1299,30 @@
 		}
 		// pre autosave and tab/window count
 		else if ((/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?/m.test(state)) &&
-		         (!/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|true))\t(count=[0-9]+\/[0-9]+)\n/m.test(state)))
+		         (!/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|session|window))\t(count=[0-9]+\/[0-9]+)\n/m.test(state)))
 		{
 			// read entire file if only read header
 			if (headerOnly) state = this.readFile(aFile);
 			
-			// pre tab/window count
-			if (/(^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|true))\n)(.*)/m.test(state))
+			// pre window sessions
+			if (/^\[SessionManager\]\n(?:name=.*\n)?(?:timestamp=\d+\n)?(autosave=true)\tcount=[0-9]+\/[0-9]+\n/m.test(state))
 			{
-				var count = this.getCount(RegExp.$6);
-				state = RegExp.$1.substring(0,RegExp.$1.length-1) + "\tcount=" + count.windows + "/" + count.tabs + "\n" + RegExp.$6;
+				state = state.replace(/autosave=true\t/, "autosave=session\t");
+				this.writeFile(aFile, state);
+			}
+			// pre tab/window count
+			else if (/(^\[SessionManager\]\n(?:name=.*\n)?(?:timestamp=\d+\n)?autosave=(false|true|session|window)\n)(.*)/m.test(state))
+			{
+				var count = this.getCount(RegExp.$3);
+				state = RegExp.$1.substring(0,RegExp.$1.length-1) + "\tcount=" + count.windows + "/" + count.tabs + "\n" + RegExp.$3;
+				if (RegExp.$2 == "true") state = state.replace(/\nautosave=true/, "\nautosave=session");
 				this.writeFile(aFile, state);
 			}
 			// pre autosave
-			else if (/(^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?)(.*)/m.test(state))
+			else if (/(^\[SessionManager\]\n(?:name=.*\n)?(?:timestamp=\d+\n)?)(.*)/m.test(state))
 			{
-				var count = this.getCount(RegExp.$4);
-				state = RegExp.$1 + "autosave=false\tcount=" + count.windows + "/" + count.tabs + "\n" + RegExp.$4;
+				var count = this.getCount(RegExp.$2);
+				state = RegExp.$1 + "autosave=false\tcount=" + count.windows + "/" + count.tabs + "\n" + RegExp.$2;
 				this.writeFile(aFile, state);
 			}
 		}
@@ -1705,7 +1758,7 @@
 			// only reload if didn't recover from crash
 			if (!no_reload) this._allowReload = true;
 			setTimeout(function() {
-				gSessionManager.mSessionStore.setWindowValue(window,"_sm_autosave_name",gSessionManager.mPref__autosave_name);			
+				gSessionManager.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(gSessionManager.mPref__autosave_name));
 			}, 100);
 		}
 	},
@@ -1798,7 +1851,7 @@
 		state = this.decryptEncryptByPreference(state); 
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
-		        "\nautosave=" + ((aAutoSave)?"true":"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
+		        "\nautosave=" + ((aAutoSave)?((aOneWindow)?"window":"session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
 	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession)
@@ -1813,6 +1866,8 @@
 			aWindow.__SM_restore = function() {
 				this.removeEventListener("load", this.__SM_restore, true);
 				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aAllowReload, aStripClosedTabs);
+				//this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore.getWindowValue(aWindow,"_sm_window_session_name"));
+				dump("restore win " + this.gSessionManager.__window_session_name + "\n");
 				delete this.__SM_restore;
 			};
 			aWindow.addEventListener("load", aWindow.__SM_restore, true);
@@ -1831,7 +1886,9 @@
 			if (!aReplaceTabs) aState = this.makeOneWindow(aState);
 			this.mSessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
 		}
-		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",this.mPref__autosave_name);			
+		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
+		this.__window_session_name = unescape(this.mSessionStore.getWindowValue(window,"_sm_window_session_name"));
+		dump("restore done " + this.__window_session_name + "\n");
 		return true;
 	},
 
@@ -1903,6 +1960,18 @@
 	{
 		return aString.replace(/[^\w ',;!()@&*+=~\x80-\xFE-]/g, "_").substr(0, 64) + this.mSessionExt;
 	},
+	
+	// Look for open window sessions
+	getWindowSessions: function()
+	{
+		var windowSessions = {};
+		this.getBrowserWindows().forEach(function(aWindow) {
+			if (aWindow.gSessionManager && aWindow.gSessionManager.__window_session_name && aWindow.gSessionManager.__window_session_name != "") { 
+				windowSessions[aWindow.gSessionManager.__window_session_name.trim().toLowerCase()] = true;
+			}
+		});
+		return windowSessions;
+	},
 
 	getBrowserWindows: function()
 	{
@@ -1955,6 +2024,10 @@
 		return this.mBundle.getString(aName);
 	}
 
+};
+
+String.prototype.trim = function() {
+	return this.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
 };
 
 window.addEventListener("load", gSessionManager.onLoad_proxy, false);
