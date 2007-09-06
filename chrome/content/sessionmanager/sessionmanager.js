@@ -16,7 +16,7 @@
 	mPromptSessionName: "?",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
-	mSessionRegExp: /^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(?:autosave=(false|session|window)\t)?(count=([0-9]+)\/([0-9]+))?/m,
+	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session|window)\tcount=([0-9]+)\/([0-9]+)/m,
 
 	mSessionCache: {},
 	mClosedWindowsCache: { timestamp: 0, data: null },
@@ -86,6 +86,9 @@
 		if ((typeof(tabClicking) == "undefined") && (typeof(TM_checkClick) == "undefined")) {
 			gBrowser.mStrip.addEventListener("click", this.onTabBarClick, false);
 		}
+		
+		// Make sure Session Store is initialzed - It doesn't seem to initialize in all O/S builds of Firefox.
+		this.mSessionStore.init(window);
 		
 		this.synchStartup();
 		this.recoverSession();
@@ -655,7 +658,7 @@
 			this.getBrowserWindows().forEach(function(aWindow) {
 				if (aWindow.gSessionManager && (aWindow.gSessionManager.__window_session_name == oldname)) { 
 					aWindow.gSessionManager.__window_session_name = values.text;
-					this.mSessionStore.setWindowValue(window,"_sm_window_session_name",escape(values.text));
+					this.mSessionStore.setWindowValue(aWindow,"_sm_window_session_name",escape(values.text));
 					this.mObserverService.notifyObservers(null, "sessionmanager:updatetitlebar", null);
 				}
 			}, this);
@@ -1104,8 +1107,8 @@
 					sessions.latestName = RegExp.$1;
 					latest = timestamp;
 				}
-				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: RegExp.$3, windows: RegExp.$5, tabs: RegExp.$6 });
-				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: RegExp.$3, time: file.lastModifiedTime, windows: RegExp.$5, tabs: RegExp.$6 };
+				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: RegExp.$3, windows: RegExp.$4, tabs: RegExp.$5 });
+				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: RegExp.$3, time: file.lastModifiedTime, windows: RegExp.$4, tabs: RegExp.$5 };
 			}
 		}
 		
@@ -1294,6 +1297,9 @@
 		if ((/\n\[Window1\]\n/.test(state)) && 
 		    (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(state))) 
 		{
+			// read entire file if only read header
+			if (headerOnly) state = this.readFile(aFile);
+			
 			var name = RegExp.$1 || this._string("untitled_window");
 			var timestamp = parseInt(RegExp.$2) || aFile.lastModifiedTime;
 			state = state.substring(state.indexOf("[Window1]\n"), state.length);
@@ -1303,31 +1309,27 @@
 			this.writeFile(aFile, state);
 		}
 		// pre autosave and tab/window count
-		else if ((/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?/m.test(state)) &&
-		         (!/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+)\n)?(autosave=(false|session|window))\t(count=[0-9]+\/[0-9]+)\n/m.test(state)))
+		else if ((/^\[SessionManager\]\nname=.*\ntimestamp=\d+\n/m.test(state)) &&
+		         (!/^\[SessionManager\]\nname=.*\ntimestamp=\d+\nautosave=(false|session|window)\tcount=[0-9]+\/[0-9]+\n/m.test(state)))
 		{
 			// read entire file if only read header
 			if (headerOnly) state = this.readFile(aFile);
 			
-			// pre window sessions
-			if (/^\[SessionManager\]\n(?:name=.*\n)?(?:timestamp=\d+\n)?(autosave=true)\tcount=[0-9]+\/[0-9]+\n/m.test(state))
-			{
-				state = state.replace(/autosave=true\t/, "autosave=session\t");
-				this.writeFile(aFile, state);
-			}
-			// pre tab/window count
-			else if (/(^\[SessionManager\]\n(?:name=.*\n)?(?:timestamp=\d+\n)?autosave=(false|true|session|window)\n)(.*)/m.test(state))
-			{
-				var count = this.getCount(RegExp.$3);
-				state = RegExp.$1.substring(0,RegExp.$1.length-1) + "\tcount=" + count.windows + "/" + count.tabs + "\n" + RegExp.$3;
-				if (RegExp.$2 == "true") state = state.replace(/\nautosave=true/, "\nautosave=session");
-				this.writeFile(aFile, state);
-			}
-			// pre autosave
-			else if (/(^\[SessionManager\]\n(?:name=.*\n)?(?:timestamp=\d+\n)?)(.*)/m.test(state))
-			{
-				var count = this.getCount(RegExp.$2);
-				state = RegExp.$1 + "autosave=false\tcount=" + count.windows + "/" + count.tabs + "\n" + RegExp.$2;
+			// This should always match, but is required to get the RegExp values set correctly.
+			// RegExp.$1 - Top 3 lines (includes name and timestamp)
+			// RegExp.$2 - Autosave string (if it exists)
+			// RegExp.$3 - Autosave value (not really used at the moment)
+			// RegExp.$4 - Count string (if it exists)
+			// RegExp.$5 - actual session data
+			if (/(^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[0-9]+\/[0-9]+\n)?(.*)/m.test(state))
+			{	
+				function getCountString(aCount) { 
+					return "\tcount=" + aCount.windows + "/" + aCount.tabs + "\n"; 
+				};
+				var countString = (RegExp.$4) ? (RegExp.$4) : getCountString(this.getCount(RegExp.$5));
+				var autoSaveString = (RegExp.$2) ? (RegExp.$2).split("\n")[0] : "autosave=false";
+				if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
+				state = RegExp.$1 + autoSaveString + countString + RegExp.$5
 				this.writeFile(aFile, state);
 			}
 		}
