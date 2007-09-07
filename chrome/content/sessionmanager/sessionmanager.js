@@ -16,7 +16,7 @@
 	mPromptSessionName: "?",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
-	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session|window)\tcount=([0-9]+)\/([0-9]+)/m,
+	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)/m,
 
 	mSessionCache: {},
 	mClosedWindowsCache: { timestamp: 0, data: null },
@@ -1310,7 +1310,7 @@
 		}
 		// pre autosave and tab/window count
 		else if ((/^\[SessionManager\]\nname=.*\ntimestamp=\d+\n/m.test(state)) &&
-		         (!/^\[SessionManager\]\nname=.*\ntimestamp=\d+\nautosave=(false|session|window)\tcount=[0-9]+\/[0-9]+\n/m.test(state)))
+		         (!/^\[SessionManager\]\nname=.*\ntimestamp=\d+\nautosave=(false|session|window)\tcount=[1-9][0-9]*\/[1-9][0-9]*\n/m.test(state)))
 		{
 			// read entire file if only read header
 			if (headerOnly) state = this.readFile(aFile);
@@ -1321,16 +1321,36 @@
 			// RegExp.$3 - Autosave value (not really used at the moment)
 			// RegExp.$4 - Count string (if it exists)
 			// RegExp.$5 - actual session data
-			if (/(^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[0-9]+\/[0-9]+\n)?(.*)/m.test(state))
+			// RegExp.$6 - should be blank or \n - if it's larger than 1 character something is wrong with session file
+			if (/(^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*\n)?(.*)(\n.*)?/m.test(state))
 			{	
 				function getCountString(aCount) { 
 					return "\tcount=" + aCount.windows + "/" + aCount.tabs + "\n"; 
 				};
-				var countString = (RegExp.$4) ? (RegExp.$4) : getCountString(this.getCount(RegExp.$5));
-				var autoSaveString = (RegExp.$2) ? (RegExp.$2).split("\n")[0] : "autosave=false";
-				if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
-				state = RegExp.$1 + autoSaveString + countString + RegExp.$5
-				this.writeFile(aFile, state);
+				if ((RegExp.$6.length == 0) || (RegExp.$6.length == 1))
+				{
+					var countString = (RegExp.$4) ? (RegExp.$4) : getCountString(this.getCount(RegExp.$5));
+					var autoSaveString = (RegExp.$2) ? (RegExp.$2).split("\n")[0] : "autosave=false";
+					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
+					state = RegExp.$1 + autoSaveString + countString + RegExp.$5
+					// bad session
+					if (countString == "\tcount=0/0\n") 
+					{
+						state = state.replace(/^\[SessionManager\]\n/,"[Bad-SessionManager]\n");
+						var leafName = aFile.leafName;
+						this.delFile(aFile, true);
+						aFile = this.getSessionDir(aFile.leafName + ".bad");
+					}
+					this.writeFile(aFile, state);
+				}
+				// bad session format, attempt to recover
+				else {
+					var newstate = state.split("\n");
+					newstate.splice(3,newstate.length - (newstate[newstate.length-1].length ? 5 : 6));
+					if (RegExp.$5 == "\tcount=0/0") newstate.splice(3,1);
+					state = newstate.join("\n");
+					this.writeFile(aFile, state);
+				}
 			}
 		}
 		
