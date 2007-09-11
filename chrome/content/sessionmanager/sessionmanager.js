@@ -135,7 +135,7 @@
 		// read current window session		
 		//this.__window_session_name = this.mSessionStore.getWindowValue(window,"_sm_window_session_name");
 		//if (this.__window_session_name) escape(this.__window_session_name);
-		dump("restore done " + this.__window_session_name + "\n");
+		//dump("restore done " + this.__window_session_name + "\n");
 
 		
 		// Remove change made in 0.6 (only do this once)
@@ -446,7 +446,7 @@
 		}
 		if (aName)
 		{
-			if (aOneWindow) this.mSessionStore.setWindowValue(window,"_sm_window_session_name",(values.autoSave)?escape(aName):"");
+//			if (aOneWindow) this.mSessionStore.setWindowValue(window,"_sm_window_session_name",(values.autoSave)?escape(aName):"");
 			
 			var file = this.getSessionDir(aFileName || this.makeFileName(aName), !aFileName);
 			try
@@ -458,8 +458,8 @@
 				this.ioError(ex);
 			}
 		}
-		if (!aOneWindow)
-		{
+//		if (!aOneWindow)
+//		{
 			if (values.autoSave)
 			{
 				this.setPref("_autosave_name",aName);
@@ -469,12 +469,12 @@
 				// If in auto-save session and user saves on top of it as manual turn off autosave
 				this.setPref("_autosave_name","");
 			}
-		}
-		else 
-		{
-			this.__window_session_name = (values.autoSave) ? aName : null;
-			gBrowser.updateTitlebar();
-		}
+//		}
+//		else 
+//		{
+//			this.__window_session_name = (values.autoSave) ? aName : null;
+//			gBrowser.updateTitlebar();
+//		}
 	},
 
 	saveWindow: function(aName, aFileName)
@@ -1878,7 +1878,7 @@
 		state = this.decryptEncryptByPreference(state); 
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
-		        "\nautosave=" + ((aAutoSave)?((aOneWindow)?"window":"session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
+		        "\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
 	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession)
@@ -1894,7 +1894,7 @@
 				this.removeEventListener("load", this.__SM_restore, true);
 				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aAllowReload, aStripClosedTabs);
 				this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore.getWindowValue(aWindow,"_sm_window_session_name"));
-				dump("restore win " + this.gSessionManager.__window_session_name + "\n");
+				//dump("restore win " + this.gSessionManager.__window_session_name + "\n");
 				delete this.__SM_restore;
 			};
 			aWindow.addEventListener("load", aWindow.__SM_restore, true);
@@ -1915,7 +1915,7 @@
 		}
 		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
 		//this.__window_session_name = unescape(this.mSessionStore.getWindowValue(window,"_sm_window_session_name"));
-		dump("restore done " + this.__window_session_name + "\n");
+		//dump("restore done " + this.__window_session_name + "\n");
 		return true;
 	},
 
