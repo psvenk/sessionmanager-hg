@@ -18,9 +18,10 @@ var gNeedSelection = false;
 // GetString values
 // 1 = Session Label         - Label at top of window
 // 2 = Accept Label          - Okay Button label for normal accept
-// 3 = Default Session Name  - (used when saving and name doesn't already exist)
+// 3 = Session Filename      - filename of session save file
 // 4 = Text Label            - Label above text box
 // 5 = Accept Existing Label - Okay button label when overwriting existing session
+// 6 = Default Session Name  - Comes from page title
 
 gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
@@ -46,24 +47,6 @@ gSessionManager.onLoad = function() {
 	var currentSession = this.getPref("_autosave_name");
 	if (currentSession) gBannedNames[currentSession.trim().toLowerCase()] = true;
 	
-	if (gParams.GetString(4)) // enable text box
-	{
-		_("text_container").hidden = false;
-		setDescription(_("text_label"), gParams.GetString(4));
-		gTextBox = _("text_box");
-		
-		sessions.forEach(function(aSession, aIx) {
-			gSessionNames[aSession.name.trim().toLowerCase()] = aIx + 1;
-		});
-		
-		onTextboxInput(gParams.GetString(6));
-		if (gExistingName && !(gParams.GetInt(1) & 256))
-		{
-			gParams.SetString(3, sessions[gExistingName - 1].fileName);
-			gTextBox.value = "";
-			onTextboxInput();
-		}
-	}
 	if (gParams.GetInt(1) & 4) // show the "Don't show [...] again" checkbox
 	{
 		_("checkbox_ignore").hidden = false;
@@ -74,6 +57,7 @@ gSessionManager.onLoad = function() {
 		_("checkbox_autosave").hidden = false;
 	}
 	
+	var sessionIndex = 1;
 	sessions.forEach(function(aSession) {
 		// Don't display current browser session or window sessions in list for delete or save
 		if (!((gParams.GetInt(1) & 16) || (gParams.GetInt(1) & 8)) || !gBannedNames[aSession.name.trim().toLowerCase()])
@@ -90,9 +74,26 @@ gSessionManager.onLoad = function() {
 			{
 				setTimeout(function(aItem) { gSessionList.selectItem(aItem); }, 0, item);
 			}
+			gSessionNames[aSession.name.trim().toLowerCase()] = sessionIndex;
+			sessionIndex = sessionIndex + 1;
 		}
 	}, this);
 	
+	if (gParams.GetString(4)) // enable text box
+	{
+		_("text_container").hidden = false;
+		setDescription(_("text_label"), gParams.GetString(4));
+		gTextBox = _("text_box");
+		
+		onTextboxInput(gParams.GetString(6));
+		if ((gBannedNames[gTextBox.value.trim().toLowerCase()] || gExistingName) && !(gParams.GetInt(1) & 256))
+		{
+			if (gExistingName) gParams.SetString(3, sessions[gExistingName - 1].fileName);
+			gTextBox.value = "";
+			onTextboxInput();
+		}
+	}
+
 	if ((gNeedSelection = !gTextBox || !gParams.GetString(5)) || (gParams.GetInt(1) & 256)) // when no textbox or renaming
 	{
 		gSessionList.addEventListener("select", onListboxSelect, false);
