@@ -341,7 +341,7 @@
 	updateTitlebar: function()
 	{
 		var sessionTitleName = " - (" + this._string("current_session2") + " " + this.mPref__autosave_name + ")";
-		var windowTitleName = " - (" + this._string("current_session2") + " " + this.__window_session_name + ")";
+		var windowTitleName = " - (" + this._string("current_session2") + " " + (this.__window_session_name || "") + ")";
 		if (this.__window_session_name && this.__window_session_name != "" && gBrowser.ownerDocument.title.indexOf(windowTitleName) == -1) {
 			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title + windowTitleName;
 		}
@@ -378,7 +378,7 @@
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("accesskey", key);
 			menuitem.setAttribute("autosave", aSession.autosave);
-			menuitem.setAttribute("disabled", windowSessions[aSession.name.trim().toLowerCase()]);
+			menuitem.setAttribute("disabled", windowSessions[aSession.name.trim().toLowerCase()] || false);
 			if (sessions.latestName == aSession.name) menuitem.setAttribute("latest", true);
 			if (aSession.name == this.mPref__autosave_name) menuitem.setAttribute("disabled", true);
 			aPopup.insertBefore(menuitem, separator);
@@ -1291,6 +1291,10 @@
 
 	readSessionFile: function(aFile,headerOnly)
 	{
+		function getCountString(aCount) { 
+			return "\tcount=" + aCount.windows + "/" + aCount.tabs + "\n"; 
+		};
+
 		var state = this.readFile(aFile,headerOnly);
 		
 		// old crashrecovery file format
@@ -1298,14 +1302,14 @@
 		    (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(state))) 
 		{
 			// read entire file if only read header
-			if (headerOnly) state = this.readFile(aFile);
-			
 			var name = RegExp.$1 || this._string("untitled_window");
 			var timestamp = parseInt(RegExp.$2) || aFile.lastModifiedTime;
+			if (headerOnly) state = this.readFile(aFile);
 			state = state.substring(state.indexOf("[Window1]\n"), state.length);
 			state = this.decodeOldFormat(state, true).toSource();
 			state = state.substring(1,state.length-1);
-			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\n" + state;
+			var countString = getCountString(this.getCount(state));
+			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
 			this.writeFile(aFile, state);
 		}
 		// pre autosave and tab/window count
@@ -1324,9 +1328,6 @@
 			// RegExp.$6 - should be blank or \n - if it's larger than 1 character something is wrong with session file
 			if (/(^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*\n)?(.*)(\n.*)?/m.test(state))
 			{	
-				function getCountString(aCount) { 
-					return "\tcount=" + aCount.windows + "/" + aCount.tabs + "\n"; 
-				};
 				if ((RegExp.$6.length == 0) || (RegExp.$6.length == 1))
 				{
 					var countString = (RegExp.$4) ? (RegExp.$4) : getCountString(this.getCount(RegExp.$5));
