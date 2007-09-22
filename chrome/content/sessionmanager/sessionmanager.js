@@ -756,6 +756,7 @@
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", aWindow.name);
 			menuitem.setAttribute("index", "window" + aIx);
+			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedWindowMenuItem(event);');
 			aPopup.insertBefore(menuitem, separator);
 		});
@@ -795,6 +796,7 @@
 			menuitem.setAttribute("statustext", aTab.url);
 			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
 			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
+			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
 			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedTabMenuItem(event);');
 			aPopup.insertBefore(menuitem, listEnd);
 		});
@@ -853,17 +855,12 @@
 
 	clickClosedWindowMenuItem: function(aEvent)
 	{	
-		// get index
-		var aIx = aEvent.originalTarget.getAttribute("index").substring(6);
-
-		// left click reopen closed window
-		if (aEvent.button == 0)
-		{
-			this.undoCloseWindow(aIx, (aEvent.shiftKey && (aEvent.ctrlKey || aEvent.metaKey))?"overwrite":(aEvent.ctrlKey)?"append":"");
-		}
 		// if ctrl/command right click, remove tab from list
-		else if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
+		if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
 		{
+			// get index
+			var aIx = aEvent.originalTarget.getAttribute("index").substring(6);
+		
 			var closedWindows = this.getClosedWindows();
 			closedWindows.splice(aIx, 1)[0].state;
 			this.storeClosedWindows(closedWindows);
@@ -876,17 +873,12 @@
 	
 	clickClosedTabMenuItem: function(aEvent)
 	{	
-		// get index
-		var aIx = aEvent.originalTarget.getAttribute("index").substring(3);
-		
-		// left click reopen closed tab
-		if (aEvent.button == 0) 
-		{
-			undoCloseTab(aIx);
-		}
 		// if ctrl/command right click, remove tab from list
-		else if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
+		if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
 		{
+			// get index
+			var aIx = aEvent.originalTarget.getAttribute("index").substring(3);
+		
 			// This code is based off of code in Tab Mix Plus
 			var state = { windows: [], _firstTabs: true };
 			state.windows[0] = { _closedTabs: [] };
