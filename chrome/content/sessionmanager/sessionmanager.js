@@ -756,7 +756,7 @@
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", aWindow.name);
 			menuitem.setAttribute("index", "window" + aIx);
-			menuitem.onclick = gSessionManager.clickClosedWindowMenuItem;
+			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedWindowMenuItem(event);');
 			aPopup.insertBefore(menuitem, separator);
 		});
 		label.hidden = (closedWindows.length == 0);
@@ -795,7 +795,7 @@
 			menuitem.setAttribute("statustext", aTab.url);
 			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
 			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
-			menuitem.onclick = gSessionManager.clickClosedTabMenuItem;
+			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedTabMenuItem(event);');
 			aPopup.insertBefore(menuitem, listEnd);
 		});
 		separator.nextSibling.hidden = (mClosedTabs.length == 0);
@@ -859,18 +859,18 @@
 		// left click reopen closed window
 		if (aEvent.button == 0)
 		{
-			gSessionManager.undoCloseWindow(aIx, (aEvent.shiftKey && (aEvent.ctrlKey || aEvent.metaKey))?"overwrite":(aEvent.ctrlKey)?"append":"");
+			this.undoCloseWindow(aIx, (aEvent.shiftKey && (aEvent.ctrlKey || aEvent.metaKey))?"overwrite":(aEvent.ctrlKey)?"append":"");
 		}
 		// if ctrl/command right click, remove tab from list
 		else if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
 		{
-			var closedWindows = gSessionManager.getClosedWindows();
+			var closedWindows = this.getClosedWindows();
 			closedWindows.splice(aIx, 1)[0].state;
-			gSessionManager.storeClosedWindows(closedWindows);
-			gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+			this.storeClosedWindows(closedWindows);
+			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
 			// update the remaining entries
-			gSessionManager.updateClosedList(aEvent.originalTarget, aIx, closedWindows.length, "window");
+			this.updateClosedList(aEvent.originalTarget, aIx, closedWindows.length, "window");
 		}
 	},
 	
@@ -893,19 +893,19 @@
 
 			if (aIx >= 0) {
 				// get closed-tabs from nsSessionStore
-				var closedTabs = eval("(" + gSessionManager.mSessionStore.getClosedTabData(window) + ")");
+				var closedTabs = eval("(" + this.mSessionStore.getClosedTabData(window) + ")");
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
-				if (!gSessionManager.mFF3) gSessionManager.fixBug350558(closedTabs);
+				if (!this.mFF3) this.fixBug350558(closedTabs);
 				// purge closed tab at aIndex
 				closedTabs.splice(aIx, 1);
 				state.windows[0]._closedTabs = closedTabs;
 			}
 
 			// replace existing _closedTabs
-			gSessionManager.mSessionStore.setWindowState(window, state.toSource(), false);
+			this.mSessionStore.setWindowState(window, state.toSource(), false);
 			
 			// update the remaining entries
-			gSessionManager.updateClosedList(aEvent.originalTarget, aIx, state.windows[0]._closedTabs.length, "tab");
+			this.updateClosedList(aEvent.originalTarget, aIx, state.windows[0]._closedTabs.length, "tab");
 		}
 	},
 	
