@@ -1245,7 +1245,7 @@
 	backupCurrentSession: function()
 	{
 		var backup = this.getPref("backup_session", 1);
-		if (backup == 2 && !this.getPref("browser.sessionstore.resume_session_once", false, true))
+		if (backup == 2)
 		{
 			var dontPrompt = { value: false };
 			backup = (this.mPromptService.confirmEx(null, this.mTitle, this._string_preserve_session || this._string("preserve_session"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string_prompt_not_again || this._string("prompt_not_again"), dontPrompt) == 1)?-1:1;
@@ -1254,9 +1254,9 @@
 				this.setPref("backup_session", (backup == -1)?0:1);
 			}
 		}
+		this.keepOldBackups();
 		if (backup > 0)
 		{
-			this.keepOldBackups();
 			try
 			{
 				var state = this.getSessionState(this._string_backup_session || this._string("backup_session"));
@@ -1266,12 +1266,7 @@
 			{
 				this.ioError(ex);
 			}
-		}
-		else
-		{
-			this.delFile(this.getSessionDir(this.mBackupSessionName), true);
-			this.keepOldBackups();
-		}
+	  }
 	},
 
 	keepOldBackups: function()
@@ -1282,6 +1277,7 @@
 			var oldBackup = this.getSessionDir(this.mBackupSessionName, true);
 			var name = this.getFormattedName("", new Date(), this._string_old_backup_session || this._string("old_backup_session"));
 			this.writeFile(oldBackup, this.nameState(this.readSessionFile(backup), name));
+			this.delFile(backup, true);
 		}
 		
 		if (this.mPref_max_backup_keep != -1)
