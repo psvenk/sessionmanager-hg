@@ -48,5 +48,147 @@
     <em:optionsURL>chrome://sessionmanager/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://sessionmanager/skin/icon.png</em:iconURL>  
     
+    <!-- Localizations -->
+    <em:localized>
+      <Description>
+        <em:locale>cs-CZ</em:locale>
+        <em:name>Správce relac�</em:name>
+        <em:description>Ukládá a obnovuje stav všech oken.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>da-DK</em:locale>
+        <em:name>Session Manager</em:name>
+        <em:description>Gemmer og henter tilstanden for alle vinduer.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>de-DE</em:locale>
+        <em:name>Sitzungs-Manager</em:name>
+        <em:description>Sichert den Zustand aller Fenster und stellt ihn wieder her.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>es-ES</em:locale>
+        <em:name>Administrador de sesiones</em:name>
+        <em:description>Guarda y recupera el estado de todas las ventanas.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>fi-FI</em:locale>
+        <em:name>Istuntojenhallinta</em:name>
+        <em:description>Tallentaa ja palauttaa kaikkien ikkunoinen tilan.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>fr-FR</em:locale>
+        <em:name>Gestionnaire de session</em:name>
+        <em:description>Enregistre et rétabli l'état de toutes les fenêtres.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>hu-HU</em:locale>
+        <em:name>Session Manager</em:name>
+        <em:description>Lehetővé teszi a munkamenet (ablakok és lapok) mentését és visszaállítását</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>it-IT</em:locale>
+        <em:name>Gestione sessioni</em:name>
+        <em:description>Salva e ripristina lo stato di tutte le finestre.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>ja-JP</em:locale>
+        <em:name>セッションマネージャ</em:name>
+        <em:description>すべてのウインドウの状態を保存し復元します.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>lt-LT</em:locale>
+        <em:name>Sesijų tvarkytojas</em:name>
+        <em:description>Išsaugo ir atkuria visus langus.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>mk-MK</em:locale>
+        <em:name>Менаџер на сесијата</em:name>
+        <em:description>Ја зачувува и обновува состојбата на сите прозорци.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>nl-NL</em:locale>
+        <em:name>Session Manager</em:name>
+        <em:description>Session Manager slaat de status van alle vensters op, en stelt u in staat ze te herstellen.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>pl-PL</em:locale>
+        <em:name>Session Manager</em:name>
+        <em:description>Zapisuje i odtwarza stan wszystkich okien</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>pt-BR</em:locale>
+        <em:name>Gerenciador de Sessões</em:name>
+        <em:description>Salva e restaura o estado de todas as janelas.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>pt-PT</em:locale>
+        <em:name>Session Manager</em:name>
+        <em:description>Guarda e restaura o estado de todas as janelas.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>ru-RU</em:locale>
+        <em:name>Менеджер сессий</em:name>
+        <em:description>Функциональный менеджер сессий. Сохраняет и восстанавливает состояние всех окон.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>sk-SK</em:locale>
+        <em:name>Session Manager</em:name>
+        <em:description>Umožní uložiť a obnoviť stav všetkých okien</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>sr-YU</em:locale>
+        <em:name>Menadžer Sesija</em:name>
+        <em:description>Snima i obnavlja stanja svih prozora.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>tr-TR</em:locale>
+        <em:name>Oturum Yöneticisi</em:name>
+        <em:description>Tüm pencerelerin durumlarını kaydeder ve geri yükler</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>zh-CN</em:locale>
+        <em:name>会话管理器</em:name>
+        <em:description>会话管理器：保存和恢复全部浏览窗口的状态。</em:description>
+      </Description>
+    </em:localized>
+    
   </Description>
 </RDF>
