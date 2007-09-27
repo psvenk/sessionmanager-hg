@@ -26,9 +26,9 @@
     <em:contributor>Rick Cart (Chinese [zh-CN])</em:contributor>
     <em:contributor>Teboga (Portuguese - Brazillian)</em:contributor>
     <em:contributor>jojaba (French)</em:contributor>
-    <em:contributor>Edgaras Janušauskas, garas (Lithuanian)</em:contributor>
+    <em:contributor>Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:contributor>
     <em:contributor>Proyecto Nave, chuzo (Spanish)</em:contributor>
-    <em:contributor>Leszek (teo) Życzkowski (Polish)</em:contributor>
+    <em:contributor>Leszek (teo) Å»yczkowski (Polish)</em:contributor>
     <em:contributor>Haebaru (Japanese)</em:contributor>
     <em:contributor>stoneflash (Russian)</em:contributor>
     <em:contributor>JW_00000 (Dutch)</em:contributor>
@@ -36,7 +36,7 @@
     <em:contributor>SerdarSahin (Turkish)</em:contributor>
     <em:contributor>Wladow (Slovak)</em:contributor>
     <em:contributor>Team erweiterungen.de, ReinekeFux (German)</em:contributor>
-    <em:contributor>Mikes Kaszmán István (Cashman) (Hungarian)</em:contributor>
+    <em:contributor>Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:contributor>
     <em:contributor>Kape123 (Serbian)</em:contributor>
     <em:contributor>lloco (Portuguese)</em:contributor>
     <em:contributor>PetrTwo (Czech)</em:contributor>
@@ -52,8 +52,8 @@
     <em:localized>
       <Description>
         <em:locale>cs-CZ</em:locale>
-        <em:name>Správce relac�</em:name>
-        <em:description>Ukládá a obnovuje stav všech oken.</em:description>
+        <em:name>Správce relací</em:name>
+        <em:description>=Ukládá a obnovuje stav všech oken.</em:description>
       </Description>
     </em:localized>
     <em:localized>
@@ -109,7 +109,7 @@
       <Description>
         <em:locale>ja-JP</em:locale>
         <em:name>セッションマネージャ</em:name>
-        <em:description>すべてのウインドウの状態を保存し復元します.</em:description>
+        <em:description>すべてのウインドウの状態を保存し復元します</em:description>
       </Description>
     </em:localized>
     <em:localized>
