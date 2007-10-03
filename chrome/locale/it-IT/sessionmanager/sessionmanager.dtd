@@ -4,6 +4,8 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Salva finestra corrente...">
 <!ENTITY saveOne.accesskey "f">
+<!ENTITY closeSession.label "Salva e chiudi la sessione corrente">
+<!ENTITY closeSession.accesskey "C">
 <!ENTITY rename.label "Rinominare sessione...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Eliminare sessione...">
