@@ -6,6 +6,8 @@
 <!ENTITY saveOne.accesskey "f">
 <!ENTITY closeSession.label "Salva e chiudi la sessione corrente">
 <!ENTITY closeSession.accesskey "C">
+<!ENTITY abandonSession.label "Abbandona la sessione corrente">
+<!ENTITY abandonSession.accesskey "A">
 <!ENTITY rename.label "Rinominare sessione...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Eliminare sessione...">
@@ -30,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Riapri scheda">
 <!ENTITY toolbar.undo.tooltip "Riapri la scheda chiusa più recentemente">
 <!ENTITY prompt.ignore.label "Non mostrare nuovamente questa finestra di dialogo">
+<!ENTITY prompt.autosave.label "Rendi questa una sessione &apos;auto-salvabile&apos;">
