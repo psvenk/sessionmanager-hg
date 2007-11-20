@@ -1,6 +1,8 @@
 /*
   The following code originated from Tab Mix Plus - http://tmp.garyr.net/ 
   It will remove stored Session Manager saved files, when user selects to clear private data
+  
+  Michael Kraft modified gSessionManager_preferencesOverlay to make it work in Firefox 3.0
 */
 
 var gSessionManager_preferencesOverlay = {
@@ -8,26 +10,23 @@ var gSessionManager_preferencesOverlay = {
 		var prefWindow = document.getElementById('BrowserPreferences');
 		this.onPaneLoad(prefWindow.lastSelected);
 
-		eval("prefWindow.showPane ="+prefWindow.showPane.toString().replace(
-			'this._outer._selectPane(this._pane);',
-			'$& gSessionManager_preferencesOverlay.onPaneLoad(this._pane.id);'
-		));
+		prefWindow._selector.setAttribute("oncommand", "gSessionManager_preferencesOverlay.onPaneLoad(getElementsByAttribute('selected','true')[0].label)");
 	},
 
 	onPaneLoad: function (aPaneID) {
-		if (aPaneID == "panePrivacy") this.onPanePrivacyLoad();
+		if (aPaneID == "panePrivacy" || aPaneID == "Privacy") this.onPanePrivacyLoad();
 	},
 
 /* ........ panePrivacy .............. */
 
 	onPanePrivacyLoad: function ()	{
-		if(gPrivacyPane.clearPrivateDataNow) {// clearPrivateDataNow not exist in firefox 1.5
-			eval("gPrivacyPane.clearPrivateDataNow ="+gPrivacyPane.clearPrivateDataNow.toString().replace(
-				'glue.sanitize(window || null);',
-				'$& gSessionManager.tryToSanitize();'
-			));
-		}
-	}
+    	window.setTimeout(function() {
+    	    var clearNowBn = document.getElementById("clearDataNow");
+    	    if (clearNowBn && clearNowBn.getAttribute("oncommand").indexOf("gSessionManager") == -1) { 
+    	        clearNowBn.setAttribute("oncommand", clearNowBn.getAttribute("oncommand") + " gSessionManager.tryToSanitize();");
+	        }
+	    }, 200);
+    }
 }
 
 // Attach sanitizing functions to gSessionManager
