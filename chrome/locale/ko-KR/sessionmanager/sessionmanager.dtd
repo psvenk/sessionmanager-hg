@@ -1,0 +1,35 @@
+<!ENTITY sessionManager "Session Manager">
+<!ENTITY toolsmenu.accesskey "M">
+<!ENTITY save.label "세션 저장하기(S)...">
+<!ENTITY save.accesskey "S">
+<!ENTITY saveOne.label "현재 창만 저장하기(W)...">
+<!ENTITY saveOne.accesskey "W">
+<!ENTITY closeSession.label "현재 세션 저장하고 닫기(C)">
+<!ENTITY closeSession.accesskey "C">
+<!ENTITY abandonSession.label "현재 세션을 삭제하기(A)">
+<!ENTITY abandonSession.accesskey "A">
+<!ENTITY rename.label "세션 이름 변경(R)...">
+<!ENTITY rename.accesskey "R">
+<!ENTITY remove.label "세션 삭제(D)...">
+<!ENTITY remove.accesskey "D">
+<!ENTITY openFolder.label "세션 폴더 열기(F)">
+<!ENTITY openFolder.accesskey "F">
+<!ENTITY options.label "&sessionManager; 옵션(O)">
+<!ENTITY options.accesskey "O">
+<!ENTITY resume.label "시작할 때 현재 세션을 재개하기(M)">
+<!ENTITY resume.accesskey "M">
+<!ENTITY reload.label "모든 복원된 창을 새로 고침(L)">
+<!ENTITY reload.accesskey "L">
+<!ENTITY overwrite.label "기존의 창에 덮어쓰기(P)">
+<!ENTITY overwrite.accesskey "P">
+<!ENTITY undoClosed.label "닫은 탭 다시 열기(C)...">
+<!ENTITY undoClosed.accesskey "C">
+<!ENTITY closedWindows "닫은 창:">
+<!ENTITY closedTabs "닫은 탭:">
+<!ENTITY clearList.label "&apos;닫은&apos; 목록 비우기(C)...">
+<!ENTITY clearList.accesskey "C">
+<!ENTITY toolbar.tooltip "현재 보고있는 세션을 저장합니다...">
+<!ENTITY toolbar.undo.label "다시 열기">
+<!ENTITY toolbar.undo.tooltip "가장 최근 닫은 탭을 다시 엽니다.">
+<!ENTITY prompt.ignore.label "이 메세지를 다시 표시하지 않기">
+<!ENTITY prompt.autosave.label "자동저장 세션으로 만들기">
