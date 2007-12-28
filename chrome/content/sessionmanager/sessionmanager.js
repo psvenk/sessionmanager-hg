@@ -279,6 +279,7 @@
 		case "quit-application-granted":
 			// quit granted so stop listening for closed windows
 			this.mPref__stopping = true;
+			this._mUserDirectory = this.getUserDir("sessions");
 			break;
 		}
 	},
@@ -1043,7 +1044,9 @@
 				}
 			}
 		} catch (ex) {
-			dir = null;
+    		// handle the case on shutdown since the above will always throw an exception on shutdown
+    		if (this._mUserDirectory) dir = this._mUserDirectory.clone();
+			else dir = null;
 		} finally {
 			return dir;
 		}
