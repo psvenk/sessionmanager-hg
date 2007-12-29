@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "pitaj da li da se bekapuje trenutna sesija">
 <!ENTITY crashrecovery.label "Omogući oporavak prilikom nasilnog gašenja">
 <!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "">
+<!ENTITY autosave_session.accesskey "">
 <!ENTITY restoring.caption "Obnavljanje sesije">
 <!ENTITY sessionList.caption "Lista sesija">
 <!ENTITY orderList.label "Uredi listu sesija">
@@ -42,6 +44,8 @@
 <!ENTITY name_format.label "Format predloga za ime sesija:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Upotrebi &#37;t za nazive aktivnih tabova, &#37;d za trenutni datum, &#37;m za vreme; dodatno je moguće ograničiti broj karaktera u nazivu sa: &#37;#t">
+<!ENTITY sessionstore.caption "">
+<!ENTITY service.caption "">
 <!ENTITY service.description "Ne dirati ova setovanja, osim ukoliko znate šta radite:">
 <!ENTITY interval.label "Minimalni interval vremena između dva snimanja stanja (u sekundama):">
 <!ENTITY interval.accesskey "i">
@@ -54,6 +58,10 @@
 <!ENTITY privacy.level2 "ni za jedan sajt">
 <!ENTITY sessiondir.caption "Lokacija snimljenih sesija">
 <!ENTITY sessiondir.desc "Podrazumevana lokacija snimljenih sesija može biti presetovana ovde.">
+<!ENTITY encrypt.caption "">
+<!ENTITY encrypt.desc "">
+<!ENTITY encrypt.label "">
+<!ENTITY encrypt.accesskey "">
 <!ENTITY change_dir.label "Promeni">
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "Vrati podrazumevana">

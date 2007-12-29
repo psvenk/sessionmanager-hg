@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Snimi trenutni prozor...">
 <!ENTITY saveOne.accesskey "W">
+<!ENTITY closeSession.label "">
+<!ENTITY closeSession.accesskey "">
+<!ENTITY abandonSession.label "">
+<!ENTITY abandonSession.accesskey "">
 <!ENTITY rename.label "Preimenuj sesiju...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Obriši sesiju...">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Poništi zatvaranje">
 <!ENTITY toolbar.undo.tooltip "Ponovo otvori najskorije zatvoreni tab">
 <!ENTITY prompt.ignore.label "Ne prikazuj ovaj dijalog ponovo">
+<!ENTITY prompt.autosave.label "">

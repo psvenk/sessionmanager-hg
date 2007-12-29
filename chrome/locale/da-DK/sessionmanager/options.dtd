@@ -44,6 +44,8 @@
 <!ENTITY name_format.label "Format for foreslåede sessionsnavne:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Brug &#37;t for det aktive faneblads overskrift, &#37;d for dagsdato og &#37;m for tidspunkt; overskriftens kan begrænses til # tegn: &#37;#t.">
+<!ENTITY sessionstore.caption "">
+<!ENTITY service.caption "">
 <!ENTITY service.description "Ændr kun på disse hvis du ved hvad du laver:">
 <!ENTITY interval.label "Minimalt tidsinterval imellem at to tilstande gemmes (i sekunder):">
 <!ENTITY interval.accesskey "i">
@@ -56,6 +58,10 @@
 <!ENTITY privacy.level2 "ingen websteder">
 <!ENTITY sessiondir.caption "Placering af gemte sessioner">
 <!ENTITY sessiondir.desc "Standard placeringen af gemte sessioner kan overskrives her.">
+<!ENTITY encrypt.caption "">
+<!ENTITY encrypt.desc "">
+<!ENTITY encrypt.label "">
+<!ENTITY encrypt.accesskey "">
 <!ENTITY change_dir.label "Ændr">
 <!ENTITY change_dir.accesskey "Æ">
 <!ENTITY default_dir.label "Genskab standard">

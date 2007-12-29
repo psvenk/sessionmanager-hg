@@ -59,6 +59,7 @@
 <!ENTITY sessiondir.caption "Kayıtlı Oturumun Bölgesi">
 <!ENTITY sessiondir.desc "Kayıtlı Oturumların varsayılan Bölgesi olmalı">
 <!ENTITY encrypt.caption "Şifreleme">
+<!ENTITY encrypt.desc "">
 <!ENTITY encrypt.label "Kapatılan pencere ve kaydedilen otorumları şifrele">
 <!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Değiştir">

@@ -4,6 +4,10 @@
 <!ENTITY save.accesskey "З">
 <!ENTITY saveOne.label "Зачувај го моменталниот прозорец...">
 <!ENTITY saveOne.accesskey "М">
+<!ENTITY closeSession.label "">
+<!ENTITY closeSession.accesskey "">
+<!ENTITY abandonSession.label "">
+<!ENTITY abandonSession.accesskey "">
 <!ENTITY rename.label "Преименувај ја сесијата..">
 <!ENTITY rename.accesskey "П">
 <!ENTITY remove.label "Избриши сеси(и)ја">
@@ -28,3 +32,4 @@
 <!ENTITY toolbar.undo.label "Отповикај го затворањето">
 <!ENTITY toolbar.undo.tooltip "Повторно отвори ги неодамнешните затворени јазичиња">
 <!ENTITY prompt.ignore.label "Не го покажувај овај дијалог повторно">
+<!ENTITY prompt.autosave.label "">

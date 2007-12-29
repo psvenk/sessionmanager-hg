@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "прашај дали да се направи резервна копија на моменталната сесија">
 <!ENTITY crashrecovery.label "Овозможи обнова од срушување">
 <!ENTITY crashrecovery.accesskey "њ">
+<!ENTITY autosave_session.label "">
+<!ENTITY autosave_session.accesskey "">
 <!ENTITY restoring.caption "Обновување на сесијата">
 <!ENTITY sessionList.caption "Листа на сесијата">
 <!ENTITY orderList.label "Сортирај ја листата на сесијата">
@@ -42,6 +44,8 @@
 <!ENTITY name_format.label "Формат за предлозите за имиња на сесијата:">
 <!ENTITY name_format.accesskey "п">
 <!ENTITY name_format.desc "Користи &#37;t за наслови на активните јазичиња, &#37;d за денешниот датум, &#37;m за време; додатно може да се ограничи должината на насловот на # знаци: &#37;#t.">
+<!ENTITY sessionstore.caption "">
+<!ENTITY service.caption "">
 <!ENTITY service.description "Не ги допирај овие, освен ако знаеш што правиш!">
 <!ENTITY interval.label "Минимум временски интервал помеѓу две зачувувања на состојбата(во секунди):">
 <!ENTITY interval.accesskey "в">
@@ -54,6 +58,10 @@
 <!ENTITY privacy.level2 "ниеден сајт">
 <!ENTITY sessiondir.caption "Локација на зачуваните сесии">
 <!ENTITY sessiondir.desc "Тука може да се премине преку зададената локација на зачуваните сесии.">
+<!ENTITY encrypt.caption "">
+<!ENTITY encrypt.desc "">
+<!ENTITY encrypt.label "">
+<!ENTITY encrypt.accesskey "">
 <!ENTITY change_dir.label "Промени">
 <!ENTITY change_dir.accesskey "и">
 <!ENTITY default_dir.label "Стандардни вредности">

@@ -44,6 +44,8 @@
 <!ENTITY name_format.label "Siūlomas sesijų vardų formatas:">
 <!ENTITY name_format.accesskey "f">
 <!ENTITY name_format.desc "Naudokite &#37;t aktyvaus skirtuko pavadinimui, &#37;d šiandienos datai ir &#37;m laikui; papildomai pavadinimo ilgis gali būti trumpinamas iki # simbolių: &#37;#t.">
+<!ENTITY sessionstore.caption "Sesijų Saugykla">
+<!ENTITY service.caption "&quot;Sesijų Saugyklos&quot; nustatymai">
 <!ENTITY service.description "Nekeiskite nieko, nebent žinote, ką darote:">
 <!ENTITY interval.label "Mažiausias laiko intervalas tarp būsenos išsaugojimų (sekundėmis):">
 <!ENTITY interval.accesskey "M">
