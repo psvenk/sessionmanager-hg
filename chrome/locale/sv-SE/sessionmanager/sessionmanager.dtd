@@ -1,0 +1,35 @@
+<!ENTITY sessionManager "Session Manager">
+<!ENTITY toolsmenu.accesskey "M">
+<!ENTITY save.label "Spara session">
+<!ENTITY save.accesskey "S">
+<!ENTITY saveOne.label "Spara nuvarande fönster...">
+<!ENTITY saveOne.accesskey "W">
+<!ENTITY closeSession.label "Spara och stäng nuvarande session">
+<!ENTITY closeSession.accesskey "C">
+<!ENTITY abandonSession.label "Överge nuvarande session">
+<!ENTITY abandonSession.accesskey "A">
+<!ENTITY rename.label "Byt namn på session...">
+<!ENTITY rename.accesskey "R">
+<!ENTITY remove.label "Radera session(er)...">
+<!ENTITY remove.accesskey "D">
+<!ENTITY openFolder.label "Öppna sessionsmapp">
+<!ENTITY openFolder.accesskey "F">
+<!ENTITY options.label "&sessionManager; Alternativ">
+<!ENTITY options.accesskey "O">
+<!ENTITY resume.label "Återuppta nuvarande session vid start">
+<!ENTITY resume.accesskey "m">
+<!ENTITY reload.label "Ladda om alla återställda fönster">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "Ersätt existerande fönster">
+<!ENTITY overwrite.accesskey "p">
+<!ENTITY undoClosed.label "Återställ stängda...">
+<!ENTITY undoClosed.accesskey "C">
+<!ENTITY closedWindows "Stängda fönster:">
+<!ENTITY closedTabs "Stängda flikar:">
+<!ENTITY clearList.label "Rensa &apos;Stängda&apos;-lista...">
+<!ENTITY clearList.accesskey "C">
+<!ENTITY toolbar.tooltip "Spara nuvarande session...">
+<!ENTITY toolbar.undo.label "Ångra Stäng">
+<!ENTITY toolbar.undo.tooltip "Återställ senast stängda flik">
+<!ENTITY prompt.ignore.label "Visa inte den här dialogen igen">
+<!ENTITY prompt.autosave.label "Gör det här till en auto-sparnings-session">

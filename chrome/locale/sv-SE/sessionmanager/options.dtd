@@ -1,0 +1,70 @@
+<!ENTITY options.title "&sessionManager; Alternativ">
+<!ENTITY general.caption "Allmänt">
+<!ENTITY startNend.caption "Uppstart &amp; nerstänging">
+<!ENTITY resume_sess.label "Ladda alltid följande session vid uppstart:">
+<!ENTITY resume_sess.accesskey "s">
+<!ENTITY backup_sess.label "Vid nerstängning">
+<!ENTITY backup_sess.accesskey "h">
+<!ENTITY backup_session.label0 "&apos;avfärda&apos; nuvarande session">
+<!ENTITY backup_session.label1 "spara nuvarande session">
+<!ENTITY backup_session.label2 "fråga om sessionen ska sparas">
+<!ENTITY crashrecovery.label "Aktivera Krashåterställning">
+<!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "Spara ersatt session automatiskt">
+<!ENTITY autosave_session.accesskey "a">
+<!ENTITY restoring.caption "Sessionsåterställning">
+<!ENTITY sessionList.caption "Sessionslista">
+<!ENTITY orderList.label "Sortera sessionlistan">
+<!ENTITY orderList.accesskey "d">
+<!ENTITY orderList.label1 "alfabetiskt">
+<!ENTITY orderList.label2 "äldsta till nyaste">
+<!ENTITY orderList.label_2 "nyaste till äldsta">
+<!ENTITY max_backup.label "Antal äldre (krashade) sessioner att behålla:">
+<!ENTITY max_backup.accesskey "N">
+<!ENTITY undoClose.caption "Ångra Stäng">
+<!ENTITY windowsNtabs.caption "Stängda fönster &amp; flikar">
+<!ENTITY max_closed.label "Maximalt antal sparade fönster:">
+<!ENTITY max_closed.accesskey "w">
+<!ENTITY max_tabs.label "Maximalt antal ihågkommna stängda flikar (per fönster):">
+<!ENTITY max_tabs.accesskey "t">
+<!ENTITY submenu.label "Lista alla stängda fönster i en undermany">
+<!ENTITY submenu.accesskey "c">
+<!ENTITY persistence.caption "Listan över stängda flikar">
+<!ENTITY closed_tabs.label "Återställ listan över återställningsbara flikar för alla fönster:">
+<!ENTITY closed_tabs.accesskey "e">
+<!ENTITY closed_tabs.label0 "aldrig">
+<!ENTITY closed_tabs.label1 "vid uppstart">
+<!ENTITY closed_tabs.label2 "alltid">
+<!ENTITY window_list.label "Rensa inte listan över stängda fönster vid nerstängning">
+<!ENTITY window_list.accesskey "o">
+<!ENTITY clear_list.label "Rensa listan">
+<!ENTITY clear_list.accesskey "r">
+<!ENTITY advanced.caption "Avancerat">
+<!ENTITY name_format.caption "Sessionsnamn">
+<!ENTITY name_format.label "Format för sessionsnamnsförslag:">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "Använd &#37;t för den aktiva flikens titel, &#37;d för dagens datum och &#37;m för klockan; dessutom så kan titelns längd begränsas till # antal tecken: &#37;#t.">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "&quot;SessionStore&quot;-inställningar">
+<!ENTITY service.description "Rör inte de här om du inte vet vad du gör!">
+<!ENTITY interval.label "Maximala tiden mellan två statussparningar (i sekunder):">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "Maximala mängden POSTDATA att spara (i byta; -1 för allt):">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Spara känslig data (formulärdata, POSTDATA, kakor) för">
+<!ENTITY privacy.accesskey "v">
+<!ENTITY privacy.level0 "alla sidor">
+<!ENTITY privacy.level1 "endast okrypterade sidor">
+<!ENTITY privacy.level2 "inga sidor allts">
+<!ENTITY sessiondir.caption "Sparade-sessioner-plats">
+<!ENTITY sessiondir.desc "Platsen för sparade sessioner kan ändras här.">
+<!ENTITY encrypt.caption "Kryptering">
+<!ENTITY encrypt.desc "Varning: Krypterad sessiondata kan bara öppnas i profiler mes identiska key3.db- och cert8.db-filer, och om ett huvudlösenord är angett så kan inte sessioner krypteras eller dekrypteras om det inte har angetts.">
+<!ENTITY encrypt.label "Kryptera sparade sessioner och stängda-fönsterdata">
+<!ENTITY encrypt.accesskey "e">
+<!ENTITY change_dir.label "Ändra">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "Standard">
+<!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "Session Manager Sparade sessioner">
+<!ENTITY sanitizer.accesskey "M">
