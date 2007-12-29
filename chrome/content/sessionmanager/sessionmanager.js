@@ -582,7 +582,13 @@
 		}
 		else if (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite))
 		{
-			newWindow = true;
+			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
+			var tabs = window.document.getElementById("content");
+			if (this.getBrowserWindows().length != 1 || !tabs || tabs.mTabs.length > 1 || 
+			    tabs.mTabs[0].linkedBrowser.lastURI.spec != "about:blank" || 
+			    this.mSessionStore.getClosedTabCount(window) > 0) {
+				newWindow = true;
+			}
 		}
 		else
 		{
@@ -1263,7 +1269,10 @@
 		if (backup.exists() && this.mPref_max_backup_keep)
 		{
 			var oldBackup = this.getSessionDir(this.mBackupSessionName, true);
-			var name = this.getFormattedName("", new Date(), this._string_old_backup_session || this._string("old_backup_session"));
+			// preserve date that file was backed up
+			var date = new Date();
+			date.setTime(backup.lastModifiedTime); 
+			var name = this.getFormattedName("", date, this._string_old_backup_session || this._string("old_backup_session"));
 			this.writeFile(oldBackup, this.nameState(this.readSessionFile(backup), name));
 			this.delFile(backup, true);
 		}
@@ -1324,7 +1333,7 @@
 					var countString = (RegExp.$4) ? (RegExp.$4) : getCountString(this.getCount(RegExp.$5));
 					var autoSaveString = (RegExp.$2) ? (RegExp.$2).split("\n")[0] : "autosave=false";
 					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
-					state = RegExp.$1 + autoSaveString + countString + RegExp.$5
+					state = RegExp.$1 + autoSaveString + countString + this.decryptEncryptByPreference(RegExp.$5)
 					// bad session
 					if (countString == "\tcount=0/0\n") 
 					{
@@ -1978,15 +1987,20 @@
 		{
 			return aString.replace(new RegExp("^(.{" + (aLength - 3) + "}).{4,}$"), "$1...");
 		}
-		function toISO8601(aDate)
+		function toISO8601(aDate, format)
 		{
-			return [aDate.getFullYear(), pad2(aDate.getMonth() + 1), pad2(aDate.getDate())].join("-");
+			if (format) {
+				return aDate.toLocaleFormat(format);
+			}
+			else {
+				return [aDate.getFullYear(), pad2(aDate.getMonth() + 1), pad2(aDate.getDate())].join("-");
+			}
 		}
 		function pad2(a) { return (a < 10)?"0" + a:a; }
 		
 		return (aFormat || this.mPref_name_format).split("%%").map(function(aPiece) {
-			return aPiece.replace(/%(\d*)([tdm])/g, function($0, $1, $2) {
-				$0 = ($2 == "t")?aTitle:($2 == "d")?toISO8601(aDate):pad2(aDate.getHours()) + ":" + pad2(aDate.getMinutes());
+			return aPiece.replace(/%(\d*)([tdm])(\"(.*)\")?/g, function($0, $1, $2, $3, $4) {
+				$0 = ($2 == "t")?aTitle:($2 == "d")?toISO8601(aDate, $4):pad2(aDate.getHours()) + ":" + pad2(aDate.getMinutes());
 				return ($1)?cut($0, Math.max(parseInt($1), 3)):$0;
 			});
 		}).join("%");
