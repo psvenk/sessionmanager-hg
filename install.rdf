@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>{1280606b-2510-4fe0-97ef-9b5a22eafe30}</em:id>
-    <em:version>0.6.1.6</em:version>
+    <em:version>0.6.1.7</em:version>
     
     <!-- Firefox -->
     <em:targetApplication>
@@ -43,6 +43,7 @@
     <em:contributor>Kenmooda (Finish)</em:contributor>
     <em:contributor>Ivan Jonoski (Macedonian)</em:contributor>
     <em:contributor>Elapsem (Korean)</em:contributor>
+    <em:contributor>Natanael_L01 (Swedish)</em:contributor>
     <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
     
     <!-- Front End Integration Hooks (used by Extension Manager)-->
@@ -181,6 +182,13 @@
         <em:locale>sr-YU</em:locale>
         <em:name>Menadžer Sesija</em:name>
         <em:description>Snima i obnavlja stanja svih prozora.</em:description>
+      </Description>
+    </em:localized>
+    <em:localized>
+      <Description>
+        <em:locale>sv-SE</em:locale>
+        <em:name>Session Manager</em:name>
+        <em:description>Sparar och återställer alla fönster.</em:description>
       </Description>
     </em:localized>
     <em:localized>
