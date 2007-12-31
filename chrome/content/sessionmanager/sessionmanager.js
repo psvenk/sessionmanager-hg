@@ -585,7 +585,7 @@
 			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
 			var tabs = window.document.getElementById("content");
 			if (this.getBrowserWindows().length != 1 || !tabs || tabs.mTabs.length > 1 || 
-			    tabs.mTabs[0].linkedBrowser.lastURI.spec != "about:blank" || 
+			    tabs.mTabs[0].linkedBrowser.currentURI.spec != "about:blank" || 
 			    this.mSessionStore.getClosedTabCount(window) > 0) {
 				newWindow = true;
 			}
