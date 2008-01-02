@@ -1,4 +1,4 @@
-<!ENTITY options.title "&sessionManager; Alternativ">
+<!ENTITY options.title "&sessionManager;-Alternativ">
 <!ENTITY general.caption "Allmänt">
 <!ENTITY startNend.caption "Uppstart &amp; nerstänging">
 <!ENTITY resume_sess.label "Ladda alltid följande session vid uppstart:">
@@ -55,7 +55,7 @@
 <!ENTITY privacy.accesskey "v">
 <!ENTITY privacy.level0 "alla sidor">
 <!ENTITY privacy.level1 "endast okrypterade sidor">
-<!ENTITY privacy.level2 "inga sidor allts">
+<!ENTITY privacy.level2 "inga sidor alls">
 <!ENTITY sessiondir.caption "Sparade-sessioner-plats">
 <!ENTITY sessiondir.desc "Platsen för sparade sessioner kan ändras här.">
 <!ENTITY encrypt.caption "Kryptering">
