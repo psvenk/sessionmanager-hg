@@ -9,6 +9,7 @@ locale	sessionmanager	de-DE	jar:chrome/sessionmanager.jar!/locale/de-DE/sessionm
 locale	sessionmanager	fi-FI	jar:chrome/sessionmanager.jar!/locale/fi-FI/sessionmanager/
 locale	sessionmanager	it-IT	jar:chrome/sessionmanager.jar!/locale/it-IT/sessionmanager/
 locale	sessionmanager	zh-CN	jar:chrome/sessionmanager.jar!/locale/zh-CN/sessionmanager/
+locale	sessionmanager	zh-TW	jar:chrome/sessionmanager.jar!/locale/zh-TW/sessionmanager/
 locale	sessionmanager	pt-PT	jar:chrome/sessionmanager.jar!/locale/pt-PT/sessionmanager/
 locale	sessionmanager	pt-BR	jar:chrome/sessionmanager.jar!/locale/pt-BR/sessionmanager/
 locale	sessionmanager	fr-FR	jar:chrome/sessionmanager.jar!/locale/fr-FR/sessionmanager/

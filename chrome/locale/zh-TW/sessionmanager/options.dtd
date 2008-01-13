@@ -1,0 +1,70 @@
+<!ENTITY options.title "&sessionManager; 選項">
+<!ENTITY general.caption "一般選項">
+<!ENTITY startNend.caption "瀏覽器開啟和關閉時">
+<!ENTITY resume_sess.label "開啟瀏覽器時固定載入如下瀏覽頁組：">
+<!ENTITY resume_sess.accesskey "s">
+<!ENTITY backup_sess.label "關閉瀏覽器時">
+<!ENTITY backup_sess.accesskey "h">
+<!ENTITY backup_session.label0 "放棄目前瀏覽頁組">
+<!ENTITY backup_session.label1 "備份目前瀏覽頁組">
+<!ENTITY backup_session.label2 "詢問是否備份目前瀏覽頁組">
+<!ENTITY crashrecovery.label "啟用當機還原">
+<!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "自動存檔被換掉的瀏覽頁組">
+<!ENTITY autosave_session.accesskey "a">
+<!ENTITY restoring.caption "瀏覽頁組還原">
+<!ENTITY sessionList.caption "瀏覽頁組清單">
+<!ENTITY orderList.label "排序瀏覽頁組清單">
+<!ENTITY orderList.accesskey "d">
+<!ENTITY orderList.label1 "依字母次序">
+<!ENTITY orderList.label2 "依時間次序從舊到新">
+<!ENTITY orderList.label_2 "依時間次序從新到舊">
+<!ENTITY max_backup.label "最大可備份較舊(遭到當機)瀏覽頁組份數：">
+<!ENTITY max_backup.accesskey "N">
+<!ENTITY undoClose.caption "復原關閉項目">
+<!ENTITY windowsNtabs.caption "已關閉的視窗和分頁">
+<!ENTITY max_closed.label "最大可復原已關閉視窗數">
+<!ENTITY max_closed.accesskey "w">
+<!ENTITY max_tabs.label "每個視窗中最大可復原已關閉分頁數：">
+<!ENTITY max_tabs.accesskey "t">
+<!ENTITY submenu.label "在子選單中列出所有已關閉視窗和分頁">
+<!ENTITY submenu.accesskey "c">
+<!ENTITY persistence.caption "持續性">
+<!ENTITY closed_tabs.label "還原所有視窗的已關閉分頁清單">
+<!ENTITY closed_tabs.accesskey "e">
+<!ENTITY closed_tabs.label0 "都不要">
+<!ENTITY closed_tabs.label1 "開啟瀏覽器時">
+<!ENTITY closed_tabs.label2 "固定">
+<!ENTITY window_list.label "關閉瀏覽器時不清除已關閉視窗清單">
+<!ENTITY window_list.accesskey "o">
+<!ENTITY clear_list.label "清除清單">
+<!ENTITY clear_list.accesskey "r">
+<!ENTITY advanced.caption "進階設定">
+<!ENTITY name_format.caption "瀏覽頁組命名">
+<!ENTITY name_format.label "建議的瀏覽頁組命名格式：">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "請用 &#37;t 代表現前分頁的標題，&#37;d 代表今天的日期以及 &#37;m 代表時間；此外， &#37;#t 代表標題長度被限制為 # 個字元。">
+<!ENTITY sessionstore.caption "瀏覽頁組存檔">
+<!ENTITY service.caption "各項&quot;瀏覽頁組存檔&quot;設定">
+<!ENTITY service.description "除非您清楚自己在做什麼，否則不要修改下列選項！">
+<!ENTITY interval.label "兩次狀態存檔之間的最小時間間隔 (單位：秒)：">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "最大可存檔的 POSTDATA 數量 (單位：位元組，設為 -1 代表全部)：">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "存檔隱私資料 (表格資料， POSTDATA 及 cookies) 供下列網站使用：">
+<!ENTITY privacy.accesskey "v">
+<!ENTITY privacy.level0 "所有網站">
+<!ENTITY privacy.level1 "僅限未加密網站">
+<!ENTITY privacy.level2 "全都不存檔">
+<!ENTITY sessiondir.caption "瀏覽頁組存檔位置">
+<!ENTITY sessiondir.desc "這裡可以將預設的存檔瀏覽頁組位置覆寫修改">
+<!ENTITY encrypt.caption "加密">
+<!ENTITY encrypt.desc "警告： 加密的瀏覽頁組資料僅能以 profiles 中與 key3.db 和 cert8.db 相符的檔案來開啟。另外，如果有設主密碼，沒輸入主密碼就無法對瀏覽頁組資料加/解密。">
+<!ENTITY encrypt.label "對存檔的瀏覽頁組和關閉的視窗資料加密">
+<!ENTITY encrypt.accesskey "e">
+<!ENTITY change_dir.label "修改">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "預設">
+<!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "瀏覽頁組管理員存檔的瀏覽頁組">
+<!ENTITY sanitizer.accesskey "M">

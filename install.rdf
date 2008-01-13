@@ -44,6 +44,7 @@
     <em:contributor>Ivan Jonoski (Macedonian)</em:contributor>
     <em:contributor>Elapsem (Korean)</em:contributor>
     <em:contributor>Natanael_L01 (Swedish)</em:contributor>
+    <em:contributor>Tsprajna (Chinese [zh-TW])</em:contributor>
     <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
     
     <!-- Front End Integration Hooks (used by Extension Manager)-->
@@ -205,6 +206,12 @@
         <em:description>会话管理器：保存和恢复全部浏览窗口的状态。</em:description>
       </Description>
     </em:localized>
-    
+    <em:localized>
+      <Description>
+        <em:locale>zh-TW</em:locale>
+        <em:name>瀏覽頁組管理員</em:name>
+        <em:description>儲存及還原所有瀏覽視窗的狀態。</em:description>
+      </Description>
+    </em:localized>
   </Description>
 </RDF>
