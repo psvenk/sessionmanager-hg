@@ -60,6 +60,8 @@ toolbar[iconsize="small"] #sessionmanager-toolbar {
 }
 
 /* Adjust to light blue when highlited */
+#sessionmanager-menu menuitem[latest="true"][_moz-menuactive="true"],
+#sessionmanager-toolbar menuitem[latest="true"][_moz-menuactive="true"],
 #session_list:focus listitem[latest="true"][selected="true"] {
 	color: lightblue;
 }
