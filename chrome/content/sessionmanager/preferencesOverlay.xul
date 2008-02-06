@@ -7,7 +7,4 @@
 
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
 	<script language="javascript" src="chrome://sessionmanager/content/preferencesOverlay.js" encoding="UTF-8" />
-
-	<prefwindow id="BrowserPreferences" onload="gSessionManager_preferencesOverlay.init();"/>
-
 </overlay>

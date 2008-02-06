@@ -8,9 +8,13 @@
 var gSessionManager_preferencesOverlay = {
 	init: function() {
 		var prefWindow = document.getElementById('BrowserPreferences');
-		this.onPaneLoad(prefWindow.lastSelected);
+		if (prefWindow)
+		{
+            window.removeEventListener("load", gSessionManager_preferencesOverlay.init, false);
+	    	gSessionManager_preferencesOverlay.onPaneLoad(prefWindow.lastSelected);
 
-		prefWindow._selector.setAttribute("oncommand", "gSessionManager_preferencesOverlay.onPaneLoad(getElementsByAttribute('selected','true')[0].label)");
+    		prefWindow._selector.setAttribute("oncommand", prefWindow._selector.getAttribute("oncommand") + ";gSessionManager_preferencesOverlay.onPaneLoad(getElementsByAttribute('selected','true')[0].label)");
+	    }
 	},
 
 	onPaneLoad: function (aPaneID) {
@@ -23,7 +27,7 @@ var gSessionManager_preferencesOverlay = {
     	window.setTimeout(function() {
     	    var clearNowBn = document.getElementById("clearDataNow");
     	    if (clearNowBn && clearNowBn.getAttribute("oncommand").indexOf("gSessionManager") == -1) { 
-    	        clearNowBn.setAttribute("oncommand", clearNowBn.getAttribute("oncommand") + " gSessionManager.tryToSanitize();");
+    	        clearNowBn.setAttribute("oncommand", "gSessionManager.tryToSanitize(); " + clearNowBn.getAttribute("oncommand"));
 	        }
 	    }, 200);
     }
@@ -101,3 +105,5 @@ gSessionManager.tryToSanitize = function () {
 	gSessionManager.sanitize();
 	return true;
 }
+
+window.addEventListener("load", gSessionManager_preferencesOverlay.init, false);

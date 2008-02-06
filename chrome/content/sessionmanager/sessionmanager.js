@@ -45,7 +45,6 @@
 		
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);
-		this.mPrefBranch3 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.sessionstore.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		
 		if (aDialog || this.mFullyLoaded)
 		{
@@ -127,7 +126,7 @@
 		// nsBrowserGlue.js use loadSubScript to load Sanitizer so we need to add this here for the case
 		// where the user disabled option to prompt before clearing data 
 		var cmd = document.getElementById("Tools:Sanitize");
-		if (cmd) cmd.setAttribute("oncommand", cmd.getAttribute("oncommand") + " gSessionManager.tryToSanitize();");
+		if (cmd) cmd.setAttribute("oncommand", "gSessionManager.tryToSanitize();" + cmd.getAttribute("oncommand"));
 		
 		// set autosave_name window value (used on browser crash)
 		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
