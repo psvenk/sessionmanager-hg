@@ -1008,7 +1008,7 @@
 
 /* ........ File Handling .............. */
 
-	sanitize : function()
+	sanitize: function()
 	{
 		// Remove all saved sessions
 		this.getSessionDir().remove(true);
@@ -1194,25 +1194,37 @@
 
 	shutDown: function()
 	{
-		if (!this.mPref_save_window_list)
+		// Handle sanitizing if sanitize on shutdown without prompting
+        if ((this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true)) &&
+		    (!this.getPref("privacy.sanitize.promptOnSanitize", true, true)) &&
+		    (this.getPref("privacy.item.extensions-sessionmanager", false, true)))
 		{
-			this.clearUndoData("window", true);
-		}
+    		this.sanitize();
+	    }
+	    // otherwise
+	    else
+	    {
+    		if (!this.mPref_save_window_list)
+	    	{
+		    	this.clearUndoData("window", true);
+    		}
 		
-		// save the currently opened session (if there is one)
-		if (!this.closeSession(false))
-		{
-			this.backupCurrentSession();
-		}
-		else
-		{
-			this.keepOldBackups();
-		}
+	    	// save the currently opened session (if there is one)
+    		if (!this.closeSession(false))
+	    	{
+		    	this.backupCurrentSession();
+    		}
+	    	else
+    		{
+	    		this.keepOldBackups();
+		    }
+		    
+		    this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
+	    }
+	    
 		this.delPref("_encrypted");
 		this.delPref("_running");
 		this.mPref__running = false;
-		
-		this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
 		
 		// Cleanup left over files from Crash Recovery
 		if (this.getPref("extensions.crashrecovery.resume_session_once", false, true))
