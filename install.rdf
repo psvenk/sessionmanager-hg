@@ -20,31 +20,30 @@
     <em:contributor>zeniko (Original Author)</em:contributor>
     <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
     <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
-    <em:contributor>&amp;</em:contributor>
-    <em:contributor>BabelZilla translators:</em:contributor>
-    <em:contributor>Andrea (Italian)</em:contributor>
-    <em:contributor>Rick Cart (Chinese [zh-CN])</em:contributor>
-    <em:contributor>Teboga (Portuguese - Brazillian)</em:contributor>
-    <em:contributor>jojaba (French)</em:contributor>
-    <em:contributor>Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:contributor>
-    <em:contributor>Proyecto Nave, chuzo (Spanish)</em:contributor>
-    <em:contributor>Leszek (teo) Å»yczkowski (Polish)</em:contributor>
-    <em:contributor>Haebaru (Japanese)</em:contributor>
-    <em:contributor>stoneflash (Russian)</em:contributor>
-    <em:contributor>JW_00000 (Dutch)</em:contributor>
-    <em:contributor>Ossipoff (Danish)</em:contributor>
-    <em:contributor>SerdarSahin (Turkish)</em:contributor>
-    <em:contributor>Wladow (Slovak)</em:contributor>
-    <em:contributor>Team erweiterungen.de, ReinekeFux (German)</em:contributor>
-    <em:contributor>Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:contributor>
-    <em:contributor>Kape123 (Serbian)</em:contributor>
-    <em:contributor>lloco (Portuguese)</em:contributor>
-    <em:contributor>PetrTwo (Czech)</em:contributor>
-    <em:contributor>Kenmooda (Finish)</em:contributor>
-    <em:contributor>Ivan Jonoski (Macedonian)</em:contributor>
-    <em:contributor>Elapsem (Korean)</em:contributor>
-    <em:contributor>Natanael_L01 (Swedish)</em:contributor>
-    <em:contributor>Tsprajna (Chinese [zh-TW])</em:contributor>
+    <em:translator >BabelZilla translators:</em:translator >
+    <em:translator >Andrea (Italian)</em:translator >
+    <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+    <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+    <em:translator >jojaba (French)</em:translator >
+    <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+    <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+    <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+    <em:translator >Haebaru (Japanese)</em:translator >
+    <em:translator >stoneflash (Russian)</em:translator >
+    <em:translator >JW_00000 (Dutch)</em:translator >
+    <em:translator >Ossipoff (Danish)</em:translator >
+    <em:translator >SerdarSahin (Turkish)</em:translator >
+    <em:translator >Wladow (Slovak)</em:translator >
+    <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+    <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+    <em:translator >Kape123 (Serbian)</em:translator >
+    <em:translator >lloco (Portuguese)</em:translator >
+    <em:translator >PetrTwo (Czech)</em:translator >
+    <em:translator >Kenmooda (Finish)</em:translator >
+    <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+    <em:translator >Elapsem (Korean)</em:translator >
+    <em:translator >Natanael_L01 (Swedish)</em:translator >
+    <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
     <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
     
     <!-- Front End Integration Hooks (used by Extension Manager)-->
@@ -57,6 +56,35 @@
         <em:locale>cs-CZ</em:locale>
         <em:name>Správce relací</em:name>
         <em:description>=Ukládá a obnovuje stav všech oken.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -64,6 +92,35 @@
         <em:locale>da-DK</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Gemmer og henter tilstanden for alle vinduer.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -71,6 +128,35 @@
         <em:locale>de-DE</em:locale>
         <em:name>Sitzungs-Manager</em:name>
         <em:description>Sichert den Zustand aller Fenster und stellt ihn wieder her.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -78,6 +164,35 @@
         <em:locale>es-ES</em:locale>
         <em:name>Administrador de sesiones</em:name>
         <em:description>Guarda y recupera el estado de todas las ventanas.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -85,6 +200,35 @@
         <em:locale>fi-FI</em:locale>
         <em:name>Istuntojenhallinta</em:name>
         <em:description>Tallentaa ja palauttaa kaikkien ikkunoinen tilan.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -92,6 +236,35 @@
         <em:locale>fr-FR</em:locale>
         <em:name>Gestionnaire de session</em:name>
         <em:description>Enregistre et rétabli l'état de toutes les fenêtres.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -99,6 +272,35 @@
         <em:locale>hu-HU</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Lehetővé teszi a munkamenet (ablakok és lapok) mentését és visszaállítását</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -106,6 +308,35 @@
         <em:locale>it-IT</em:locale>
         <em:name>Gestione sessioni</em:name>
         <em:description>Salva e ripristina lo stato di tutte le finestre.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -113,6 +344,35 @@
         <em:locale>ja-JP</em:locale>
         <em:name>セッションマネージャ</em:name>
         <em:description>すべてのウインドウの状態を保存し復元します</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -120,6 +380,35 @@
         <em:locale>ko-KR</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>모든 창의 상태를 저장하여 복원합니다.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -127,6 +416,35 @@
         <em:locale>lt-LT</em:locale>
         <em:name>Sesijų tvarkytojas</em:name>
         <em:description>Išsaugo ir atkuria visus langus.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -134,6 +452,35 @@
         <em:locale>mk-MK</em:locale>
         <em:name>Менаџер на сесијата</em:name>
         <em:description>Ја зачувува и обновува состојбата на сите прозорци.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -141,6 +488,35 @@
         <em:locale>nl-NL</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Session Manager slaat de status van alle vensters op, en stelt u in staat ze te herstellen.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -148,6 +524,35 @@
         <em:locale>pl-PL</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Zapisuje i odtwarza stan wszystkich okien</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -155,6 +560,35 @@
         <em:locale>pt-BR</em:locale>
         <em:name>Gerenciador de Sessões</em:name>
         <em:description>Salva e restaura o estado de todas as janelas.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -162,6 +596,35 @@
         <em:locale>pt-PT</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Guarda e restaura o estado de todas as janelas.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -169,6 +632,35 @@
         <em:locale>ru-RU</em:locale>
         <em:name>Менеджер сессий</em:name>
         <em:description>Функциональный менеджер сессий. Сохраняет и восстанавливает состояние всех окон.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -176,6 +668,35 @@
         <em:locale>sk-SK</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Umožní uložiť a obnoviť stav všetkých okien</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -183,6 +704,35 @@
         <em:locale>sr-YU</em:locale>
         <em:name>Menadžer Sesija</em:name>
         <em:description>Snima i obnavlja stanja svih prozora.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -190,6 +740,35 @@
         <em:locale>sv-SE</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Sparar och återställer alla fönster.</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -197,6 +776,35 @@
         <em:locale>tr-TR</em:locale>
         <em:name>Oturum Yöneticisi</em:name>
         <em:description>Tüm pencerelerin durumlarını kaydeder ve geri yükler</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -204,6 +812,35 @@
         <em:locale>zh-CN</em:locale>
         <em:name>会话管理器</em:name>
         <em:description>会话管理器：保存和恢复全部浏览窗口的状态。</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
     <em:localized>
@@ -211,6 +848,35 @@
         <em:locale>zh-TW</em:locale>
         <em:name>瀏覽頁組管理員</em:name>
         <em:description>儲存及還原所有瀏覽視窗的狀態。</em:description>
+        <em:creator>Morac</em:creator>
+        <em:contributor>zeniko (Original Author)</em:contributor>
+        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
+        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
+        <em:translator >BabelZilla translators:</em:translator >
+        <em:translator >Andrea (Italian)</em:translator >
+        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
+        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
+        <em:translator >jojaba (French)</em:translator >
+        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
+        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
+        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
+        <em:translator >Haebaru (Japanese)</em:translator >
+        <em:translator >stoneflash (Russian)</em:translator >
+        <em:translator >JW_00000 (Dutch)</em:translator >
+        <em:translator >Ossipoff (Danish)</em:translator >
+        <em:translator >SerdarSahin (Turkish)</em:translator >
+        <em:translator >Wladow (Slovak)</em:translator >
+        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
+        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Kape123 (Serbian)</em:translator >
+        <em:translator >lloco (Portuguese)</em:translator >
+        <em:translator >PetrTwo (Czech)</em:translator >
+        <em:translator >Kenmooda (Finish)</em:translator >
+        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
+        <em:translator >Elapsem (Korean)</em:translator >
+        <em:translator >Natanael_L01 (Swedish)</em:translator >
+        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
+        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
       </Description>
     </em:localized>
   </Description>
