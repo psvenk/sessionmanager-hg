@@ -103,7 +103,7 @@ var SessionManagerHelperComponent = {
 	// preference indicates there is an active session, but there really isn't
 	_handle_crash: function()
 	{
-		var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch2);
+		var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 		var crash_resume = prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
 		var sm_running = prefroot.getBoolPref("extensions.sessionmanager._running");
 		
@@ -117,20 +117,24 @@ var SessionManagerHelperComponent = {
 	// code adapted from Danil Ivanov's "Cache Fixer" extension
 	_restoreCache: function()
 	{
+    	var cache = null;
 		try 
 		{
-			var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch2);
+			var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 			var disabled = prefroot.getBoolPref("extensions.sessionmanager.disable_cache_fixer");
 			if (disabled)
 			{
-				var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Components.interfaces.nsIConsoleService);
+				var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
   				consoleService.logStringMessage("SessionManager: Cache Fixer disabled");
 				return;
 			}
+			var pd_path = prefroot.getComplexValue("browser.cache.disk.parent_directory",Ci.nsISupportsString).data;
+			cache = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+			cache.initWithPath(pd_path);
 		}
 		catch (ex) {}
 		
-		var cache = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfLD", Ci.nsILocalFile);
+		if (!cache) cache = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfLD", Ci.nsILocalFile);
 		cache.append("Cache");
 		cache.append("_CACHE_MAP_");
 		if (!cache.exists())
