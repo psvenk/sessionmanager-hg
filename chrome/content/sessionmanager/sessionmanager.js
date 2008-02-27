@@ -1694,7 +1694,9 @@
 			switch (pb.getPrefType(aName))
 			{
 				case pb.PREF_STRING:
-					return pb.getCharPref(aName);
+//					return pb.getCharPref(aName);
+// handle unicode values
+                    return pb.getComplexValue(aName,Components.interfaces.nsISupportsString).data
 				case pb.PREF_BOOL:
 					return pb.getBoolPref(aName);
 				case pb.PREF_INT:
@@ -1718,7 +1720,12 @@
 			pb.setIntPref(aName, parseInt(aValue));
 			break;
 		default:
-			pb.setCharPref(aName, "" + aValue);
+//			pb.setCharPref(aName, "" + aValue);
+// Handle unicode preferences
+            var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+            str.data = aValue;
+            pb.setComplexValue(aName,Components.interfaces.nsISupportsString, str);
+
 			break;
 		}
 	},
