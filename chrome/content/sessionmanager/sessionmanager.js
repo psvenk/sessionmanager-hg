@@ -1327,25 +1327,37 @@
 		else if ((/^\[SessionManager\]\nname=.*\ntimestamp=\d+\n/m.test(state)) &&
 		         (!/^\[SessionManager\]\nname=.*\ntimestamp=\d+\nautosave=(false|session|window)\tcount=[1-9][0-9]*\/[1-9][0-9]*\n/m.test(state)))
 		{
-			// read entire file if only read header
-			if (headerOnly) state = this.readFile(aFile);
-			
 			// This should always match, but is required to get the RegExp values set correctly.
-			// RegExp.$1 - Top 3 lines (includes name and timestamp)
-			// RegExp.$2 - Autosave string (if it exists)
-			// RegExp.$3 - Autosave value (not really used at the moment)
-			// RegExp.$4 - Count string (if it exists)
-			// RegExp.$5 - actual session data
-			// RegExp.$6 - should be blank or \n - if it's larger than 1 character something is wrong with session file
-			if (/(^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*\n)?(.*)(\n.*)?/m.test(state))
+			// RegExp.$1 - Entire 4 line header
+			// RegExp.$2 - Top 3 lines (includes name and timestamp)
+			// RegExp.$3 - Autosave string (if it exists)
+			// RegExp.$4 - Autosave value (not really used at the moment)
+			// RegExp.$5 - Count string (if it exists)
+			if (/((^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*\n)?)/m.test(state))
 			{	
-				if ((RegExp.$6.length == 0) || (RegExp.$6.length == 1))
+    			var header = RegExp.$1;
+    			var nameTime = RegExp.$2;
+    			var auto = RegExp.$3;
+    			var autoValue = RegExp.$4;
+    			var count = RegExp.$5;
+    			var goodSession = true;
+    			
+    			// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
+    			if (/autosave=(false|true|session|window).*\nautosave=(false|true|session|window)/m.test(state)) {
+        			goodSession = false;
+    			}
+    			
+    			// read entire file if only read header
+	    		if (headerOnly) state = this.readFile(aFile);
+
+				if (goodSession)
 				{
-					var countString = (RegExp.$4) ? (RegExp.$4) : getCountString(this.getCount(RegExp.$5));
-					var autoSaveString = (RegExp.$2) ? (RegExp.$2).split("\n")[0] : "autosave=false";
+    				var data = state.split("\n")[((auto) ? 4 : 3)];
+					var countString = (count) ? (count) : getCountString(this.getCount(data));
+					var autoSaveString = (auto) ? (auto).split("\n")[0] : "autosave=false";
 					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
-					state = RegExp.$1 + autoSaveString + countString + this.decryptEncryptByPreference(RegExp.$5)
-					// bad session
+					state = nameTime + autoSaveString + countString + this.decryptEncryptByPreference(data)
+					// bad session so rename it so it won't load again
 					if (countString == "\tcount=0/0\n") 
 					{
 						state = state.replace(/^\[SessionManager\]\n/,"[Bad-SessionManager]\n");
@@ -1355,13 +1367,14 @@
 					}
 					this.writeFile(aFile, state);
 				}
-				// bad session format, attempt to recover
+				// else bad session format, attempt to recover by removing extra line
 				else {
 					var newstate = state.split("\n");
 					newstate.splice(3,newstate.length - (newstate[newstate.length-1].length ? 5 : 6));
 					if (RegExp.$5 == "\tcount=0/0") newstate.splice(3,1);
 					state = newstate.join("\n");
 					this.writeFile(aFile, state);
+					state = this.readSessionFile(aFile,headerOnly);
 				}
 			}
 		}
