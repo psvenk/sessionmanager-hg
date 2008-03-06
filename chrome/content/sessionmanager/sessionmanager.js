@@ -150,15 +150,15 @@
 			setTimeout(function() {
 				var tBrowser = top.document.getElementById("content");
 				if (tBrowser.mCurrentTab.linkedBrowser && 
-	                (tBrowser.mCurrentTab.linkedBrowser.contentDocument.location == "about:blank"))
-    	        {
-        	    	tBrowser.loadURI(gSessionManager.mFirstUrl);
-	            }
-    	        else
-        		{
-        			tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
-        		}
-        	},1000);
+					(tBrowser.mCurrentTab.linkedBrowser.contentDocument.location == "about:blank"))
+				{
+					tBrowser.loadURI(gSessionManager.mFirstUrl);
+				}
+				else
+				{
+					tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
+				}
+			},1000);
 		}
 	},
 
@@ -200,8 +200,8 @@
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 			this.mBundle = null;
 			
-			// This executes in Firefox 2.x if last browser window closes and non-browser windows are still open.
-			// In Firefox 3.0, it executes whenever the last browser window is closed
+			// This executes in Firefox 2.x if last browser window closes and non-browser windows are still open
+			// or if Firefox is restarted. In Firefox 3.0, it executes whenever the last browser window is closed.
 			if (!this.mPref__stopping) {
 				this.mObserverService.removeObserver(this, "quit-application", false);
 				this.shutDown();
@@ -273,7 +273,7 @@
 				// don't reload tabs after restart
 				this.setPref("_no_reload", true);
 			}
- 			break;
+			break;
 		case "quit-application-granted":
 			// quit granted so stop listening for closed windows
 			this.mPref__stopping = true;
@@ -584,8 +584,8 @@
 			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
 			var tabs = window.document.getElementById("content");
 			if (this.getBrowserWindows().length != 1 || !tabs || tabs.mTabs.length > 1 || 
-			    tabs.mTabs[0].linkedBrowser.currentURI.spec != "about:blank" || 
-			    this.mSessionStore.getClosedTabCount(window) > 0) {
+				tabs.mTabs[0].linkedBrowser.currentURI.spec != "about:blank" || 
+				this.mSessionStore.getClosedTabCount(window) > 0) {
 				newWindow = true;
 			}
 		}
@@ -648,7 +648,7 @@
 			if (newFile)
 			{
 				if (this.mPref_resume_session == file.leafName && this.mPref_resume_session != this.mBackupSessionName &&
-				    this.mPref_resume_session != this.mAutoSaveSessionName)
+					this.mPref_resume_session != this.mAutoSaveSessionName)
 				{
 					this.setPref("resume_session", filename);
 				}
@@ -767,7 +767,7 @@
 		if (!this.mFF3) this.fixBug350558(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
-				                url:aValue.state.entries[aValue.state.entries.length - 1].url }
+								url:aValue.state.entries[aValue.state.entries.length - 1].url }
 			if (aValue.state.xultab)
 			{
 				var xultabData = aValue.state.xultab.split(" ");
@@ -902,7 +902,7 @@
 		// remove item from list
 		popup.removeChild(aMenuItem);
 					
-       	// Update toolbar button if no more tabs
+		// Update toolbar button if no more tabs
 		if (aClosedListLength == 0) 
 		{
 			popup.hidePopup();
@@ -952,7 +952,7 @@
 		params.SetString(5, aAcceptExistingLabel || "");
 		params.SetString(6, aValues.text || "");
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
-		                  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.allowNamedReplace)?256:0));
+						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.allowNamedReplace)?256:0));
 		
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, (this.mFullyLoaded)?window:null);
 		
@@ -1036,8 +1036,8 @@
 				}
 			}
 		} catch (ex) {
-    		// handle the case on shutdown since the above will always throw an exception on shutdown
-    		if (this._mUserDirectory) dir = this._mUserDirectory.clone();
+			// handle the case on shutdown since the above will always throw an exception on shutdown
+			if (this._mUserDirectory) dir = this._mUserDirectory.clone();
 			else dir = null;
 		} finally {
 			return dir;
@@ -1182,45 +1182,46 @@
 		this.storeClosedWindows(windows.slice(0, this.mPref_max_closed_undo));
 	},
 
-	clearUndoData: function(aType, aSilent)
+	clearUndoData: function(aType, aSilent, aShuttingDown)
 	{
 		if (aType == "window" || aType == "all")
 		{
 			this.delFile(this.getProfileFile(this.mClosedWindowFile), aSilent);
 		}
-		this.updateToolbarButton((aType == "all")?false:undefined);
+		if (!aShuttingDown) this.updateToolbarButton((aType == "all")?false:undefined);
 	},
 
 	shutDown: function()
 	{
 		// Handle sanitizing if sanitize on shutdown without prompting
-        if ((this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true)) &&
-		    (!this.getPref("privacy.sanitize.promptOnSanitize", true, true)) &&
-		    (this.getPref("privacy.item.extensions-sessionmanager", false, true)))
+		if ((this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true)) &&
+			(!this.getPref("privacy.sanitize.promptOnSanitize", true, true)) &&
+			(this.getPref("privacy.item.extensions-sessionmanager", false, true)))
 		{
-    		this.sanitize();
-	    }
-	    // otherwise
-	    else
-	    {
-    		if (!this.mPref_save_window_list)
-	    	{
-		    	this.clearUndoData("window", true);
-    		}
+			this.sanitize();
+			this.setPref("_autosave_name","");
+		}
+		// otherwise
+		else
+		{
+			if (!this.mPref_save_window_list)
+			{
+				this.clearUndoData("window", true, true);
+			}
 		
-	    	// save the currently opened session (if there is one)
-    		if (!this.closeSession(false))
-	    	{
-		    	this.backupCurrentSession();
-    		}
-	    	else
-    		{
-	    		this.keepOldBackups();
-		    }
-		    
-		    this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
-	    }
-	    
+			// save the currently opened session (if there is one)
+			if (!this.closeSession(false))
+			{
+				this.backupCurrentSession();
+			}
+			else
+			{
+				this.keepOldBackups();
+			}
+			
+			this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
+		}
+		
 		this.delPref("_encrypted");
 		this.delPref("_running");
 		this.mPref__running = false;
@@ -1310,7 +1311,7 @@
 		
 		// old crashrecovery file format
 		if ((/\n\[Window1\]\n/.test(state)) && 
-		    (/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(state))) 
+			(/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(state))) 
 		{
 			// read entire file if only read header
 			var name = RegExp.$1 || this._string("untitled_window");
@@ -1325,7 +1326,7 @@
 		}
 		// pre autosave and tab/window count
 		else if ((/^\[SessionManager\]\nname=.*\ntimestamp=\d+\n/m.test(state)) &&
-		         (!/^\[SessionManager\]\nname=.*\ntimestamp=\d+\nautosave=(false|session|window)\tcount=[1-9][0-9]*\/[1-9][0-9]*\n/m.test(state)))
+				 (!/^\[SessionManager\]\nname=.*\ntimestamp=\d+\nautosave=(false|session|window)\tcount=[1-9][0-9]*\/[1-9][0-9]*\n/m.test(state)))
 		{
 			// This should always match, but is required to get the RegExp values set correctly.
 			// RegExp.$1 - Entire 4 line header
@@ -1335,24 +1336,24 @@
 			// RegExp.$5 - Count string (if it exists)
 			if (/((^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*\n)?)/m.test(state))
 			{	
-    			var header = RegExp.$1;
-    			var nameTime = RegExp.$2;
-    			var auto = RegExp.$3;
-    			var autoValue = RegExp.$4;
-    			var count = RegExp.$5;
-    			var goodSession = true;
-    			
-    			// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
-    			if (/autosave=(false|true|session|window).*\nautosave=(false|true|session|window)/m.test(state)) {
-        			goodSession = false;
-    			}
-    			
-    			// read entire file if only read header
-	    		if (headerOnly) state = this.readFile(aFile);
+				var header = RegExp.$1;
+				var nameTime = RegExp.$2;
+				var auto = RegExp.$3;
+				var autoValue = RegExp.$4;
+				var count = RegExp.$5;
+				var goodSession = true;
+				
+				// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
+				if (/autosave=(false|true|session|window).*\nautosave=(false|true|session|window)/m.test(state)) {
+					goodSession = false;
+				}
+				
+				// read entire file if only read header
+				if (headerOnly) state = this.readFile(aFile);
 
 				if (goodSession)
 				{
-    				var data = state.split("\n")[((auto) ? 4 : 3)];
+					var data = state.split("\n")[((auto) ? 4 : 3)];
 					var countString = (count) ? (count) : getCountString(this.getCount(data));
 					var autoSaveString = (auto) ? (auto).split("\n")[0] : "autosave=false";
 					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
@@ -1707,9 +1708,9 @@
 			switch (pb.getPrefType(aName))
 			{
 				case pb.PREF_STRING:
-//					return pb.getCharPref(aName);
-// handle unicode values
-                    return pb.getComplexValue(aName,Components.interfaces.nsISupportsString).data
+					//return pb.getCharPref(aName);
+					// handle unicode values
+					return pb.getComplexValue(aName,this.mComponents.interfaces.nsISupportsString).data
 				case pb.PREF_BOOL:
 					return pb.getBoolPref(aName);
 				case pb.PREF_INT:
@@ -1733,11 +1734,11 @@
 			pb.setIntPref(aName, parseInt(aValue));
 			break;
 		default:
-//			pb.setCharPref(aName, "" + aValue);
-// Handle unicode preferences
-            var str = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
-            str.data = aValue;
-            pb.setComplexValue(aName,Components.interfaces.nsISupportsString, str);
+			//pb.setCharPref(aName, "" + aValue);
+			// Handle unicode preferences
+			var str = this.mComponents.classes["@mozilla.org/supports-string;1"].createInstance(this.mComponents.interfaces.nsISupportsString);
+			str.data = aValue;
+			pb.setComplexValue(aName,this.mComponents.interfaces.nsISupportsString, str);
 
 			break;
 		}
@@ -1815,7 +1816,16 @@
 		// handle browser reload with same session
 		else if (recoverOnly) {
 			// only reload if didn't recover from crash
-			if (!no_reload) this._allowReload = true;
+			if (!no_reload) 
+			{
+				this._allowReload = true;
+				// if Firefox 2 and restared, try to recover autosave name since Firefox 2 runs
+				// shutdown processing on a restart.
+				if (!this.mFF3)
+				{
+					this.setPref("_autosave_name",unescape(this.mSessionStore.getWindowValue(window,"_sm_autosave_name")));
+				}
+			}
 			setTimeout(function() {
 				gSessionManager.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(gSessionManager.mPref__autosave_name));
 			}, 100);
@@ -1887,32 +1897,32 @@
 	// and tabs.entries array data in Firefox 2.0.x
 	fixBug350558: function (aTabs)
 	{
-	    aTabs.forEach(function(bValue, bIndex) {
-    	    // Closed Tabs
-    	    if (bValue.state) {
-		        // If "fake" array exists, make it a real one
-		        if (!(bValue.state.entries instanceof Array))
-		        {
-    			    var oldEntries = bValue.state.entries;
-			        bValue.state.entries = [];
-			        for (var i = 0; oldEntries[i]; i++) {
-    				    bValue.state.entries[i] = oldEntries[i];
-			        }
-		        }
-	        }
-	        // Open Tabs
-	        else {
-			    // If "fake" array exists, make it a real one
-			    if (!(bValue.entries instanceof Array))
-			    {
-				    var oldEntries = bValue.entries;
-				    bValue.entries = [];
-				    for (var i = 0; oldEntries[i]; i++) {
-					    bValue.entries[i] = oldEntries[i];
-				    }
-			    }
-	        }
-	    });
+		aTabs.forEach(function(bValue, bIndex) {
+			// Closed Tabs
+			if (bValue.state) {
+				// If "fake" array exists, make it a real one
+				if (!(bValue.state.entries instanceof Array))
+				{
+					var oldEntries = bValue.state.entries;
+					bValue.state.entries = [];
+					for (var i = 0; oldEntries[i]; i++) {
+						bValue.state.entries[i] = oldEntries[i];
+					}
+				}
+			}
+			// Open Tabs
+			else {
+				// If "fake" array exists, make it a real one
+				if (!(bValue.entries instanceof Array))
+				{
+					var oldEntries = bValue.entries;
+					bValue.entries = [];
+					for (var i = 0; oldEntries[i]; i++) {
+						bValue.entries[i] = oldEntries[i];
+					}
+				}
+			}
+		});
 	},
 
 	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave)
@@ -1926,7 +1936,7 @@
 		state = this.decryptEncryptByPreference(state); 
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
-		        "\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
+				"\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
 	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession)
@@ -2005,8 +2015,8 @@
 			if (aStrip) aWindow._closedTabs = [];
 			else if (afixBug350558) this.fixBug350558(aWindow._closedTabs);
 
-        	// Work around for bug 350558 which mangles the _closedTabs.state.entries 
-	        // and tabs.entries array data in Firefox 2.0.x
+			// Work around for bug 350558 which mangles the _closedTabs.state.entries 
+			// and tabs.entries array data in Firefox 2.0.x
 			if (afixBug350558) this.fixBug350558(aWindow.tabs);
 		}, this);
 		return aState.toSource();
@@ -2104,7 +2114,6 @@
 	{
 		return this.mBundle.getString(aName);
 	}
-
 };
 
 String.prototype.trim = function() {
