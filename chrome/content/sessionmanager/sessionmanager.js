@@ -128,9 +128,6 @@
 		var cmd = document.getElementById("Tools:Sanitize");
 		if (cmd) cmd.setAttribute("oncommand", "gSessionManager.tryToSanitize();" + cmd.getAttribute("oncommand"));
 		
-		// set autosave_name window value (used on browser crash)
-		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
-
 		// read current window session		
 		//this.__window_session_name = this.mSessionStore.getWindowValue(window,"_sm_window_session_name");
 		//if (this.__window_session_name) escape(this.__window_session_name);
@@ -1813,20 +1810,12 @@
 				this.setPref("resume_session", session || "");
 			}
 		}
-		// handle browser reload with same session
+		// handle browser reload with same session and when opening new windows
 		else if (recoverOnly) {
 			// only reload if didn't recover from crash
-			if (!no_reload) 
-			{
-				this._allowReload = true;
-				// if Firefox 2 and restared, try to recover autosave name since Firefox 2 runs
-				// shutdown processing on a restart.
-				if (!this.mFF3)
-				{
-					this.setPref("_autosave_name",unescape(this.mSessionStore.getWindowValue(window,"_sm_autosave_name")));
-				}
-			}
+			if (!no_reload) this._allowReload = true;
 			setTimeout(function() {
+				//dump("Recovery autosave_name: " + gSessionManager.mPref__autosave_name + "\n");
 				gSessionManager.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(gSessionManager.mPref__autosave_name));
 			}, 100);
 		}
@@ -1972,7 +1961,6 @@
 			if (!aReplaceTabs) aState = this.makeOneWindow(aState);
 			this.mSessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
 		}
-		this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
 		//this.__window_session_name = unescape(this.mSessionStore.getWindowValue(window,"_sm_window_session_name"));
 		//dump("restore done " + this.__window_session_name + "\n");
 		return true;
