@@ -80,11 +80,6 @@ var SessionManagerHelperComponent = {
 				this._restoreCache();
 			}
 			catch (ex) { report(ex); }
-			try
-			{
-				this._backupSession();
-			}
-			catch (ex) { report(ex); }
 			break;
 		case "final-ui-startup":
 			os.removeObserver(this, aTopic);
@@ -162,22 +157,6 @@ var SessionManagerHelperComponent = {
 		output.writeByteArray(content, content.length);
 		output.flush();
 		output.close();
-	},
-
-	_backupSession: function()
-	{
-		var profile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsILocalFile);
-		var backup = profile.clone();
-		backup.append("sessionstore.bak");
-		if (backup.exists())
-		{
-			backup.remove(false);
-		}
-		profile.append("sessionstore.js");
-		if (profile.exists())
-		{
-			profile.copyTo(null, backup.leafName);
-		}
 	},
 
 /* ........ QueryInterface .............. */
