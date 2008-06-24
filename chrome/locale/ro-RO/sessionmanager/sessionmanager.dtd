@@ -1,0 +1,35 @@
+<!ENTITY sessionManager "Gestionar sesiuni">
+<!ENTITY toolsmenu.accesskey "G">
+<!ENTITY save.label "Salvează sesiunea curentă...">
+<!ENTITY save.accesskey "S">
+<!ENTITY saveOne.label "Salvează fereastra curentă...">
+<!ENTITY saveOne.accesskey "f">
+<!ENTITY closeSession.label "Salvează şi închide sesiunea curentă">
+<!ENTITY closeSession.accesskey "c">
+<!ENTITY abandonSession.label "Abandonează sesiunea curentă">
+<!ENTITY abandonSession.accesskey "A">
+<!ENTITY rename.label "Redenumeşte sesiunea...">
+<!ENTITY rename.accesskey "R">
+<!ENTITY remove.label "Şterge sesiunea...">
+<!ENTITY remove.accesskey "t">
+<!ENTITY openFolder.label "Deschide dosarul sesiunilor salvate">
+<!ENTITY openFolder.accesskey "d">
+<!ENTITY options.label "Opţiuni &sessionManager;">
+<!ENTITY options.accesskey "O">
+<!ENTITY resume.label "Restaurează sesiunea la lansarea aplicaţiei">
+<!ENTITY resume.accesskey "p">
+<!ENTITY reload.label "Reîncarcă toate ferestrele restaurate">
+<!ENTITY reload.accesskey "R">
+<!ENTITY overwrite.label "Înlocuieşte fereastra curentă">
+<!ENTITY overwrite.accesskey "c">
+<!ENTITY undoClosed.label "Redeschide ferestrele şi/sau filele închise...">
+<!ENTITY undoClosed.accesskey "R">
+<!ENTITY closedWindows "Ferestre închise:">
+<!ENTITY closedTabs "File închise:">
+<!ENTITY clearList.label "Şterge lista filelor închise...">
+<!ENTITY clearList.accesskey "l">
+<!ENTITY toolbar.tooltip "Salvează sesiunea curentă...">
+<!ENTITY toolbar.undo.label "Redeschide">
+<!ENTITY toolbar.undo.tooltip "Redeschide cele mai recente file închise">
+<!ENTITY prompt.ignore.label "Nu mai afişa această fereastră de dialog">
+<!ENTITY prompt.autosave.label "Activează auto-salvarea acestei sesiuni">

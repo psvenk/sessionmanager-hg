@@ -1,0 +1,70 @@
+<!ENTITY options.title "Opţiuni &sessionManager;">
+<!ENTITY general.caption "General">
+<!ENTITY startNend.caption "Lansare şi închidere">
+<!ENTITY resume_sess.label "La lansare, încarcă întotdeauna următoarea sesiune:">
+<!ENTITY resume_sess.accesskey "l">
+<!ENTITY backup_sess.label "La închidere">
+<!ENTITY backup_sess.accesskey "n">
+<!ENTITY backup_session.label0 "înlătură sesiunea curentă">
+<!ENTITY backup_session.label1 "arhivează sesiunea curentă">
+<!ENTITY backup_session.label2 "întreabă dacă se arhivează sesiunea curentă">
+<!ENTITY crashrecovery.label "Activează recuperarea după o închidere forţată">
+<!ENTITY crashrecovery.accesskey "f">
+<!ENTITY autosave_session.label "Salvează automat sesiunea înlocuită">
+<!ENTITY autosave_session.accesskey "S">
+<!ENTITY restoring.caption "Restaurare sesiune">
+<!ENTITY sessionList.caption "Listă de sesiuni">
+<!ENTITY orderList.label "Ordonează lista de sesiuni">
+<!ENTITY orderList.accesskey "O">
+<!ENTITY orderList.label1 "alfabetic">
+<!ENTITY orderList.label2 "de la cea mai veche la cea mai recentă">
+<!ENTITY orderList.label_2 "de la cea mai recentă la cea mai veche">
+<!ENTITY max_backup.label "Numărul de sesiuni vechi (sau închise forţat) care se păstrează:">
+<!ENTITY max_backup.accesskey "v">
+<!ENTITY undoClose.caption "Recuperări">
+<!ENTITY windowsNtabs.caption "Ferestre şi file închise">
+<!ENTITY max_closed.label "Număr maxim de ferestre închise:">
+<!ENTITY max_closed.accesskey "e">
+<!ENTITY max_tabs.label "Număr maxim de file închise (într-o fereastră):">
+<!ENTITY max_tabs.accesskey "f">
+<!ENTITY submenu.label "Afişează lista ferestrelor şi filelor închise într-un submeniu">
+<!ENTITY submenu.accesskey "m">
+<!ENTITY persistence.caption "Persistenţă">
+<!ENTITY closed_tabs.label "Restaurează lista filelor închise pentru toate ferestrele:">
+<!ENTITY closed_tabs.accesskey "R">
+<!ENTITY closed_tabs.label0 "niciodată">
+<!ENTITY closed_tabs.label1 "la pornire">
+<!ENTITY closed_tabs.label2 "întotdeauna">
+<!ENTITY window_list.label "La închiderea aplicaţiei, nu şterge lista ferestrelor închise">
+<!ENTITY window_list.accesskey "t">
+<!ENTITY clear_list.label "Şterge lista">
+<!ENTITY clear_list.accesskey "l">
+<!ENTITY advanced.caption "Complex">
+<!ENTITY name_format.caption "Denumiri sesiuni">
+<!ENTITY name_format.label "Sugestii de formare a denumirilor sesiunilor:">
+<!ENTITY name_format.accesskey "f">
+<!ENTITY name_format.desc "Folosiţi &#37;t pentru titlul filei active, &#37;d pentru data curentă şi &#37;m pentru ora curentă.  Lungimea titlului filei poate fi limitată folosind şablonul &#37;#t, unde # este numărul de caractere.">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "Opţiuni &quot;SessionStore&quot;">
+<!ENTITY service.description "Nu modificaţi aceste opţiuni decât dacă ştiţi sigur ce înseamnă!">
+<!ENTITY interval.label "Intervalul minim dintre două salvări ale stării sesiunii (în secunde):">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "Cantitatea maximă de date &quot;POSTDATA&quot; ce se salvează (în baiţi; -1 pentru tot):">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Salvează datele personale (date din formulare, &quot;POSTDATA&quot; şi &quot;cookie&quot;) pentru:">
+<!ENTITY privacy.accesskey "p">
+<!ENTITY privacy.level0 "toate saiturile">
+<!ENTITY privacy.level1 "saiturile necriptate">
+<!ENTITY privacy.level2 "nici un sait">
+<!ENTITY sessiondir.caption "Dosarul de salvare a sesiunilor">
+<!ENTITY sessiondir.desc "Dosarul implicit de salvare poate fi reselectat aici.">
+<!ENTITY encrypt.caption "Criptare">
+<!ENTITY encrypt.desc "Avertisment: Datele din sesiunile criptate pot fi accesate numai din profiluri ce au fişierele &quot;key3.db&quot; şi &quot;cert8.db&quot; identice.  În plus, dacă o parolă principală este activată, sesiunea nu poate fi criptată sau decriptată dacă această parolă nu este furnizată.">
+<!ENTITY encrypt.label "Criptează sesiunea salvată şi închide fereastra">
+<!ENTITY encrypt.accesskey "e">
+<!ENTITY change_dir.label "Modifică">
+<!ENTITY change_dir.accesskey "M">
+<!ENTITY default_dir.label "Implicit">
+<!ENTITY default_dir.accesskey "I">
+<!ENTITY sanitizer.label "Sesiuni salvate de Gestionarul de sesiuni">
+<!ENTITY sanitizer.accesskey "G">
