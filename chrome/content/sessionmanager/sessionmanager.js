@@ -1,5 +1,5 @@
 /*const*/ var gSessionManager = {
-	mSessionStore: Components.classes["@mozilla.org/browser/sessionstore;1"].getService(Components.interfaces.nsISessionStore),
+	mSessionStoreValue : null,
 	mObserverService: Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService),
 	mPrefRoot: Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch2),
 	mWindowMediator: Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator),
@@ -20,17 +20,51 @@
 
 	mSessionCache: {},
 	mClosedWindowsCache: { timestamp: 0, data: null },
+	
+	mSessionStore : function() {
+		// Get SessionStore component if not already retrieved
+		if (!gSessionManager.mSessionStoreValue) {
+		
+			// Firefox
+			if (Components.classes["@mozilla.org/browser/sessionstore;1"]) {
+				gSessionManager.mSessionStoreValue = Components.classes["@mozilla.org/browser/sessionstore;1"].
+					getService(Components.interfaces.nsISessionStore);
+			}
+			// SeaMonkey
+			else if (Components.classes["@mozilla.org/suite/sessionstore ;1"]) {
+				gSessionManager.mSessionStoreValue = Components.classes["@mozilla.org/suite/sessionstore;1"].
+					getService(Components.interfaces.nsISessionStore);
+			}
+			// Not supported
+			else {
+				var sessionButton = document.getElementById("sessionmanager-toolbar");
+				var undoButton = document.getElementById("sessionmanager-undo");
+				var sessionMenu = document.getElementById("sessionmanager-menu");
+				if (sessionButton) sessionButton.style.visibility = "collapse";
+				if (undoButton) undoButton.style.visibility = "collapse";
+				if (sessionMenu) sessionMenu.style.visibility = "collapse";
+				if (!this.getPref("browser.sessionmanager.uninstalled", false, true)) {
+					alert("Session Manager is not supported in this browser because it does not contain the SessionStore component.  Session Manager will be uninstalled after the browser is restarted.");
+		    		var liExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager);
+					liExtensionManager.uninstallItem("{1280606b-2510-4fe0-97ef-9b5a22eafe30}");
+					this.setPref("browser.sessionmanager.uninstalled", true, true);
+					window.addEventListener("unload", gSessionManager.onUnload_Uninstall, false);
+				}
+			}
+		}
+		return gSessionManager.mSessionStoreValue;
+	},
 
 /* ........ Listeners / Observers.............. */
 
 	onLoad_proxy: function()
 	{
 		this.removeEventListener("load", gSessionManager.onLoad_proxy, false);
-		if (!window.SessionManager) // if Tab Mix Plus isn't installed
-		{
-			window.SessionManager = gSessionManager;
+		
+		if (gSessionManager.mSessionStore()) {
+			window.addEventListener("unload", gSessionManager.onUnload_proxy, false);			
+			gSessionManager.onLoad();
 		}
-		gSessionManager.onLoad();
 	},
 
 	onLoad: function(aDialog)
@@ -46,11 +80,16 @@
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		
+		if (!window.SessionManager) // if Tab Mix Plus isn't installed
+		{
+			window.SessionManager = gSessionManager;
+		}
+				
 		if (aDialog || this.mFullyLoaded)
 		{
 			return;
 		}
-		
+
 		// Set flag to determine if running Firefox 3.0 or later (document.getElementsByAttributeNS only valid in FF3+)
 		this.mFF3 = (document.getElementsByAttributeNS) ? true : false;
 		
@@ -87,7 +126,7 @@
 		}
 		
 		// Make sure Session Store is initialzed - It doesn't seem to initialize in all O/S builds of Firefox.
-		this.mSessionStore.init(window);
+		this.mSessionStore().init(window);
 		
 		this.synchStartup();
 		this.recoverSession();
@@ -108,7 +147,7 @@
 		// Workaround for bug 366986
 		// TabClose event fires too late to use SetTabValue to save the "image" attribute value and have it be saved by SessionStore
 		// so make the image tag persistant so it can be read later from the xultab variable.
-		this.mSessionStore.persistTabAttribute("image");
+		this.mSessionStore().persistTabAttribute("image");
 		
 		// Workaround for bug 360408 in Firefox 2.0, remove when fixed and uncomment call to onWindowClose in onUnload
 		if (!this.mFF3) eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
@@ -120,7 +159,13 @@
 		}
 		
 		// Don't allow tab to reload when restoring closed tab
-		eval("undoCloseTab = " + undoCloseTab.toString().replace("var tabbrowser", "window.gSessionManager._allowReload = false; $&"));
+		if (undoCloseTab) {
+			eval("undoCloseTab = " + undoCloseTab.toString().replace("var tabbrowser", "window.gSessionManager._allowReload = false; $&"));
+		}
+		// SeaMonkey doesn't have an undoCloseTab function so create one
+		else {
+			eval("undoCloseTab = gSessionManager.undoCloseTabSM");
+		}
 		
 		// add call to gSessionManager_Sanitizer (code take from Tab Mix Plus)
 		// nsBrowserGlue.js use loadSubScript to load Sanitizer so we need to add this here for the case
@@ -129,7 +174,7 @@
 		if (cmd) cmd.setAttribute("oncommand", "gSessionManager.tryToSanitize();" + cmd.getAttribute("oncommand"));
 		
 		// read current window session		
-		//this.__window_session_name = this.mSessionStore.getWindowValue(window,"_sm_window_session_name");
+		//this.__window_session_name = this.mSessionStore().getWindowValue(window,"_sm_window_session_name");
 		//if (this.__window_session_name) escape(this.__window_session_name);
 		//dump("restore done " + this.__window_session_name + "\n");
 
@@ -159,6 +204,13 @@
 		}
 	},
 
+	// If uninstalling because of incompatability remove preference
+	onUnload_Uninstall: function()
+	{
+		this.removeEventListener("unload", gSessionManager.onUnload_Uninstall, false);
+		gSessionManager.delPref("browser.sessionmanager.uninstalled", true);
+	},
+	
 	onUnload_proxy: function()
 	{
 		this.removeEventListener("unload", gSessionManager.onUnload_proxy, false);
@@ -253,7 +305,7 @@
 				this.setResumeCurrent(this.mPref_resume_session == this.mBackupSessionName);
 				break;
 			case "_autosave_name":
-				this.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
+				this.mSessionStore().setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
 				gBrowser.updateTitlebar();
 				break;
 			}
@@ -322,12 +374,12 @@
 		if (this.__window_session_name) 
 		{
 			this.closeSession(true);
-			this.mSessionStore.setWindowValue(window,"_sm_window_session_name","");
+			this.mSessionStore().setWindowValue(window,"_sm_window_session_name","");
 		}
 			
 		if (this.mPref__running && !this.mPref__stopping && this.getBrowserWindows().length != 0)
 		{
-			this.mSessionStore.setWindowValue(window,"_sm_autosave_name","");
+			this.mSessionStore().setWindowValue(window,"_sm_autosave_name","");
 			var state = this.getSessionState(null, true);
 			this.appendClosedWindow(state);
 			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
@@ -443,7 +495,7 @@
 		}
 		if (aName)
 		{
-//			if (aOneWindow) this.mSessionStore.setWindowValue(window,"_sm_window_session_name",(values.autoSave)?escape(aName):"");
+//			if (aOneWindow) this.mSessionStore().setWindowValue(window,"_sm_window_session_name",(values.autoSave)?escape(aName):"");
 			
 			var file = this.getSessionDir(aFileName || this.makeFileName(aName), !aFileName);
 			try
@@ -582,7 +634,7 @@
 			var tabs = window.document.getElementById("content");
 			if (this.getBrowserWindows().length != 1 || !tabs || tabs.mTabs.length > 1 || 
 				tabs.mTabs[0].linkedBrowser.currentURI.spec != "about:blank" || 
-				this.mSessionStore.getClosedTabCount(window) > 0) {
+				this.mSessionStore().getClosedTabCount(window) > 0) {
 				newWindow = true;
 			}
 		}
@@ -661,7 +713,7 @@
 			this.getBrowserWindows().forEach(function(aWindow) {
 				if (aWindow.gSessionManager && (aWindow.gSessionManager.__window_session_name == oldname)) { 
 					aWindow.gSessionManager.__window_session_name = values.text;
-					this.mSessionStore.setWindowValue(aWindow,"_sm_window_session_name",escape(values.text));
+					this.mSessionStore().setWindowValue(aWindow,"_sm_window_session_name",escape(values.text));
 					this.mObserverService.notifyObservers(null, "sessionmanager:updatetitlebar", null);
 				}
 			}, this);
@@ -758,7 +810,7 @@
 			aPopup.removeChild(item);
 		}
 		
-		var closedTabs = this.mSessionStore.getClosedTabData(window);
+		var closedTabs = this.mSessionStore().getClosedTabData(window);
 		var mClosedTabs = [];
 		closedTabs = eval(closedTabs);
 		if (!this.mFF3) this.fixBug350558(closedTabs);
@@ -875,7 +927,7 @@
 
 			if (aIx >= 0) {
 				// get closed-tabs from nsSessionStore
-				var closedTabs = eval("(" + this.mSessionStore.getClosedTabData(window) + ")");
+				var closedTabs = eval("(" + this.mSessionStore().getClosedTabData(window) + ")");
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
 				if (!this.mFF3) this.fixBug350558(closedTabs);
 				// purge closed tab at aIndex
@@ -884,7 +936,7 @@
 			}
 
 			// replace existing _closedTabs
-			this.mSessionStore.setWindowState(window, state.toSource(), false);
+			this.mSessionStore().setWindowState(window, state.toSource(), false);
 			
 			// update the remaining entries
 			this.updateClosedList(aEvent.originalTarget, aIx, state.windows[0]._closedTabs.length, "tab");
@@ -959,16 +1011,32 @@
 		aValues.autoSave = (params.GetInt(1) && 8)?1:0;
 		return !params.GetInt(0);
 	},
-
-	selectSession: function(aSessionLabel, aAcceptLabel, aValues)
+	
+	// the aOverride variable in an optional callback procedure that will be used to get the session list instead
+	// of the default getSessions() function.  The function must return an array of sessions where a session is an
+	// object containing:
+	//		name 		- This is what is displayed in the session select window
+	//		fileName	- This is what is returned when the object is selected
+	//		windows		- Window count (optional - if omited won't display either window or tab count)
+	//		tabs		- Tab count	(optional - if omited won't display either window or tab count)
+	//		autosave	- Will cause item to be bold (optional)
+	//
+	// If the session list is not formatted correctly an error will be dump to the console using the "dump"
+	// function and the session select window will not be displayed.
+	//
+	selectSession: function(aSessionLabel, aAcceptLabel, aValues, aOverride)
 	{
 		var values = aValues || {};
 		
+		if (aOverride) this.getSessionsOverride = aOverride;
+		
 		if (this.prompt(aSessionLabel, aAcceptLabel, values))
 		{
+			this.getSessionsOverride = null;
 			return values.name;
 		}
 		
+		this.getSessionsOverride = null;
 		return null;
 	},
 
@@ -1161,7 +1229,7 @@
 			this.mClosedWindowsCache.data = null;
 			this.mClosedWindowsCache.timestamp = 0;
 		}
-		this.updateToolbarButton(aList.length + this.mSessionStore.getClosedTabCount(window)  > 0);
+		this.updateToolbarButton(aList.length + this.mSessionStore().getClosedTabCount(window)  > 0);
 	},
 
 	appendClosedWindow: function(aState)
@@ -1816,7 +1884,7 @@
 			if (!no_reload) this._allowReload = true;
 			setTimeout(function() {
 				//dump("Recovery autosave_name: " + gSessionManager.mPref__autosave_name + "\n");
-				gSessionManager.mSessionStore.setWindowValue(window,"_sm_autosave_name",escape(gSessionManager.mPref__autosave_name));
+				gSessionManager.mSessionStore().setWindowValue(window,"_sm_autosave_name",escape(gSessionManager.mPref__autosave_name));
 			}, 100);
 		}
 	},
@@ -1856,13 +1924,22 @@
 		{
 			var tabcount = 0;
 			try {
-				tabcount = this.mSessionStore.getClosedTabCount(window);
+				tabcount = this.mSessionStore().getClosedTabCount(window);
 			} catch (ex) {}
 			this.setDisabled(button, (aEnable != undefined)?!aEnable:tabcount == 0 && this.getClosedWindows().length == 0);
 		}
 	},
 
 /* ........ Auxiliary Functions .............. */
+	// Undo closed tab function for SeaMonkey
+	undoCloseTabSM: function (aIndex)
+	{
+		window.gSessionManager._allowReload = false;
+		
+		if (gSessionManager.mSessionStore().getClosedTabCount(window) == 0)	return;
+		gSessionManager.mSessionStore().undoCloseTab(window, aIndex || 0);
+	},
+
 	// count windows and tabs
 	getCount: function (aState)
 	{
@@ -1916,7 +1993,7 @@
 
 	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave)
 	{
-		var state = (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
+		var state = (aOneWindow)?this.mSessionStore().getWindowState(window):this.mSessionStore().getBrowserState();
 		
 		state = this.handleTabUndoData(state, aNoUndoData, !this.mFF3);
 		var count = this.getCount(state);
@@ -1940,7 +2017,7 @@
 			aWindow.__SM_restore = function() {
 				this.removeEventListener("load", this.__SM_restore, true);
 				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aAllowReload, aStripClosedTabs);
-				this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore.getWindowValue(aWindow,"_sm_window_session_name"));
+				this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore().getWindowValue(aWindow,"_sm_window_session_name"));
 				//dump("restore win " + this.gSessionManager.__window_session_name + "\n");
 				delete this.__SM_restore;
 			};
@@ -1954,14 +2031,14 @@
 		this._allowReload = aAllowReload;
 		if (aEntireSession)
 		{
-			this.mSessionStore.setBrowserState(aState);
+			this.mSessionStore().setBrowserState(aState);
 		}
 		else
 		{
 			if (!aReplaceTabs) aState = this.makeOneWindow(aState);
-			this.mSessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
+			this.mSessionStore().setWindowState(aWindow, aState, aReplaceTabs || false);
 		}
-		//this.__window_session_name = unescape(this.mSessionStore.getWindowValue(window,"_sm_window_session_name"));
+		//this.__window_session_name = unescape(this.mSessionStore().getWindowValue(window,"_sm_window_session_name"));
 		//dump("restore done " + this.__window_session_name + "\n");
 		return true;
 	},
@@ -2109,4 +2186,3 @@ String.prototype.trim = function() {
 };
 
 window.addEventListener("load", gSessionManager.onLoad_proxy, false);
-window.addEventListener("unload", gSessionManager.onUnload_proxy, false);
