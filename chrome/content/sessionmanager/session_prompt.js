@@ -33,7 +33,26 @@ gSessionManager.onLoad = function() {
 	gAcceptButton = document.documentElement.getButton("accept");
 	gAcceptButton.label = gParams.GetString(2) || gAcceptButton.label;
 	
-	var sessions = this.getSessions(true);
+	var sessions = null;
+	if (window.opener && window.opener.gSessionManager && window.opener.gSessionManager.getSessionsOverride) {
+		if (typeof window.opener.gSessionManager.getSessionsOverride == "function") {
+			try {
+				sessions = window.opener.gSessionManager.getSessionsOverride();
+			} catch (ex) { 
+				dump ("Session Manager: Override function error\n" + ex + "\n");
+			}
+		}
+		else dump ("Session Manager: Passed override function parameter is not a function\n");
+		if (!sessions || !_isValidSessionList(sessions)) {
+			gParams.SetInt(0, 1);
+			window.close();
+			return;
+		}
+	}
+	else {
+		sessions = this.getSessions(true);
+	}
+	
 	if (gParams.GetInt(1) & 1) // add a "virtual" current session
 	{
 		sessions.unshift({ name: this._string("current_session"), fileName: "*" });
@@ -64,7 +83,9 @@ gSessionManager.onLoad = function() {
 		{
 			var label;
 			// add counts if not current browsing session since current session has no counts.
-			if (aSession.fileName != "*") label = aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")";
+			if (aSession.fileName != "*" && aSession.windows && aSession.tabs) {
+				label = aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")";
+			}
 			else label = aSession.name;
 			var item = gSessionList.appendItem(label, aSession.fileName);
 			item.setAttribute("autosave", aSession.autosave);
@@ -141,7 +162,7 @@ gSessionManager.onUnload = function() {
 		persist(document.documentElement, "screenX", window.screenX - window.opener.screenX);
 		persist(document.documentElement, "screenY", window.screenY - window.opener.screenY);
 	}
-	persist(gSessionList, "height", gSessionList.boxObject.height);
+	if (gSessionList) persist(gSessionList, "height", gSessionList.boxObject.height);
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0));
 };
@@ -215,4 +236,14 @@ function setDescription(aObj, aValue)
 function _(aId)
 {
 	return document.getElementById(aId);
+}
+
+function _isValidSessionList(aSessions)
+{
+	if (aSessions==null || typeof(aSessions)!="object" || typeof(aSessions.length)!="number" || 
+	    aSessions.length == 0 || !aSessions[0].name) {
+		dump("Session Manager: Override function returned an invalid session list.\n");
+		return false;
+	}
+	return true;
 }
