@@ -32,6 +32,7 @@ overlay	chrome://browser/content/preferences/preferences.xul	chrome://sessionman
 overlay  chrome://browser/content/preferences/sanitize.xul		chrome://sessionmanager/content/overlaySanitizeUI.xul
 overlay  chrome://browser/content/sanitize.xul					chrome://sessionmanager/content/overlaySanitizeUI.xul
 overlay	chrome://browser/content/browser.xul					chrome://sessionmanager/content/sessionmanager.xul
+overlay	chrome://navigator/content/navigator.xul				chrome://sessionmanager/content/sessionmanager.xul
 
 style	chrome://global/content/customizeToolbar.xul	chrome://sessionmanager/skin/sessionmanager.css
 
