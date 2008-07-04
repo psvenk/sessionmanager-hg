@@ -742,13 +742,24 @@
 
 	openFolder: function()
 	{
-		try
-		{
-			this.getSessionDir().launch();
-		}
-		catch (ex)
-		{
-			this.ioError(ex);
+		var dir = this.getSessionDir();
+		try {
+			// "Double click" the session directory to open it
+			dir.launch();
+		} catch (e) {
+			try {
+				// If launch also fails (probably because it's not implemented), let the
+				// OS handler try to open the session directory
+				var uri = Components.classes["@mozilla.org/network/io-service;1"].
+				          getService(Components.interfaces.nsIIOService).newFileURI(dir);
+				var protocolSvc = Components.classes["@mozilla.org/uriloader/external-protocol-service;1"].
+				                  getService(Components.interfaces.nsIExternalProtocolService);
+				protocolSvc.loadUrl(uri);
+			}
+			catch (ex)
+			{
+				this.ioError(ex);
+			}
 		}
 	},
 
