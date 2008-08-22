@@ -913,7 +913,7 @@ const SM_VERSION = "0.6.1.16";
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", aWindow.name);
 			menuitem.setAttribute("index", "window" + aIx);
-			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey)?"append":"");');
+			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
 			menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
 			aPopup.insertBefore(menuitem, separator);
