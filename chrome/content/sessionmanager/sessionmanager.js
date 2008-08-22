@@ -1,5 +1,10 @@
+const FF3 = "1.9";
+const FF3_1 = "1.9.1";
+const SM_VERSION = "0.6.1.16";
+
 /*const*/ var gSessionManager = {
 	mSessionStoreValue : null,
+	mSessionStartupValue : null,
 	mObserverService: Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService),
 	mPrefRoot: Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch2),
 	mWindowMediator: Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator),
@@ -12,47 +17,53 @@
 	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
+	mBackupSessionRegEx: /^backup(-[1-9]+)?\.session$/,
 	mAutoSaveSessionName: "autosave.session",
-	mPromptSessionName: "?",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
 	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)/m,
 
-	mSessionCache: {},
+	mSessionCache: { timestamp: 0 },
 	mClosedWindowsCache: { timestamp: 0, data: null },
 	
 	mSessionStore : function() {
 		// Get SessionStore component if not already retrieved
-		if (!gSessionManager.mSessionStoreValue) {
+		if (!this.mSessionStoreValue) {
 		
 			// Firefox
-			if (Components.classes["@mozilla.org/browser/sessionstore;1"]) {
-				gSessionManager.mSessionStoreValue = Components.classes["@mozilla.org/browser/sessionstore;1"].
-					getService(Components.interfaces.nsISessionStore);
+			if (this.mComponents.classes["@mozilla.org/browser/sessionstore;1"]) {
+				this.mSessionStoreValue = this.mComponents.classes["@mozilla.org/browser/sessionstore;1"].
+					getService(this.mComponents.interfaces.nsISessionStore);
+				this.mSessionStartupValue = this.mComponents.classes["@mozilla.org/browser/sessionstartup;1"].
+					getService(this.mComponents.interfaces.nsISessionStartup);
 			}
 			// SeaMonkey
-			else if (Components.classes["@mozilla.org/suite/sessionstore ;1"]) {
-				gSessionManager.mSessionStoreValue = Components.classes["@mozilla.org/suite/sessionstore;1"].
-					getService(Components.interfaces.nsISessionStore);
+			else if (this.mComponents.classes["@mozilla.org/suite/sessionstore ;1"]) {
+				this.mSessionStoreValue = this.mComponents.classes["@mozilla.org/suite/sessionstore;1"].
+					getService(this.mComponents.interfaces.nsISessionStore);
+				this.mSessionStartupValue = this.mComponents.classes["@mozilla.org/suite/sessionstartup;1"].
+					getService(this.mComponents.interfaces.nsISessionStartup);
 			}
 			// Not supported
 			else {
 				var sessionButton = document.getElementById("sessionmanager-toolbar");
 				var undoButton = document.getElementById("sessionmanager-undo");
 				var sessionMenu = document.getElementById("sessionmanager-menu");
-				if (sessionButton) sessionButton.style.visibility = "collapse";
-				if (undoButton) undoButton.style.visibility = "collapse";
-				if (sessionMenu) sessionMenu.style.visibility = "collapse";
+				if (sessionButton) sessionButton.hidden = true;
+				if (undoButton) undoButton.hidden = true;
+				if (sessionMenu) sessionMenu.hidden = true;
 				if (!this.getPref("browser.sessionmanager.uninstalled", false, true)) {
-					alert("Session Manager is not supported in this browser because it does not contain the SessionStore component.  Session Manager will be uninstalled after the browser is restarted.");
-		    		var liExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager);
+					this.mBundle = document.getElementById("bundle_sessionmanager");
+					this.mTitle = this._string("sessionManager");
+					this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, this._string("not_supported"));
+		    		var liExtensionManager = this.mComponents.classes["@mozilla.org/extensions/manager;1"].getService(this.mComponents.interfaces.nsIExtensionManager);
 					liExtensionManager.uninstallItem("{1280606b-2510-4fe0-97ef-9b5a22eafe30}");
 					this.setPref("browser.sessionmanager.uninstalled", true, true);
 					window.addEventListener("unload", gSessionManager.onUnload_Uninstall, false);
 				}
 			}
 		}
-		return gSessionManager.mSessionStoreValue;
+		return this.mSessionStoreValue;
 	},
 
 /* ........ Listeners / Observers.............. */
@@ -73,9 +84,21 @@
 		this.mTitle = this._string("sessionManager");
 		this.mEOL = this.getEOL();
 		
+		// Determine Mozilla version to see what is supported
+		this.mAppVersion = "0";
+		try {
+			this.mAppVersion = Components.classes["@mozilla.org/xre/app-info;1"].
+			                   getService(Components.interfaces.nsIXULAppInfo).platformVersion;
+		} catch (e) { dump(e + "\n"); }
+
 		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
 		// enabled and presumably anyone installing Session Manager actually wants to use it. 
-		this.setPref("browser.sessionstore.enabled", true, true);
+		// This preference no longer exists as of Firefox 3.1 so don't set it, if there is no default value
+		if (this.mAppVersion < FF3_1) {
+			if (!this.getPref("browser.sessionstore.enabled", true, true)) {
+				this.setPref("browser.sessionstore.enabled", true, true);
+			}
+		}
 		
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);
@@ -89,27 +112,32 @@
 		{
 			return;
 		}
-
-		// Set flag to determine if running Firefox 3.0 or later (document.getElementsByAttributeNS only valid in FF3+)
-		this.mFF3 = (document.getElementsByAttributeNS) ? true : false;
 		
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.addObserver(this, aTopic, false);
 		}, this);
 		this.mObserverService.addObserver(this, "quit-application", false);
+		this.mObserverService.addObserver(this, "sessionmanager-list-update", false);
+		// The following is needed to handle extensions who issue bad restarts in Firefox 2.0
+		if (this.mAppVersion < FF3) this.mObserverService.addObserver(this, "quit-application-requested", false);
 		
 		this.mPref_autosave_session = this.getPref("autosave_session", true);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
+		this.mPref_click_restore_tab = this.getPref("click_restore_tab", true);
 		this.mPref_encrypt_sessions = this.getPref("encrypt_sessions", false);
 		this.mPref_max_backup_keep = this.getPref("max_backup_keep", 0);
 		this.mPref_max_closed_undo = this.getPref("max_closed_undo", 10);
+		this.mPref_max_display = this.getPref("max_display", 20);
 		this.mPref_name_format = this.getPref("name_format", "%40t-%d");
 		this.mPref_overwrite = this.getPref("overwrite", false);
 		this.mPref_reload = this.getPref("reload", false);
 		this.mPref_resume_session = this.getPref("resume_session", "");
 		this.mPref_save_closed_tabs = this.getPref("save_closed_tabs", 0);
+		this.mPref_save_cookies = this.getPref("save_cookies", false);
 		this.mPref_save_window_list = this.getPref("save_window_list", false);
 		this.mPref_session_list_order = this.getPref("session_list_order", 1);
+		this.mPref_hide_tools_menu = this.getPref("hide_tools_menu", true);
+		this.mPref_startup = this.getPref("startup",0);
 		this.mPref_submenus = this.getPref("submenus", false);
 		this.mPref__running = this.getPref("_running", false);
 		this.mPref__autosave_name = this.getPref("_autosave_name", "");
@@ -119,16 +147,17 @@
 		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
 		
+		// Hide Session Manager toolbar item if option requested
+		this.showHideToolsMenu();
+		
 		// Undo close tab if middle click on tab bar - only do this if Tab Clicking Options
 		// or Tab Mix Plus are not installed.
-		if ((typeof(tabClicking) == "undefined") && (typeof(TM_checkClick) == "undefined")) {
-			gBrowser.mStrip.addEventListener("click", this.onTabBarClick, false);
-		}
+		this.watchForMiddleMouseClicks();
 		
 		// Make sure Session Store is initialzed - It doesn't seem to initialize in all O/S builds of Firefox.
 		this.mSessionStore().init(window);
 		
-		this.synchStartup();
+		this.synchStartup("page");   // Let Firefox's preference override ours if it changed when browser not running
 		this.recoverSession();
 		this.updateToolbarButton();
 		
@@ -150,7 +179,7 @@
 		this.mSessionStore().persistTabAttribute("image");
 		
 		// Workaround for bug 360408 in Firefox 2.0, remove when fixed and uncomment call to onWindowClose in onUnload
-		if (!this.mFF3) eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
+		if (this.mAppVersion < FF3) eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
 		
 		// Have Tab Mix Plus call our function to update our toolbar button.
 		if (gBrowser.undoRemoveTab)
@@ -186,9 +215,9 @@
 		}
 		
 		// One time message on update
-		if (this.getPref("version", "") != "0.6.1")
+		if (this.getPref("version", "") != SM_VERSION)
 		{
-			this.setPref("version", "0.6.1");
+			this.setPref("version", SM_VERSION);
 			setTimeout(function() {
 				var tBrowser = top.document.getElementById("content");
 				if (tBrowser.mCurrentTab.linkedBrowser && 
@@ -201,6 +230,20 @@
 					tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
 				}
 			},1000);
+			
+			// Clean out screenX and screenY persist values from localstore.rdf since we don't persist anymore.
+			var RDF = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
+			var ls = Components.classes["@mozilla.org/rdf/datasource;1?name=local-store"].getService(Components.interfaces.nsIRDFDataSource);
+			var rdfNode = RDF.GetResource("chrome://sessionmanager/content/options.xul#sessionmanagerOptions");
+			var arcOut = ls.ArcLabelsOut(rdfNode);
+			while (arcOut.hasMoreElements()) {
+				var aLabel = arcOut.getNext();
+				if (aLabel instanceof Components.interfaces.nsIRDFResource) {
+					var aTarget = ls.GetTarget(rdfNode, aLabel, true);
+					ls.Unassert(rdfNode, aLabel, aTarget);
+				}
+			}
+			ls.QueryInterface(Components.interfaces.nsIRDFRemoteDataSource).Flush();				
 		}
 	},
 
@@ -224,6 +267,7 @@
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.removeObserver(this, aTopic);
 		}, this);
+		this.mObserverService.removeObserver(this, "sessionmanager-list-update");
 		this.mPrefBranch.removeObserver("", this);
 		this.mPrefBranch2.removeObserver("page", this);
 		
@@ -233,10 +277,10 @@
 		
 		// Last window closing will leaks briefly since "quit-application" observer is not removed from it 
 		// until after shutdown is run, but since browser is closing anyway, who cares?
-		if (numWindows != 0) this.mObserverService.removeObserver(this, "quit-application", false);
+		if (numWindows != 0) this.mObserverService.removeObserver(this, "quit-application");
 
 		// Only do the following in Firefox 3.0 and above where bug 360408 is fixed.
-		if (this.mFF3) this.onWindowClose();
+		if (this.mAppVersion >= FF3) this.onWindowClose();
 				
 		if (this.mPref__running && numWindows == 0)
 		{
@@ -252,7 +296,7 @@
 			// This executes in Firefox 2.x if last browser window closes and non-browser windows are still open
 			// or if Firefox is restarted. In Firefox 3.0, it executes whenever the last browser window is closed.
 			if (!this.mPref__stopping) {
-				this.mObserverService.removeObserver(this, "quit-application", false);
+				this.mObserverService.removeObserver(this, "quit-application");
 				this.shutDown();
 			}
 		}
@@ -273,14 +317,23 @@
 			break;
 		case "browser:purge-session-history":
 			this.clearUndoData("all");
-			this.delFile(this.getSessionDir(this.mBackupSessionName));
-			this.delFile(this.getSessionDir(this.mAutoSaveSessionName));
 			break;
+		case "sessionmanager-list-update":
+			// this session cache from updated window so this window doesn't need to read from disk
+			if (window != aSubject) {
+				if (this.mSessionCache.timestamp < aSubject.gSessionManager.mSessionCache.timestamp) {
+					//dump("Updating window " + window.title + "\n");
+					this.mSessionCache = aSubject.gSessionManager.mSessionCache;
+				}
+			}
 		case "nsPref:changed":
 			this["mPref_" + aData] = this.getPref(aData);
 			
 			switch (aData)
 			{
+			case "click_restore_tab":
+				this.watchForMiddleMouseClicks();
+				break;
 			case "encrypt_sessions":
 				this.encryptionChange();
 				break;
@@ -299,19 +352,30 @@
 				}
 				break;
 			case "page":
-				this.synchStartup();
-				break;
+			case "startup":
 			case "resume_session":
-				this.setResumeCurrent(this.mPref_resume_session == this.mBackupSessionName);
+				this.synchStartup(aData);
 				break;
 			case "_autosave_name":
 				this.mSessionStore().setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
 				gBrowser.updateTitlebar();
 				break;
+			case "hide_tools_menu":
+				this.showHideToolsMenu();
+			}
+			break;
+		case "quit-application-requested":
+			// this is only registered for Firefox 2.0 to handle when extension issue a restart since most do not send a 
+			// quit-application-granted notification causing SessionStore to drop all but one window
+			this.mObserverService.removeObserver(this, "quit-application-requested");
+			if (aData == "restart") {
+				var os = Components.classes["@mozilla.org/observer-service;1"]
+   		                  .getService(Components.interfaces.nsIObserverService);
+   		        os.notifyObservers(null, "quit-application-granted", null);
 			}
 			break;
 		case "quit-application":
-			this.mObserverService.removeObserver(this, "quit-application", false);
+			this.mObserverService.removeObserver(this, "quit-application");
 			// only run shutdown for one window and if not restarting browser
 			if (aData != "restart")
 			{
@@ -398,6 +462,16 @@
 			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title.replace(/(- \(([^:|.]*): ([^:|.]*)\)+( - \(([^:|.]*): ([^:|.]*)\))*)?$/, windowTitleName + sessionTitleName);
 		} catch (ex) { dump(ex); }
 	},
+	
+	// Undo close tab if middle click on tab bar if enabled by user - only do this if Tab Clicking Options
+	// or Tab Mix Plus are not installed.
+	watchForMiddleMouseClicks: function() 
+	{
+		if (this.mPref_click_restore_tab && (typeof(tabClicking) == "undefined") && (typeof(TM_checkClick) == "undefined")) {
+			gBrowser.mStrip.addEventListener("click", this.onTabBarClick, false);
+		}
+		else gBrowser.mStrip.removeEventListener("click", this.onTabBarClick, false);
+	},
 
 /* ........ Menu Event Handlers .............. */
 
@@ -406,32 +480,52 @@
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
 		var separator = get_("separator");
+		var backupSep = get_("backup-separator");
 		var startSep = get_("start-separator");
 		var closer = get_("closer");
 		var abandon = get_("abandon");
-		
+		var save = get_("save");
+		var backupMenu = get_("backup-menu");
+				
 		for (var item = startSep.nextSibling; item != separator; item = startSep.nextSibling)
 		{
 			aPopup.removeChild(item);
 		}
 		
+		while (backupMenu.menupopup.childNodes.length) backupMenu.menupopup.removeChild(backupMenu.menupopup.childNodes[0]);
+		
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
+		save.hidden = (this.getBrowserWindows().length == 1);
 		
 		var windowSessions = this.getWindowSessions();
 		var sessions = this.getSessions(true);
+		var count = 0;
+		var backupCount = 0;
 		sessions.forEach(function(aSession, aIx) {
-			var key = (aIx < 9)?aIx + 1:(aIx == 9)?"0":"";
+			if (!aSession.backup && (!count++ >= this.mPref_max_display)) return;
+	
+			var key = aSession.backup?"":(count < 10)?count:(count == 10)?"0":"";
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", ((key)?key + ") ":"") + aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")");
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
+			menuitem.setAttribute("contextmenu", "sessionmanager-ContextMenu");
+			menuitem.setAttribute("filename", aSession.fileName);
 			menuitem.setAttribute("accesskey", key);
 			menuitem.setAttribute("autosave", aSession.autosave);
 			menuitem.setAttribute("disabled", windowSessions[aSession.name.trim().toLowerCase()] || false);
-			if (sessions.latestName == aSession.name) menuitem.setAttribute("latest", true);
+			if (sessions.latestTime == aSession.timestamp) menuitem.setAttribute("latest", true);
+			if (sessions.latestBackUpTime == aSession.timestamp) menuitem.setAttribute("latest", true);
 			if (aSession.name == this.mPref__autosave_name) menuitem.setAttribute("disabled", true);
-			aPopup.insertBefore(menuitem, separator);
+			if (aSession.backup) {
+				backupCount++;
+				backupMenu.menupopup.appendChild(menuitem);
+			}
+			else {
+				aPopup.insertBefore(menuitem, separator);
+			}
 		}, this);
+		backupSep.hidden = backupMenu.hidden = (backupCount == 0);
 		separator.hidden = (sessions.length == 0);
 		this.setDisabled(separator.nextSibling, separator.hidden);
 		this.setDisabled(separator.nextSibling.nextSibling, separator.hidden);
@@ -615,6 +709,8 @@
 		try
 		{
 			TMP_SingleWindowMode = gSingleWindowMode;
+			if (TMP_SingleWindowMode && (aMode != "startup") && (aMode != "overwrite") && !this.mPref_overwrite)
+				aMode = "append";
 		}
 		catch (ex) {}
 		
@@ -624,11 +720,11 @@
 			overwriteTabs = this.isCmdLineEmpty();
 			tabsToMove = (!overwriteTabs)?Array.slice(gBrowser.mTabs):null;
 		}
-		else if (aMode == "append" || TMP_SingleWindowMode)
+		else if (aMode == "append")
 		{
 			overwriteTabs = false;
 		}
-		else if (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite))
+		else if (!TMP_SingleWindowMode && (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite)))
 		{
 			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
 			var tabs = window.document.getElementById("content");
@@ -645,14 +741,14 @@
 				if (aWindow != window) { 
 					aWindow.gSessionManager.mPref__stopping = true; 
 					// If not Firefox 3 call onWindowClose to save current window session since it isn't done in FF2
-					if (!this.mFF3) aWindow.gSessionManager.onWindowClose();
+					if (this.mAppVersion < FF3) aWindow.gSessionManager.onWindowClose();
 				}
 			});
 		}
 
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, stripClosedTabs, (overwriteTabs && !newWindow));
+			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode);
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
@@ -667,9 +763,12 @@
 		}, 0);
 	},
 
-	rename: function()
+	rename: function(aSession)
 	{
-		var values = {};
+		var values;
+		if (aSession) values = { name: aSession, text: this.mSessionCache[aSession].name };
+		else values = {};
+		
 		if (!this.prompt(this._string("rename_session"), this._string("rename_session_ok"), values, this._string("rename2_session")))
 		{
 			return;
@@ -734,7 +833,10 @@
 		{
 			aSession.split("\n").forEach(function(aFileName) {
 				// If deleted autoload session, revert to no autoload session
-				if (aFileName == this.mPref_resume_session) this.setPref("resume_session", "");
+				if (aFileName == this.mPref_resume_session) {
+					this.setPref("resume_session", "");
+					this.setPref("startup", 0);
+				}
 				this.delFile(this.getSessionDir(aFileName));
 			}, this);
 		}
@@ -772,7 +874,7 @@
 			return;
 		}
 		
-		openDialog("chrome://sessionmanager/content/options.xul", "_blank", "chrome,titlebar,centerscreen," + ((this.getPref("browser.preferences.instantApply", false, true))?"dialog=no":"modal"));
+		openDialog("chrome://sessionmanager/content/options.xul", "_blank", "chrome,titlebar,toolbar,centerscreen," + ((this.getPref("browser.preferences.instantApply", false, true))?"dialog=no":"modal"));
 	},
 
 	toggleResume: function()
@@ -810,7 +912,8 @@
 			menuitem.setAttribute("label", aWindow.name);
 			menuitem.setAttribute("index", "window" + aIx);
 			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey)?"append":"");');
-			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedWindowMenuItem(event);');
+			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
+			menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
 			aPopup.insertBefore(menuitem, separator);
 		});
 		label.hidden = (closedWindows.length == 0);
@@ -824,7 +927,7 @@
 		var closedTabs = this.mSessionStore().getClosedTabData(window);
 		var mClosedTabs = [];
 		closedTabs = eval(closedTabs);
-		if (!this.mFF3) this.fixBug350558(closedTabs);
+		if (this.mAppVersion < FF3) this.fixBug350558(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
 								url:aValue.state.entries[aValue.state.entries.length - 1].url }
@@ -850,7 +953,8 @@
 			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
 			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
-			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedTabMenuItem(event);');
+			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
+			menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
 			aPopup.insertBefore(menuitem, listEnd);
 		});
 		separator.nextSibling.hidden = (mClosedTabs.length == 0);
@@ -906,32 +1010,38 @@
 		}
 	},
 
-	clickClosedWindowMenuItem: function(aEvent)
-	{	
-		// if ctrl/command right click, remove tab from list
+	clickClosedUndoMenuItem: function(aEvent) 
+	{
+		// if ctrl/command right click, remove item from list
 		if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
 		{
+			this.removeUndoMenuItem(aEvent.originalTarget);
+		}
+	},
+	
+	removeUndoMenuItem: function(aTarget)
+	{	
+		var aIx = null;
+		var indexAttribute = aTarget.getAttribute("index");
+		// removing window item
+		if (indexAttribute.indexOf("window") != -1) {
 			// get index
-			var aIx = aEvent.originalTarget.getAttribute("index").substring(6);
-		
+			aIx = indexAttribute.substring(6);
+			
+			// remove window from closed window list and tell other open windows
 			var closedWindows = this.getClosedWindows();
 			closedWindows.splice(aIx, 1)[0].state;
 			this.storeClosedWindows(closedWindows);
 			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
 			// update the remaining entries
-			this.updateClosedList(aEvent.originalTarget, aIx, closedWindows.length, "window");
+			this.updateClosedList(aTarget, aIx, closedWindows.length, "window");
 		}
-	},
-	
-	clickClosedTabMenuItem: function(aEvent)
-	{	
-		// if ctrl/command right click, remove tab from list
-		if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
-		{
+		// removing tab item
+		else if (indexAttribute.indexOf("tab") != -1) {
 			// get index
-			var aIx = aEvent.originalTarget.getAttribute("index").substring(3);
-		
+			aIx = indexAttribute.substring(3);
+			
 			// This code is based off of code in Tab Mix Plus
 			var state = { windows: [], _firstTabs: true };
 			state.windows[0] = { _closedTabs: [] };
@@ -940,17 +1050,17 @@
 				// get closed-tabs from nsSessionStore
 				var closedTabs = eval("(" + this.mSessionStore().getClosedTabData(window) + ")");
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
-				if (!this.mFF3) this.fixBug350558(closedTabs);
+				if (this.mAppVersion < FF3) this.fixBug350558(closedTabs);
 				// purge closed tab at aIndex
 				closedTabs.splice(aIx, 1);
 				state.windows[0]._closedTabs = closedTabs;
 			}
 
 			// replace existing _closedTabs
-			this.mSessionStore().setWindowState(window, state.toSource(), false);
+			this.mSessionStore().setWindowState(window, uneval(state), false);
 			
 			// update the remaining entries
-			this.updateClosedList(aEvent.originalTarget, aIx, state.windows[0]._closedTabs.length, "tab");
+			this.updateClosedList(aTarget, aIx, state.windows[0]._closedTabs.length, "tab");
 		}
 	},
 	
@@ -997,6 +1107,57 @@
 
 		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 	},
+	
+/* ........ Right click menu handlers .............. */
+
+	session_popupInit: function(aPopup) {
+		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
+		
+		get_("replace").hidden = (this.getBrowserWindows().length == 1);
+	},
+
+	session_load: function(aReplace) {
+		var session = document.popupNode.getAttribute("filename");
+		var oldOverwrite = this.mPref_overwrite;
+		if (aReplace) {
+			this.mPref_overwrite = true;
+			this.load(session);
+		}
+		else {
+			var state = this.readSessionFile(this.getSessionDir(session),true);
+			var newWindow = (((this.mSessionRegExp.test(state))?RegExp.$4:0) > 1) || this.getBrowserWindows().length > 1;
+			this.mPref_overwrite = false;
+			this.load(session, (newWindow)?"newwindow":"append");
+		}
+		this.mPref_overwrite = oldOverwrite;
+	},
+	
+	session_replace: function(aWindow) {
+		var session = document.popupNode.getAttribute("filename");
+		if (aWindow) {
+			this.saveWindow(this.mSessionCache[session].name, session);
+		}
+		else {
+			this.save(this.mSessionCache[session].name, session);
+		}
+	},
+	
+	session_rename: function() {
+		var session = document.popupNode.getAttribute("filename");
+		this.rename(session);
+	},
+	
+	session_remove: function() {
+		var session = document.popupNode.getAttribute("filename");
+		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm")))
+			this.remove(session);
+	},
+	
+	session_setStartup: function() {
+		var session = document.popupNode.getAttribute("filename");
+		this.setPref("resume_session", session);
+	},
+	
 /* ........ User Prompts .............. */
 
 	prompt: function(aSessionLabel, aAcceptLabel, aValues, aTextLabel, aAcceptExistingLabel)
@@ -1102,7 +1263,7 @@
 		var dirname = this.getPref("sessions_dir", "");
 		try {
 			if (dirname != "") {
-				var dir = Components.classes["@mozilla.org/file/local;1"].createInstance(Components.interfaces.nsILocalFile);
+				var dir = this.mComponents.classes["@mozilla.org/file/local;1"].createInstance(this.mComponents.interfaces.nsILocalFile);
 				dir.initWithPath(dirname);
 				if (dir.isDirectory && dir.isWritable()) {
 					dir.append(aFileName);
@@ -1154,37 +1315,65 @@
 		return dir.QueryInterface(this.mComponents.interfaces.nsILocalFile);
 	},
 
-	getSessions: function(headerOnly)
+	//
+	// headerOnly - only return header data, not the entire session file.  Speeds up grabbing of session names
+	// filter - optional regular expression. If specified, will only return sessions that match that expression
+	//
+	getSessions: function(headerOnly, filter)
 	{
+		var matchArray;
 		var sessions = [];
 		var latest = 0;
+		var latest_backup = 0;
+		var trueUpdate = false;
 		
 		var filesEnum = this.getSessionDir().directoryEntries.QueryInterface(this.mComponents.interfaces.nsISimpleEnumerator);
 		while (filesEnum.hasMoreElements())
 		{
 			var file = filesEnum.getNext().QueryInterface(this.mComponents.interfaces.nsIFile);
 			var fileName = file.leafName;
+			var backupItem = (this.mBackupSessionRegEx.test(fileName) || (fileName == this.mAutoSaveSessionName));
 			var cached = this.mSessionCache[fileName] || null;
 			if (cached && cached.time == file.lastModifiedTime)
 			{
-				if (latest < cached.timestamp) 
+				try {
+					if (filter && !filter.test(cached.name)) continue;
+				} catch(ex) { 
+					dump ("Session Manager: Bad Regular Expression passed to getSessions, ignoring\n"); 
+				}
+				if (!backupItem && (latest < cached.timestamp)) 
 				{
-					sessions.latestName = cached.name;
+					sessions.latestTime = cached.timestamp;
 					latest = cached.timestamp;
 				}
-				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs });
+				else if (backupItem && (latest_backup < cached.timestamp)) {
+					sessions.latestBackUpTime = cached.timestamp;
+					latest_backup = cached.timestamp;
+				}
+				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs, backup: backupItem });
 				continue;
 			}
-			if (this.mSessionRegExp.test(this.readSessionFile(file, headerOnly)))
+			if (matchArray = this.mSessionRegExp.exec(this.readSessionFile(file, headerOnly)))
 			{
-				var timestamp = parseInt(RegExp.$2) || file.lastModifiedTime;
-				if (latest < timestamp) 
+				try {
+					if (filter && !filter.test(matchArray[1])) continue;
+				} catch(ex) { 
+					dump ("Session Manager: Bad Regular Expression passed to getSessions, ignoring\n"); 
+				}
+				var timestamp = parseInt(matchArray[2]) || file.lastModifiedTime;
+				if (!backupItem && (latest < timestamp)) 
 				{
-					sessions.latestName = RegExp.$1;
+					sessions.latestTime = timestamp;
 					latest = timestamp;
 				}
-				sessions.push({ fileName: fileName, name: RegExp.$1, timestamp: timestamp, autosave: RegExp.$3, windows: RegExp.$4, tabs: RegExp.$5 });
-				this.mSessionCache[fileName] = { name: RegExp.$1, timestamp: timestamp, autosave: RegExp.$3, time: file.lastModifiedTime, windows: RegExp.$4, tabs: RegExp.$5 };
+				else if (backupItem && (latest_backup < timestamp)) {
+					sessions.latestBackUpTime = timestamp;
+					latest_backup = timestamp;
+				}
+				sessions.push({ fileName: fileName, name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], windows: matchArray[4], tabs: matchArray[5], backup: backupItem });
+				this.mSessionCache[fileName] = { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: file.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem };
+				this.mSessionCache.timestamp = timestamp;
+				trueUpdate = true;
 			}
 		}
 		
@@ -1202,6 +1391,9 @@
 			break;
 		}
 		
+		// Notify all other open windows so they can copy the session list cache - this minimizes disk reads
+		//dump("Needed to read disk is " + (trueUpdate?"true\n":"false\n"));
+		if (trueUpdate) this.mObserverService.notifyObservers(window, "sessionmanager-list-update", "");
 		return (this.mPref_session_list_order < 0)?sessions.reverse():sessions;
 	},
 
@@ -1292,7 +1484,7 @@
 			}
 			else
 			{
-				this.keepOldBackups();
+				this.keepOldBackups(false);
 			}
 			
 			this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
@@ -1327,6 +1519,20 @@
 	backupCurrentSession: function()
 	{
 		var backup = this.getPref("backup_session", 1);
+		
+		// Don't save if just a blank window, if there's an error parsing data, just save
+		var state = null;
+		if (backup > 0) {
+			state = this.getSessionState(this._string_backup_session || this._string("backup_session"));
+			try {
+				var aState = eval("(" + state.split("\n")[4] + ")");
+				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
+		    		(aState.windows[0].tabs[0].entries.length > 1) || (aState.windows[0].tabs[0].entries[0].url != "about:blank"))) {
+					backup = 0;
+				}
+			} catch(ex) { dump(ex); }
+		}
+		
 		if (backup == 2)
 		{
 			var dontPrompt = { value: false };
@@ -1336,23 +1542,24 @@
 				this.setPref("backup_session", (backup == -1)?0:1);
 			}
 		}
-		this.keepOldBackups();
 		if (backup > 0)
 		{
+			this.keepOldBackups(true);
 			try
 			{
-				var state = this.getSessionState(this._string_backup_session || this._string("backup_session"));
 				this.writeFile(this.getSessionDir(this.mBackupSessionName), state);
 			}
 			catch (ex)
 			{
 				this.ioError(ex);
 			}
-	  }
+		}
+		else this.keepOldBackups(false);
 	},
 
-	keepOldBackups: function()
+	keepOldBackups: function(backingUp)
 	{
+		if (!backingUp) this.mPref_max_backup_keep = this.mPref_max_backup_keep + 1; 
 		var backup = this.getSessionDir(this.mBackupSessionName);
 		if (backup.exists() && this.mPref_max_backup_keep)
 		{
@@ -1394,7 +1601,7 @@
 			var timestamp = parseInt(RegExp.$2) || aFile.lastModifiedTime;
 			if (headerOnly) state = this.readFile(aFile);
 			state = state.substring(state.indexOf("[Window1]\n"), state.length);
-			state = this.decodeOldFormat(state, true).toSource();
+			state = uneval(this.decodeOldFormat(state, true));
 			state = state.substring(1,state.length-1);
 			var countString = getCountString(this.getCount(state));
 			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
@@ -1749,7 +1956,7 @@
 		aObj["_closedTabs"] = [];
 
 		closedTabs.forEach(function(aValue, aIndex) {
-			aObj["_closedTabs"][aIndex] = eval(({ state : aValue[0].toSource() }));
+			aObj["_closedTabs"][aIndex] = eval(({ state : uneval(aValue[0]) }));
 		}, this);
 	},
 
@@ -1845,27 +2052,32 @@
 		return false;
 	},
 		
-	synchStartup: function()
+	synchStartup: function(aData)
 	{
-		var startup = this.getPref("browser.startup.page", 1, true);
-		if (startup == 3) 
-		{
-			this.setPref("resume_session", this.mBackupSessionName);
+		var browser_startup = this.getPref("browser.startup.page", 1, true);
+		var sm_startup = this.getPref("startup", 0);
+
+		// if no selected session set value to browser default
+		if ((sm_startup == 2) && !this.getPref("resume_session")) {
+			this.setPref("startup", 0);
+			return;   // just return since setting "startup" will call this procedure again
 		}
-		else 
-		{
-			this.setPref("old_startup_page", startup);
-			if (this.mPref_resume_session == this.mBackupSessionName)
-			{
-				this.setPref("resume_session", "");
-			}
+		
+		// browser currently sent to resume browser session and Session Manager thinks it's handling sessions
+		if (browser_startup >= 2 && sm_startup) {
+			if (aData == "page") this.setPref("startup",0);
+			else this.setPref("browser.startup.page",  this.getPref("old_startup_page",1), true);
 		}
+		else if (browser_startup < 2) this.setPref("old_startup_page", browser_startup);
 	},
 
 	recoverSession: function()
 	{
 		var recovering = this.getPref("_recovering");
-		var recoverOnly = recovering || this.mPref__running || this.doResumeCurrent() || this.getPref("browser.sessionstore.resume_session_once", false, true) || !window.arguments || (window.arguments[0] == null);
+		// Use SessionStart's value in FF3 because preference is cleared by the time we are called, in FF2 SessionStart doesn't set this value
+		var sessionstart = (this.mAppVersion >= FF3)?(this.mSessionStartupValue._sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
+		                              :this.getPref("browser.sessionstore.resume_session_once", false, true)
+		var recoverOnly = this.mPref__running || sessionstart || !window.arguments || (window.arguments[0] == null);
 		var no_reload = this.getPref("_no_reload");
 		if (no_reload) this.delPref("_no_reload");
 		// handle crash where user chose a specific session
@@ -1876,17 +2088,24 @@
 			this.mPref__autosave_name = "";
 			this.load(recovering, "startup");
 		}
-		else if (!recoverOnly && this.mPref_resume_session && this.getSessions(true).length > 0)
+		else if (!recoverOnly && ((this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions(true).length > 0)
 		{
 			var values = { ignorable: true };
-			var session = (this.mPref_resume_session == this.mPromptSessionName)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session;
+			var session = (this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session;
 			if (session && this.getSessionDir(session).exists())
 			{
 				this.load(session, "startup");
 			}
+			// if user set to resume previous session, don't clear this so that way user can choose whether to backup
+			// current session or not and still have it restore.
+			else if ((this.mPref_startup == 2) && (this.mPref_resume_session != this.mBackupSessionName)) {
+				this.setPref("resume_session","");
+				this.setPref("startup",0);
+			}
 			if (values.ignore)
 			{
 				this.setPref("resume_session", session || "");
+				this.setPref("startup", (session)?2:0);
 			}
 		}
 		// handle browser reload with same session and when opening new windows
@@ -1902,30 +2121,7 @@
 
 	isCmdLineEmpty: function()
 	{
-		var homepage = null;
-		
-		switch (this.getPref("browser.startup.page", 1, true))
-		{
-		case 0:
-			homepage = "about:blank";
-			break;
-		case 1:
-			try
-			{
-				homepage = this.mPrefRoot.getComplexValue("browser.startup.homepage", Components.interfaces.nsIPrefLocalizedString).data;
-			}
-			catch (ex)
-			{
-				homepage = this.getPref("browser.startup.homepage", "", true);
-			}
-			break;
-		}
-		if (window.arguments.length > 0 && window.arguments[0].split("\n")[0] == homepage)
-		{
-			window.arguments.shift();
-		}
-		
-		return (window.arguments.length == 0);
+		return (window.arguments.length <= 1);
 	},
 
 	updateToolbarButton: function(aEnable)
@@ -1938,6 +2134,15 @@
 				tabcount = this.mSessionStore().getClosedTabCount(window);
 			} catch (ex) {}
 			this.setDisabled(button, (aEnable != undefined)?!aEnable:tabcount == 0 && this.getClosedWindows().length == 0);
+		}
+	},
+	
+	showHideToolsMenu: function()
+	{
+		// ignore option if not Firefox based because SeaMonkey won't be able to unhide the menu
+		if (document.getElementById("menu_ToolsPopup")) {
+			var sessionMenu = document.getElementById("sessionmanager-menu");
+			if (sessionMenu) sessionMenu.hidden = this.mPref_hide_tools_menu;
 		}
 	},
 
@@ -2006,7 +2211,7 @@
 	{
 		var state = (aOneWindow)?this.mSessionStore().getWindowState(window):this.mSessionStore().getBrowserState();
 		
-		state = this.handleTabUndoData(state, aNoUndoData, !this.mFF3);
+		state = this.handleTabUndoData(state, aNoUndoData, true, (this.mAppVersion < FF3));
 		var count = this.getCount(state);
 		
 		// encrypt state if encryption preference set
@@ -2016,7 +2221,7 @@
 				"\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession)
+	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession, aOneWindow)
 	{
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
@@ -2037,7 +2242,7 @@
 		}
 
 		//Try and fix bug35058 even in FF 3.0, because session might have been saved under FF 2.0
-		aState = this.handleTabUndoData(aState, aStripClosedTabs, 1);  
+		aState = this.handleTabUndoData(aState, aStripClosedTabs, false, true);  
 		
 		this._allowReload = aAllowReload;
 		if (aEntireSession)
@@ -2046,7 +2251,7 @@
 		}
 		else
 		{
-			if (!aReplaceTabs) aState = this.makeOneWindow(aState);
+			if (!aReplaceTabs || aOneWindow) aState = this.makeOneWindow(aState);
 			this.mSessionStore().setWindowState(aWindow, aState, aReplaceTabs || false);
 		}
 		//this.__window_session_name = unescape(this.mSessionStore().getWindowValue(window,"_sm_window_session_name"));
@@ -2081,13 +2286,17 @@
 			aState.windows = [];
 			aState.windows[0] = firstWindow;
 		}
-		return aState.toSource();
+		return uneval(aState);
 	},
 	
-	handleTabUndoData: function(aState, aStrip, afixBug350558)
+	handleTabUndoData: function(aState, aStrip, aSaving, afixBug350558)
 	{
 		aState = eval("(" + aState + ")");
 		aState.windows.forEach(function(aWindow) {
+			// Strip out cookies if user doesn't want to save them
+			if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
+
+			// Either remove or fix closed tabs			
 			if (aStrip) aWindow._closedTabs = [];
 			else if (afixBug350558) this.fixBug350558(aWindow._closedTabs);
 
@@ -2095,7 +2304,7 @@
 			// and tabs.entries array data in Firefox 2.0.x
 			if (afixBug350558) this.fixBug350558(aWindow.tabs);
 		}, this);
-		return aState.toSource();
+		return uneval(aState);
 	},
 
 	getFormattedName: function(aTitle, aDate, aFormat)
