@@ -1,82 +1,102 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css" type="text/css"?>
+<?xml-stylesheet href="chrome://sessionmanager/skin/options.css" type="text/css" ?>
 
 <!DOCTYPE prefwindow [
 	<!ENTITY % sessionmanagerDTD SYSTEM "chrome://sessionmanager/locale/sessionmanager.dtd">
 	%sessionmanagerDTD;
 	<!ENTITY % optionsDTD SYSTEM "chrome://sessionmanager/locale/options.dtd">
 	%optionsDTD;
+	<!ENTITY % tabBrowserDTD SYSTEM "chrome://global/locale/tabbrowser.dtd" >
+	%tabBrowserDTD;
+	<!ENTITY % mainDTD SYSTEM "chrome://browser/locale/preferences/main.dtd" >
+	%mainDTD;
 ]>
 
-<prefwindow id="sessionmanagerOptions" title="&options.title;"  
-            xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-            onload="fixSize(); sizeToContent;"
-            windowtype="SessionManager:Options"
-            persist="screenX screenY">
+<prefwindow id="sessionmanagerOptions" title="&options.title;" type="prefwindow"
+						xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+						buttons="accept,cancel,extra1" buttonlabelextra1="&apply.label;"
+						ondialogextra1="savePrefs();"
+						onload="fixSize(); sizeToContent;" ondialogaccept="setStartValue();"
+						windowtype="SessionManager:Options" persist="lastSelected">
 	
-	<prefpane id="SessionManagerOptionsPane">
+	<!-- ************************************** -->
+	<!-- ****** Main Preference Panel ********* -->
+	<!-- ************************************** -->
+		<prefpane id="mainPrefPane" label="&general.caption;">
 		<preferences>
-			<preference id="browser.sessionstore.interval" name="browser.sessionstore.interval" type="int"/>
-			<preference id="browser.sessionstore.postdata" name="browser.sessionstore.postdata" type="int"/>
-			<preference id="browser.sessionstore.privacy_level" name="browser.sessionstore.privacy_level" type="int"/>
-			<preference id="browser.sessionstore.resume_from_crash" name="browser.sessionstore.resume_from_crash" type="bool"/>
+			<preference id="browser.startup.page" name="browser.startup.page" type="int"/>
 			<preference id="extensions.sessionmanager.autosave_session" name="extensions.sessionmanager.autosave_session" type="bool"/>
 			<preference id="extensions.sessionmanager.backup_session" name="extensions.sessionmanager.backup_session" type="int"/>
+			<preference id="extensions.sessionmanager.hide_tools_menu" name="extensions.sessionmanager.hide_tools_menu" type="bool"/>
 			<preference id="extensions.sessionmanager.max_backup_keep" name="extensions.sessionmanager.max_backup_keep" type="int"/>
-			<preference id="extensions.sessionmanager.max_closed_undo" name="extensions.sessionmanager.max_closed_undo" type="int"/>
-			<preference id="browser.sessionstore.max_tabs_undo" name="browser.sessionstore.max_tabs_undo" type="int"/>
+			<preference id="extensions.sessionmanager.max_display" name="extensions.sessionmanager.max_display" type="int"/>
 			<preference id="extensions.sessionmanager.name_format" name="extensions.sessionmanager.name_format" type="string"/>
-			<preference id="extensions.sessionmanager.options_selected_tab" name="extensions.sessionmanager.options_selected_tab" type="int"/>
 			<preference id="extensions.sessionmanager.overwrite" name="extensions.sessionmanager.overwrite" type="bool"/>
 			<preference id="extensions.sessionmanager.reload" name="extensions.sessionmanager.reload" type="bool"/>
 			<preference id="extensions.sessionmanager.resume_session" name="extensions.sessionmanager.resume_session" type="string"/>
-			<preference id="extensions.sessionmanager.save_closed_tabs" name="extensions.sessionmanager.save_closed_tabs" type="int"/>
-			<preference id="extensions.sessionmanager.save_window_list" name="extensions.sessionmanager.save_window_list" type="bool"/>
+			<preference id="extensions.sessionmanager.save_cookies" name="extensions.sessionmanager.save_cookies" type="bool"/>
 			<preference id="extensions.sessionmanager.session_list_order" name="extensions.sessionmanager.session_list_order" type="int"/>
-			<preference id="extensions.sessionmanager.sessions_dir" name="extensions.sessionmanager.sessions_dir" type="string"/>
-			<preference id="extensions.sessionmanager.submenus" name="extensions.sessionmanager.submenus" type="bool"/>
-			<preference id="extensions.sessionmanager.encrypt_sessions" name="extensions.sessionmanager.encrypt_sessions" type="bool"/>
 		</preferences>
-		
-		<stringbundleset id="stringbundleset">
-			<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
-		</stringbundleset>
 
-		<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
-		<script type="application/x-javascript" src="chrome://sessionmanager/content/options.js"/>  
-   		
-		<tabbox id="SessionManagerPrefs" flex="1">
+		<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionconvert.js"/>	
+
+		<tabbox id="generalPrefsTab" flex="1">
 			<tabs>
-				<tab label="&general.caption;"/>
-				<tab label="&undoClose.caption;"/>
-				<tab label="&advanced.caption;"/>
-				<tab label="&sessionstore.caption;"/>
+				<tab label="&startNend.caption;"/>
+				<tab label="&save_and_restore.caption;"/>
+				<tab label="&display.caption;"/>
 			</tabs>
 			<tabpanels>
 				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&startNend.caption;"/>
-						<grid>
-							<columns>
-								<column/>
-								<column/>
-							</columns>
-							<rows>
-								<label value="&resume_sess.label;" accesskey="&resume_sess.accesskey;" control="resume_session"/>
-								<menulist id="resume_session" preference="extensions.sessionmanager.resume_session"/>
-								<separator style="height: 0.5em;" orient="vertical"/>
-								<row align="center">
-									<label value="&backup_sess.label;" accesskey="&backup_sess.accesskey;" control="backup_session"/>
-									<menulist id="backup_session" preference="extensions.sessionmanager.backup_session">
-										<menupopup>
-											<menuitem value="1" label="&backup_session.label1;"/>
-											<menuitem value="0" label="&backup_session.label0;"/>
-											<menuitem value="2" label="&backup_session.label2;"/>
-										</menupopup>
-									</menulist>
-								</row>
-							</rows>
-						</grid>
+						<label value="&resume_sess.label;"/>
+						<radiogroup id="startupOption" oncommand="startupSelect(this.selectedIndex);" orient="horizontal">
+							<radio label="&noSession.label;" accesskey="&noSession.accesskey;"/>
+							<radio label="&promptSession.label;" accesskey="&promptSession.accesskey;"/>
+							<radio label="&selectSession.label;" accesskey="&selectSession.accesskey;"/>
+						</radiogroup>
+						<hbox>
+							<menulist id="browserStartupPage" preference="browser.startup.page">
+								<menupopup>
+									<menuitem label="&startupHomePage.label;" value="1"/>
+									<menuitem label="&startupBlankPage.label;" value="0"/>
+									<menuitem label="&lastpage.label;" value="2"/>
+									<menuitem label="&startupLastSession.label;" value="3"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+						<hbox pack="end">
+							<menulist id="resume_session" preference="extensions.sessionmanager.resume_session">
+								<menupopup>
+									<menuitem value="" label="&noSession.label;"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+						<separator style="height: 1.0em;" orient="vertical"/>
+						<hbox align="center">
+							<label value="&backup_sess.label;" accesskey="&backup_sess.accesskey;" control="backup_session"/>
+							<menulist id="backup_session" preference="extensions.sessionmanager.backup_session">
+								<menupopup>
+									<menuitem value="1" label="&backup_session.label1;"/>
+									<menuitem value="0" label="&backup_session.label0;"/>
+									<menuitem value="2" label="&backup_session.label2;"/>
+								</menupopup>
+							</menulist>
+						</hbox>
+					</groupbox>
+				</tabpanel>
+				<tabpanel orient="vertical">
+					<groupbox>
+						<caption label="&saving.caption;"/>
+						<hbox align="center">
+							<checkbox label="&cookies.label;" accesskey="&cookies.accesskey;" preference="extensions.sessionmanager.save_cookies"/>
+						</hbox>
+						<hbox align="center">
+							<label value="&max_backup.label;" accesskey="&max_backup.accesskey;" control="max_backup_keep"/>
+							<textbox id="max_backup_keep" preference="extensions.sessionmanager.max_backup_keep" size="1" maxlength="5"/>
+						</hbox>
 					</groupbox>
 					<groupbox>
 						<caption label="&restoring.caption;"/>
@@ -87,7 +107,7 @@
 							</columns>
 							<rows>
 								<row>
-									<checkbox label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="extensions.sessionmanager.overwrite"/>
+									<checkbox id="overwrite" label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="extensions.sessionmanager.overwrite"/>
 									<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload"/>
 								</row>
 								<row>
@@ -96,6 +116,8 @@
 							</rows>
 						</grid>
 					</groupbox>
+				</tabpanel>
+				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&sessionList.caption;"/>
 						<hbox align="center">
@@ -109,113 +131,167 @@
 							</menulist>
 						</hbox>
 						<hbox align="center">
-							<label value="&max_backup.label;" accesskey="&max_backup.accesskey;" control="max_backup_keep"/>
-							<textbox id="max_backup_keep" preference="extensions.sessionmanager.max_backup_keep" size="1" maxlength="5"/>
+							<label value="&max_display.label;" accesskey="&max_display.accesskey;" control="max_display"/>
+							<textbox id="max_display" width="30px" preference="extensions.sessionmanager.max_display"/>
 						</hbox>
 					</groupbox>
-				</tabpanel>
-				
-				<tabpanel orient="vertical">
-					<groupbox>
-						<caption label="&windowsNtabs.caption;"/>
-						<grid>
-							<columns>
-								<column/>
-								<column/>
-							</columns>
-							<rows>
-								<row align="center">
-									<label value="&max_closed.label;" accesskey="&max_closed.accesskey;" control="max_closed"/>
-									<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo();"/>
-								</row>
-								<row align="center">
-									<label value="&max_tabs.label;" accesskey="&max_tabs.accesskey;" control="max_tabs"/>
-									<textbox id="max_tabs" preference="browser.sessionstore.max_tabs_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxTabsUndo();"/>
-								</row>
-							</rows>
-						</grid>
-						<checkbox label="&submenu.label;" accesskey="&submenu.accesskey;" preference="extensions.sessionmanager.submenus"/>
-					</groupbox>
-					<groupbox>
-						<caption label="&persistence.caption;"/>
-						<hbox align="center">
-							<label flex="1" style="width: 26em" accesskey="&closed_tabs.accesskey;" control="save_closed_tabs">&closed_tabs.label;</label>
-							<menulist id="save_closed_tabs" preference="extensions.sessionmanager.save_closed_tabs">
-								<menupopup>
-									<menuitem value="1" label="&closed_tabs.label1;"/>
-									<menuitem value="2" label="&closed_tabs.label2;"/>
-									<menuitem value="0" label="&closed_tabs.label0;"/>
-								</menupopup>
-							</menulist>
-						</hbox>
-						<separator style="height: 1.0em;" orient="vertical"/>
-						<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="extensions.sessionmanager.save_window_list"/>
-					</groupbox>
-					<hbox pack="end">
-						<button  pack="end" label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
-					</hbox>
-				</tabpanel>
-				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&name_format.caption;"/>
 						<hbox align="center">
 							<label value="&name_format.label;" accesskey="&name_format.accesskey;" control="name_format"/>
 							<textbox id="name_format" preference="extensions.sessionmanager.name_format"/>
 						</hbox>
-						<description style="width: 5em;">&name_format.desc;</description>
+						<description id="name_describe" style="width: 5em;">&name_format.desc;</description>
 					</groupbox>
-					<groupbox>
-						<caption label="&sessiondir.caption;"/>
-						<description>&sessiondir.desc;</description>
-						<textbox preference="extensions.sessionmanager.sessions_dir" id="sessions_dir" readonly="true"/>
-						<hbox pack="end">
-							<button label="&change_dir.label;" accesskey="&change_dir.accesskey;" oncommand="selectSessionDir();"/>
-							<button label="&default_dir.label;" accesskey="&default_dir.accesskey;" oncommand="defaultSessionDir();"/>
-						</hbox>
-					</groupbox>
-					<groupbox>
-						<caption label="&encrypt.caption;"/>
-						<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" preference="extensions.sessionmanager.encrypt_sessions" 
-						          oncommand="this.checked = checkEncryption(this.checked);"/>
-						<separator style="height: 0.5em;" orient="vertical"/>
-						<description style="width: 26em; color:red;" class="indent">&encrypt.desc;</description>
-					</groupbox>
-				</tabpanel>
-				<tabpanel orient="vertical">
-					<groupbox>
-						<caption label="&service.caption;"/>
-						<checkbox label="&crashrecovery.label;" accesskey="&crashrecovery.accesskey;" preference="browser.sessionstore.resume_from_crash"/>
-						<separator style="height: 1.0em;" orient="vertical"/>
-						<description style="width: 5em;" class="header">&service.description;</description>
-						<grid>
-							<columns>
-								<column/>
-								<column/>
-							</columns>
-							<rows>
-								<row align="center">
-									<label value="&interval.label;" accesskey="&interval.accesskey;" control="interval"/>
-									<textbox id="interval" preference="browser.sessionstore.interval" size="1" onsyncfrompreference="return readInterval();" onsynctopreference="return writeInterval();"/>
-								</row>
-								<row align="center">
-									<label value="&postdata.label;" accesskey="&postdata.accesskey;" control="postdata"/>
-									<textbox id="postdata" preference="browser.sessionstore.postdata" size="1"/>
-								</row>
-							</rows>
-						</grid>						  						
-						<label value="&privacy.label;" accesskey="&privacy.accesskey;" control="privacy_level"/>
-						<hbox pack="end">
-							<menulist id="privacy_level" preference="browser.sessionstore.privacy_level" onsyncfrompreference="return readPrivacyLevel();">
-								<menupopup>
-									<menuitem value="0" label="&privacy.level0;"/>
-									<menuitem value="1" label="&privacy.level1;"/>
-									<menuitem value="2" label="&privacy.level2;"/>
-								</menupopup>
-							</menulist>
-						</hbox>
-					</groupbox>
+					<checkbox id="hide_tools_menu" label="&hide_tools_menu.label;" 
+										accesskey="&hide_tools_menu.accesskey;" preference="extensions.sessionmanager.hide_tools_menu"/>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
+		<groupbox>
+			<caption label="&sessionImport.caption;"/>
+			<hbox>
+				<button label="&importTMP.label;" accesskey="&importTMP.accesskey;" oncommand="gConvertTMPSession.init();"/>
+				<button label="&importSS.label;" accesskey="&importSS.accesskey;" oncommand="gSessionSaverConverter.init();"/>
+			</hbox>
+		</groupbox>
 	</prefpane>
+	
+	<!-- ******************************************* -->
+	<!-- ****** UndoClose Preference Panel ********* -->
+	<!-- ******************************************* -->
+		<prefpane id="undoclosePrefPane" label="&undoClose.caption;">
+		<preferences>
+			<preference id="browser.sessionstore.max_tabs_undo" name="browser.sessionstore.max_tabs_undo" type="int"/>
+			<preference id="extensions.sessionmanager.click_restore_tab" name="extensions.sessionmanager.click_restore_tab" type="bool"/>
+			<preference id="extensions.sessionmanager.max_closed_undo" name="extensions.sessionmanager.max_closed_undo" type="int"/>
+			<preference id="extensions.sessionmanager.save_closed_tabs" name="extensions.sessionmanager.save_closed_tabs" type="int"/>
+			<preference id="extensions.sessionmanager.save_window_list" name="extensions.sessionmanager.save_window_list" type="bool"/>
+			<preference id="extensions.sessionmanager.submenus" name="extensions.sessionmanager.submenus" type="bool"/>
+		</preferences>
+
+		<groupbox>
+			<caption label="&windowsNtabs.caption;"/>
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+				</columns>
+				<rows>
+					<row align="center">
+						<label value="&max_closed.label;" accesskey="&max_closed.accesskey;" control="max_closed"/>
+						<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo();"/>
+					</row>
+					<row align="center">
+						<label value="&max_tabs.label;" accesskey="&max_tabs.accesskey;" control="max_tabs"/>
+						<textbox id="max_tabs" preference="browser.sessionstore.max_tabs_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxTabsUndo();"/>
+					</row>
+				</rows>
+			</grid>
+			<checkbox label="&submenu.label;" accesskey="&submenu.accesskey;" preference="extensions.sessionmanager.submenus"/>
+			<checkbox id="midClickPref" label="&middleclick.label;" accesskey="&middleclick.accesskey;" preference="extensions.sessionmanager.click_restore_tab"/>
+		</groupbox>
+		<groupbox>
+			<caption label="&persistence.caption;"/>
+			<hbox align="center">
+				<label value="&closed_tabs.label;" accesskey="&closed_tabs.accesskey;" control="save_closed_tabs"/>
+				<menulist id="save_closed_tabs" preference="extensions.sessionmanager.save_closed_tabs">
+					<menupopup>
+						<menuitem value="1" label="&closed_tabs.label1;"/>
+						<menuitem value="2" label="&closed_tabs.label2;"/>
+						<menuitem value="0" label="&closed_tabs.label0;"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+			<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="extensions.sessionmanager.save_window_list"/>
+		</groupbox>
+		<hbox pack="end">
+			<button	pack="end" label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
+		</hbox>
+	</prefpane>
+
+	<!-- ****************************************** -->
+	<!-- ****** Advanced Preference Panel ********* -->
+	<!-- ****************************************** -->
+		<prefpane id="advancedPrefPane" label="&advanced.caption;">
+		<preferences>
+			<preference id="extensions.sessionmanager.sessions_dir" name="extensions.sessionmanager.sessions_dir" type="string"/>
+			<preference id="extensions.sessionmanager.encrypt_sessions" name="extensions.sessionmanager.encrypt_sessions" type="bool"/>
+		</preferences>
+
+		<groupbox>
+			<caption label="&sessiondir.caption;"/>
+			<description>&sessiondir.desc;</description>
+			<textbox preference="extensions.sessionmanager.sessions_dir" id="sessions_dir" readonly="true"/>
+			<hbox pack="end">
+				<button label="&change_dir.label;" accesskey="&change_dir.accesskey;" oncommand="selectSessionDir();"/>
+				<button label="&default_dir.label;" accesskey="&default_dir.accesskey;" oncommand="defaultSessionDir();"/>
+			</hbox>
+		</groupbox>
+		<groupbox>
+			<caption label="&encrypt.caption;"/>
+			<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" preference="extensions.sessionmanager.encrypt_sessions" 
+								oncommand="this.checked = checkEncryption(this.checked);"/>
+			<separator style="height: 0.5em;" orient="vertical"/>
+			<description style="width: 26em; color:red;" class="indent">&encrypt.desc;</description>
+		</groupbox>
+	</prefpane>
+
+	<!-- ********************************************** -->
+	<!-- ****** SessionStore Preference Panel ********* -->
+	<!-- ********************************************** -->
+		<prefpane id="sessionstorePrefPane" label="&sessionstore.caption;">
+		<preferences>
+			<preference id="browser.sessionstore.interval" name="browser.sessionstore.interval" type="int"/>
+			<preference id="browser.sessionstore.postdata" name="browser.sessionstore.postdata" type="int"/>
+			<preference id="browser.sessionstore.privacy_level" name="browser.sessionstore.privacy_level" type="int"/>
+			<preference id="browser.sessionstore.resume_from_crash" name="browser.sessionstore.resume_from_crash" type="bool"/>
+		</preferences>
+
+		<groupbox>
+			<caption label="&service.caption;"/>
+			<checkbox label="&crashrecovery.label;" accesskey="&crashrecovery.accesskey;" preference="browser.sessionstore.resume_from_crash"/>
+			<separator style="height: 1.0em;" orient="vertical"/>
+			<description style="width: 5em;" class="header">&service.description;</description>
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+				</columns>
+				<rows>
+					<row align="center">
+						<label value="&interval.label;" accesskey="&interval.accesskey;" control="interval"/>
+						<textbox id="interval" preference="browser.sessionstore.interval" size="1" onsyncfrompreference="return readInterval();" onsynctopreference="return writeInterval();"/>
+					</row>
+					<row align="center">
+						<label value="&postdata.label;" accesskey="&postdata.accesskey;" control="postdata"/>
+						<textbox id="postdata" preference="browser.sessionstore.postdata" size="1"/>
+					</row>
+				</rows>
+			</grid>
+			<label value="&privacy.label;" accesskey="&privacy.accesskey;" control="privacy_level"/>
+			<hbox pack="end">
+				<menulist id="privacy_level" preference="browser.sessionstore.privacy_level" onsyncfrompreference="return readPrivacyLevel();">
+					<menupopup>
+						<menuitem value="0" label="&privacy.level0;"/>
+						<menuitem value="1" label="&privacy.level1;"/>
+						<menuitem value="2" label="&privacy.level2;"/>
+					</menupopup>
+				</menulist>
+			</hbox>
+		</groupbox>
+	</prefpane>
+
+	<stringbundleset id="stringbundleset">
+		<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
+	</stringbundleset>
+
+	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
+	<script type="application/x-javascript" src="chrome://sessionmanager/content/options.js"/>
+
+	<preferences>
+		<preference id="extensions.sessionmanager.options_selected_tab" name="extensions.sessionmanager.options_selected_tab" type="int"/>
+		<preference id="extensions.sessionmanager.startup" name="extensions.sessionmanager.startup" type="int"/>
+	</preferences>
+
 </prefwindow>
