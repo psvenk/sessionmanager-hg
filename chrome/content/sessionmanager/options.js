@@ -4,8 +4,6 @@ gSessionManager.onLoad = function() {
 	
 	var resume_session = _("resume_session");
 	var sessions = this.getSessions(true);
-	resume_session.appendItem(this._string("startup_none"), "", "");
-	resume_session.appendItem(this._string("startup_prompt"), this.mPromptSessionName, "");
 	if (!sessions.some(function(aSession) { return aSession.fileName == this.mBackupSessionName; }, this))
 	{
 		resume_session.appendItem(this._string("startup_resume"), this.mBackupSessionName, "");
@@ -18,15 +16,38 @@ gSessionManager.onLoad = function() {
 	}, this);
 	resume_session.value = _("extensions.sessionmanager.resume_session").value;
 	
+	// hide option to hide toolbar menu if not Firefox since SeaMonkey can't unhide it
+	if (!/(BonEcho|Minefield|Flock|Firefox|Netscape)/.test(navigator.userAgent))
+		document.getElementById("hide_tools_menu").setAttribute("hidden", "true");
+	
 	// current load session no longer there
 	if (resume_session.selectedIndex == -1) {
-		resume_session.value = "";
+		resume_session.value ="";
+		_("extensions.sessionmanager.resume_session").valueFromPreferences = resume_session.value;
+		// change option to none if select session was selected
+		if (_("startupOption").selectedIndex==2) {
+			_("startupOption").selectedIndex = 0;
+			_("extensions.sessionmanager.startup").valueFromPreferences = _("startupOption").selectedIndex;
+		}
 	}
 	
-	_("SessionManagerPrefs").selectedIndex = _("extensions.sessionmanager.options_selected_tab").value;
+	// Restore selected indexes and hide/show menus for startup options
+	_("generalPrefsTab").selectedIndex = _("extensions.sessionmanager.options_selected_tab").valueFromPreferences;
+	startupSelect(_("startupOption").selectedIndex = _("extensions.sessionmanager.startup").valueFromPreferences);
+	
+	// Hide mid-click preference if Tab Mix Plus or Tab Clicking Options is enabled
+	var browser = this.mWindowMediator.getMostRecentWindow("navigator:browser");
+	if (browser) {
+		if ((typeof(browser.tabClicking) != "undefined") || (typeof(browser.TM_checkClick) != "undefined")) {
+			_("midClickPref").style.visibility = "collapse";
+		}
+		
+		if (browser.gSingleWindowMode) _("overwrite").label = gSessionManager._string("overwrite_tabs");
+	}
 };
+
 gSessionManager.onUnload = function() {
-	_("extensions.sessionmanager.options_selected_tab").valueFromPreferences = _("SessionManagerPrefs").selectedIndex;
+	_("extensions.sessionmanager.options_selected_tab").valueFromPreferences = _("generalPrefsTab").selectedIndex;
 };
 
 var _disable = gSessionManager.setDisabled;
@@ -112,8 +133,30 @@ function checkEncryption(aState) {
 	return aState;
 }
 
-// For whatever reason the prefpane won't be sized correctly unless the tabbox's style.height value is explicitly set
-// so just set it to it's current computed height
+// For whatever reason, even though the height is calculated correction, the prefpane won't be sized correctly 
+// unless the description elements' style.height values are explicitly set so just set them to their current computed heights.
 function fixSize() {
-	_("SessionManagerPrefs").style.height=document.defaultView.getComputedStyle(_("SessionManagerPrefs"), null).getPropertyValue("height");
+	var descriptions = document.getElementsByTagName('description'); 
+	for (var i=0; i<descriptions.length; i++) {
+		descriptions[i].style.height=document.defaultView.getComputedStyle(descriptions[i], null).getPropertyValue("height");
+	}
 }
+
+function startupSelect(index) {
+	// hide/display corresponding menus	
+	_("browserStartupPage").style.visibility = (index != 0)?"collapse":"visible";
+	_("resume_session").style.visibility = (index != 2)?"collapse":"visible";
+	if (index == 1) _("resume_session").style.visibility = "hidden";
+}
+
+function setStartValue() {
+	_("extensions.sessionmanager.startup").valueFromPreferences = _("startupOption").selectedIndex;
+}
+
+function savePrefs() {
+	var prefs = document.getElementsByTagName('preference');
+	for (var i=0; i<prefs.length; i++) {
+		prefs[i].valueFromPreferences = prefs[i].value;
+	}
+	setStartValue();
+}	
