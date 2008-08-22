@@ -89,8 +89,8 @@ gSessionManager.onLoad = function() {
 			else label = aSession.name;
 			var item = gSessionList.appendItem(label, aSession.fileName);
 			item.setAttribute("autosave", aSession.autosave);
-			item.setAttribute("session_loaded", gBannedNames[aSession.name.trim().toLowerCase()]);
-			if (((sessions.latestName == aSession.name) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) item.setAttribute("latest",true);
+			item.setAttribute("session_loaded", gBannedNames[aSession.name.trim().toLowerCase()] || null);
+			if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) item.setAttribute("latest",true);
 			if (aSession.fileName == gParams.GetString(3))
 			{
 				setTimeout(function(aItem) { gSessionList.selectItem(aItem); }, 0, item);
