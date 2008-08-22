@@ -492,7 +492,9 @@ const SM_VERSION = "0.6.1.16";
 			aPopup.removeChild(item);
 		}
 		
-		while (backupMenu.menupopup.childNodes.length) backupMenu.menupopup.removeChild(backupMenu.menupopup.childNodes[0]);
+		// Firefox 2.0 does not have a menupopup element
+		var backupPopup = backupMenu.menupopup || backupMenu.lastChild; 
+		while (backupPopup.childNodes.length) backupPopup.removeChild(backupPopup.childNodes[0]);
 		
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
 		save.hidden = (this.getBrowserWindows().length == 1);
@@ -519,7 +521,7 @@ const SM_VERSION = "0.6.1.16";
 			if (aSession.name == this.mPref__autosave_name) menuitem.setAttribute("disabled", true);
 			if (aSession.backup) {
 				backupCount++;
-				backupMenu.menupopup.appendChild(menuitem);
+				backupPopup.appendChild(menuitem);
 			}
 			else {
 				aPopup.insertBefore(menuitem, separator);
