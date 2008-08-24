@@ -567,14 +567,6 @@ const SM_VERSION = "0.6.1.16";
 				}
 			}
 		}
-		
-		// in case the popup belongs to a collapsed element
-		aPopup.style.visibility = "visible";
-	},
-
-	uninit: function(aPopup)
-	{
-		aPopup.style.visibility = "";
 	},
 
 	save: function(aName, aFileName, aOneWindow)
@@ -971,18 +963,9 @@ const SM_VERSION = "0.6.1.16";
 				this.updateToolbarButton(false);
 				setTimeout(function(aPopup) { aPopup.parentNode.open = false; }, 0, aPopup);
 			}
-			else
-			{
-				aPopup.style.visibility = "visible";
-			}
 		}
 		
 		return showPopup;
-	},
-
-	uninitUndo: function(aPopup)
-	{
-		aPopup.style.visibility = "";
 	},
 
 	undoCloseWindow: function(aIx, aMode)
@@ -1018,6 +1001,8 @@ const SM_VERSION = "0.6.1.16";
 		if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
 		{
 			this.removeUndoMenuItem(aEvent.originalTarget);
+			aEvent.preventDefault();
+			aEvent.stopPropagation();
 		}
 	},
 	
@@ -1111,6 +1096,7 @@ const SM_VERSION = "0.6.1.16";
 	},
 	
 /* ........ Right click menu handlers .............. */
+// Firefox 2.0 does not close parent menu when context menu closes so force it closed
 
 	session_popupInit: function(aPopup) {
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
@@ -1119,6 +1105,7 @@ const SM_VERSION = "0.6.1.16";
 	},
 
 	session_load: function(aReplace) {
+		if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		var oldOverwrite = this.mPref_overwrite;
 		if (aReplace) {
@@ -1135,6 +1122,7 @@ const SM_VERSION = "0.6.1.16";
 	},
 	
 	session_replace: function(aWindow) {
+		if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		if (aWindow) {
 			this.saveWindow(this.mSessionCache[session].name, session);
@@ -1145,17 +1133,21 @@ const SM_VERSION = "0.6.1.16";
 	},
 	
 	session_rename: function() {
+		if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.rename(session);
 	},
 	
 	session_remove: function() {
 		var session = document.popupNode.getAttribute("filename");
-		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm")))
+		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm"))) {
+			if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
 			this.remove(session);
+		}
 	},
 	
 	session_setStartup: function() {
+		if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.setPref("resume_session", session);
 	},
