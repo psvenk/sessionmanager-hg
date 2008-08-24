@@ -13,13 +13,13 @@
 	<!-- Menu in toolbar -->
 	<toolbarpalette id="BrowserToolbarPalette"> <!-- Firefox (toolbar) -->
 		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" oncommand="gSessionManager.save(null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.tooltip;" contextmenu="">
-			<menupopup onpopupshowing="gSessionManager.init(this, true);" onpopuphiding="gSessionManager.uninit(this);" onmousemove="event.stopPropagation();" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
+			<menupopup onpopupshowing="gSessionManager.init(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
 				<menuitem _id="save" label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
 				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
 				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
 				<menuseparator _id="backup-separator"/>
-				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;" onpopupshowing="event.stopPropagation();" onpopuphiding="event.stopPropagation();">
+				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
 					<menupopup>
 					</menupopup>
 				</menu>
@@ -31,7 +31,7 @@
 				<menuseparator _id="options-separator"/>
 				<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="gSessionManager.openOptions();"/>
 				<menuseparator/>
-				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;" onpopupshowing="event.stopPropagation();" onpopuphiding="event.stopPropagation();">
+				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
 					<menupopup>
 						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 						<menuseparator _id="closed-separator"/>
@@ -43,8 +43,10 @@
 			</menupopup>
 		</toolbarbutton>
 		
-		<toolbarbutton id="sessionmanager-undo" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&toolbar.undo.label;" oncommand="if (event.shiftKey) gSessionManager.undoCloseWindow(); else if (gSessionManager.mSessionStore().getClosedTabCount(window)) undoCloseTab(); else this.open = true;" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.undo.tooltip;" contextmenu="">
-			<menupopup onpopupshowing="gSessionManager.initUndo(this, true);" onpopuphiding="gSessionManager.uninitUndo(this);" onmousemove="event.stopPropagation();" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
+		<toolbarbutton id="sessionmanager-undo" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&toolbar.undo.label;" 
+		               oncommand="if (event.shiftKey) gSessionManager.undoCloseWindow(); else if (gSessionManager.mSessionStore().getClosedTabCount(window)) undoCloseTab(); else this.open = true;" 
+		               onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.undo.tooltip;" contextmenu="">
+			<menupopup onpopupshowing="gSessionManager.initUndo(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
 				<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 				<menuseparator _id="closed-separator"/>
 				<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
@@ -57,13 +59,13 @@
 	<!-- Menu in Tools Menu -->
 	<menupopup id="menu_ToolsPopup"> <!-- Firefox -->
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="devToolsSeparator">
-			<menupopup onpopupshowing="gSessionManager.init(this);" onpopuphiding="gSessionManager.uninit(this);">
+			<menupopup onpopupshowing="gSessionManager.init(this);">
 				<menuitem _id="save" label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
 				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
 				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
 				<menuseparator _id="backup-separator"/>
-				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;" onpopupshowing="event.stopPropagation();" onpopuphiding="event.stopPropagation();">
+				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
 					<menupopup>
 					</menupopup>
 				</menu>
@@ -75,7 +77,7 @@
 				<menuseparator _id="options-separator"/>
 				<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="gSessionManager.openOptions();"/>
 				<menuseparator/>
-				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;" onpopupshowing="event.stopPropagation();" onpopuphiding="event.stopPropagation();">
+				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
 					<menupopup>
 						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 						<menuseparator _id="closed-separator"/>
@@ -90,13 +92,13 @@
 	
 	<menupopup id="taskPopup"> <!-- SeaMonkey -->
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="navBeginGlobalItems">
-			<menupopup onpopupshowing="gSessionManager.init(this);" onpopuphiding="gSessionManager.uninit(this);">
+			<menupopup onpopupshowing="gSessionManager.init(this);">
 				<menuitem _id="save" label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
 				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
 				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
 				<menuseparator _id="backup-separator"/>
-				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;" onpopupshowing="event.stopPropagation();" onpopuphiding="event.stopPropagation();">
+				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
 					<menupopup>
 					</menupopup>
 				</menu>
@@ -110,7 +112,7 @@
 				<menuitem _id="reload" type="checkbox" label="&reload.label;" accesskey="&reload.accesskey;" oncommand="gSessionManager.toggleReload();"/>
 				<menuitem _id="overwrite" type="checkbox" label="&overwrite.label;" accesskey="&overwrite.accesskey;" oncommand="gSessionManager.toggleOverwrite();"/>
 				<menuseparator/>
-				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;" onpopupshowing="event.stopPropagation();" onpopuphiding="event.stopPropagation();">
+				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
 					<menupopup>
 						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 						<menuseparator _id="closed-separator"/>
@@ -123,7 +125,7 @@
 		</menu>
 	</menupopup>
 	
-	<popup id="sessionmanager-ContextMenu" onpopupshowing="gSessionManager.session_popupInit(this);">
+	<menupopup id="sessionmanager-ContextMenu" onpopupshowing="gSessionManager.session_popupInit(this);">
 		<menuitem label="&load_replace.label;" accesskey="&load_replace.accesskey;" oncommand="gSessionManager.session_load(true);"/>
 		<menuitem label="&load_append.label;" accesskey="&load_append.accesskey;" oncommand="gSessionManager.session_load(false);"/>
 		<menuseparator/>
@@ -134,20 +136,20 @@
 		<menuitem label="&remove_one.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.session_remove();"/>
 		<menuseparator/>
 		<menuitem label="&set_startup.label;" accesskey="&set_startup.accesskey;" oncommand="gSessionManager.session_setStartup();"/>
-	</popup>
+	</menupopup>
 	
-	<popup id="sessionmanager-undo-ContextMenu">
+	<menupopup id="sessionmanager-undo-ContextMenu">
 		<menuitem label="&remove_item.label;" accesskey="&remove_item.accesskey;" oncommand="gSessionManager.removeUndoMenuItem(document.popupNode);"/>
-	</popup>
+	</menupopup>
 	
 	<popupset id="mainPopupSet"> <!-- Firefox -->
-		<popup id="sessionmanager-ContextMenu"/>
-		<popup id="sessionmanager-undo-ContextMenu"/>
+		<menupopup id="sessionmanager-ContextMenu"/>
+		<menupopup id="sessionmanager-undo-ContextMenu"/>
 	</popupset>
 	
 	<popupset id="taskPopup"> <!-- SeaMonkey -->
-		<popup id="sessionmanager-ContextMenu"/>
-		<popup id="sessionmanager-undo-ContextMenu"/>
+		<menupopup id="sessionmanager-ContextMenu"/>
+		<menupopup id="sessionmanager-undo-ContextMenu"/>
 	</popupset>
 
 	<!-- Sidebar Menu --><!--
