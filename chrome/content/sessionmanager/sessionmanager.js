@@ -504,7 +504,7 @@ const SM_VERSION = "0.6.1.16";
 		var count = 0;
 		var backupCount = 0;
 		sessions.forEach(function(aSession, aIx) {
-			if (!aSession.backup && (!count++ >= this.mPref_max_display)) return;
+			if (!aSession.backup && (count++ >= this.mPref_max_display)) return;
 	
 			var key = aSession.backup?"":(count < 10)?count:(count == 10)?"0":"";
 			var menuitem = document.createElement("menuitem");
