@@ -17,7 +17,7 @@
 						xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 						buttons="accept,cancel,extra1" buttonlabelextra1="&apply.label;"
 						ondialogextra1="savePrefs();"
-						onload="fixSize(); sizeToContent;" ondialogaccept="setStartValue();"
+						onload="fixSize();" ondialogaccept="setStartValue();"
 						windowtype="SessionManager:Options" persist="lastSelected">
 	
 	<!-- ************************************** -->
