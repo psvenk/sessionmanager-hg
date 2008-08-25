@@ -2051,8 +2051,11 @@ const SM_VERSION = "0.6.1.16";
 	{
 		if (aNode.childNodes) {
 			for (var i in aNode.childNodes) {
-				if (aNode.childNodes[i].setAttribute) aNode.childNodes[i].setAttribute("tooltiptext", "");
-				this.fixBug374288(aNode.childNodes[i]);
+				var child = aNode.childNodes[i];
+				if (child.getAttribute && !child.getAttribute("tooltiptext")) {
+					child.setAttribute("tooltiptext", "");
+				}
+				this.fixBug374288(child);
 			}
 		}
 	},
