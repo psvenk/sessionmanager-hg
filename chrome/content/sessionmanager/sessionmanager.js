@@ -565,6 +565,11 @@ const SM_VERSION = "0.6.1.16";
 				}
 			}
 		}
+		
+		// Bug copies tooltiptext to children so specifically set tooltiptext for all children
+		if (aIsToolbar) {
+			this.fixBug374288(aPopup.parentNode);
+		}
 	},
 
 	save: function(aName, aFileName, aOneWindow)
@@ -961,8 +966,12 @@ const SM_VERSION = "0.6.1.16";
 				this.updateToolbarButton(false);
 				setTimeout(function(aPopup) { aPopup.parentNode.open = false; }, 0, aPopup);
 			}
+			else {
+				// Bug copies tooltiptext to children so specifically set tooltiptext for all children
+				this.fixBug374288(aPopup.parentNode);
+			}
 		}
-		
+
 		return showPopup;
 	},
 
@@ -2034,6 +2043,19 @@ const SM_VERSION = "0.6.1.16";
 	},
 
 /* ........ Miscellaneous Enhancements .............. */
+
+	// Bug 374288 causes all elements that don't have a specified tooltip or tooltiptext to inherit their
+	// ancestors tooltip/tooltiptext.  To work around this set a blank tooltiptext for all descendents of aNode.
+	//
+	fixBug374288: function(aNode)
+	{
+		if (aNode.childNodes) {
+			for (var i in aNode.childNodes) {
+				if (aNode.childNodes[i].setAttribute) aNode.childNodes[i].setAttribute("tooltiptext", "");
+				this.fixBug374288(aNode.childNodes[i]);
+			}
+		}
+	},
 
 	// Called to handle clearing of private data (stored sessions) when the toolbar item is selected
 	// and when the clear now button is pressed in the privacy options pane.  If the option to promptOnSanitize
