@@ -16,8 +16,8 @@
 <prefwindow id="sessionmanagerOptions" title="&options.title;" type="prefwindow"
 						xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 						buttons="accept,cancel,extra1" buttonlabelextra1="&apply.label;"
-						ondialogextra1="savePrefs();"
-						onload="fixSize();" ondialogaccept="setStartValue();"
+						ondialogextra1="savePrefs();" onchange="enableApply();"
+						onload="onLoad();" ondialogaccept="setStartValue();"
 						windowtype="SessionManager:Options" persist="lastSelected">
 	
 	<!-- ************************************** -->

@@ -133,13 +133,16 @@ function checkEncryption(aState) {
 	return aState;
 }
 
-// For whatever reason, even though the height is calculated correction, the prefpane won't be sized correctly 
-// unless the description elements' style.height values are explicitly set so just set them to their current computed heights.
-function fixSize() {
+function onLoad() {
+	// For whatever reason, even though the height is calculated correction, the prefpane won't be sized correctly 
+	// unless the description elements' style.height values are explicitly set so just set them to their current computed heights.
 	var descriptions = document.getElementsByTagName('description'); 
 	for (var i=0; i<descriptions.length; i++) {
 		descriptions[i].style.height=document.defaultView.getComputedStyle(descriptions[i], null).getPropertyValue("height");
 	}
+	
+	// Disable Apply Button by default
+	document.getElementById("sessionmanagerOptions").getButton("extra1").disabled = true;
 }
 
 function startupSelect(index) {
@@ -159,4 +162,11 @@ function savePrefs() {
 		prefs[i].valueFromPreferences = prefs[i].value;
 	}
 	setStartValue();
+	
+	// Disable Apply Button
+	document.getElementById("sessionmanagerOptions").getButton("extra1").disabled = true;
 }	
+
+function enableApply() {
+	document.getElementById("sessionmanagerOptions").getButton("extra1").disabled = false;
+}
