@@ -1,5 +1,3 @@
-const FF3 = "1.9";
-const FF3_1 = "1.9.1";
 const SM_VERSION = "0.6.1.16";
 
 /*const*/ var gSessionManager = {
@@ -94,7 +92,7 @@ const SM_VERSION = "0.6.1.16";
 		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
 		// enabled and presumably anyone installing Session Manager actually wants to use it. 
 		// This preference no longer exists as of Firefox 3.1 so don't set it, if there is no default value
-		if (this.mAppVersion < FF3_1) {
+		if (this.mAppVersion < "1.9.1") {
 			if (!this.getPref("browser.sessionstore.enabled", true, true)) {
 				this.setPref("browser.sessionstore.enabled", true, true);
 			}
@@ -119,7 +117,7 @@ const SM_VERSION = "0.6.1.16";
 		this.mObserverService.addObserver(this, "quit-application", false);
 		this.mObserverService.addObserver(this, "sessionmanager-list-update", false);
 		// The following is needed to handle extensions who issue bad restarts in Firefox 2.0
-		if (this.mAppVersion < FF3) this.mObserverService.addObserver(this, "quit-application-requested", false);
+		if (this.mAppVersion < "1.9") this.mObserverService.addObserver(this, "quit-application-requested", false);
 		
 		this.mPref_autosave_session = this.getPref("autosave_session", true);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
@@ -179,7 +177,7 @@ const SM_VERSION = "0.6.1.16";
 		this.mSessionStore().persistTabAttribute("image");
 		
 		// Workaround for bug 360408 in Firefox 2.0, remove when fixed and uncomment call to onWindowClose in onUnload
-		if (this.mAppVersion < FF3) eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
+		if (this.mAppVersion < "1.9") eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
 		
 		// Have Tab Mix Plus call our function to update our toolbar button.
 		if (gBrowser.undoRemoveTab)
@@ -280,7 +278,7 @@ const SM_VERSION = "0.6.1.16";
 		if (numWindows != 0) this.mObserverService.removeObserver(this, "quit-application");
 
 		// Only do the following in Firefox 3.0 and above where bug 360408 is fixed.
-		if (this.mAppVersion >= FF3) this.onWindowClose();
+		if (this.mAppVersion >= "1.9") this.onWindowClose();
 				
 		if (this.mPref__running && numWindows == 0)
 		{
@@ -735,7 +733,7 @@ const SM_VERSION = "0.6.1.16";
 				if (aWindow != window) { 
 					aWindow.gSessionManager.mPref__stopping = true; 
 					// If not Firefox 3 call onWindowClose to save current window session since it isn't done in FF2
-					if (this.mAppVersion < FF3) aWindow.gSessionManager.onWindowClose();
+					if (this.mAppVersion < "1.9") aWindow.gSessionManager.onWindowClose();
 				}
 			});
 		}
@@ -921,7 +919,7 @@ const SM_VERSION = "0.6.1.16";
 		var closedTabs = this.mSessionStore().getClosedTabData(window);
 		var mClosedTabs = [];
 		closedTabs = eval(closedTabs);
-		if (this.mAppVersion < FF3) this.fixBug350558(closedTabs);
+		if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
 								url:aValue.state.entries[aValue.state.entries.length - 1].url }
@@ -1037,7 +1035,7 @@ const SM_VERSION = "0.6.1.16";
 				// get closed-tabs from nsSessionStore
 				var closedTabs = eval("(" + this.mSessionStore().getClosedTabData(window) + ")");
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
-				if (this.mAppVersion < FF3) this.fixBug350558(closedTabs);
+				if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 				// purge closed tab at aIndex
 				closedTabs.splice(aIx, 1);
 				state.windows[0]._closedTabs = closedTabs;
@@ -1105,7 +1103,7 @@ const SM_VERSION = "0.6.1.16";
 	},
 
 	session_load: function(aReplace) {
-		if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
+		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		var oldOverwrite = this.mPref_overwrite;
 		if (aReplace) {
@@ -1122,7 +1120,7 @@ const SM_VERSION = "0.6.1.16";
 	},
 	
 	session_replace: function(aWindow) {
-		if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
+		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		if (aWindow) {
 			this.saveWindow(this.mSessionCache[session].name, session);
@@ -1133,7 +1131,7 @@ const SM_VERSION = "0.6.1.16";
 	},
 	
 	session_rename: function() {
-		if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
+		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.rename(session);
 	},
@@ -1141,13 +1139,13 @@ const SM_VERSION = "0.6.1.16";
 	session_remove: function() {
 		var session = document.popupNode.getAttribute("filename");
 		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm"))) {
-			if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
+			if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
 			this.remove(session);
 		}
 	},
 	
 	session_setStartup: function() {
-		if (this.mAppVersion < FF3) document.popupNode.parentNode.hidePopup();
+		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.setPref("resume_session", session);
 	},
@@ -2078,7 +2076,7 @@ const SM_VERSION = "0.6.1.16";
 	{
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called, in FF2 SessionStart doesn't set this value
-		var sessionstart = (this.mAppVersion >= FF3)?(this.mSessionStartupValue._sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
+		var sessionstart = (this.mAppVersion >= "1.9")?(this.mSessionStartupValue._sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
 		                              :this.getPref("browser.sessionstore.resume_session_once", false, true)
 		var recoverOnly = this.mPref__running || sessionstart || !window.arguments || (window.arguments[0] == null);
 		var no_reload = this.getPref("_no_reload");
@@ -2214,7 +2212,7 @@ const SM_VERSION = "0.6.1.16";
 	{
 		var state = (aOneWindow)?this.mSessionStore().getWindowState(window):this.mSessionStore().getBrowserState();
 		
-		state = this.handleTabUndoData(state, aNoUndoData, true, (this.mAppVersion < FF3));
+		state = this.handleTabUndoData(state, aNoUndoData, true, (this.mAppVersion < "1.9"));
 		var count = this.getCount(state);
 		
 		// encrypt state if encryption preference set
