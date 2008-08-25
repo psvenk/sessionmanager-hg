@@ -52,7 +52,7 @@
 					<groupbox>
 						<caption label="&startNend.caption;"/>
 						<label value="&resume_sess.label;"/>
-						<radiogroup id="startupOption" oncommand="startupSelect(this.selectedIndex);" orient="horizontal">
+						<radiogroup id="startupOption" oncommand="enableApply(); startupSelect(this.selectedIndex);" orient="horizontal">
 							<radio label="&noSession.label;" accesskey="&noSession.accesskey;"/>
 							<radio label="&promptSession.label;" accesskey="&promptSession.accesskey;"/>
 							<radio label="&selectSession.label;" accesskey="&selectSession.accesskey;"/>
