@@ -1154,6 +1154,15 @@ const SM_VERSION = "0.6.1.16";
 	
 /* ........ User Prompts .............. */
 
+	openSessionExplorer: function() {
+		this.openWindow(
+			"chrome://sessionmanager/content/sessionexplorer.xul",
+			"chrome,titlebar,centerscreen,modal,resizable,dialog=yes",
+			{},
+			(this.mFullyLoaded)?window:null
+		);
+	},
+
 	prompt: function(aSessionLabel, aAcceptLabel, aValues, aTextLabel, aAcceptExistingLabel)
 	{
 		var params = Components.classes["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Components.interfaces.nsIDialogParamBlock);

@@ -58,6 +58,13 @@
 	
 	<!-- Menu in Tools Menu -->
 	<menupopup id="menu_ToolsPopup"> <!-- Firefox -->
+		<!--menuitem
+			id="sessionexplorer-item"
+			label="Session Explorer"
+			accesskey="E"
+			oncommand="gSessionManager.openSessionExplorer()"
+			insertbefore="devToolsSeparator"
+		/-->
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="devToolsSeparator">
 			<menupopup onpopupshowing="gSessionManager.init(this);">
 				<menuitem _id="save" label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
