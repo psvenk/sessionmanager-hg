@@ -1157,6 +1157,7 @@ const SM_VERSION = "0.6.1.16";
 		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.setPref("resume_session", session);
+		this.setPref("startup", 2);
 	},
 	
 /* ........ User Prompts .............. */
