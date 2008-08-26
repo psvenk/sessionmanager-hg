@@ -4,6 +4,7 @@ pref("browser.sessionstore.restore_prompt_uri", "chrome://sessionmanager/content
 
 pref("extensions.sessionmanager.autosave_session", true);
 pref("extensions.sessionmanager.backup_session", 1);
+pref("extensions.sessionmanager.backup_temporary", false);
 pref("extensions.sessionmanager.click_restore_tab", true);
 pref("extensions.sessionmanager.disable_cache_fixer", false);
 pref("extensions.sessionmanager.encrypt_sessions", false);
@@ -15,7 +16,7 @@ pref("extensions.sessionmanager.name_format", "%40t-%d");
 pref("extensions.sessionmanager.options_selected_tab", 0);
 pref("extensions.sessionmanager.overwrite", true);
 pref("extensions.sessionmanager.reload", false);
-pref("extensions.sessionmanager.resume_session", "");
+pref("extensions.sessionmanager.resume_session", "backup.session");
 pref("extensions.sessionmanager.save_closed_tabs", 1);
 pref("extensions.sessionmanager.save_cookies", true);
 pref("extensions.sessionmanager.save_window_list", false);
