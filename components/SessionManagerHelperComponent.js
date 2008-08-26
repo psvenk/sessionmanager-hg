@@ -104,8 +104,9 @@ var SessionManagerHelperComponent = {
 		
 		if (sm_running && !crash_resume)
 		{
-			dump("SessionManager: Removing active session");
+			dump("SessionManager: Removing active session\n");
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_name");
+			prefroot.deleteBranch("extensions.sessionmanager._running");
 		}
 	},
 
