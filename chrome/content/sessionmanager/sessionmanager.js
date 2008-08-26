@@ -129,7 +129,7 @@ const SM_VERSION = "0.6.1.16";
 		this.mPref_name_format = this.getPref("name_format", "%40t-%d");
 		this.mPref_overwrite = this.getPref("overwrite", false);
 		this.mPref_reload = this.getPref("reload", false);
-		this.mPref_resume_session = this.getPref("resume_session", "");
+		this.mPref_resume_session = this.getPref("resume_session", this.mBackupSessionName);
 		this.mPref_save_closed_tabs = this.getPref("save_closed_tabs", 0);
 		this.mPref_save_cookies = this.getPref("save_cookies", false);
 		this.mPref_save_window_list = this.getPref("save_window_list", false);
@@ -161,8 +161,17 @@ const SM_VERSION = "0.6.1.16";
 		
 		if (!this.mPref__running)
 		{
-			this.mPrefRoot.savePrefFile(null);
+			// If backup file is temporary, then delete it
+			try {
+				if (this.getPref("backup_temporary", true)) {
+					this.setPref("backup_temporary", false)
+					this.delFile(this.getSessionDir(this.mBackupSessionName));
+				}
+			} catch (ex) { dump(ex + "\n"); }
+			
+			// make sure that the _running preference is saved in case we crash
 			this.setPref("_running", true);
+			this.mPrefRoot.savePrefFile(null);
 		}
 		this.mFullyLoaded = true;
 		
@@ -526,7 +535,7 @@ const SM_VERSION = "0.6.1.16";
 			}
 		}, this);
 		backupSep.hidden = backupMenu.hidden = (backupCount == 0);
-		separator.hidden = (sessions.length == 0);
+		separator.hidden = ((sessions.length - backupCount) == 0);
 		this.setDisabled(separator.nextSibling, separator.hidden);
 		this.setDisabled(separator.nextSibling.nextSibling, separator.hidden);
 		
@@ -830,8 +839,8 @@ const SM_VERSION = "0.6.1.16";
 		{
 			aSession.split("\n").forEach(function(aFileName) {
 				// If deleted autoload session, revert to no autoload session
-				if (aFileName == this.mPref_resume_session) {
-					this.setPref("resume_session", "");
+				if ((aFileName == this.mPref_resume_session) && (aFileName != this.mBackupSessionName)) {
+					this.setPref("resume_session", this.mBackupSessionName);
 					this.setPref("startup", 0);
 				}
 				this.delFile(this.getSessionDir(aFileName));
@@ -1529,11 +1538,12 @@ const SM_VERSION = "0.6.1.16";
 
 	backupCurrentSession: function()
 	{
-		var backup = this.getPref("backup_session", 1);
+		var backup = this.mPref_backup_session;
+		var temp_backup = (this.mPref_startup > 0) && (this.mPref_resume_session == this.mBackupSessionName);
 		
 		// Don't save if just a blank window, if there's an error parsing data, just save
 		var state = null;
-		if (backup > 0) {
+		if ((backup > 0) || temp_backup) {
 			state = this.getSessionState(this._string_backup_session || this._string("backup_session"));
 			try {
 				var aState = eval("(" + state.split("\n")[4] + ")");
@@ -1553,12 +1563,13 @@ const SM_VERSION = "0.6.1.16";
 				this.setPref("backup_session", (backup == -1)?0:1);
 			}
 		}
-		if (backup > 0)
+		if (backup > 0 || temp_backup)
 		{
-			this.keepOldBackups(true);
+			this.keepOldBackups(backup > 0);
 			try
 			{
 				this.writeFile(this.getSessionDir(this.mBackupSessionName), state);
+				if (temp_backup && (backup <= 0)) this.setPref("backup_temporary", true);
 			}
 			catch (ex)
 			{
@@ -2050,10 +2061,10 @@ const SM_VERSION = "0.6.1.16";
 	//
 	fixBug374288: function(aNode)
 	{
-		if (aNode.childNodes) {
+		if (aNode && aNode.childNodes) {
 			for (var i in aNode.childNodes) {
 				var child = aNode.childNodes[i];
-				if (child.getAttribute && !child.getAttribute("tooltiptext")) {
+				if (child && child.getAttribute && !child.getAttribute("tooltiptext")) {
 					child.setAttribute("tooltiptext", "");
 				}
 				this.fixBug374288(child);
@@ -2084,12 +2095,6 @@ const SM_VERSION = "0.6.1.16";
 		var browser_startup = this.getPref("browser.startup.page", 1, true);
 		var sm_startup = this.getPref("startup", 0);
 
-		// if no selected session set value to browser default
-		if ((sm_startup == 2) && !this.getPref("resume_session")) {
-			this.setPref("startup", 0);
-			return;   // just return since setting "startup" will call this procedure again
-		}
-		
 		// browser currently sent to resume browser session and Session Manager thinks it's handling sessions
 		if (browser_startup >= 2 && sm_startup) {
 			if (aData == "page") this.setPref("startup",0);
@@ -2102,9 +2107,10 @@ const SM_VERSION = "0.6.1.16";
 	{
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called, in FF2 SessionStart doesn't set this value
-		var sessionstart = (this.mAppVersion >= "1.9")?(this.mSessionStartupValue._sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
-		                              :this.getPref("browser.sessionstore.resume_session_once", false, true)
-		var recoverOnly = this.mPref__running || sessionstart || !window.arguments || (window.arguments[0] == null);
+		var sessionstart = (this.mAppVersion >= "1.9")
+		                    ?(this.mSessionStartupValue._sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
+		                    :this.getPref("browser.sessionstore.resume_session_once", false, true);
+		var recoverOnly = this.mPref__running || sessionstart;
 		var no_reload = this.getPref("_no_reload");
 		if (no_reload) this.delPref("_no_reload");
 		// handle crash where user chose a specific session
@@ -2126,7 +2132,7 @@ const SM_VERSION = "0.6.1.16";
 			// if user set to resume previous session, don't clear this so that way user can choose whether to backup
 			// current session or not and still have it restore.
 			else if ((this.mPref_startup == 2) && (this.mPref_resume_session != this.mBackupSessionName)) {
-				this.setPref("resume_session","");
+				this.setPref("resume_session",this.mBackupSessionName);
 				this.setPref("startup",0);
 			}
 			if (values.ignore)
@@ -2148,7 +2154,7 @@ const SM_VERSION = "0.6.1.16";
 
 	isCmdLineEmpty: function()
 	{
-		return (window.arguments.length <= 1);
+		return (!window.arguments || window.arguments.length <= 1);
 	},
 
 	updateToolbarButton: function(aEnable)
