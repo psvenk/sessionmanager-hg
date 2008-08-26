@@ -70,7 +70,6 @@
 						<hbox pack="end">
 							<menulist id="resume_session" preference="extensions.sessionmanager.resume_session">
 								<menupopup>
-									<menuitem value="" label="&noSession.label;"/>
 								</menupopup>
 							</menulist>
 						</hbox>
