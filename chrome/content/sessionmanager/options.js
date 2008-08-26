@@ -4,17 +4,15 @@ gSessionManager.onLoad = function() {
 	
 	var resume_session = _("resume_session");
 	var sessions = this.getSessions(true);
-	if (!sessions.some(function(aSession) { return aSession.fileName == this.mBackupSessionName; }, this))
-	{
-		resume_session.appendItem(this._string("startup_resume"), this.mBackupSessionName, "");
-	}
+	resume_session.appendItem(this._string("startup_resume"), this.mBackupSessionName, "");
 	sessions.forEach(function(aSession) {
-		if (aSession.fileName != this.mAutoSaveSessionName)
+		if ((aSession.fileName != this.mAutoSaveSessionName) && (aSession.fileName != this.mBackupSessionName))
 		{
 			resume_session.appendItem(aSession.name, aSession.fileName, "");
 		}
 	}, this);
-	resume_session.value = _("extensions.sessionmanager.resume_session").value;
+	// if no restore value, select previous browser session
+	resume_session.value = _("extensions.sessionmanager.resume_session").value || this.mBackupSessionName;
 	
 	// hide option to hide toolbar menu if not Firefox since SeaMonkey can't unhide it
 	if (!/(BonEcho|Minefield|Flock|Firefox|Netscape)/.test(navigator.userAgent))
