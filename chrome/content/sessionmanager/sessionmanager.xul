@@ -20,7 +20,7 @@
 				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
 				<menuseparator _id="backup-separator"/>
 				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
-					<menupopup>
+					<menupopup onpopupshowing="event.stopPropagation();">
 					</menupopup>
 				</menu>
 				<menuseparator _id="start-separator"/>
@@ -32,7 +32,7 @@
 				<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="gSessionManager.openOptions();"/>
 				<menuseparator/>
 				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
-					<menupopup>
+					<menupopup onpopupshowing="event.stopPropagation();">
 						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 						<menuseparator _id="closed-separator"/>
 						<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
@@ -73,7 +73,7 @@
 				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
 				<menuseparator _id="backup-separator"/>
 				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
-					<menupopup>
+					<menupopup onpopupshowing="event.stopPropagation();">
 					</menupopup>
 				</menu>
 				<menuseparator _id="start-separator"/>
@@ -85,7 +85,7 @@
 				<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="gSessionManager.openOptions();"/>
 				<menuseparator/>
 				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
-					<menupopup>
+					<menupopup onpopupshowing="event.stopPropagation();">
 						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 						<menuseparator _id="closed-separator"/>
 						<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
@@ -106,7 +106,7 @@
 				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
 				<menuseparator _id="backup-separator"/>
 				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
-					<menupopup>
+					<menupopup onpopupshowing="event.stopPropagation();">
 					</menupopup>
 				</menu>
 				<menuseparator _id="start-separator"/>
@@ -120,7 +120,7 @@
 				<menuitem _id="overwrite" type="checkbox" label="&overwrite.label;" accesskey="&overwrite.accesskey;" oncommand="gSessionManager.toggleOverwrite();"/>
 				<menuseparator/>
 				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
-					<menupopup>
+					<menupopup onpopupshowing="event.stopPropagation();">
 						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 						<menuseparator _id="closed-separator"/>
 						<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
