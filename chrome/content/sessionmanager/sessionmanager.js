@@ -1663,8 +1663,10 @@ const SM_VERSION = "0.6.1.16";
 					var autoSaveString = (auto) ? (auto).split("\n")[0] : "autosave=false";
 					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
 					state = nameTime + autoSaveString + countString + this.decryptEncryptByPreference(data)
-					// bad session so rename it so it won't load again
-					if (countString == "\tcount=0/0\n") 
+					// bad session so rename it so it won't load again - This catches case where window and/or 
+					// tab count is zero.  Technically we can load when tab count is 0, but that should never
+					// happen so session is probably corrupted anyway so just flag it so.
+					if (/(\d\/0)|(0\/\d)/.test(countString)) 
 					{
 						state = state.replace(/^\[SessionManager\]\n/,"[Bad-SessionManager]\n");
 						var leafName = aFile.leafName;
