@@ -1,4 +1,4 @@
-const SM_VERSION = "0.6.1.16";
+const SM_VERSION = "0.6.2";
 
 /*const*/ var gSessionManager = {
 	mSessionStoreValue : null,
