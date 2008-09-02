@@ -4,10 +4,6 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Salvar Janela Atual...">
 <!ENTITY saveOne.accesskey "J">
-<!ENTITY closeSession.label "">
-<!ENTITY closeSession.accesskey "">
-<!ENTITY abandonSession.label "">
-<!ENTITY abandonSession.accesskey "">
 <!ENTITY rename.label "Renomear Sessão...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Excluir Sessão(ões)...">
@@ -32,4 +28,3 @@
 <!ENTITY toolbar.undo.label "Desfazer Fechar">
 <!ENTITY toolbar.undo.tooltip "Reabre a aba fechada mais recentemente">
 <!ENTITY prompt.ignore.label "Não mostrar este diálogo novamente">
-<!ENTITY prompt.autosave.label "">

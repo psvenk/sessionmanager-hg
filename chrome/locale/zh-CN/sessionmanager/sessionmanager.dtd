@@ -4,10 +4,6 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "保存当前窗口...">
 <!ENTITY saveOne.accesskey "W">
-<!ENTITY closeSession.label "">
-<!ENTITY closeSession.accesskey "">
-<!ENTITY abandonSession.label "">
-<!ENTITY abandonSession.accesskey "">
 <!ENTITY rename.label "重命名会话...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "删除会话...">
@@ -32,4 +28,3 @@
 <!ENTITY toolbar.undo.label "撤销关闭">
 <!ENTITY toolbar.undo.tooltip "重新打开最近一次关闭的标签页">
 <!ENTITY prompt.ignore.label "不要再次显示此对话框">
-<!ENTITY prompt.autosave.label "">

@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Önceki kapatılmış sekmeleri yeniden aç">
 <!ENTITY prompt.ignore.label "Bu uyarıyı artık gösterme">
 <!ENTITY prompt.autosave.label "Otomatik kayıt yap">
+<!ENTITY load_replace.label "Yükle (Şimdiki oturumla değiştir)">
+<!ENTITY load_replace.accesskey "L">
+<!ENTITY load_append.label "Yükle (Şimdiki Oturuma Ekle)">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "Oturumu Şimdikiyle Değiştir">
+<!ENTITY replace_all.accesskey "R">
+<!ENTITY replace_window.label "Oturumu Şimdiki Pencerede değiştir">
+<!ENTITY replace_window.accesskey "W">
+<!ENTITY remove_one.label "Oturum Sil..">
+<!ENTITY set_startup.label "Açılış Oturumu olarak ayarla">
+<!ENTITY set_startup.accesskey "S">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "İsim">
+<!ENTITY session_windows.label "Pencereler">
+<!ENTITY session_tabs.label "Sekmeler">
+<!ENTITY backup_sessions.label "Oturum Yedekleri">
+<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY remove_item.label "Sil">
+<!ENTITY remove_item.accesskey "D">

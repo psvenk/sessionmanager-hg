@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "最近閉じたタブを元に戻す">
 <!ENTITY prompt.ignore.label "再びこのダイアログを表示しない">
 <!ENTITY prompt.autosave.label "セッションを自動保存する">
+<!ENTITY load_replace.label "読み込み (現在のセッションを取り替える)">
+<!ENTITY load_replace.accesskey "L">
+<!ENTITY load_append.label "読み込み (現在のセッションに追加)">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "セッションを現在セッションに取り替える">
+<!ENTITY replace_all.accesskey "R">
+<!ENTITY replace_window.label "セッションを現在ウィンドウに取り替える">
+<!ENTITY replace_window.accesskey "W">
+<!ENTITY remove_one.label "セッションを削除...">
+<!ENTITY set_startup.label "スタートアップセッションとして設定">
+<!ENTITY set_startup.accesskey "S">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "名前">
+<!ENTITY session_windows.label "ウインドウ">
+<!ENTITY session_tabs.label "タブ">
+<!ENTITY backup_sessions.label "バックアップセッション">
+<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY remove_item.label "アイテムを削除">
+<!ENTITY remove_item.accesskey "D">

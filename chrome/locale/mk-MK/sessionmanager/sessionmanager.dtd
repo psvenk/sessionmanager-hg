@@ -4,10 +4,10 @@
 <!ENTITY save.accesskey "З">
 <!ENTITY saveOne.label "Зачувај го моменталниот прозорец...">
 <!ENTITY saveOne.accesskey "М">
-<!ENTITY closeSession.label "">
-<!ENTITY closeSession.accesskey "">
-<!ENTITY abandonSession.label "">
-<!ENTITY abandonSession.accesskey "">
+<!ENTITY closeSession.label "Зачувај и Затвори ја Моменталната Сесија">
+<!ENTITY closeSession.accesskey "ј">
+<!ENTITY abandonSession.label "Напуштија Моменталната Сесија">
+<!ENTITY abandonSession.accesskey "Н">
 <!ENTITY rename.label "Преименувај ја сесијата..">
 <!ENTITY rename.accesskey "П">
 <!ENTITY remove.label "Избриши сеси(и)ја">
@@ -32,4 +32,23 @@
 <!ENTITY toolbar.undo.label "Отповикај го затворањето">
 <!ENTITY toolbar.undo.tooltip "Повторно отвори ги неодамнешните затворени јазичиња">
 <!ENTITY prompt.ignore.label "Не го покажувај овај дијалог повторно">
-<!ENTITY prompt.autosave.label "">
+<!ENTITY prompt.autosave.label "Автоматски зачувај ја сесијата">
+<!ENTITY load_replace.label "Вчитај (Заменија Моменталната Сесија)">
+<!ENTITY load_replace.accesskey "В">
+<!ENTITY load_append.label "Вчитај (Додај Во Моменталната Сесија)">
+<!ENTITY load_append.accesskey "А">
+<!ENTITY replace_all.label "Заменија Сесијата со Моменталната Сесија">
+<!ENTITY replace_all.accesskey "З">
+<!ENTITY replace_window.label "Заменија Сесијата со Моменталниот Прозорец">
+<!ENTITY replace_window.accesskey "М">
+<!ENTITY remove_one.label "Избриши ја Сесијата">
+<!ENTITY set_startup.label "Постави ја како Почетна сесија">
+<!ENTITY set_startup.accesskey "С">
+<!ENTITY openSessionManagerSidebar.commandkey "С">
+<!ENTITY session_name.label "Име">
+<!ENTITY session_windows.label "Прозорци">
+<!ENTITY session_tabs.label "Јазичиња">
+<!ENTITY backup_sessions.label "Резервни Сесии">
+<!ENTITY backup_sessions.accesskey "Р">
+<!ENTITY remove_item.label "Избриши елемент">
+<!ENTITY remove_item.accesskey "И">

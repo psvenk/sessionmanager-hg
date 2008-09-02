@@ -1,7 +1,7 @@
 <!ENTITY options.title "Možnosti Správce relací">
 <!ENTITY general.caption "Hlavní">
 <!ENTITY startNend.caption "Spuštění &amp; ukončení">
-<!ENTITY resume_sess.label "Při spuštění vždy načíst následující relaci:">
+<!ENTITY resume_sess.label "Při spuštění vždy načíst relaci:">
 <!ENTITY resume_sess.accesskey "s">
 <!ENTITY backup_sess.label "Při ukončení">
 <!ENTITY backup_sess.accesskey "k">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "V">
 <!ENTITY sanitizer.label "Uložené relace ve Správci ukládaných relací">
 <!ENTITY sanitizer.accesskey "s">
+<!ENTITY saving.caption "Ukládání relace">
+<!ENTITY lastpage.label "Zobrazit poslední načtenou stránku">
+<!ENTITY noSession.label "Žádnou">
+<!ENTITY noSession.accesskey "u">
+<!ENTITY promptSession.label "Dotázat se na relaci">
+<!ENTITY promptSession.accesskey "D">
+<!ENTITY selectSession.label "Zvolit relaci">
+<!ENTITY selectSession.accesskey "Z">
+<!ENTITY cookies.label "Uložit cookies relace">
+<!ENTITY cookies.accesskey "c">
+<!ENTITY sessionImport.caption "Importovat relaci z...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "Použít">
+<!ENTITY save_and_restore.caption "Ukládání &amp; obnova">
+<!ENTITY display.caption "Zobrazení">
+<!ENTITY middleclick.label "Klepnutí prostředním tlačítkem myši otevře poslední zavřený panel">
+<!ENTITY middleclick.accesskey "m">
+<!ENTITY max_display.label "Maximální počet relací zobrazených v nabídce">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Nezobrazovat Správce relací v nabídce Nástroje">
+<!ENTITY hide_tools_menu.accesskey "N">

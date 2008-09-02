@@ -14,7 +14,7 @@
 <!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "セッションを復元">
 <!ENTITY sessionList.caption "セッションリスト">
-<!ENTITY orderList.label "セッションリストをオーダーする">
+<!ENTITY orderList.label "セッションリストの並び順">
 <!ENTITY orderList.accesskey "d">
 <!ENTITY orderList.label1 "アルファベット順">
 <!ENTITY orderList.label2 "新しい順">
@@ -23,9 +23,9 @@
 <!ENTITY max_backup.accesskey "N">
 <!ENTITY undoClose.caption "開きなおす">
 <!ENTITY windowsNtabs.caption "閉じたウインドウとタブ">
-<!ENTITY max_closed.label "保存する閉じたウインドウの最大数">
+<!ENTITY max_closed.label "閉じたウインドウの最大保存数">
 <!ENTITY max_closed.accesskey "w">
-<!ENTITY max_tabs.label "保存する閉じたタブの最大数(ウインドウごとに)">
+<!ENTITY max_tabs.label "閉じたタブの最大保存数(ウインドウごと)">
 <!ENTITY max_tabs.accesskey "t">
 <!ENTITY submenu.label "全ての閉じたウインドウとタブをサブメニューに表示する">
 <!ENTITY submenu.accesskey "c">
@@ -51,7 +51,7 @@
 <!ENTITY interval.accesskey "i">
 <!ENTITY postdata.label "格納するポストデータの最大量(バイト単位; -1 の場合はすべて)">
 <!ENTITY postdata.accesskey "x">
-<!ENTITY privacy.label "機密のデータを保存(フォームデータ、ポストデータ、およびクッキー)">
+<!ENTITY privacy.label "機密のデータを保存(フォームデータ、ポストデータ、およびCookies)">
 <!ENTITY privacy.accesskey "v">
 <!ENTITY privacy.level0 "すべてのサイト">
 <!ENTITY privacy.level1 "暗号化していないサイトのみ">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "D">
 <!ENTITY sanitizer.label "セッションマネージャの保存したセッション">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "セッションの保存">
+<!ENTITY lastpage.label "最後にロードしたページを表示">
+<!ENTITY noSession.label "なし">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "セッションを指定する">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "セッションを選択">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "セッションCookiesを保存する">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "他のセッションをインポート">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "適用">
+<!ENTITY save_and_restore.caption "保存と復元">
+<!ENTITY display.caption "表示">
+<!ENTITY middleclick.label "中クリックで最後に閉じたタブを開きなおす">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "メニューに表示するセッションの最大数">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "ツールメニューにセッションマネージャのメニューを表示しない">
+<!ENTITY hide_tools_menu.accesskey "D">

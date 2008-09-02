@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Re-abrir o separador fechado mais recente">
 <!ENTITY prompt.ignore.label "Não mostrar este diálogo novamente">
 <!ENTITY prompt.autosave.label "Tornar isto numa sessão de guardar auto">
+<!ENTITY load_replace.label "Carregar (substituir sessão actual)">
+<!ENTITY load_replace.accesskey "C">
+<!ENTITY load_append.label "Carregar (adicionar à sessão actual)">
+<!ENTITY load_append.accesskey "a">
+<!ENTITY replace_all.label "Substituir sessão pela sessão actual">
+<!ENTITY replace_all.accesskey "S">
+<!ENTITY replace_window.label "Substituir sessão pela janela actual">
+<!ENTITY replace_window.accesskey "u">
+<!ENTITY remove_one.label "Eliminar sessão...">
+<!ENTITY set_startup.label "Aplicar como sessão inicial">
+<!ENTITY set_startup.accesskey "A">
+<!ENTITY openSessionManagerSidebar.commandkey "A">
+<!ENTITY session_name.label "Nome">
+<!ENTITY session_windows.label "janelas">
+<!ENTITY session_tabs.label "Separadores">
+<!ENTITY backup_sessions.label "Guardar sessões">
+<!ENTITY backup_sessions.accesskey "G">
+<!ENTITY remove_item.label "Apagar item">
+<!ENTITY remove_item.accesskey "p">

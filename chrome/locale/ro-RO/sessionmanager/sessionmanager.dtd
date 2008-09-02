@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Redeschide cele mai recente file închise">
 <!ENTITY prompt.ignore.label "Nu mai afişa această fereastră de dialog">
 <!ENTITY prompt.autosave.label "Activează auto-salvarea acestei sesiuni">
+<!ENTITY load_replace.label "Încarcă sesiunea (înlocuieşte sesiunea curentă)">
+<!ENTITY load_replace.accesskey "c">
+<!ENTITY load_append.label "Încarcă sesiunea (adaugă la sesiunea curentă)">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "Înlocuieşte sesiunea cu sesiunea curentă">
+<!ENTITY replace_all.accesskey "l">
+<!ENTITY replace_window.label "Înlocuieşte sesiunea cu fereastra curentă">
+<!ENTITY replace_window.accesskey "f">
+<!ENTITY remove_one.label "Şterge sesiunea...">
+<!ENTITY set_startup.label "Stabileşte sesiunea ca sesiune de pornire">
+<!ENTITY set_startup.accesskey "p">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Denumire">
+<!ENTITY session_windows.label "Ferestre">
+<!ENTITY session_tabs.label "File">
+<!ENTITY backup_sessions.label "Sesiuni arhivate">
+<!ENTITY backup_sessions.accesskey "a">
+<!ENTITY remove_item.label "Şterge elementul">
+<!ENTITY remove_item.accesskey "t">

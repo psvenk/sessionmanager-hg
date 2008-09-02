@@ -19,7 +19,7 @@
 <!ENTITY resume.label "Aktuelle Sitzung nach Neustart fortsetzen">
 <!ENTITY resume.accesskey "N">
 <!ENTITY reload.label "Alle Fenster neu laden">
-<!ENTITY reload.accesskey "A">
+<!ENTITY reload.accesskey "l">
 <!ENTITY overwrite.label "Vorhandene Fenster ersetzen">
 <!ENTITY overwrite.accesskey "V">
 <!ENTITY undoClosed.label "Kürzlich geschlossene Fenster/Tabs">
@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Zuletzt geschlossenen Tab wiederherstellen">
 <!ENTITY prompt.ignore.label "Diesen Dialog nicht mehr anzeigen">
 <!ENTITY prompt.autosave.label "Diese Sitzung immer automatisch sichern">
+<!ENTITY load_replace.label "Laden (aktuelle Sitzung ersetzen)">
+<!ENTITY load_replace.accesskey "L">
+<!ENTITY load_append.label "Laden (zur aktuellen Sitzung hinzufügen)">
+<!ENTITY load_append.accesskey "a">
+<!ENTITY replace_all.label "Sitzung durch aktuelle Sitzung ersetzen">
+<!ENTITY replace_all.accesskey "S">
+<!ENTITY replace_window.label "Sitzung durch aktuelles Fenster ersetzen">
+<!ENTITY replace_window.accesskey "F">
+<!ENTITY remove_one.label "Sitzung löschen...">
+<!ENTITY set_startup.label "Als Startsitzung festlegen">
+<!ENTITY set_startup.accesskey "f">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Name">
+<!ENTITY session_windows.label "Fenster">
+<!ENTITY session_tabs.label "Tabs">
+<!ENTITY backup_sessions.label "Gesicherte Sitzungen">
+<!ENTITY backup_sessions.accesskey "G">
+<!ENTITY remove_item.label "Eintrag löschen">
+<!ENTITY remove_item.accesskey "l">

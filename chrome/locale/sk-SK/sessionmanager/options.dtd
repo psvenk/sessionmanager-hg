@@ -1,6 +1,6 @@
-<!ENTITY options.title "&sessionManager; Nastavenia">
+<!ENTITY options.title "&sessionManager; - Nastavenia">
 <!ENTITY general.caption "Všeobecné">
-<!ENTITY startNend.caption "Spustenie &amp; ukončenie">
+<!ENTITY startNend.caption "Spustenie a ukončenie">
 <!ENTITY resume_sess.label "Pri spustení vždy načítať nasledujúce reláciu:">
 <!ENTITY resume_sess.accesskey "s">
 <!ENTITY backup_sess.label "Pri ukončení">
@@ -33,7 +33,7 @@
 <!ENTITY closed_tabs.label "Obnoviť zoznam kariet, ktoré je možné znova otvoriť, pre všetky okná:">
 <!ENTITY closed_tabs.accesskey "e">
 <!ENTITY closed_tabs.label0 "nikdy">
-<!ENTITY closed_tabs.label1 "pri sputení">
+<!ENTITY closed_tabs.label1 "pri spustení">
 <!ENTITY closed_tabs.label2 "vždy">
 <!ENTITY window_list.label "Pri ukončení nemazať zoznam zatvorených okien">
 <!ENTITY window_list.accesskey "o">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "b">
 <!ENTITY sanitizer.label "Uložené relácie rozšírenia Session Manager">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Ukladanie relácie">
+<!ENTITY lastpage.label "Zobraziť naposledy načítanú stránku">
+<!ENTITY noSession.label "Žiadna">
+<!ENTITY noSession.accesskey "a">
+<!ENTITY promptSession.label "Opýtať sa na reláciu">
+<!ENTITY promptSession.accesskey "O">
+<!ENTITY selectSession.label "Vybrať reláciu">
+<!ENTITY selectSession.accesskey "V">
+<!ENTITY cookies.label "Uložiť cookies relácie">
+<!ENTITY cookies.accesskey "U">
+<!ENTITY sessionImport.caption "Importovať relácie z...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "S">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "T">
+<!ENTITY apply.label "Použiť">
+<!ENTITY save_and_restore.caption "Uloženie a obnova">
+<!ENTITY display.caption "Zobrazenie">
+<!ENTITY middleclick.label "Kliknutím stredným tlačidlom myši znova otvoriť naposledy zatvorenú kartu">
+<!ENTITY middleclick.accesskey "u">
+<!ENTITY max_display.label "Maximálny počet relácií zobrazených v ponuke">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Nezobrazovať ponuku Správca relácií v ponuke Nástroje">
+<!ENTITY hide_tools_menu.accesskey "e">

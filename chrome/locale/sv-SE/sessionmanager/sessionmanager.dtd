@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Återställ senast stängda flik">
 <!ENTITY prompt.ignore.label "Visa inte den här dialogen igen">
 <!ENTITY prompt.autosave.label "Gör det här till en auto-sparnings-session">
+<!ENTITY load_replace.label "Ladda in (ersätt nuvarande session)">
+<!ENTITY load_replace.accesskey "L">
+<!ENTITY load_append.label "Ladda in (lägg till på nuvarande session)">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "Ersätt session med nuvarande session">
+<!ENTITY replace_all.accesskey "R">
+<!ENTITY replace_window.label "Ersätt session med nuvarande fönster">
+<!ENTITY replace_window.accesskey "W">
+<!ENTITY remove_one.label "Radera session...">
+<!ENTITY set_startup.label "Ställ in som startsession">
+<!ENTITY set_startup.accesskey "S">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Namn">
+<!ENTITY session_windows.label "Fönster">
+<!ENTITY session_tabs.label "Flikar">
+<!ENTITY backup_sessions.label "Säkerhetskopiera sessioner">
+<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY remove_item.label "Ta bort">
+<!ENTITY remove_item.accesskey "D">

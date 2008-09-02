@@ -10,7 +10,7 @@
 <!ENTITY abandonSession.accesskey "P">
 <!ENTITY rename.label "Přejmenovat relaci...">
 <!ENTITY rename.accesskey "P">
-<!ENTITY remove.label "Smazat relaci(e)">
+<!ENTITY remove.label "Smazat relace...">
 <!ENTITY remove.accesskey "m">
 <!ENTITY openFolder.label "Otevřít složku s relacemi">
 <!ENTITY openFolder.accesskey "s">
@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Znovu otevře poslední zavřený panel">
 <!ENTITY prompt.ignore.label "Toto dialogové okno již znovu nezobrazovat">
 <!ENTITY prompt.autosave.label "Automatické ukládání této relace">
+<!ENTITY load_replace.label "Načíst (nahradit aktuální relaci)">
+<!ENTITY load_replace.accesskey "N">
+<!ENTITY load_append.label "Načíst (přidat k aktuální relaci)">
+<!ENTITY load_append.accesskey "a">
+<!ENTITY replace_all.label "Nahradit relaci aktuální relací">
+<!ENTITY replace_all.accesskey "r">
+<!ENTITY replace_window.label "Nahradit relaci aktuálním oknem">
+<!ENTITY replace_window.accesskey "o">
+<!ENTITY remove_one.label "Odstranit relaci...">
+<!ENTITY set_startup.label "Nastavit jako relaci při spuštění">
+<!ENTITY set_startup.accesskey "s">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Název">
+<!ENTITY session_windows.label "Okna">
+<!ENTITY session_tabs.label "Panely">
+<!ENTITY backup_sessions.label "Zálohované relace">
+<!ENTITY backup_sessions.accesskey "Z">
+<!ENTITY remove_item.label "Odstranit položku">
+<!ENTITY remove_item.accesskey "d">

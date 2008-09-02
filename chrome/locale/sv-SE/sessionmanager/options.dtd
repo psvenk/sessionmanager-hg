@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "D">
 <!ENTITY sanitizer.label "Session Manager Sparade sessioner">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Session sparas">
+<!ENTITY lastpage.label "Visa min senast laddade sida">
+<!ENTITY noSession.label "Ingen">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Fråga efter en session">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "Välj en session">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Spara sessionskakor">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "Importera Sessioner från...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "Verkställ">
+<!ENTITY save_and_restore.caption "Sparar &amp; återställer">
+<!ENTITY display.caption "Visa">
+<!ENTITY middleclick.label "Mittenklick återställer senast stängda flik">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Maximalt antal sessioner att visa i menyn">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Visa inte Session Manager-meny i Verktyg-menyn">
+<!ENTITY hide_tools_menu.accesskey "D">

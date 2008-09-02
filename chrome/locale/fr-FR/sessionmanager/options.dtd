@@ -1,6 +1,6 @@
 <!ENTITY options.title "Options du &sessionManager;">
 <!ENTITY general.caption "Générales">
-<!ENTITY startNend.caption "Démarrage et fermeture">
+<!ENTITY startNend.caption "Démarrage &amp; fermeture">
 <!ENTITY resume_sess.label "Au démarrage, toujours charger la session suivante :">
 <!ENTITY resume_sess.accesskey "s">
 <!ENTITY backup_sess.label "À la fermeture">
@@ -8,7 +8,7 @@
 <!ENTITY backup_session.label0 "fermer la session courante">
 <!ENTITY backup_session.label1 "sauvegarder la session courante">
 <!ENTITY backup_session.label2 "demander s&apos;il faut sauvegarder la session courante">
-<!ENTITY crashrecovery.label "Activer Crash recovery">
+<!ENTITY crashrecovery.label "Activer Crash Recovery">
 <!ENTITY crashrecovery.accesskey "c">
 <!ENTITY autosave_session.label "Enregistrer automatiquement les sessions remplacées">
 <!ENTITY autosave_session.accesskey "a">
@@ -30,7 +30,7 @@
 <!ENTITY submenu.label "Lister toutes les fenêtres et tous les onglets fermés dans un sous-menu">
 <!ENTITY submenu.accesskey "L">
 <!ENTITY persistence.caption "Persistance">
-<!ENTITY closed_tabs.label "Restaurer la liste d&apos;onglets fermés réouvrables :">
+<!ENTITY closed_tabs.label "Rétablir la liste des onglets fermés que l&apos;on peut à nouveau ouvrir pour toutes les fenêtres :">
 <!ENTITY closed_tabs.accesskey "R">
 <!ENTITY closed_tabs.label0 "jamais">
 <!ENTITY closed_tabs.label1 "au démarrage">
@@ -47,7 +47,7 @@
 <!ENTITY sessionstore.caption "Stockage de session">
 <!ENTITY service.caption "Paramètres de stockage de session">
 <!ENTITY service.description "Ne modifiez rien, tant que vous ne savez pas ce que vous faites !">
-<!ENTITY interval.label "Intervalle mimimum entre deux enregistrements d&apos;état (en secondes) :">
+<!ENTITY interval.label "Intervalle minimum entre deux enregistrements d&apos;état (en secondes) :">
 <!ENTITY interval.accesskey "i">
 <!ENTITY postdata.label "Nombre maximum de POSTDATA stockés (en bytes ; -1 pour tous) :">
 <!ENTITY postdata.accesskey "y">
@@ -57,9 +57,9 @@
 <!ENTITY privacy.level1 "les sites non chiffrés uniquement">
 <!ENTITY privacy.level2 "aucun site">
 <!ENTITY sessiondir.caption "Emplacement des sessions enregistrées">
-<!ENTITY sessiondir.desc "L&apos;emplacement de stockage des sessions enregistrées par défaut peut être modifié ici.">
+<!ENTITY sessiondir.desc "L&apos;emplacement par défaut de stockage des sessions enregistrées peut être modifié ici.">
 <!ENTITY encrypt.caption "Chiffrement">
-<!ENTITY encrypt.desc "Avertissement : Les données de session chiffrées ne peuvent être lues qu&apos;avec des fichiers key3.db et cert8.db identiques. De plus, si un mot de passe principal a été défini, les sessions ne peuvent ni être chiffrées, ni être déchiffrées si ce mot de passe n&apos;est pas donné.">
+<!ENTITY encrypt.desc "Avertissement : Les données de session chiffrées ne peuvent être lues qu&apos;avec des fichiers key3.db et cert8.db identiques. De plus, si un mot de passe principal a été défini, les sessions ne peuvent ni être chiffrées, ni être déchiffrées si ce mot de passe n&apos;est pas indiqué.">
 <!ENTITY encrypt.label "Chiffrer la session enregistrée et les données de la fenêtre fermée">
 <!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Modifier">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "D">
 <!ENTITY sanitizer.label "Sessions enregistrées dans le gestionnaire">
 <!ENTITY sanitizer.accesskey "G">
+<!ENTITY saving.caption "Enregistrement de session">
+<!ENTITY lastpage.label "Afficher ma dernière page chargée">
+<!ENTITY noSession.label "Aucun">
+<!ENTITY noSession.accesskey "c">
+<!ENTITY promptSession.label "Demander l&apos;ouverture d&apos;une session">
+<!ENTITY promptSession.accesskey "D">
+<!ENTITY selectSession.label "Choisir une session">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Enregistrer les cookies de session">
+<!ENTITY cookies.accesskey "c">
+<!ENTITY sessionImport.caption "Importer des sessions à partir de…">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "v">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "T">
+<!ENTITY apply.label "Appliquer">
+<!ENTITY save_and_restore.caption "Enregistrement &amp; rétablissement">
+<!ENTITY display.caption "Affichage">
+<!ENTITY middleclick.label "Le clic du milieu ouvre à nouveau le dernier onglet fermé">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Nombre maximum de sessions à afficher dans le menu">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Ne pas afficher l&apos;entrée « Gestionnaire de session » dans le menu « Outils »">
+<!ENTITY hide_tools_menu.accesskey "N">

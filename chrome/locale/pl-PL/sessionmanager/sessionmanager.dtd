@@ -10,7 +10,7 @@
 <!ENTITY abandonSession.accesskey "N">
 <!ENTITY rename.label "Zmień nazwę sesji">
 <!ENTITY rename.accesskey "N">
-<!ENTITY remove.label "Usuń sesję(e)">
+<!ENTITY remove.label "Usuń sesje">
 <!ENTITY remove.accesskey "U">
 <!ENTITY openFolder.label "Otwórz folder sesji">
 <!ENTITY openFolder.accesskey "f">
@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Otwiera ponownie ostatnio zamknięte karty">
 <!ENTITY prompt.ignore.label "Nie pokazuj tego okna ponownie">
 <!ENTITY prompt.autosave.label "Ustanów jako automatycznie zapisywaną sesję">
+<!ENTITY load_replace.label "Wczytaj (zamień bieżącą sesję)">
+<!ENTITY load_replace.accesskey "W">
+<!ENTITY load_append.label "Wczytaj (dołącz do bieżącej sesji)">
+<!ENTITY load_append.accesskey "C">
+<!ENTITY replace_all.label "Zamień sesję z bieżącą sesją">
+<!ENTITY replace_all.accesskey "Z">
+<!ENTITY replace_window.label "Zamień sesję z aktywnym oknem">
+<!ENTITY replace_window.accesskey "O">
+<!ENTITY remove_one.label "Usuń sesję...">
+<!ENTITY set_startup.label "Ustaw jako sesję startową">
+<!ENTITY set_startup.accesskey "U">
+<!ENTITY openSessionManagerSidebar.commandkey "B">
+<!ENTITY session_name.label "Nazwa">
+<!ENTITY session_windows.label "Okna">
+<!ENTITY session_tabs.label "Karty">
+<!ENTITY backup_sessions.label "Kopia sesji">
+<!ENTITY backup_sessions.accesskey "K">
+<!ENTITY remove_item.label "Usuń element">
+<!ENTITY remove_item.accesskey "U">

@@ -1,5 +1,5 @@
-<!ENTITY sessionManager "Session Manager">
-<!ENTITY toolsmenu.accesskey "M">
+<!ENTITY sessionManager "Správca relácií">
+<!ENTITY toolsmenu.accesskey "r">
 <!ENTITY save.label "Uložiť reláciu...">
 <!ENTITY save.accesskey "U">
 <!ENTITY saveOne.label "Uložiť aktuálne okno...">
@@ -26,10 +26,29 @@
 <!ENTITY undoClosed.accesskey "z">
 <!ENTITY closedWindows "Zatvorené okná:">
 <!ENTITY closedTabs "Zatvorené karty:">
-<!ENTITY clearList.label "Vymazať zoznam &apos;Zatvorené&apos;...">
-<!ENTITY clearList.accesskey "v">
+<!ENTITY clearList.label "Vymazať zoznam &apos;Zatvorené karty&apos;...">
+<!ENTITY clearList.accesskey "V">
 <!ENTITY toolbar.tooltip "Uložiť aktuálnu reláciu prehliadača...">
 <!ENTITY toolbar.undo.label "Znova otvoriť zatvorené">
 <!ENTITY toolbar.undo.tooltip "Znova otvorí naposledy zatvorené karty">
 <!ENTITY prompt.ignore.label "Toto dialógové okno už nezobrazovať">
 <!ENTITY prompt.autosave.label "Nastaviť ako reláciu, ktorá bude ukladaná automaticky">
+<!ENTITY load_replace.label "Načítať (nahradiť aktuálnu reláciu)">
+<!ENTITY load_replace.accesskey "h">
+<!ENTITY load_append.label "Načítať (pripojiť k aktuálnej relácii)">
+<!ENTITY load_append.accesskey "k">
+<!ENTITY replace_all.label "Nahradiť reláciu aktuálnou reláciou">
+<!ENTITY replace_all.accesskey "r">
+<!ENTITY replace_window.label "Nahradiť reláciu aktuálnym oknom">
+<!ENTITY replace_window.accesskey "o">
+<!ENTITY remove_one.label "Odstrániť reláciu...">
+<!ENTITY set_startup.label "Nastaviť ako reláciu pri spustení">
+<!ENTITY set_startup.accesskey "e">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Názov">
+<!ENTITY session_windows.label "Okná">
+<!ENTITY session_tabs.label "Karty">
+<!ENTITY backup_sessions.label "Zálohovať relácie">
+<!ENTITY backup_sessions.accesskey "Z">
+<!ENTITY remove_item.label "Odstrániť položku">
+<!ENTITY remove_item.accesskey "d">

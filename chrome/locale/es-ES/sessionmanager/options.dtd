@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "R">
 <!ENTITY sanitizer.label "Session Manager - Sesiones guardadas">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Guardando sesión">
+<!ENTITY lastpage.label "Mostrar mi última página cargada">
+<!ENTITY noSession.label "Ninguna">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Preguntar por una sesión">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "Seleccionar la sesión">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Guardar las cookies de las sesiones">
+<!ENTITY cookies.accesskey "c">
+<!ENTITY sessionImport.caption "Importar sesiones desde...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "Aplicar">
+<!ENTITY save_and_restore.caption "Guardar &amp; Restaurar">
+<!ENTITY display.caption "Mostrar">
+<!ENTITY middleclick.label "El botón central reabre la última pestaña cerrada">
+<!ENTITY middleclick.accesskey "c">
+<!ENTITY max_display.label "Número máximo de sesiones a mostrar en el menú">
+<!ENTITY max_display.accesskey "N">
+<!ENTITY hide_tools_menu.label "No mostrar el menú de Session Manager en el menú Herramientas">
+<!ENTITY hide_tools_menu.accesskey "m">

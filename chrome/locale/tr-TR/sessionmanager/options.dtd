@@ -17,8 +17,8 @@
 <!ENTITY orderList.label "Oturum listesini al">
 <!ENTITY orderList.accesskey "d">
 <!ENTITY orderList.label1 "Alfabetik">
-<!ENTITY orderList.label2 "eskiden yeniye">
-<!ENTITY orderList.label_2 "yeniden eskiye">
+<!ENTITY orderList.label2 "Eskiden Yeniye">
+<!ENTITY orderList.label_2 "Yeniden Eskiye">
 <!ENTITY max_backup.label "yedeği tutulacak eski (çökmüş) oturumların sayısı:">
 <!ENTITY max_backup.accesskey "N">
 <!ENTITY undoClose.caption "Kapamayı Geri al">
@@ -59,7 +59,7 @@
 <!ENTITY sessiondir.caption "Kayıtlı Oturumun Bölgesi">
 <!ENTITY sessiondir.desc "Kayıtlı Oturumların varsayılan Bölgesi olmalı">
 <!ENTITY encrypt.caption "Şifreleme">
-<!ENTITY encrypt.desc "">
+<!ENTITY encrypt.desc "Dikkat: Şifrelenmiş oturumlar yanlızca key3.db ve cert8.db dosyalarında tanımlanmış profillerle açılabilirler. İlaveten eğer, bir ana şifre ayarlanmış ise, oturumlar bu Ana şifre girilmeden şifrelenip çözülemezler.">
 <!ENTITY encrypt.label "Kapatılan pencere ve kaydedilen otorumları şifrele">
 <!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Değiştir">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "D">
 <!ENTITY sanitizer.label "Oturum Yöneticisi Kayıtlı Oturumlar">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Oturum Kaydı">
+<!ENTITY lastpage.label "Son yüklediğim sayfayı göster">
+<!ENTITY noSession.label "Yok">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Bir oturum sor">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "Oturum Seç">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Oturum Çerezlerini kaydet">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "Oturumları İçe aktar..">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "l">
+<!ENTITY apply.label "Tamam">
+<!ENTITY save_and_restore.caption "Kaydetme &amp; Geri Yükleme">
+<!ENTITY display.caption "Görünüm">
+<!ENTITY middleclick.label "Orta tıklaması kapatılan son sekmeyş açar">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Menüde gösterilecek En çok oturum sayısı">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Araçlar Menüsünde Oturum Yöneticisini gösterme">
+<!ENTITY hide_tools_menu.accesskey "D">

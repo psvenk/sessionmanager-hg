@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Vuelve a abrir la pestaña cerrada más recientemente">
 <!ENTITY prompt.ignore.label "No volver a mostrar este mensaje">
 <!ENTITY prompt.autosave.label "Guardar esta sesión automáticamente">
+<!ENTITY load_replace.label "Cargar (Reemplazar la sesión actual)">
+<!ENTITY load_replace.accesskey "C">
+<!ENTITY load_append.label "Cargar (Añadir a la sesión actual)">
+<!ENTITY load_append.accesskey "ñ">
+<!ENTITY replace_all.label "Reemplazar la sesión con la sesión actual">
+<!ENTITY replace_all.accesskey "R">
+<!ENTITY replace_window.label "Reemplazar la sesión con la ventana actual">
+<!ENTITY replace_window.accesskey "s">
+<!ENTITY remove_one.label "Borrar sesión...">
+<!ENTITY set_startup.label "Establecer como la sesión de inicio">
+<!ENTITY set_startup.accesskey "E">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Nombre">
+<!ENTITY session_windows.label "Ventanas">
+<!ENTITY session_tabs.label "Pestañas">
+<!ENTITY backup_sessions.label "Hacer copia de seguridad de las sesiones">
+<!ENTITY backup_sessions.accesskey "H">
+<!ENTITY remove_item.label "Borrar elemento">
+<!ENTITY remove_item.accesskey "B">

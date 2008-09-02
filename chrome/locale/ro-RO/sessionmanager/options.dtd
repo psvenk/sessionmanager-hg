@@ -1,10 +1,10 @@
 <!ENTITY options.title "Opţiuni &sessionManager;">
 <!ENTITY general.caption "General">
 <!ENTITY startNend.caption "Lansare şi închidere">
-<!ENTITY resume_sess.label "La lansare, încarcă întotdeauna următoarea sesiune:">
+<!ENTITY resume_sess.label "La lansare">
 <!ENTITY resume_sess.accesskey "l">
 <!ENTITY backup_sess.label "La închidere">
-<!ENTITY backup_sess.accesskey "n">
+<!ENTITY backup_sess.accesskey "c">
 <!ENTITY backup_session.label0 "înlătură sesiunea curentă">
 <!ENTITY backup_session.label1 "arhivează sesiunea curentă">
 <!ENTITY backup_session.label2 "întreabă dacă se arhivează sesiunea curentă">
@@ -43,7 +43,7 @@
 <!ENTITY name_format.caption "Denumiri sesiuni">
 <!ENTITY name_format.label "Sugestii de formare a denumirilor sesiunilor:">
 <!ENTITY name_format.accesskey "f">
-<!ENTITY name_format.desc "Folosiţi &#37;t pentru titlul filei active, &#37;d pentru data curentă şi &#37;m pentru ora curentă.  Lungimea titlului filei poate fi limitată folosind şablonul &#37;#t, unde # este numărul de caractere.">
+<!ENTITY name_format.desc "Folosiţi &#37;t pentru titlul filei active, &#37;d pentru data curentă şi &#37;m pentru ora curentă. Lungimea titlului poate fi limitată folosind &#37;#t, unde # este numărul de caractere.">
 <!ENTITY sessionstore.caption "SessionStore">
 <!ENTITY service.caption "Opţiuni &quot;SessionStore&quot;">
 <!ENTITY service.description "Nu modificaţi aceste opţiuni decât dacă ştiţi sigur ce înseamnă!">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "I">
 <!ENTITY sanitizer.label "Sesiuni salvate de Gestionarul de sesiuni">
 <!ENTITY sanitizer.accesskey "G">
+<!ENTITY saving.caption "Salvare sesiune">
+<!ENTITY lastpage.label "Arată ultima pagină încărcată">
+<!ENTITY noSession.label "Nu încărca nimic">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Solicită o sesiune">
+<!ENTITY promptSession.accesskey "o">
+<!ENTITY selectSession.label "Selectează următoarea sesiune">
+<!ENTITY selectSession.accesskey "u">
+<!ENTITY cookies.label "Salvează cookie-urile sesiunii curente">
+<!ENTITY cookies.accesskey "k">
+<!ENTITY sessionImport.caption "Importă sesiunile din...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "S">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "T">
+<!ENTITY apply.label "Aplică">
+<!ENTITY save_and_restore.caption "Salvare şi restaurare">
+<!ENTITY display.caption "Afişare">
+<!ENTITY middleclick.label "Clic-mijloc redeschide ultima filă închisă">
+<!ENTITY middleclick.accesskey "m">
+<!ENTITY max_display.label "Numărul maxim de sesiuni afişate in meniu">
+<!ENTITY max_display.accesskey "x">
+<!ENTITY hide_tools_menu.label "Nu afişa meniul gestionarului de sesiuni în meniul Unelte">
+<!ENTITY hide_tools_menu.accesskey "g">

@@ -1,7 +1,7 @@
 <!ENTITY options.title "&sessionManager; 選項">
 <!ENTITY general.caption "一般選項">
-<!ENTITY startNend.caption "瀏覽器開啟和關閉時">
-<!ENTITY resume_sess.label "開啟瀏覽器時固定載入如下瀏覽頁組：">
+<!ENTITY startNend.caption "瀏覽器啟動與關閉">
+<!ENTITY resume_sess.label "啟動瀏覽器時固定載入下述頁組：">
 <!ENTITY resume_sess.accesskey "s">
 <!ENTITY backup_sess.label "關閉瀏覽器時">
 <!ENTITY backup_sess.accesskey "h">
@@ -33,7 +33,7 @@
 <!ENTITY closed_tabs.label "還原所有視窗的已關閉分頁清單">
 <!ENTITY closed_tabs.accesskey "e">
 <!ENTITY closed_tabs.label0 "都不要">
-<!ENTITY closed_tabs.label1 "開啟瀏覽器時">
+<!ENTITY closed_tabs.label1 "啟動瀏覽器時">
 <!ENTITY closed_tabs.label2 "固定">
 <!ENTITY window_list.label "關閉瀏覽器時不清除已關閉視窗清單">
 <!ENTITY window_list.accesskey "o">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "D">
 <!ENTITY sanitizer.label "瀏覽頁組管理員存檔的瀏覽頁組">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "瀏覽頁組存檔">
+<!ENTITY lastpage.label "顯示我最後載入的網頁">
+<!ENTITY noSession.label "無(交由瀏覽器處理)">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "列出清單供我選擇">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "我選定的頁組">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "頁組Cookies存檔">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "從...匯入瀏覽頁組">
+<!ENTITY importSS.label "匯入SessionSaver資料">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "匯入Tab Mix Plus資料">
+<!ENTITY importTMP.accesskey "ID">
+<!ENTITY apply.label "套用">
+<!ENTITY save_and_restore.caption "存檔與還原">
+<!ENTITY display.caption "設定顯示">
+<!ENTITY middleclick.label "滑鼠中鍵重開最後關閉的分頁">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "顯示於選單的最大頁組數">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "工具選單中不要顯示瀏覽頁組管理員選單">
+<!ENTITY hide_tools_menu.accesskey "D">

@@ -33,3 +33,22 @@
 <!ENTITY toolbar.undo.tooltip "Heropen de laatst gesloten tab">
 <!ENTITY prompt.ignore.label "Toon dit dialoogvenster niet meer">
 <!ENTITY prompt.autosave.label "Deze sessie automatisch opslaan">
+<!ENTITY load_replace.label "Laden (Huidige sessie vervangen)">
+<!ENTITY load_replace.accesskey "L">
+<!ENTITY load_append.label "Laden (Aan huidige sessie toevoegen)">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "Sessie met huidige sessie vervangen">
+<!ENTITY replace_all.accesskey "s">
+<!ENTITY replace_window.label "Sessie met huidig venster vervangen">
+<!ENTITY replace_window.accesskey "v">
+<!ENTITY remove_one.label "Sessie verwijderen...">
+<!ENTITY set_startup.label "Als opstartsessie instellen">
+<!ENTITY set_startup.accesskey "o">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Naam">
+<!ENTITY session_windows.label "Vensters">
+<!ENTITY session_tabs.label "Tabs">
+<!ENTITY backup_sessions.label "Back-up sessies">
+<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY remove_item.label "Item verwijderen">
+<!ENTITY remove_item.accesskey "v">

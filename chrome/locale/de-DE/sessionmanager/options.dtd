@@ -1,7 +1,7 @@
 <!ENTITY options.title "&sessionManager; - Einstellungen">
 <!ENTITY general.caption "Allgemein">
-<!ENTITY startNend.caption "Start &amp; Beenden">
-<!ENTITY resume_sess.label "Beim Start des Browsers folgende Sitzung laden:">
+<!ENTITY startNend.caption "Starten &amp; Beenden">
+<!ENTITY resume_sess.label "Beim Starten des Browsers folgende Sitzung laden:">
 <!ENTITY resume_sess.accesskey "S">
 <!ENTITY backup_sess.label "Beim Beenden">
 <!ENTITY backup_sess.accesskey "B">
@@ -44,8 +44,8 @@
 <!ENTITY name_format.label "Formatvorgabe für die vorgeschlagenen Sitzungs-Namen:">
 <!ENTITY name_format.accesskey "o">
 <!ENTITY name_format.desc "&#37;t steht für den aktuellen Seitentitel, &#37;d für das Datum und &#37;m für die Zeit; die Länge des Titels kann zudem auf # Zeichen beschränkt werden: &#37;#t.">
-<!ENTITY sessionstore.caption "Sitzungssicherung">
-<!ENTITY service.caption "Sitzungssicherung - Einstellungen">
+<!ENTITY sessionstore.caption "Sitzungs-Sicherung">
+<!ENTITY service.caption "Einstellungen zur Sitzungs-Sicherung (&quot;SessionStore&quot;)">
 <!ENTITY service.description "Ändern Sie diese Einstellungen nur, wenn Sie wissen, was sie bewirken!">
 <!ENTITY interval.label "Minimales Zeitintervall zwischen zwei Sicherungsvorgängen (in Sekunden):">
 <!ENTITY interval.accesskey "i">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "w">
 <!ENTITY sanitizer.label "Gespeicherte Sitzungen des Sitzungs-Managers">
 <!ENTITY sanitizer.accesskey "z">
+<!ENTITY saving.caption "Sitzungen sichern">
+<!ENTITY lastpage.label "Zuletzt geladene Seite anzeigen">
+<!ENTITY noSession.label "Keine">
+<!ENTITY noSession.accesskey "K">
+<!ENTITY promptSession.label "Nach einer Sitzung fragen">
+<!ENTITY promptSession.accesskey "f">
+<!ENTITY selectSession.label "Sitzung auswählen">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Sitzungs-Cookies sichern">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "Sitzungen importieren von....">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "Übernehmen">
+<!ENTITY save_and_restore.caption "Sichern &amp; Wiederherstellen">
+<!ENTITY display.caption "Anzeige">
+<!ENTITY middleclick.label "Mit Mittelklick auf die Tab-Leiste zuletzt geschlossenen Tab wiederherstellen">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Maximale Anzahl der im Menü angezeigten Sitzungen:">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Eintrag &quot;Sitzungs-Manager&quot; nicht im Menü &quot;Extras&quot; anzeigen">
+<!ENTITY hide_tools_menu.accesskey "n">

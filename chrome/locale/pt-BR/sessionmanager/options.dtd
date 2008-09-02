@@ -10,8 +10,6 @@
 <!ENTITY backup_session.label2 "perguntar se a sessão atual deve ser salva">
 <!ENTITY crashrecovery.label "Ativar Crash Recovery (Recuperação de Falhas)">
 <!ENTITY crashrecovery.accesskey "i">
-<!ENTITY autosave_session.label "">
-<!ENTITY autosave_session.accesskey "">
 <!ENTITY restoring.caption "Restaurar Sessão">
 <!ENTITY sessionList.caption "Lista de Sessões">
 <!ENTITY orderList.label "Ordenar a lista de sessões">
@@ -44,8 +42,6 @@
 <!ENTITY name_format.label "Formato sugerido para nomes de sessões:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Use &#37;t para o título da aba ativa, &#37;d para a data de hoje e &#37;m para a hora; além disso o tamanho do título pode ser limitado com caracteres # : &#37;#t.">
-<!ENTITY sessionstore.caption "">
-<!ENTITY service.caption "">
 <!ENTITY service.description "Não mexa nisso, a menos que saiba o que está fazendo:">
 <!ENTITY interval.label "Intervalo de tempo mínimo entre dois salvamentos de estado (em segundos):">
 <!ENTITY interval.accesskey "i">
@@ -58,10 +54,6 @@
 <!ENTITY privacy.level2 "nenhum site">
 <!ENTITY sessiondir.caption "Local das sessões guardadas">
 <!ENTITY sessiondir.desc "O local pré-definido das sessões guardadas pode ser substituído aqui.">
-<!ENTITY encrypt.caption "">
-<!ENTITY encrypt.desc "">
-<!ENTITY encrypt.label "">
-<!ENTITY encrypt.accesskey "">
 <!ENTITY change_dir.label "Mudar">
 <!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Pré-definido">

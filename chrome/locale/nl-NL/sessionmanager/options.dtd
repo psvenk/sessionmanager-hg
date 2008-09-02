@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "S">
 <!ENTITY sanitizer.label "Session Manager opgeslagen sessies">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Sessie opslaan">
+<!ENTITY lastpage.label "Mijn laatst geladen pagina weergeven">
+<!ENTITY noSession.label "Geen">
+<!ENTITY noSession.accesskey "G">
+<!ENTITY promptSession.label "Naar een sessie vragen">
+<!ENTITY promptSession.accesskey "N">
+<!ENTITY selectSession.label "Sessie selecteren">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Sessie-cookies opsaal">
+<!ENTITY cookies.accesskey "c">
+<!ENTITY sessionImport.caption "Sessies importeren van...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "i">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "i">
+<!ENTITY apply.label "Toepassen">
+<!ENTITY save_and_restore.caption "Opslaan &amp; herstellen">
+<!ENTITY display.caption "Beeld">
+<!ENTITY middleclick.label "Middelklik heropent de laatst gesloten tab">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Maximumaantal sessies weer te geven in het menu">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Session Manager-menu niet weergeven in menu Extra">
+<!ENTITY hide_tools_menu.accesskey "n">

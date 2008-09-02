@@ -10,8 +10,8 @@
 <!ENTITY backup_session.label2 "прашај дали да се направи резервна копија на моменталната сесија">
 <!ENTITY crashrecovery.label "Овозможи обнова од срушување">
 <!ENTITY crashrecovery.accesskey "њ">
-<!ENTITY autosave_session.label "">
-<!ENTITY autosave_session.accesskey "">
+<!ENTITY autosave_session.label "Автоматски зачувај ја заменетата сесија">
+<!ENTITY autosave_session.accesskey "а">
 <!ENTITY restoring.caption "Обновување на сесијата">
 <!ENTITY sessionList.caption "Листа на сесијата">
 <!ENTITY orderList.label "Сортирај ја листата на сесијата">
@@ -44,8 +44,6 @@
 <!ENTITY name_format.label "Формат за предлозите за имиња на сесијата:">
 <!ENTITY name_format.accesskey "п">
 <!ENTITY name_format.desc "Користи &#37;t за наслови на активните јазичиња, &#37;d за денешниот датум, &#37;m за време; додатно може да се ограничи должината на насловот на # знаци: &#37;#t.">
-<!ENTITY sessionstore.caption "">
-<!ENTITY service.caption "">
 <!ENTITY service.description "Не ги допирај овие, освен ако знаеш што правиш!">
 <!ENTITY interval.label "Минимум временски интервал помеѓу две зачувувања на состојбата(во секунди):">
 <!ENTITY interval.accesskey "в">
@@ -58,13 +56,26 @@
 <!ENTITY privacy.level2 "ниеден сајт">
 <!ENTITY sessiondir.caption "Локација на зачуваните сесии">
 <!ENTITY sessiondir.desc "Тука може да се премине преку зададената локација на зачуваните сесии.">
-<!ENTITY encrypt.caption "">
-<!ENTITY encrypt.desc "">
-<!ENTITY encrypt.label "">
-<!ENTITY encrypt.accesskey "">
+<!ENTITY encrypt.caption "Енкрипција">
+<!ENTITY encrypt.accesskey "е">
 <!ENTITY change_dir.label "Промени">
 <!ENTITY change_dir.accesskey "и">
 <!ENTITY default_dir.label "Стандардни вредности">
 <!ENTITY default_dir.accesskey "д">
 <!ENTITY sanitizer.label "Зачувани сесии на Менаџерот на Сесијата">
 <!ENTITY sanitizer.accesskey "с">
+<!ENTITY saving.caption "Зачувавање на сесијата">
+<!ENTITY lastpage.label "Покажи ја мојата последна вчитана страница">
+<!ENTITY noSession.label "Ниедна">
+<!ENTITY noSession.accesskey "Н">
+<!ENTITY promptSession.label "Прашај за сесија">
+<!ENTITY promptSession.accesskey "П">
+<!ENTITY selectSession.label "Избери сесија">
+<!ENTITY selectSession.accesskey "И">
+<!ENTITY cookies.label "Зачувај ги Колачињата на Сесијата">
+<!ENTITY cookies.accesskey "К">
+<!ENTITY sessionImport.caption "Внеси Сесии од...">
+<!ENTITY importSS.accesskey "В">
+<!ENTITY importTMP.accesskey "В">
+<!ENTITY apply.label "Примени">
+<!ENTITY display.caption "Прикажи">

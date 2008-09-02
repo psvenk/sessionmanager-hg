@@ -1,7 +1,7 @@
 <!ENTITY options.title "&sessionManager; - beállítások">
 <!ENTITY general.caption "Általános">
 <!ENTITY startNend.caption "Indítás és bezárás">
-<!ENTITY resume_sess.label "Indításkor a következő munkamenet betöltése:">
+<!ENTITY resume_sess.label "Indításkor mindig a következő munkamenet betöltése:">
 <!ENTITY resume_sess.accesskey "I">
 <!ENTITY backup_sess.label "Bezáráskor">
 <!ENTITY backup_sess.accesskey "B">
@@ -11,7 +11,7 @@
 <!ENTITY crashrecovery.label "Helyreállítás engedélyezése összeomlás után">
 <!ENTITY crashrecovery.accesskey "V">
 <!ENTITY autosave_session.label "Lecserélt munkamenet automatikus mentése">
-<!ENTITY autosave_session.accesskey "a">
+<!ENTITY autosave_session.accesskey "e">
 <!ENTITY restoring.caption "Munkamenet visszaállítása">
 <!ENTITY sessionList.caption "Elérhető munkamenetek">
 <!ENTITY orderList.label "Munkamenetek rendezése">
@@ -68,3 +68,27 @@
 <!ENTITY default_dir.accesskey "A">
 <!ENTITY sanitizer.label "Mentett munkamenetek (Session Manager)">
 <!ENTITY sanitizer.accesskey "e">
+<!ENTITY saving.caption "Munkamenet mentése">
+<!ENTITY lastpage.label "Az utolsó betöltött oldal megjelenítése">
+<!ENTITY noSession.label "Nincs">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Rákérdez a munkamenetre">
+<!ENTITY promptSession.accesskey "R">
+<!ENTITY selectSession.label "Munkamenet kiválasztása">
+<!ENTITY selectSession.accesskey "k">
+<!ENTITY cookies.label "Munkamenetekhez tartozó sütik mentése">
+<!ENTITY cookies.accesskey "M">
+<!ENTITY sessionImport.caption "Munkamenetek importálása...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "v">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "T">
+<!ENTITY apply.label "Alkalmaz">
+<!ENTITY save_and_restore.caption "Mentés és visszaállítás">
+<!ENTITY display.caption "Megjelenítés">
+<!ENTITY middleclick.label "Kattintás a középsővel újra megnyitja az utolsóként bezárt lapot">
+<!ENTITY middleclick.accesskey "u">
+<!ENTITY max_display.label "A menüben megjelenített munkamenetek maximális száma">
+<!ENTITY max_display.accesskey "x">
+<!ENTITY hide_tools_menu.label "Ne jelenjen meg a Session manager menüje az eszközök menüben">
+<!ENTITY hide_tools_menu.accesskey "e">

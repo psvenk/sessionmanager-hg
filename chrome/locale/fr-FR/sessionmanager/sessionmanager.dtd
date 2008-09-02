@@ -1,5 +1,5 @@
 <!ENTITY sessionManager "Gestionnaire de session">
-<!ENTITY toolsmenu.accesskey "s">
+<!ENTITY toolsmenu.accesskey "G">
 <!ENTITY save.label "Enregistrer la session…">
 <!ENTITY save.accesskey "g">
 <!ENTITY saveOne.label "Enregistrer la fenêtre courante…">
@@ -26,10 +26,29 @@
 <!ENTITY undoClosed.accesskey "v">
 <!ENTITY closedWindows "Fenêtres fermées :">
 <!ENTITY closedTabs "Onglets fermés :">
-<!ENTITY clearList.label "Effacer la liste des &apos;éléments fermés&apos;…">
+<!ENTITY clearList.label "Effacer la liste des « éléments fermés »…">
 <!ENTITY clearList.accesskey "E">
 <!ENTITY toolbar.tooltip "Enregistrer la session de navigation courante…">
 <!ENTITY toolbar.undo.label "Récupération">
-<!ENTITY toolbar.undo.tooltip "Réouvrir le dernier onglet fermé">
+<!ENTITY toolbar.undo.tooltip "Ouvrir à nouveau le dernier onglet fermé">
 <!ENTITY prompt.ignore.label "Ne plus afficher cette boîte de dialogue à l&apos;avenir">
 <!ENTITY prompt.autosave.label "Faire en sorte que cette session soit enregistrée automatiquement">
+<!ENTITY load_replace.label "Charger (remplacer la session courante)">
+<!ENTITY load_replace.accesskey "C">
+<!ENTITY load_append.label "Charger (ajouter à la session courante)">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "Remplacer la session par la session courante">
+<!ENTITY replace_all.accesskey "R">
+<!ENTITY replace_window.label "Remplacer la session par la fenêtre courante">
+<!ENTITY replace_window.accesskey "f">
+<!ENTITY remove_one.label "Supprimer la session…">
+<!ENTITY set_startup.label "Définir comme session de démarrage">
+<!ENTITY set_startup.accesskey "d">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Nom">
+<!ENTITY session_windows.label "Fenêtres">
+<!ENTITY session_tabs.label "Onglets">
+<!ENTITY backup_sessions.label "Sauvegarder les sessions">
+<!ENTITY backup_sessions.accesskey "g">
+<!ENTITY remove_item.label "Supprimer l&apos;élément">
+<!ENTITY remove_item.accesskey "u">
