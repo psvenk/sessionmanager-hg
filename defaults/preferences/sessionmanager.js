@@ -11,7 +11,7 @@ pref("extensions.sessionmanager.encrypt_sessions", false);
 pref("extensions.sessionmanager.hide_tools_menu", false);
 pref("extensions.sessionmanager.max_backup_keep", 10);
 pref("extensions.sessionmanager.max_closed_undo", 10);
-pref("extensions.sessionmanager.max_display", 20);
+pref("extensions.sessionmanager.max_display", -1);
 pref("extensions.sessionmanager.name_format", "%40t-%d");
 pref("extensions.sessionmanager.options_selected_tab", 0);
 pref("extensions.sessionmanager.overwrite", true);
