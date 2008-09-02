@@ -511,7 +511,7 @@ const SM_VERSION = "0.6.1.16";
 		var count = 0;
 		var backupCount = 0;
 		sessions.forEach(function(aSession, aIx) {
-			if (!aSession.backup && (count++ >= this.mPref_max_display)) return;
+			if (!aSession.backup && (this.mPref_max_display >= 0) && (count++ >= this.mPref_max_display)) return;
 	
 			var key = aSession.backup?"":(count < 10)?count:(count == 10)?"0":"";
 			var menuitem = document.createElement("menuitem");
@@ -535,7 +535,7 @@ const SM_VERSION = "0.6.1.16";
 			}
 		}, this);
 		backupSep.hidden = backupMenu.hidden = (backupCount == 0);
-		separator.hidden = ((sessions.length - backupCount) == 0);
+		separator.hidden = (this.mPref_max_display == 0) || ((sessions.length - backupCount) == 0);
 		this.setDisabled(separator.nextSibling, separator.hidden);
 		this.setDisabled(separator.nextSibling.nextSibling, separator.hidden);
 		
@@ -946,6 +946,11 @@ const SM_VERSION = "0.6.1.16";
 						mClosedTabs[aIndex].image = data[1];
 					}
 				}, this);
+			}
+			// Firefox 3.1 uses attributes instead of xultab
+			if (aValue.state.attributes && aValue.state.attributes.image)
+			{
+				mClosedTabs[aIndex].image = aValue.state.attributes.image;
 			}
 		}, this);
 
