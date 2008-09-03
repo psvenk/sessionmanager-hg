@@ -237,17 +237,9 @@ const SM_VERSION = "0.6.2.1";
 		{
 			this.setPref("version", SM_VERSION);
 			setTimeout(function() {
-				var tBrowser = top.document.getElementById("content");
-				if (tBrowser.mCurrentTab.linkedBrowser && 
-					(tBrowser.mCurrentTab.linkedBrowser.contentDocument.location == "about:blank"))
-				{
-					tBrowser.loadURI(gSessionManager.mFirstUrl);
-				}
-				else
-				{
-					tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
-				}
-			},1000);
+				var tBrowser = getBrowser();
+				tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
+			},100);
 			
 			// Clean out screenX and screenY persist values from localstore.rdf since we don't persist anymore.
 			var RDF = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
@@ -745,7 +737,7 @@ const SM_VERSION = "0.6.2.1";
 		else if (!TMP_SingleWindowMode && (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite)))
 		{
 			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
-			var tabs = window.document.getElementById("content");
+			var tabs = window.getBrowser();
 			if (this.getBrowserWindows().length != 1 || !tabs || tabs.mTabs.length > 1 || 
 				tabs.mTabs[0].linkedBrowser.currentURI.spec != "about:blank" || 
 				this.mSessionStore().getClosedTabCount(window) > 0) {
