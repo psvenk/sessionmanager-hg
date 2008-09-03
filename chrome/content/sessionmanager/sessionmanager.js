@@ -1,4 +1,4 @@
-const SM_VERSION = "0.6.2";
+const SM_VERSION = "0.6.2.1";
 
 /*const*/ var gSessionManager = {
 	mSessionStoreValue : null,
@@ -129,6 +129,7 @@ const SM_VERSION = "0.6.2";
 		this.mPref_name_format = this.getPref("name_format", "%40t-%d");
 		this.mPref_overwrite = this.getPref("overwrite", false);
 		this.mPref_reload = this.getPref("reload", false);
+		this.mPref_restore_temporary = this.getPref("restore_temporary", false);
 		this.mPref_resume_session = this.getPref("resume_session", this.mBackupSessionName);
 		this.mPref_save_closed_tabs = this.getPref("save_closed_tabs", 0);
 		this.mPref_save_cookies = this.getPref("save_cookies", false);
@@ -144,6 +145,13 @@ const SM_VERSION = "0.6.2";
 		
 		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
 		gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+		
+		// Make sure resume_session is not null.  This could happen in 0.6.2.  It should no longer occur, but 
+		// better safe than sorry.
+		if (!this.mPref_resume_session) {
+			this.setPref("resume_session", this.mBackupSessionName);
+			if (this.mPref_startup == 2) this.setPref("startup",0);
+		}
 		
 		// Hide Session Manager toolbar item if option requested
 		this.showHideToolsMenu();
@@ -168,6 +176,9 @@ const SM_VERSION = "0.6.2";
 					this.delFile(this.getSessionDir(this.mBackupSessionName));
 				}
 			} catch (ex) { dump(ex + "\n"); }
+
+			// If we did a temporary restore, set it to false			
+			if (this.mPref_restore_temporary) this.setPref("restore_temporary", false)
 			
 			// make sure that the _running preference is saved in case we crash
 			this.setPref("_running", true);
@@ -296,6 +307,7 @@ const SM_VERSION = "0.6.2";
 			this._string_old_backup_session = this._string("old_backup_session");
 			this._string_prompt_not_again = this._string("prompt_not_again");
 			this._string_encrypt_fail = this._string("encrypt_fail");
+			this._string_save_and_restore = this._string("save_and_restore");
 			
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 			this.mBundle = null;
@@ -536,8 +548,8 @@ const SM_VERSION = "0.6.2";
 		}, this);
 		backupSep.hidden = backupMenu.hidden = (backupCount == 0);
 		separator.hidden = (this.mPref_max_display == 0) || ((sessions.length - backupCount) == 0);
-		this.setDisabled(separator.nextSibling, separator.hidden);
-		this.setDisabled(separator.nextSibling.nextSibling, separator.hidden);
+		this.setDisabled(separator.nextSibling, separator.hidden && backupSep.hidden);
+		this.setDisabled(separator.nextSibling.nextSibling, separator.hidden && backupSep.hidden);
 		
 		try
 		{
@@ -1551,7 +1563,7 @@ const SM_VERSION = "0.6.2";
 		if ((backup > 0) || temp_backup) {
 			state = this.getSessionState(this._string_backup_session || this._string("backup_session"));
 			try {
-				var aState = eval("(" + state.split("\n")[4] + ")");
+				var aState = eval("(" + this.decrypt(state.split("\n")[4]) + ")");
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
 		    		(aState.windows[0].tabs[0].entries.length > 1) || (aState.windows[0].tabs[0].entries[0].url != "about:blank"))) {
 					backup = 0;
@@ -1562,7 +1574,14 @@ const SM_VERSION = "0.6.2";
 		if (backup == 2)
 		{
 			var dontPrompt = { value: false };
-			backup = (this.mPromptService.confirmEx(null, this.mTitle, this._string_preserve_session || this._string("preserve_session"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string_prompt_not_again || this._string("prompt_not_again"), dontPrompt) == 1)?-1:1;
+			var flags = this.mPromptService.BUTTON_TITLE_SAVE * this.mPromptService.BUTTON_POS_0 + 
+			            this.mPromptService.BUTTON_TITLE_DONT_SAVE * this.mPromptService.BUTTON_POS_1 +
+			            this.mPromptService.BUTTON_TITLE_IS_STRING * this.mPromptService.BUTTON_POS_2; 
+			var results = this.mPromptService.confirmEx(null, this.mTitle, this._string_preserve_session || this._string("preserve_session"), flags,
+			              null, null, this._string_save_and_restore || this._string("save_and_restore"),
+			              this._string_prompt_not_again || this._string("prompt_not_again"), dontPrompt);
+			backup = (results == 1)?-1:1;
+			if (results == 2) this.setPref("restore_temporary", true);
 			if (dontPrompt.value)
 			{
 				this.setPref("backup_session", (backup == -1)?0:1);
@@ -2128,10 +2147,10 @@ const SM_VERSION = "0.6.2";
 			this.mPref__autosave_name = "";
 			this.load(recovering, "startup");
 		}
-		else if (!recoverOnly && ((this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions(true).length > 0)
+		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions(true).length > 0)
 		{
 			var values = { ignorable: true };
-			var session = (this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session;
+			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
 			if (session && this.getSessionDir(session).exists())
 			{
 				this.load(session, "startup");
@@ -2144,7 +2163,7 @@ const SM_VERSION = "0.6.2";
 			}
 			if (values.ignore)
 			{
-				this.setPref("resume_session", session || "");
+				this.setPref("resume_session", session || this.mBackupSessionName);
 				this.setPref("startup", (session)?2:0);
 			}
 		}
