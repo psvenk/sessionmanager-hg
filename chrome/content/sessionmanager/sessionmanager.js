@@ -15,7 +15,7 @@ const SM_VERSION = "0.6.2.1";
 	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
-	mBackupSessionRegEx: /^backup(-[1-9]+)?\.session$/,
+	mBackupSessionRegEx: /^backup(-[1-9](\d)*)?\.session$/,
 	mAutoSaveSessionName: "autosave.session",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
@@ -515,9 +515,9 @@ const SM_VERSION = "0.6.2.1";
 		var count = 0;
 		var backupCount = 0;
 		sessions.forEach(function(aSession, aIx) {
-			if (!aSession.backup && (this.mPref_max_display >= 0) && (count++ >= this.mPref_max_display)) return;
+			if (!aSession.backup && (this.mPref_max_display >= 0) && (count >= this.mPref_max_display)) return;
 	
-			var key = aSession.backup?"":(count < 10)?count:(count == 10)?"0":"";
+			var key = aSession.backup?"":(++count < 10)?count:(count == 10)?"0":"";
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", ((key)?key + ") ":"") + aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")");
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");');
