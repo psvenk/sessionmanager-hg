@@ -88,7 +88,7 @@
 <!ENTITY display.caption "Display">
 <!ENTITY middleclick.label "Middle Click re-opens last closed tab">
 <!ENTITY middleclick.accesskey "M">
-<!ENTITY max_display.label "Maximum number of sessions to display in menu">
+<!ENTITY max_display.label "Maximum number of sessions to display in menu (-1 for all)">
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "Do not display Session Manager menu in Tools menu">
 <!ENTITY hide_tools_menu.accesskey "D">
