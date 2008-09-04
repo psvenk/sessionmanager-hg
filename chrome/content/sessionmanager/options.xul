@@ -15,15 +15,15 @@
 
 <prefwindow id="sessionmanagerOptions" title="&options.title;" type="prefwindow"
 						xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
-						buttons="accept,cancel,extra1" buttonlabelextra1="&apply.label;"
+						buttons="accept,cancel,extra1,help" buttonlabelextra1="&apply.label;"
 						ondialogextra1="savePrefs();" onchange="enableApply();"
-						onload="onLoad();" ondialogaccept="setStartValue();"
+						onload="onLoad();" ondialogaccept="setStartValue();" ondialoghelp="goHelp();"
 						windowtype="SessionManager:Options" persist="lastSelected">
 	
 	<!-- ************************************** -->
 	<!-- ****** Main Preference Panel ********* -->
 	<!-- ************************************** -->
-		<prefpane id="mainPrefPane" label="&general.caption;">
+		<prefpane id="mainPrefPane" label="&general.caption;" helpURI="" helpTopic="prefs-main">
 		<preferences>
 			<preference id="browser.startup.page" name="browser.startup.page" type="int"/>
 			<preference id="extensions.sessionmanager.autosave_session" name="extensions.sessionmanager.autosave_session" type="bool"/>
@@ -159,7 +159,7 @@
 	<!-- ******************************************* -->
 	<!-- ****** UndoClose Preference Panel ********* -->
 	<!-- ******************************************* -->
-		<prefpane id="undoclosePrefPane" label="&undoClose.caption;">
+		<prefpane id="undoclosePrefPane" label="&undoClose.caption;" helpURI="" helpTopic="prefs-undo">
 		<preferences>
 			<preference id="browser.sessionstore.max_tabs_undo" name="browser.sessionstore.max_tabs_undo" type="int"/>
 			<preference id="extensions.sessionmanager.click_restore_tab" name="extensions.sessionmanager.click_restore_tab" type="bool"/>
@@ -212,8 +212,9 @@
 	<!-- ****************************************** -->
 	<!-- ****** Advanced Preference Panel ********* -->
 	<!-- ****************************************** -->
-		<prefpane id="advancedPrefPane" label="&advanced.caption;">
+		<prefpane id="advancedPrefPane" label="&advanced.caption;" helpURI="" helpTopic="prefs-advanced">
 		<preferences>
+			<preference id="extensions.sessionmanager.disable_cache_fixer" name="extensions.sessionmanager.disable_cache_fixer" type="bool"/>
 			<preference id="extensions.sessionmanager.sessions_dir" name="extensions.sessionmanager.sessions_dir" type="string"/>
 			<preference id="extensions.sessionmanager.encrypt_sessions" name="extensions.sessionmanager.encrypt_sessions" type="bool"/>
 		</preferences>
@@ -234,12 +235,14 @@
 			<separator style="height: 0.5em;" orient="vertical"/>
 			<description style="width: 26em; color:red;" class="indent">&encrypt.desc;</description>
 		</groupbox>
+		<checkbox label="&disable_cache_fixer.label;" accesskey="&disable_cache_fixer.accesskey;" 
+		          preference="extensions.sessionmanager.disable_cache_fixer"/>
 	</prefpane>
 
 	<!-- ********************************************** -->
 	<!-- ****** SessionStore Preference Panel ********* -->
 	<!-- ********************************************** -->
-		<prefpane id="sessionstorePrefPane" label="&sessionstore.caption;">
+		<prefpane id="sessionstorePrefPane" label="&sessionstore.caption;" helpURI="" helpTopic="prefs-sessionstore">
 		<preferences>
 			<preference id="browser.sessionstore.interval" name="browser.sessionstore.interval" type="int"/>
 			<preference id="browser.sessionstore.postdata" name="browser.sessionstore.postdata" type="int"/>

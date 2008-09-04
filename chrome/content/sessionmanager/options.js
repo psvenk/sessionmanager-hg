@@ -42,6 +42,9 @@ gSessionManager.onLoad = function() {
 		
 		if (browser.gSingleWindowMode) _("overwrite").label = gSessionManager._string("overwrite_tabs");
 	}
+	
+	// Disable default help window for Firefox 2.0 and below
+	if (this.mAppVersion < "1.9") _("sessionmanagerOptions").openHelp = function () {}
 };
 
 gSessionManager.onUnload = function() {
@@ -167,4 +170,62 @@ function savePrefs() {
 
 function enableApply() {
 	document.getElementById("sessionmanagerOptions").getButton("extra1").disabled = false;
+}
+
+function goHelp() {
+	var link = "http://sessionmanager.mozdev.org/options.html#";
+	
+	switch (_("sessionmanagerOptions").currentPane) {
+		case (_("mainPrefPane")):
+			switch (_("generalPrefsTab").selectedIndex) {
+				case 0:
+					link = link + "startup";
+					break;
+				case 1:
+					link = link + "saving";
+					break;
+				case 2:
+					link = link + "display";
+					break;
+			}
+			break;
+		case (_("undoclosePrefPane")):
+			link = link + "undo";
+			break;
+		case (_("advancedPrefPane")):
+			link = link + "advanced";
+			break;
+		case (_("sessionstorePrefPane")):
+			link = link + "sessionstore";
+			break;
+	}
+	
+	openLink(link);
+}
+
+function openLink(url) {
+	var top = Components.classes["@mozilla.org/appshell/window-mediator;1"]
+             .getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow("navigator:browser");
+		             
+    if (!top) window.open(url, "", "");
+    else {
+	    var tBrowser = top.getBrowser();
+	    var currBlank = false;
+			
+		// Is current tab blank or already on help page.
+		if (tBrowser && tBrowser.mCurrentTab.linkedBrowser) {
+			var location = tBrowser.mCurrentTab.linkedBrowser.contentDocument.location.href;
+			var index = location.indexOf("#");
+			var baseLocation = (index == -1)? location : location.substring(0,index);
+			index = url.indexOf("#");
+			var baseURL = (index == -1)? url : url.substring(0,index);
+			currBlank = (location == "about:blank") || (baseLocation == baseURL);
+		}
+				                   
+		if (currBlank) tBrowser.loadURI(url);
+		else {
+			var tab = tBrowser.addTab(url);
+			tBrowser.selectedTab = tab;
+		}
+	}
 }
