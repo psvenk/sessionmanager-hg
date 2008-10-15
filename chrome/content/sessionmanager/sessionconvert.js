@@ -455,6 +455,7 @@ var gSessionSaverConverter = {
 var gConvertTMPSession = {
 	
 	sessionList: null,
+	isFirefox3: false,
 
 	init: function() {
 		this.RDFService = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
@@ -464,13 +465,22 @@ var gConvertTMPSession = {
 		var chromeWin = windowMediator.getMostRecentWindow("navigator:browser");
 		this.gSessionManager = chromeWin.gSessionManager;
 		
+		// Determine Mozilla version to see what is supported
+		try {
+			var mAppVersion = Components.classes["@mozilla.org/xre/app-info;1"].
+			                  getService(Components.interfaces.nsIXULAppInfo).platformVersion;
+			this.isFirefox3 = (mAppVersion >= "1.9");
+		} catch (ex) { dump(ex + "\n"); }
+		
 		if (!chromeWin.TMP_SessionStore) {
 			this._prompt.alert(null, this.gSessionManager._string("sessionManager"), this.gSessionManager._string("tmp_no_install"));
 			return;
 		}
 		else {
 			this.SessionManager = chromeWin.SessionManager;
+			this.SessionData = chromeWin.SessionData;
 			this.gSessionPath = chromeWin.gSessionPath;
+			this.TMP_SessionStore = chromeWin.TMP_SessionStore;
 			if (!this.convertFile()) {
 				if (!this.confirm(this.gSessionManager._string("tmp_no_default"))) {
 					this.pickFile();
@@ -552,7 +562,7 @@ var gConvertTMPSession = {
 		}
 		else {
 			this.SessionManager.setLiteral("rdf:gSessionManager", "status", "converted");
-			this.SessionManager.dataFlush();
+			this.SessionManager.saveStateDelayed();
 		}
 		if (rv == 0) {
 			try {
@@ -693,35 +703,67 @@ var gConvertTMPSession = {
 			if (rdfNodeTab instanceof this.RDFResource) {
 				var closedTab = {};
 				closedTab.state = this.getTabState(rdfNodeTab);
-				closedTab.title = closedTab.state.entries[0].title;
+				closedTab.title = closedTab.state.entries[closedTab.state.index - 1].title;
+				if (this.isFirefox3)
+					closedTab.image = this.SessionManager.getLiteralValue(rdfNodeTab, "image");				 
 				closedTab.pos = this.SessionManager.getIntValue(rdfNodeTab, "tabPos");
-				_tabs.push(closedTab);
+				// we use in the RDF revers order
+				_tabs.unshift(closedTab);
 			}
 		}
 		return _tabs;
 	},
 
 	getTabState: function (rdfNodeTab) {
-		var tabData = {entries:[], index: 0, zoom: 1, disallow:"", xultab: "", extData: null, text:""};
+		var tabData = {entries:[], index: 0, zoom: 1, disallow:"", extData: null, text:""};
 		tabData.entries = this.getHistoryState(rdfNodeTab);
-		tabData.index = this.SessionManager.getIntValue(rdfNodeTab, "index");
+		tabData.index = this.SessionManager.getIntValue(rdfNodeTab, "index") + 1;
 		tabData.zoom = this.SessionManager.getLiteralValue(rdfNodeTab, "scroll").split(",")[2];
-		var tabProperties = this.SessionManager.getLiteralValue(rdfNodeTab, "properties");
+		var properties = this.SessionManager.getLiteralValue(rdfNodeTab, "properties");
 		var tabAttribute = ["Images","Subframes","MetaRedirects","Plugins","Javascript"];
+		
+		var booleanAttrLength = this.SessionData.tabAttribute.length + this.SessionData.docShellItems.length;
+		var tabProperties = properties.substr(0, booleanAttrLength);
 		var disallow = [];
-		for (var j = 2; j < tabProperties.length; j++ ) {
-			if (tabProperties.charAt(j) != "1")
+		for (var j = 0; j < tabAttribute.length; j++ ) {
+			if (tabProperties.charAt(j+2) != "1")
 				disallow.push(tabAttribute[j]);
 		}
 		tabData.disallow = disallow.join(",");
 		var xultab = [];
-		var image = this.SessionManager.getLiteralValue(rdfNodeTab, "image");
-		if (image)
-			xultab.push("image=" + image);
-		if (tabProperties.charAt(0) == "1")
-			xultab.push("protected=true");
-		xultab.push("_locked=" + (tabProperties.charAt(1) == "1"));
-		tabData.xultab = xultab.join(" ");
+		if (!this.isFirefox3) {
+			var image = this.SessionManager.getLiteralValue(rdfNodeTab, "image");
+			if (image)
+				xultab.push("image=" + image);
+		}
+		// xultab replace in fireofx 3.1+ with tabData.attributes
+		// but nsSessionStore can still read xultab
+		var useAttributes = this.TMP_SessionStore.noEnabledPref;
+		if (useAttributes) {
+			tabData.attributes = {};
+			if (tabProperties.charAt(0) == "1" && properties.indexOf("protected=") == -1)
+				tabData.attributes["protected"] = "true";
+			if (properties.indexOf("_locked=") == -1)
+				tabData.attributes["_locked"] = (tabProperties.charAt(1) == "1");
+
+			if (properties.length > booleanAttrLength) {
+				properties = properties.substr(booleanAttrLength + 1).split(" ");
+				properties.forEach(function(aAttr) {
+				  if (/^([^\s=]+)=(.*)/.test(aAttr)) {
+					 tabData.attributes[RegExp.$1] = RegExp.$2;
+				  }
+				});
+			}
+		}
+		else {
+			if (tabProperties.charAt(0) == "1" && properties.indexOf("protected=") == -1)
+				xultab.push("protected=true");
+			if (properties.indexOf("_locked=") == -1)
+				xultab.push("_locked=" + (tabProperties.charAt(1) == "1"));
+			tabData.xultab = xultab.join(" ");
+			if (properties.length > booleanAttrLength)
+			  tabData.xultab += properties.substr(booleanAttrLength + 1);
+		}
 		return tabData;
 	},
 
