@@ -72,6 +72,7 @@ var SessionManagerHelperComponent = {
 		case "app-startup":
 			os.addObserver(this, "profile-after-change", false);
 			os.addObserver(this, "final-ui-startup", false);
+			os.addObserver(this, "sessionstore-state-read", false);
 			break;
 		case "profile-after-change":
 			os.removeObserver(this, aTopic);
@@ -88,6 +89,14 @@ var SessionManagerHelperComponent = {
 				this._handle_crash();
 			}
 			catch (ex) {}
+			break;
+		case "sessionstore-state-read":
+			os.removeObserver(this, aTopic);
+			try 
+			{
+				this._check_for_crash(aSubject);
+			}
+			catch (ex) { report(ex); }
 			break;
 		}
 	},
@@ -106,8 +115,36 @@ var SessionManagerHelperComponent = {
 		{
 			dump("SessionManager: Removing active session\n");
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_name");
+			prefroot.deleteBranch("extensions.sessionmanager._autosave_time");
 			prefroot.deleteBranch("extensions.sessionmanager._running");
+			prefroot.deleteBranch("extensions.sessionmanager._allow_reload");
 		}
+	},
+	
+	// This will check to see if there was a crash and if so put up the crash prompt 
+	// to allow the user to choose a session to restore
+	_check_for_crash: function(aStateDataString)
+	{
+		try {
+			// parse the session state into JS objects
+			var s = new Components.utils.Sandbox("about:blank");
+			var initialState = Components.utils.evalInSandbox(aStateDataString.QueryInterface(Ci.nsISupportsString).data, s);
+		}
+		catch (ex) { debug("The session file is invalid: " + ex); } 
+    
+		var lastSessionCrashed =
+			initialState && initialState.session && initialState.session.state &&
+			initialState.session.state == "running";
+		
+		//report("Last Crashed = " + lastSessionCrashed);
+		if (lastSessionCrashed) {
+        	var params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
+        	// default to recovering
+        	params.SetInt(0, 0);
+        	Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher).
+        		openWindow(null, "chrome://sessionmanager/content/restore_prompt.xul", "_blank", "chrome,modal,centerscreen,titlebar", params);
+        	if (params.GetInt(0) == 1) aStateDataString.QueryInterface(Ci.nsISupportsString).data = "";
+    	}
 	},
 
 	// code adapted from Danil Ivanov's "Cache Fixer" extension
