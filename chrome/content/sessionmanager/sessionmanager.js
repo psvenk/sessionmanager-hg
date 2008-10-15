@@ -337,6 +337,7 @@ const SM_VERSION = "0.6.2.1";
 					this.mSessionCache = aSubject.gSessionManager.mSessionCache;
 				}
 			}
+			break;
 		case "nsPref:changed":
 			this["mPref_" + aData] = this.getPref(aData);
 			
@@ -449,12 +450,16 @@ const SM_VERSION = "0.6.2.1";
 		if (this.__window_session_name) 
 		{
 			this.closeSession(true);
-			this.mSessionStore().setWindowValue(window,"_sm_window_session_name","");
+			// Don't need to save autosave name in FF 3.0+ since when closed window is restored it will be overwritten
+			// and it will cause an exception if window's data has been wiped.
+			if (this.mAppVersion < "1.9") this.mSessionStore().setWindowValue(window,"_sm_autosave_name","");
 		}
 			
 		if (this.mPref__running && !this.mPref__stopping && this.getBrowserWindows().length != 0)
 		{
-			this.mSessionStore().setWindowValue(window,"_sm_autosave_name","");
+			// Don't need to save autosave name in FF 3.0+ since when closed window is restored it will be overwritten
+			// and it will cause an exception if window's data has been wiped.
+			if (this.mAppVersion < "1.9") this.mSessionStore().setWindowValue(window,"_sm_autosave_name","");
 			var state = this.getSessionState(null, true);
 			this.appendClosedWindow(state);
 			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
