@@ -146,7 +146,10 @@ const SM_VERSION = "0.6.2.5";
 		this.mPrefBranch2.addObserver("page", this, false);
 		
 		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
-		gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+		if (this.mPref_reload) {
+			gBrowser.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
+			gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+		}
 		
 		// Make sure resume_session is not null.  This could happen in 0.6.2.  It should no longer occur, but 
 		// better safe than sorry.
@@ -282,7 +285,10 @@ const SM_VERSION = "0.6.2.5";
 		this.mPrefBranch2.removeObserver("page", this);
 		
 		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
-		gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+		if (this.mPref_reload) {
+			gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+			gBrowser.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
+		}
 		gBrowser.mStrip.removeEventListener("click", this.onTabBarClick, false);
 		
 		// Last window closing will leaks briefly since "quit-application" observer is not removed from it 
@@ -378,6 +384,16 @@ const SM_VERSION = "0.6.2.5";
 			case "hide_tools_menu":
 				this.showHideToolsMenu();
 				break;
+			case "reload":
+				if (this.mPref_reload) {
+					gBrowser.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
+					gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+				}
+				else {
+					gBrowser.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
+					gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
+				}
+				break;
 			}
 			break;
 		case "quit-application-requested":
@@ -410,25 +426,43 @@ const SM_VERSION = "0.6.2.5";
 	{
 		gSessionManager.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", "tab");
 	},
+	
+	// This is to try and prevent tabs that are closed during the restore preocess from actually reloading.  
+	// It doesn't work all the time, but it's better than nothing.
+	onTabRestoring_proxy: function(aEvent) {
+		// If tab reloading enabled and not offline
+		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
+
+			if (gSessionManager.mSessionStore().getTabValue(aEvent.originalTarget, "session_manager_reload")) {
+				gSessionManager.mSessionStore().deleteTabValue(aEvent.originalTarget, "session_manager_reload");
+			}
+			else if (gSessionManager.mSessionStore().getTabValue(aEvent.originalTarget, "session_manager_allow_reload")) {
+				gSessionManager.mSessionStore().deleteTabValue(aEvent.originalTarget, "session_manager_allow_reload");
+				gSessionManager.mSessionStore().setTabValue(aEvent.originalTarget, "session_manager_reload", true);
+			}
+		}
+	},
 
 	onTabRestored_proxy: function(aEvent)
 	{
-		var browser = this.getBrowserForTab(aEvent.originalTarget);
+		// If tab reloading enabled and not offline
+		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
 
-		// Count down the number of reloads allowed and then delete preference when done
-		var allowReload = gSessionManager.getPref("_allow_reload", 0);
-		//dump("Allow Reload = " + allowReload + " for " + aEvent.originalTarget.label + "\n");
-		if (allowReload > 0) {
-			gSessionManager.setPref("_allow_reload", allowReload - 1);
-		}
-		else {
-			gSessionManager.delPref("_allow_reload");
-		}
-		if (gSessionManager.mPref_reload && allowReload && !gSessionManager.mIOService.offline)
-		{
-			//dump("reloading\n");
-			var nsIWebNavigation = Components.interfaces.nsIWebNavigation;
-			browser.reloadWithFlags(nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE);
+			// Restore tabs that are marked restore.
+			var allowReload = gSessionManager.mSessionStore().getTabValue(aEvent.originalTarget, "session_manager_reload");
+			if (allowReload == "true")
+			{
+				var nsIWebNavigation = Components.interfaces.nsIWebNavigation;
+				var browser = this.getBrowserForTab(aEvent.originalTarget);
+				browser.reloadWithFlags(nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE);
+				
+				// no longer allow tab to reload
+				try {
+					gSessionManager.mSessionStore().deleteTabValue(aEvent.originalTarget, "session_manager_reload");
+					gSessionManager.mSessionStore().deleteTabValue(aEvent.originalTarget, "session_manager_allow_reload");
+				}
+				catch (ex) { dump(ex + "\n"); }
+			}
 		}
 	},
 	
@@ -786,10 +820,24 @@ const SM_VERSION = "0.6.2.5";
 			});
 		}
 
-		// Allow restoring of tabs (tabs is the number of tabs in the sessions)	
-		var tabs = this.countTabs(state);
-		if (tabs) this.setPref("_allow_reload", parseInt(tabs));
-		else this.delPref("_allow_reload");
+		// If reload tabs enabled and not offline, set the tabs to allow reloading
+		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
+			try {
+				state = this.decrypt(state);
+		
+				var tempState = eval("(" + state + ")");
+				for (var i in tempState.windows) {
+					for (var j in tempState.windows[i].tabs) {
+						if (tempState.windows[i].tabs[j].entries && tempState.windows[i].tabs[j].entries.length != 0) {
+							if (!tempState.windows[i].tabs[j].extData) tempState.windows[i].tabs[j].extData = {};
+							tempState.windows[i].tabs[j].extData["session_manager_allow_reload"] = true;
+						}
+					}
+				}
+				state = uneval(tempState);
+			}
+			catch (ex) { dump(ex + "\n"); };
+		}
 		
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
@@ -1047,9 +1095,6 @@ const SM_VERSION = "0.6.2.5";
 				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 			}
 			
-			// Disallow restoring of tabs		
-			this.delPref("_allow_reload");
-		
 			var okay = this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append");
 			if (okay) {
 				this.storeClosedWindows(closedWindows);
@@ -1575,7 +1620,6 @@ const SM_VERSION = "0.6.2.5";
 		
 		this.delPref("_encrypted");
 		this.delPref("_running");
-		this.delPref("_allow_reload");
 		this.mPref__running = false;
 
 		// Cleanup left over files from Crash Recovery
@@ -2281,26 +2325,6 @@ const SM_VERSION = "0.6.2.5";
 		catch (ex) { dump(ex + "\n"); };
 
 		return { windows: windows, tabs: tabs };
-	},
-	
-	// count valid tabs
-	countTabs: function (aState)
-	{
-		var tabs = 0;
-		try {
-			aState = this.decrypt(aState);
-		
-			aState = eval("(" + aState + ")");
-			aState.windows.forEach(function(aWindow) {
-				for (var i in aWindow.tabs) {
-					if (aWindow.tabs[i].entries && aWindow.tabs[i].entries.length != 0) tabs = tabs + 1;
-				}
-			});
-		}
-		catch (ex) { dump(ex + "\n"); };
-
-		//dump("Tabs = " + tabs + "\n");
-		return tabs;
 	},
 	
 	// Work around for bug 350558 which mangles the _closedTabs.state.entries 
