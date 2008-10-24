@@ -478,9 +478,8 @@ var gConvertTMPSession = {
 		}
 		else {
 			this.SessionManager = chromeWin.SessionManager;
-			this.SessionData = chromeWin.SessionData;
+			this.convertSession = chromeWin.convertSession;
 			this.gSessionPath = chromeWin.gSessionPath;
-			this.TMP_SessionStore = chromeWin.TMP_SessionStore;
 			if (!this.convertFile()) {
 				if (!this.confirm(this.gSessionManager._string("tmp_no_default"))) {
 					this.pickFile();
@@ -606,7 +605,7 @@ var gConvertTMPSession = {
 
 		for (var i = 0; i < sessions.path.length; i++ ) {
 			if (!convert[i]) continue;
-			var sessionState = this.getSessionState(sessions.path[i]);
+			var sessionState = this.convertSession.getSessionState(sessions.path[i]);
 
 			// get timestamp from nameExt property
 			var dateString = "", fileDate;
@@ -652,135 +651,5 @@ var gConvertTMPSession = {
 			return false;
 		}
 		return true;
-	},
-
-	getSessionState: function (aPath) {
-		var _windows = [];
-		var sessionEnum = this.SessionManager.initContainer(aPath).GetElements();
-		while (sessionEnum.hasMoreElements()) {
-			var rdfNodeWindow = sessionEnum.getNext();
-			if (rdfNodeWindow instanceof this.RDFResource) {
-				var windowPath = rdfNodeWindow.QueryInterface(this.RDFResource).Value;
-				if (this.SessionManager.nodeHasArc(windowPath, "dontLoad"))
-					continue;
-				var aWindowState = this.getWindowState(rdfNodeWindow);
-				if (aWindowState) // don't save empty windows
-					_windows.push(aWindowState);
-			}
-		}
-		return { windows: _windows };
-	},
-
-	getWindowState: function (rdfNodeWindow) {
-		var state = { tabs: [], selected: 0, _closedTabs: [] };
-
-		var rdfNodeTabs = this.SessionManager.getResource(rdfNodeWindow, "tabs");
-		if (!(rdfNodeTabs instanceof this.RDFResource) || this.SessionManager.containerEmpty(rdfNodeTabs)) {
-			return null;
-		}
-		state.tabs = this.getTabsState(rdfNodeTabs);
-		state._closedTabs = this.getClosedTabsState(this.SessionManager.getResource(rdfNodeWindow, "closedtabs"));
-		state.selected = this.SessionManager.getIntValue(rdfNodeWindow, "selectedIndex");
-		return state;
-	},
-
-	getTabsState: function (rdfNodeTabs) {
-		var _tabs = [];
-		var tabsEnum = this.SessionManager.initContainer(rdfNodeTabs).GetElements();
-		while (tabsEnum.hasMoreElements()) {
-			var rdfNodeTab = tabsEnum.getNext();
-			if (rdfNodeTab instanceof this.RDFResource)
-				_tabs.push(this.getTabState(rdfNodeTab));
-		}
-		return _tabs;
-	},
-
-	getClosedTabsState: function (rdfNodeTabs) {
-		var _tabs = [];
-		var tabsEnum = this.SessionManager.initContainer(rdfNodeTabs).GetElements();
-		while (tabsEnum.hasMoreElements()) {
-			var rdfNodeTab = tabsEnum.getNext();
-			if (rdfNodeTab instanceof this.RDFResource) {
-				var closedTab = {};
-				closedTab.state = this.getTabState(rdfNodeTab);
-				closedTab.title = closedTab.state.entries[closedTab.state.index - 1].title;
-				if (this.isFirefox3)
-					closedTab.image = this.SessionManager.getLiteralValue(rdfNodeTab, "image");				 
-				closedTab.pos = this.SessionManager.getIntValue(rdfNodeTab, "tabPos");
-				// we use in the RDF revers order
-				_tabs.unshift(closedTab);
-			}
-		}
-		return _tabs;
-	},
-
-	getTabState: function (rdfNodeTab) {
-		var tabData = {entries:[], index: 0, zoom: 1, disallow:"", extData: null, text:""};
-		tabData.entries = this.getHistoryState(rdfNodeTab);
-		tabData.index = this.SessionManager.getIntValue(rdfNodeTab, "index") + 1;
-		tabData.zoom = this.SessionManager.getLiteralValue(rdfNodeTab, "scroll").split(",")[2];
-		var properties = this.SessionManager.getLiteralValue(rdfNodeTab, "properties");
-		var tabAttribute = ["Images","Subframes","MetaRedirects","Plugins","Javascript"];
-		
-		var booleanAttrLength = this.SessionData.tabAttribute.length + this.SessionData.docShellItems.length;
-		var tabProperties = properties.substr(0, booleanAttrLength);
-		var disallow = [];
-		for (var j = 0; j < tabAttribute.length; j++ ) {
-			if (tabProperties.charAt(j+2) != "1")
-				disallow.push(tabAttribute[j]);
-		}
-		tabData.disallow = disallow.join(",");
-		var xultab = [];
-		if (!this.isFirefox3) {
-			var image = this.SessionManager.getLiteralValue(rdfNodeTab, "image");
-			if (image)
-				xultab.push("image=" + image);
-		}
-		// xultab replace in fireofx 3.1+ with tabData.attributes
-		// but nsSessionStore can still read xultab
-		var useAttributes = this.TMP_SessionStore.noEnabledPref;
-		if (useAttributes) {
-			tabData.attributes = {};
-			if (tabProperties.charAt(0) == "1" && properties.indexOf("protected=") == -1)
-				tabData.attributes["protected"] = "true";
-			if (properties.indexOf("_locked=") == -1)
-				tabData.attributes["_locked"] = (tabProperties.charAt(1) == "1");
-
-			if (properties.length > booleanAttrLength) {
-				properties = properties.substr(booleanAttrLength + 1).split(" ");
-				properties.forEach(function(aAttr) {
-				  if (/^([^\s=]+)=(.*)/.test(aAttr)) {
-					 tabData.attributes[RegExp.$1] = RegExp.$2;
-				  }
-				});
-			}
-		}
-		else {
-			if (tabProperties.charAt(0) == "1" && properties.indexOf("protected=") == -1)
-				xultab.push("protected=true");
-			if (properties.indexOf("_locked=") == -1)
-				xultab.push("_locked=" + (tabProperties.charAt(1) == "1"));
-			tabData.xultab = xultab.join(" ");
-			if (properties.length > booleanAttrLength)
-			  tabData.xultab += properties.substr(booleanAttrLength + 1);
-		}
-		return tabData;
-	},
-
-	getHistoryState: function (rdfNodeTab) {
-		var tmpData = this.SessionManager.getLiteralValue(rdfNodeTab, "history").split("|-|");
-		var sep = tmpData.shift(); // remove seperator from data
-		var historyData = tmpData.join("|-|").split(sep);
-		var historyCount = historyData.length/3;
-		var entries = [];
-		for ( var i = 0; i < historyCount; i++ ){
-			var entry = { url:"", children:[], ID: 0};
-			var index = i * 3;
-			entry.url = historyData[index + 1];
-			entry.title = unescape(historyData[index]);
-			entry.scroll = historyData[index + 2];
-			entries.push(entry);
-		}
-		return entries;
 	}
 }
