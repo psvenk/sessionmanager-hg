@@ -1,6 +1,8 @@
-const SM_VERSION = "0.6.2.1";
+const SM_VERSION = "0.6.2.5";
 
 /*const*/ var gSessionManager = {
+	_inPrivateBrowsing: false,
+	
 	mSessionStoreValue : null,
 	mSessionStartupValue : null,
 	mObserverService: Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService),
@@ -12,7 +14,7 @@ const SM_VERSION = "0.6.2.1";
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted"],
+	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted", "browser:private-browsing"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mBackupSessionRegEx: /^backup(-[1-9](\d)*)?\.session$/,
@@ -205,12 +207,8 @@ const SM_VERSION = "0.6.2.1";
 			eval("gBrowser.undoRemoveTab = " + gBrowser.undoRemoveTab.toString().replace("return this", "gSessionManager.mObserverService.notifyObservers(window, 'sessionmanager:windowtabopenclose', 'tab'); $&"));
 		}
 		
-		// Don't allow tab to reload when restoring closed tab
-		if (undoCloseTab) {
-			eval("undoCloseTab = " + undoCloseTab.toString().replace("var tabbrowser", "window.gSessionManager._allowReload = false; $&"));
-		}
 		// SeaMonkey doesn't have an undoCloseTab function so create one
-		else {
+		if (!undoCloseTab) {
 			eval("undoCloseTab = gSessionManager.undoCloseTabSM");
 		}
 		
@@ -225,7 +223,6 @@ const SM_VERSION = "0.6.2.1";
 		//if (this.__window_session_name) escape(this.__window_session_name);
 		//dump("restore done " + this.__window_session_name + "\n");
 
-		
 		// Remove change made in 0.6 (only do this once)
 		if (this.getPref("version", "") == "0.6")
 		{
@@ -235,6 +232,9 @@ const SM_VERSION = "0.6.2.1";
 		// One time message on update
 		if (this.getPref("version", "") != SM_VERSION)
 		{
+			// this isn't used anymore
+			this.delPref("_no_reload");
+			
 			this.setPref("version", SM_VERSION);
 			setTimeout(function() {
 				var tBrowser = getBrowser();
@@ -329,6 +329,9 @@ const SM_VERSION = "0.6.2.1";
 		case "browser:purge-session-history":
 			this.clearUndoData("all");
 			break;
+		case "browser:private-browsing":
+			this._inPrivateBrowsing = (aData == "enter");
+			break;
 		case "sessionmanager-list-update":
 			// this session cache from updated window so this window doesn't need to read from disk
 			if (window != aSubject) {
@@ -374,6 +377,7 @@ const SM_VERSION = "0.6.2.1";
 				break;
 			case "hide_tools_menu":
 				this.showHideToolsMenu();
+				break;
 			}
 			break;
 		case "quit-application-requested":
@@ -393,11 +397,6 @@ const SM_VERSION = "0.6.2.1";
 			{
 				this.shutDown();
 			}
-			else
-			{
-				// don't reload tabs after restart
-				this.setPref("_no_reload", true);
-			}
 			break;
 		case "quit-application-granted":
 			// quit granted so stop listening for closed windows
@@ -416,8 +415,18 @@ const SM_VERSION = "0.6.2.1";
 	{
 		var browser = this.getBrowserForTab(aEvent.originalTarget);
 
-		if (gSessionManager.mPref_reload && gSessionManager._allowReload && !gSessionManager.mIOService.offline)
+		// Count down the number of reloads allowed and then delete preference when done
+		var allowReload = gSessionManager.getPref("_allow_reload", 0);
+		//dump("Allow Reload = " + allowReload + " for " + aEvent.originalTarget.label + "\n");
+		if (allowReload > 0) {
+			gSessionManager.setPref("_allow_reload", allowReload - 1);
+		}
+		else {
+			gSessionManager.delPref("_allow_reload");
+		}
+		if (gSessionManager.mPref_reload && allowReload && !gSessionManager.mIOService.offline)
 		{
+			//dump("reloading\n");
 			var nsIWebNavigation = Components.interfaces.nsIWebNavigation;
 			browser.reloadWithFlags(nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE);
 		}
@@ -515,10 +524,16 @@ const SM_VERSION = "0.6.2.1";
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
 		save.hidden = (this.getBrowserWindows().length == 1);
 		
+		// Disable saving in privacy mode
+		this.setDisabled(save, this._inPrivateBrowsing);
+		this.setDisabled(save.nextSibling, this._inPrivateBrowsing);
+		this.setDisabled(save.nextSibling.nextSibling,this._inPrivateBrowsing);
+		
 		var windowSessions = this.getWindowSessions();
 		var sessions = this.getSessions(true);
 		var count = 0;
 		var backupCount = 0;
+		var user_latest = backup_latest = false;
 		sessions.forEach(function(aSession, aIx) {
 			if (!aSession.backup && (this.mPref_max_display >= 0) && (count >= this.mPref_max_display)) return;
 	
@@ -530,10 +545,15 @@ const SM_VERSION = "0.6.2.1";
 			menuitem.setAttribute("contextmenu", "sessionmanager-ContextMenu");
 			menuitem.setAttribute("filename", aSession.fileName);
 			menuitem.setAttribute("accesskey", key);
-			menuitem.setAttribute("autosave", aSession.autosave);
+			menuitem.setAttribute("autosave", /^window|session/.exec(aSession.autosave));
 			menuitem.setAttribute("disabled", windowSessions[aSession.name.trim().toLowerCase()] || false);
-			if (sessions.latestTime == aSession.timestamp) menuitem.setAttribute("latest", true);
-			if (sessions.latestBackUpTime == aSession.timestamp) menuitem.setAttribute("latest", true);
+			// only display one latest (even if two have the same timestamp)
+			if (!(aSession.backup?backup_latest:user_latest) &&
+			    ((aSession.backup?sessions.latestBackUpTime:sessions.latestTime) == aSession.timestamp)) {
+				menuitem.setAttribute("latest", true);
+				if (aSession.backup) backup_latest = true;
+				else user_latest = true;
+			}
 			if (aSession.name == this.mPref__autosave_name) menuitem.setAttribute("disabled", true);
 			if (aSession.backup) {
 				backupCount++;
@@ -592,6 +612,7 @@ const SM_VERSION = "0.6.2.1";
 
 	save: function(aName, aFileName, aOneWindow)
 	{
+		if (this._inPrivateBrowsing) return;
 		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString(), autoSaveable : true };
 		if (!aName)
 		{
@@ -649,7 +670,7 @@ const SM_VERSION = "0.6.2.1";
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
 			{
-				this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true));
+				if (!this._inPrivateBrowsing) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true));
 			}
 			catch (ex)
 			{
@@ -712,6 +733,10 @@ const SM_VERSION = "0.6.2.1";
 				this.setPref("_autosave_name", name);
 			}
 		}
+		else {
+			this.ioError();
+			return;
+		}
 		
 		var newWindow = false;
 		var overwriteTabs = true;
@@ -761,9 +786,14 @@ const SM_VERSION = "0.6.2.1";
 			});
 		}
 
+		// Allow restoring of tabs (tabs is the number of tabs in the sessions)	
+		var tabs = this.countTabs(state);
+		if (tabs) this.setPref("_allow_reload", parseInt(tabs));
+		else this.delPref("_allow_reload");
+		
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, true, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode);
+			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode);
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
@@ -1017,7 +1047,10 @@ const SM_VERSION = "0.6.2.1";
 				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 			}
 			
-			var okay = this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append", false);
+			// Disallow restoring of tabs		
+			this.delPref("_allow_reload");
+		
+			var okay = this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append");
 			if (okay) {
 				this.storeClosedWindows(closedWindows);
 				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
@@ -1131,7 +1164,21 @@ const SM_VERSION = "0.6.2.1";
 	session_popupInit: function(aPopup) {
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
-		get_("replace").hidden = (this.getBrowserWindows().length == 1);
+		var current = (document.popupNode.getAttribute("disabled") == "true");
+		var replace = get_("replace");
+		
+		replace.hidden = (this.getBrowserWindows().length == 1);
+		
+		// Disable saving in privacy mode or loaded auto-save session
+		this.setDisabled(replace, (this._inPrivateBrowsing | current));
+		this.setDisabled(get_("replacew"), (this._inPrivateBrowsing | current));
+		
+		// Disable almost everything for currently loaded auto-save session
+		this.setDisabled(get_("loada"), current);
+		this.setDisabled(get_("loadr"), current);
+		
+		// Disable setting startup if already startup
+		this.setDisabled(get_("startup"), ((this.mPref_startup == 2) && (document.popupNode.getAttribute("filename") == this.mPref_resume_session)));
 	},
 
 	session_load: function(aReplace) {
@@ -1172,6 +1219,10 @@ const SM_VERSION = "0.6.2.1";
 		var session = document.popupNode.getAttribute("filename");
 		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm"))) {
 			if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
+			// if currently loaded autosave session clear autosave name
+			if (document.popupNode.getAttribute("disabled") == "true") {
+				this.setPref("_autosave_name","");
+			}
 			this.remove(session);
 		}
 	},
@@ -1199,13 +1250,14 @@ const SM_VERSION = "0.6.2.1";
 		var params = Components.classes["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Components.interfaces.nsIDialogParamBlock);
 		aValues = aValues || {};
 		
-		params.SetNumberStrings(7);
+		params.SetNumberStrings(8);
 		params.SetString(1, aSessionLabel);
 		params.SetString(2, aAcceptLabel);
 		params.SetString(3, aValues.name || "");
 		params.SetString(4, aTextLabel || "");
 		params.SetString(5, aAcceptExistingLabel || "");
 		params.SetString(6, aValues.text || "");
+		params.SetString(7, aValues.count || "");
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
 						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.allowNamedReplace)?256:0));
 		
@@ -1357,9 +1409,8 @@ const SM_VERSION = "0.6.2.1";
 	{
 		var matchArray;
 		var sessions = [];
-		var latest = 0;
-		var latest_backup = 0;
 		var trueUpdate = false;
+		sessions.latestTime = sessions.latestBackUpTime = 0;
 		
 		var filesEnum = this.getSessionDir().directoryEntries.QueryInterface(this.mComponents.interfaces.nsISimpleEnumerator);
 		while (filesEnum.hasMoreElements())
@@ -1375,14 +1426,12 @@ const SM_VERSION = "0.6.2.1";
 				} catch(ex) { 
 					dump ("Session Manager: Bad Regular Expression passed to getSessions, ignoring\n"); 
 				}
-				if (!backupItem && (latest < cached.timestamp)) 
+				if (!backupItem && (sessions.latestTime < cached.timestamp)) 
 				{
 					sessions.latestTime = cached.timestamp;
-					latest = cached.timestamp;
 				}
-				else if (backupItem && (latest_backup < cached.timestamp)) {
+				else if (backupItem && (sessions.latestBackUpTime < cached.timestamp)) {
 					sessions.latestBackUpTime = cached.timestamp;
-					latest_backup = cached.timestamp;
 				}
 				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs, backup: backupItem });
 				continue;
@@ -1395,18 +1444,18 @@ const SM_VERSION = "0.6.2.1";
 					dump ("Session Manager: Bad Regular Expression passed to getSessions, ignoring\n"); 
 				}
 				var timestamp = parseInt(matchArray[2]) || file.lastModifiedTime;
-				if (!backupItem && (latest < timestamp)) 
+				if (!backupItem && (sessions.latestTime < timestamp)) 
 				{
 					sessions.latestTime = timestamp;
-					latest = timestamp;
 				}
-				else if (backupItem && (latest_backup < timestamp)) {
+				else if (backupItem && (sessions.latestBackUpTime < timestamp)) {
 					sessions.latestBackUpTime = timestamp;
-					latest_backup = timestamp;
 				}
 				sessions.push({ fileName: fileName, name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], windows: matchArray[4], tabs: matchArray[5], backup: backupItem });
 				this.mSessionCache[fileName] = { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: file.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem };
-				this.mSessionCache.timestamp = timestamp;
+				
+				// update last file modified time
+				if (this.mSessionCache.timestamp < file.lastModifiedTime) this.mSessionCache.timestamp = file.lastModifiedTime;
 				trueUpdate = true;
 			}
 		}
@@ -1471,7 +1520,7 @@ const SM_VERSION = "0.6.2.1";
 
 	appendClosedWindow: function(aState)
 	{
-		if (this.mPref_max_closed_undo == 0 || Array.every(gBrowser.browsers, this.isCleanBrowser))
+		if (this.mPref_max_closed_undo == 0 || this._inPrivateBrowsing || Array.every(gBrowser.browsers, this.isCleanBrowser))
 		{
 			return;
 		}
@@ -1514,11 +1563,11 @@ const SM_VERSION = "0.6.2.1";
 			// save the currently opened session (if there is one)
 			if (!this.closeSession(false))
 			{
-				this.backupCurrentSession();
+				if (!this._inPrivateBrowsing) this.backupCurrentSession();
 			}
 			else
 			{
-				this.keepOldBackups(false);
+				if (!this._inPrivateBrowsing) this.keepOldBackups(false);
 			}
 			
 			this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
@@ -1526,8 +1575,9 @@ const SM_VERSION = "0.6.2.1";
 		
 		this.delPref("_encrypted");
 		this.delPref("_running");
+		this.delPref("_allow_reload");
 		this.mPref__running = false;
-		
+
 		// Cleanup left over files from Crash Recovery
 		if (this.getPref("extensions.crashrecovery.resume_session_once", false, true))
 		{	
@@ -1541,8 +1591,10 @@ const SM_VERSION = "0.6.2.1";
 	{
 		try
 		{
-			var state = this.getSessionState(this._string("autosave_session"));
-			this.writeFile(this.getSessionDir(this.mAutoSaveSessionName), state);
+			if (!this._inPrivateBrowsing) {
+				var state = this.getSessionState(this._string("autosave_session"));
+				this.writeFile(this.getSessionDir(this.mAutoSaveSessionName), state);
+			}
 		}
 		catch (ex)
 		{
@@ -1562,7 +1614,8 @@ const SM_VERSION = "0.6.2.1";
 			try {
 				var aState = eval("(" + this.decrypt(state.split("\n")[4]) + ")");
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
-		    		(aState.windows[0].tabs[0].entries.length > 1) || (aState.windows[0].tabs[0].entries[0].url != "about:blank"))) {
+		    		(aState.windows[0].tabs[0].entries.length > 1) || 
+		    		((aState.windows[0].tabs[0].entries.length == 1 && aState.windows[0].tabs[0].entries[0].url != "about:blank")))) {
 					backup = 0;
 				}
 			} catch(ex) { dump(ex); }
@@ -1617,7 +1670,7 @@ const SM_VERSION = "0.6.2.1";
 		
 		if (this.mPref_max_backup_keep != -1)
 		{
-			this.getSessions().filter(function(aSession) {
+			this.getSessions(true).filter(function(aSession) {
 				return /^backup-\d+\.session$/.test(aSession.fileName);
 			}).sort(function(a, b) {
 				return b.timestamp - a.timestamp;
@@ -1689,10 +1742,17 @@ const SM_VERSION = "0.6.2.1";
 					// happen so session is probably corrupted anyway so just flag it so.
 					if (/(\d\/0)|(0\/\d)/.test(countString)) 
 					{
-						state = state.replace(/^\[SessionManager\]\n/,"[Bad-SessionManager]\n");
-						var leafName = aFile.leafName;
-						this.delFile(aFile, true);
-						aFile = this.getSessionDir(aFile.leafName + ".bad");
+						// If one window and no tabs (blank session), delete file otherwise mark it bad
+						if (countString == "\tcount=1/0\n") {
+							this.delFile(aFile, true);
+							return null;
+						}
+						else {
+							state = state.replace(/^\[SessionManager\]\n/,"[Bad-SessionManager]\n");
+							var leafName = aFile.leafName;
+							this.delFile(aFile, true);
+							aFile = this.getSessionDir(aFile.leafName + ".bad");
+						}
 					}
 					this.writeFile(aFile, state);
 				}
@@ -2134,14 +2194,10 @@ const SM_VERSION = "0.6.2.1";
 		                    ?(this.mSessionStartupValue._sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
 		                    :this.getPref("browser.sessionstore.resume_session_once", false, true);
 		var recoverOnly = this.mPref__running || sessionstart;
-		var no_reload = this.getPref("_no_reload");
-		if (no_reload) this.delPref("_no_reload");
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
 			this.delPref("_recovering");
-			this.delPref("_autosave_name");   // if user chooses another session, forget current session
-			this.mPref__autosave_name = "";
 			this.load(recovering, "startup");
 		}
 		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions(true).length > 0)
@@ -2166,8 +2222,6 @@ const SM_VERSION = "0.6.2.1";
 		}
 		// handle browser reload with same session and when opening new windows
 		else if (recoverOnly) {
-			// only reload if didn't recover from crash
-			if (!no_reload) this._allowReload = true;
 			setTimeout(function() {
 				//dump("Recovery autosave_name: " + gSessionManager.mPref__autosave_name + "\n");
 				gSessionManager.mSessionStore().setWindowValue(window,"_sm_autosave_name",escape(gSessionManager.mPref__autosave_name));
@@ -2206,8 +2260,6 @@ const SM_VERSION = "0.6.2.1";
 	// Undo closed tab function for SeaMonkey
 	undoCloseTabSM: function (aIndex)
 	{
-		window.gSessionManager._allowReload = false;
-		
 		if (gSessionManager.mSessionStore().getClosedTabCount(window) == 0)	return;
 		gSessionManager.mSessionStore().undoCloseTab(window, aIndex || 0);
 	},
@@ -2226,9 +2278,29 @@ const SM_VERSION = "0.6.2.1";
 				tabs = tabs + aWindow.tabs.length;
 			});
 		}
-		catch (ex) {};
+		catch (ex) { dump(ex + "\n"); };
 
 		return { windows: windows, tabs: tabs };
+	},
+	
+	// count valid tabs
+	countTabs: function (aState)
+	{
+		var tabs = 0;
+		try {
+			aState = this.decrypt(aState);
+		
+			aState = eval("(" + aState + ")");
+			aState.windows.forEach(function(aWindow) {
+				for (var i in aWindow.tabs) {
+					if (aWindow.tabs[i].entries && aWindow.tabs[i].entries.length != 0) tabs = tabs + 1;
+				}
+			});
+		}
+		catch (ex) { dump(ex + "\n"); };
+
+		//dump("Tabs = " + tabs + "\n");
+		return tabs;
 	},
 	
 	// Work around for bug 350558 which mangles the _closedTabs.state.entries 
@@ -2277,7 +2349,7 @@ const SM_VERSION = "0.6.2.1";
 				"\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aAllowReload, aStripClosedTabs, aEntireSession, aOneWindow)
+	restoreSession: function(aWindow, aState, aReplaceTabs, aStripClosedTabs, aEntireSession, aOneWindow)
 	{
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
@@ -2288,7 +2360,7 @@ const SM_VERSION = "0.6.2.1";
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
 			aWindow.__SM_restore = function() {
 				this.removeEventListener("load", this.__SM_restore, true);
-				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aAllowReload, aStripClosedTabs);
+				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aStripClosedTabs);
 				this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore().getWindowValue(aWindow,"_sm_window_session_name"));
 				//dump("restore win " + this.gSessionManager.__window_session_name + "\n");
 				delete this.__SM_restore;
@@ -2300,7 +2372,6 @@ const SM_VERSION = "0.6.2.1";
 		//Try and fix bug35058 even in FF 3.0, because session might have been saved under FF 2.0
 		aState = this.handleTabUndoData(aState, aStripClosedTabs, false, true);  
 		
-		this._allowReload = aAllowReload;
 		if (aEntireSession)
 		{
 			this.mSessionStore().setBrowserState(aState);
@@ -2418,7 +2489,7 @@ const SM_VERSION = "0.6.2.1";
 		return windows;
 	},
 
-	doResumeCurrent: function(aOnce)
+	doResumeCurrent: function()
 	{
 		return (this.getPref("browser.startup.page", 1, true) == 3)?true:false;
 	},
