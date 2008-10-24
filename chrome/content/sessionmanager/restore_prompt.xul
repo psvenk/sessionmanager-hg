@@ -3,89 +3,10 @@
 <!DOCTYPE dialog>
 
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
-	
 	<stringbundleset id="stringbundleset">
 		<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
 	</stringbundleset>
 	
-	<script type="application/x-javascript"><![CDATA[
-		gSessionManager.restorePrompt = function() {
-			this.onLoad(true);
-			this.onLoad = function() { };
-			this.onUnload = function() { };
-			
-			var params = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
-			params.SetInt(0, 0);
-			
-			var values = { name: "*", addCurrentSession: true, ignorable: false }
-			var fileName = (location.search != "?cancel")?this.selectSession(this._string("recover_session"), this._string("recover_session_ok"), values):"";
-			if (fileName != "*")
-			{
-				if (fileName)
-				{
-					this.setPref("_recovering", fileName);
-				}
-				else if (!this.getPref("save_window_list", false))
-				{
-					this.clearUndoData("window", true);
-				}
-				params.SetInt(0, 1); // don't recover the crashed session
-			}
-			else
-			{
-				// don't reload tabs after resume from crash
-				this.setPref("_no_reload", true);
-			}
-			
-			// save crashed session
-			var file = this.getProfileFile("sessionstore.js");
-			if (file.exists())
-			{
-				var name = this.getFormattedName("", new Date(), this._string("crashed_session"));
-				var state = this.nameState(this.readFile(file), name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false");
-				this.writeFile(this.getSessionDir(this.mBackupSessionName, true), state);
-				
-				// find if there was an autosave session active at time of crash and get its name
-				if (/_sm_autosave_name:\"([^\s]*)\"/m.test(state))
-				{
-					var autosave_name = unescape(RegExp.$1);
-					if (autosave_name != "")
-					{
-						// if not recovering last session
-						if (fileName != "*")
-						{
-							// Get name of chosen session
-							var chosen_name = null;
-							if (/^(\[SessionManager\])(?:\nname=(.*))?/m.test(this.readSessionFile(this.getSessionDir(fileName,false), true))) chosen_name = RegExp.$2;
-							// not recovering autosave session
-							if (chosen_name != autosave_name)
-							{
-								var autosave_state = this.nameState(this.readFile(file), autosave_name + 
-								                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=session");
-								this.writeFile(this.getSessionDir(this.makeFileName(autosave_name), false), autosave_state);
-								this.delPref("_autosave_name");
-							}
-							// choose to recover autosave session so just recover last session
-							else 
-							{
-								// don't reload tabs after resume from crash
-								this.setPref("_no_reload", true);
-								this.delPref("_recovering");
-								this.setPref("_autosave_name", autosave_name);
-								params.SetInt(0, 0);
-							}
-						}
-						// recovering last session
-						else this.setPref("_autosave_name", autosave_name);
-					}
-					// name was blank somehow so delete preference in case its there
-					else this.delPref("_autosave_name");
-				}
-			}
-		};
-		
-		gSessionManager.restorePrompt();
-		window.close();
-	]]></script>
+	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
+	<script type="application/x-javascript" src="chrome://sessionmanager/content/restore_prompt.js"/>
 </dialog>
