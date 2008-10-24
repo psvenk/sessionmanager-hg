@@ -133,16 +133,16 @@
 	</menupopup>
 	
 	<menupopup id="sessionmanager-ContextMenu" onpopupshowing="gSessionManager.session_popupInit(this);">
-		<menuitem label="&load_replace.label;" accesskey="&load_replace.accesskey;" oncommand="gSessionManager.session_load(true);"/>
-		<menuitem label="&load_append.label;" accesskey="&load_append.accesskey;" oncommand="gSessionManager.session_load(false);"/>
+		<menuitem _id="loadr" label="&load_replace.label;" accesskey="&load_replace.accesskey;" oncommand="gSessionManager.session_load(true);"/>
+		<menuitem _id="loada" label="&load_append.label;" accesskey="&load_append.accesskey;" oncommand="gSessionManager.session_load(false);"/>
 		<menuseparator/>
 		<menuitem _id="replace" label="&replace_all.label;" accesskey="&replace_all.accesskey;" oncommand="gSessionManager.session_replace(false);"/>
-		<menuitem label="&replace_window.label;" accesskey="&replace_window.accesskey;" oncommand="gSessionManager.session_replace(true);"/>
+		<menuitem _id="replacew" label="&replace_window.label;" accesskey="&replace_window.accesskey;" oncommand="gSessionManager.session_replace(true);"/>
 		<menuseparator/>
 		<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.session_rename();"/>
 		<menuitem label="&remove_one.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.session_remove();"/>
 		<menuseparator/>
-		<menuitem label="&set_startup.label;" accesskey="&set_startup.accesskey;" oncommand="gSessionManager.session_setStartup();"/>
+		<menuitem _id="startup" label="&set_startup.label;" accesskey="&set_startup.accesskey;" oncommand="gSessionManager.session_setStartup();"/>
 	</menupopup>
 	
 	<menupopup id="sessionmanager-undo-ContextMenu">
