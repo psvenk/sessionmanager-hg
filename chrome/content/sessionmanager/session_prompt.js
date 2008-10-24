@@ -22,6 +22,7 @@ var gNeedSelection = false;
 // 4 = Text Label            - Label above text box
 // 5 = Accept Existing Label - Okay button label when overwriting existing session
 // 6 = Default Session Name  - Comes from page title
+// 7 = Count String          - Count String for current crashed session
 
 gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
@@ -85,6 +86,9 @@ gSessionManager.onLoad = function() {
 			// add counts if not current browsing session since current session has no counts.
 			if (aSession.fileName != "*" && aSession.windows && aSession.tabs) {
 				label = aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")";
+			}
+			else if (aSession.fileName == "*") {
+				label = aSession.name + gParams.GetString(7);
 			}
 			else label = aSession.name;
 			var item = gSessionList.appendItem(label, aSession.fileName);
