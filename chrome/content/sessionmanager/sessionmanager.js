@@ -1,8 +1,6 @@
 const SM_VERSION = "0.6.2.5";
 
 /*const*/ var gSessionManager = {
-	_inPrivateBrowsing: false,
-	
 	mSessionStoreValue : null,
 	mSessionStartupValue : null,
 	mObserverService: Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService),
@@ -14,7 +12,7 @@ const SM_VERSION = "0.6.2.5";
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted", "browser:private-browsing"],
+	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted", "private-browsing"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mBackupSessionRegEx: /^backup(-[1-9](\d)*)?\.session$/,
@@ -335,8 +333,8 @@ const SM_VERSION = "0.6.2.5";
 		case "browser:purge-session-history":
 			this.clearUndoData("all");
 			break;
-		case "browser:private-browsing":
-			this._inPrivateBrowsing = (aData == "enter");
+		case "private-browsing":
+			if (aData == "enter") this.closeSession(false,true);
 			break;
 		case "sessionmanager-list-update":
 			// this session cache from updated window so this window doesn't need to read from disk
@@ -433,12 +431,13 @@ const SM_VERSION = "0.6.2.5";
 		// If tab reloading enabled and not offline
 		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
 
-			if (gSessionManager.mSessionStore().getTabValue(aEvent.originalTarget, "session_manager_reload")) {
-				gSessionManager.mSessionStore().deleteTabValue(aEvent.originalTarget, "session_manager_reload");
+			var sessionStore = gSessionManager.mSessionStore();
+			if (sessionStore.getTabValue(aEvent.originalTarget, "session_manager_reload")) {
+				sessionStore.deleteTabValue(aEvent.originalTarget, "session_manager_reload");
 			}
-			else if (gSessionManager.mSessionStore().getTabValue(aEvent.originalTarget, "session_manager_allow_reload")) {
-				gSessionManager.mSessionStore().deleteTabValue(aEvent.originalTarget, "session_manager_allow_reload");
-				gSessionManager.mSessionStore().setTabValue(aEvent.originalTarget, "session_manager_reload", true);
+			else if (sessionStore.getTabValue(aEvent.originalTarget, "session_manager_allow_reload")) {
+				sessionStore.deleteTabValue(aEvent.originalTarget, "session_manager_allow_reload");
+				sessionStore.setTabValue(aEvent.originalTarget, "session_manager_reload", true);
 			}
 		}
 	},
@@ -449,7 +448,8 @@ const SM_VERSION = "0.6.2.5";
 		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
 
 			// Restore tabs that are marked restore.
-			var allowReload = gSessionManager.mSessionStore().getTabValue(aEvent.originalTarget, "session_manager_reload");
+			var sessionStore = gSessionManager.mSessionStore();
+			var allowReload = sessionStore.getTabValue(aEvent.originalTarget, "session_manager_reload");
 			if (allowReload == "true")
 			{
 				var nsIWebNavigation = Components.interfaces.nsIWebNavigation;
@@ -458,10 +458,10 @@ const SM_VERSION = "0.6.2.5";
 				
 				// no longer allow tab to reload
 				try {
-					gSessionManager.mSessionStore().deleteTabValue(aEvent.originalTarget, "session_manager_reload");
-					gSessionManager.mSessionStore().deleteTabValue(aEvent.originalTarget, "session_manager_allow_reload");
+					sessionStore.deleteTabValue(aEvent.originalTarget, "session_manager_reload");
+					sessionStore.deleteTabValue(aEvent.originalTarget, "session_manager_allow_reload");
 				}
-				catch (ex) { dump(ex + "\n"); }
+				catch (ex) {}
 			}
 		}
 	},
@@ -559,9 +559,10 @@ const SM_VERSION = "0.6.2.5";
 		save.hidden = (this.getBrowserWindows().length == 1);
 		
 		// Disable saving in privacy mode
-		this.setDisabled(save, this._inPrivateBrowsing);
-		this.setDisabled(save.nextSibling, this._inPrivateBrowsing);
-		this.setDisabled(save.nextSibling.nextSibling,this._inPrivateBrowsing);
+		var inPrivateBrowsing = this.isPrivateBrowserMode();
+		this.setDisabled(save, inPrivateBrowsing);
+		this.setDisabled(save.previousSibling, inPrivateBrowsing);
+		this.setDisabled(save.nextSibling, inPrivateBrowsing);
 		
 		var windowSessions = this.getWindowSessions();
 		var sessions = this.getSessions(true);
@@ -646,7 +647,7 @@ const SM_VERSION = "0.6.2.5";
 
 	save: function(aName, aFileName, aOneWindow)
 	{
-		if (this._inPrivateBrowsing) return;
+		if (this.isPrivateBrowserMode()) return;
 		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString(), autoSaveable : true };
 		if (!aName)
 		{
@@ -696,7 +697,7 @@ const SM_VERSION = "0.6.2.5";
 	},
 	
 	// if aOneWindow is true, then close the window session otherwise close the browser session
-	closeSession: function(aOneWindow)
+	closeSession: function(aOneWindow, aForce)
 	{
 		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
 		if (name != "")
@@ -704,7 +705,7 @@ const SM_VERSION = "0.6.2.5";
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
 			{
-				if (!this._inPrivateBrowsing) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true));
+				if (aForce || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true));
 			}
 			catch (ex)
 			{
@@ -761,8 +762,9 @@ const SM_VERSION = "0.6.2.5";
 				}
 			}
 			
-			// If this is an autosave session, keep track of it if there is not already an active session
-			if (autosave == "session" && this.mPref__autosave_name=="") 
+			// If this is an autosave session, keep track of it if there is not already an active session and not in private
+			// browsing mode
+			if (autosave == "session" && this.mPref__autosave_name=="" && !this.isPrivateBrowserMode()) 
 			{
 				this.setPref("_autosave_name", name);
 			}
@@ -1215,8 +1217,9 @@ const SM_VERSION = "0.6.2.5";
 		replace.hidden = (this.getBrowserWindows().length == 1);
 		
 		// Disable saving in privacy mode or loaded auto-save session
-		this.setDisabled(replace, (this._inPrivateBrowsing | current));
-		this.setDisabled(get_("replacew"), (this._inPrivateBrowsing | current));
+		var inPrivateBrowsing = this.isPrivateBrowserMode();
+		this.setDisabled(replace, (inPrivateBrowsing | current));
+		this.setDisabled(get_("replacew"), (inPrivateBrowsing | current));
 		
 		// Disable almost everything for currently loaded auto-save session
 		this.setDisabled(get_("loada"), current);
@@ -1565,7 +1568,7 @@ const SM_VERSION = "0.6.2.5";
 
 	appendClosedWindow: function(aState)
 	{
-		if (this.mPref_max_closed_undo == 0 || this._inPrivateBrowsing || Array.every(gBrowser.browsers, this.isCleanBrowser))
+		if (this.mPref_max_closed_undo == 0 || this.isPrivateBrowserMode() || Array.every(gBrowser.browsers, this.isCleanBrowser))
 		{
 			return;
 		}
@@ -1608,11 +1611,11 @@ const SM_VERSION = "0.6.2.5";
 			// save the currently opened session (if there is one)
 			if (!this.closeSession(false))
 			{
-				if (!this._inPrivateBrowsing) this.backupCurrentSession();
+				if (!this.isPrivateBrowserMode()) this.backupCurrentSession();
 			}
 			else
 			{
-				if (!this._inPrivateBrowsing) this.keepOldBackups(false);
+				if (!this.isPrivateBrowserMode()) this.keepOldBackups(false);
 			}
 			
 			this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
@@ -1635,7 +1638,7 @@ const SM_VERSION = "0.6.2.5";
 	{
 		try
 		{
-			if (!this._inPrivateBrowsing) {
+			if (!this.isPrivateBrowserMode()) {
 				var state = this.getSessionState(this._string("autosave_session"));
 				this.writeFile(this.getSessionDir(this.mAutoSaveSessionName), state);
 			}
@@ -2276,6 +2279,18 @@ const SM_VERSION = "0.6.2.5";
 	isCmdLineEmpty: function()
 	{
 		return (!window.arguments || window.arguments.length <= 1);
+	},
+	
+	isPrivateBrowserMode: function()
+	{
+		// This is only available in Firefox 3.1 and above
+		try {
+			return Components.classes["@mozilla.org/privatebrowsing;1"].
+					getService(Components.interfaces.nsIPrivateBrowsingService).privateBrowsingEnabled;
+		}
+		catch(ex) {
+			return false;
+		}
 	},
 
 	updateToolbarButton: function(aEnable)
