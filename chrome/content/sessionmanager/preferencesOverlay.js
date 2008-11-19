@@ -2,7 +2,8 @@
   The following code originated from Tab Mix Plus - http://tmp.garyr.net/ 
   It will remove stored Session Manager saved files, when user selects to clear private data
   
-  Michael Kraft modified gSessionManager_preferencesOverlay to make it work in Firefox 3.0
+  Michael Kraft modified gSessionManager_preferencesOverlay to make it work in Firefox 3.0 and 
+  gSessionManager.addMenuItem to work in Firefox 3.1
 */
 
 var gSessionManager_preferencesOverlay = {
@@ -64,21 +65,32 @@ gSessionManager.addMenuItem = function () {
 	var firstCheckbox = document.getElementsByTagName('checkbox')[0];
 	if (prefs && firstCheckbox) // if this isn't true we are lost :)
 	{
+
+		// Determine Mozilla version to see what is supported
+		var appVersion = "0";
+		try {
+			appVersion = Components.classes["@mozilla.org/xre/app-info;1"].
+			             getService(Components.interfaces.nsIXULAppInfo).platformVersion;
+		} catch (e) { dump(e + "\n"); }
+		
 		var pref = document.createElement('preference');
-		pref.setAttribute('id', 'privacy.item.extensions-sessionmanager');
-		pref.setAttribute('name', 'privacy.item.extensions-sessionmanager');
+		if ((appVersion >= "1.9.1") && (window.location == "chrome://browser/content/sanitize.xul")) {
+			this.mSanitizePreference = "privacy.cpd.extensions-sessionmanager";
+		}
+		pref.setAttribute('id', this.mSanitizePreference);
+		pref.setAttribute('name', this.mSanitizePreference);
 		pref.setAttribute('type', 'bool');
 		prefs.appendChild(pref);
 
 		var check = document.createElement('checkbox');
 		check.setAttribute('label', this.sanitizeLabel.label);
 		check.setAttribute('accesskey', this.sanitizeLabel.accesskey);
-		check.setAttribute('preference', 'privacy.item.extensions-sessionmanager');
+		check.setAttribute('preference', this.mSanitizePreference);
 		firstCheckbox.parentNode.insertBefore(check, firstCheckbox);
 
 		if (typeof(gSanitizePromptDialog) == 'object')
 		{
-			pref.setAttribute('readonly', 'true');
+			if (appVersion < "1.9.1") pref.setAttribute('readonly', 'true');
 			check.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
 		}
 	}
@@ -87,7 +99,7 @@ gSessionManager.addMenuItem = function () {
 gSessionManager.tryToSanitize = function () {
 	var prefService = Components.classes["@mozilla.org/preferences-service;1"]
 						.getService(Components.interfaces.nsIPrefBranch);
-		try {
+	try {
 		var promptOnSanitize = prefService.getBoolPref("privacy.sanitize.promptOnSanitize");
 	} catch (e) { promptOnSanitize = true;}
 

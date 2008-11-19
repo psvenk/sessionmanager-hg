@@ -7,12 +7,13 @@
  *
  * -->
 <!DOCTYPE overlay [
-<!ENTITY % tabmixDTD SYSTEM "chrome://sessionmanager/locale/options.dtd" >
-%tabmixDTD;
+<!ENTITY % sessionManagerDTD SYSTEM "chrome://sessionmanager/locale/options.dtd" >
+%sessionManagerDTD;
 ]>
 
- <overlay id="tabmix-sanitize-ui" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+ <overlay id="sessionManager-sanitize-ui" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
+	<script type="application/x-javascript" src="chrome://browser/content/sanitize.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/preferencesOverlay.js"/>
 	<script type="application/x-javascript">
