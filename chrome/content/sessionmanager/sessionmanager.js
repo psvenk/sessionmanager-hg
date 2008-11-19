@@ -24,6 +24,8 @@ const SM_VERSION = "0.6.2.5";
 	mSessionCache: { timestamp: 0 },
 	mClosedWindowsCache: { timestamp: 0, data: null },
 	
+	mSanitizePreference: "privacy.item.extensions-sessionmanager",
+	
 	mSessionStore : function() {
 		// Get SessionStore component if not already retrieved
 		if (!this.mSessionStoreValue) {
@@ -312,7 +314,8 @@ const SM_VERSION = "0.6.2.5";
 			// or if Firefox is restarted. In Firefox 3.0, it executes whenever the last browser window is closed.
 			if (!this.mPref__stopping) {
 				this.mObserverService.removeObserver(this, "quit-application");
-				this.shutDown();
+				// Don't do shutdown processing when entering private browsing mode
+				if (!this.doNotShutdown) this.shutDown();
 			}
 		}
 		this.mBundle = null;
@@ -334,7 +337,24 @@ const SM_VERSION = "0.6.2.5";
 			this.clearUndoData("all");
 			break;
 		case "private-browsing":
-			if (aData == "enter") this.closeSession(false,true);
+			if (aData == "enter") {
+				// Prevent this window from triggering shutdown processing when it is closed on entering private browsing mode
+				this.doNotShutdown = true;
+				// Only do the following once
+				if (!this.doNotDoPrivateProcessing) {
+					// Close current autosave session or make an autosave backup.
+					if (!this.closeSession(false,true) && (this.mPref_autosave_session)) {
+						this.autoSaveCurrentSession(true); 
+					}
+					
+					// Prevent other windows from doing the saving processing
+					this.getBrowserWindows().forEach(function(aWindow) {
+						if (aWindow != window) { 
+							aWindow.gSessionManager.doNotDoPrivateProcessing = true; 
+						}
+					});
+				}
+			}
 			break;
 		case "sessionmanager-list-update":
 			// this session cache from updated window so this window doesn't need to read from disk
@@ -697,7 +717,7 @@ const SM_VERSION = "0.6.2.5";
 	},
 	
 	// if aOneWindow is true, then close the window session otherwise close the browser session
-	closeSession: function(aOneWindow, aForce)
+	closeSession: function(aOneWindow, aForceSave)
 	{
 		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
 		if (name != "")
@@ -705,7 +725,7 @@ const SM_VERSION = "0.6.2.5";
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
 			{
-				if (aForce || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true));
+				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true));
 			}
 			catch (ex)
 			{
@@ -1380,8 +1400,32 @@ const SM_VERSION = "0.6.2.5";
 
 	sanitize: function()
 	{
-		// Remove all saved sessions
-		this.getSessionDir().remove(true);
+		// If Sanitize GUI not used
+		if (this.mSanitizePreference == "privacy.item.extensions-sessionmanager") {
+			// Remove all saved sessions
+			this.getSessionDir().remove(true);
+		}
+		else {
+			Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader)
+			                                                           .loadSubScript("chrome://browser/content/sanitize.js");
+
+			var range = Sanitizer.getClearRange();
+		   
+			// if delete all, then do it.
+			if (!range) {
+				// Remove all saved sessions
+				this.getSessionDir().remove(true);
+			}
+			else {
+				// Delete only sessions after startDate
+				var sessions = this.getSessions(true);
+				sessions.forEach(function(aSession, aIx) { 
+					if (range[0] <= aSession.timestamp*1000) {
+						this.delFile(this.getSessionDir(aSession.fileName));
+					}
+				}, this);
+			}                 
+		}
 	},
 
 	getProfileFile: function(aFileName)
@@ -1634,11 +1678,11 @@ const SM_VERSION = "0.6.2.5";
 		}
 	},
 	
-	autoSaveCurrentSession: function()
+	autoSaveCurrentSession: function(aForceSave)
 	{
 		try
 		{
-			if (!this.isPrivateBrowserMode()) {
+			if (aForceSave || !this.isPrivateBrowserMode()) {
 				var state = this.getSessionState(this._string("autosave_session"));
 				this.writeFile(this.getSessionDir(this.mAutoSaveSessionName), state);
 			}
