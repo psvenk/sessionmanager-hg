@@ -2422,7 +2422,7 @@ const SM_VERSION = "0.6.2.5";
 	{
 		var state = (aOneWindow)?this.mSessionStore().getWindowState(window):this.mSessionStore().getBrowserState();
 		
-		state = this.handleTabUndoData(state, aNoUndoData, true, (this.mAppVersion < "1.9"));
+		state = this.modifySessionData(state, aNoUndoData, true, (this.mAppVersion < "1.9"));
 		var count = this.getCount(state);
 		
 		// encrypt state if encryption preference set
@@ -2453,7 +2453,7 @@ const SM_VERSION = "0.6.2.5";
 		}
 
 		//Try and fix bug35058 even in FF 3.0, because session might have been saved under FF 2.0
-		aState = this.handleTabUndoData(aState, aStripClosedTabs, false, true);  
+		aState = this.modifySessionData(aState, aStripClosedTabs, false, true, aEntireSession);  
 		
 		if (aEntireSession)
 		{
@@ -2485,6 +2485,8 @@ const SM_VERSION = "0.6.2.5";
 		{
 			// take off first window
 			var firstWindow = aState.windows.shift();
+			// make sure toolbars are not hidden on the window
+			delete(firstWindow.hidden);
 			// Move tabs to first window
 			aState.windows.forEach(function(aWindow) {
 				while (aWindow.tabs.length > 0)
@@ -2499,7 +2501,7 @@ const SM_VERSION = "0.6.2.5";
 		return uneval(aState);
 	},
 	
-	handleTabUndoData: function(aState, aStrip, aSaving, afixBug350558)
+	modifySessionData: function(aState, aStrip, aSaving, afixBug350558, aReplacingWindow)
 	{
 		aState = eval("(" + aState + ")");
 		aState.windows.forEach(function(aWindow) {
@@ -2514,6 +2516,10 @@ const SM_VERSION = "0.6.2.5";
 			// and tabs.entries array data in Firefox 2.0.x
 			if (afixBug350558) this.fixBug350558(aWindow.tabs);
 		}, this);
+		// if only one window, don't allow toolbars to be hidden
+		if (aReplacingWindow && (aState.windows.length == 1) && aState.windows[0].hidden) {
+			delete (aState.windows[0].hidden);
+		}
 		return uneval(aState);
 	},
 
