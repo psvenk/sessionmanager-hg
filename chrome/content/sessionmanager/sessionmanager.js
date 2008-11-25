@@ -2282,7 +2282,7 @@ const SM_VERSION = "0.6.2.5";
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called, in FF2 SessionStart doesn't set this value
 		var sessionstart = (this.mAppVersion >= "1.9")
-		                    ?(this.mSessionStartupValue._sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
+		                    ?(this.mSessionStartupValue.sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
 		                    :this.getPref("browser.sessionstore.resume_session_once", false, true);
 		var recoverOnly = this.mPref__running || sessionstart;
 		// handle crash where user chose a specific session
