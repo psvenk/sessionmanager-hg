@@ -17,9 +17,10 @@ const SM_VERSION = "0.6.2.5";
 	mBackupSessionName: "backup.session",
 	mBackupSessionRegEx: /^backup(-[1-9](\d)*)?\.session$/,
 	mAutoSaveSessionName: "autosave.session",
+	mBackupGroup: "",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
-	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)/m,
+	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
 
 	mSessionCache: { timestamp: 0 },
 	mClosedWindowsCache: { timestamp: 0, data: null },
@@ -590,15 +591,16 @@ const SM_VERSION = "0.6.2.5";
 		var backupCount = 0;
 		var user_latest = backup_latest = false;
 		sessions.forEach(function(aSession, aIx) {
-			if (!aSession.backup && (this.mPref_max_display >= 0) && (count >= this.mPref_max_display)) return;
+			if (!aSession.backup && !aSession.group && (this.mPref_max_display >= 0) && (count >= this.mPref_max_display)) return;
 	
-			var key = aSession.backup?"":(++count < 10)?count:(count == 10)?"0":"";
+			var key = (aSession.backup || aSession.group)?"":(++count < 10)?count:(count == 10)?"0":"";
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", ((key)?key + ") ":"") + aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")");
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("contextmenu", "sessionmanager-ContextMenu");
 			menuitem.setAttribute("filename", aSession.fileName);
+			menuitem.setAttribute("backup-item", aSession.backup);
 			menuitem.setAttribute("accesskey", key);
 			menuitem.setAttribute("autosave", /^window|session/.exec(aSession.autosave));
 			menuitem.setAttribute("disabled", windowSessions[aSession.name.trim().toLowerCase()] || false);
@@ -615,7 +617,23 @@ const SM_VERSION = "0.6.2.5";
 				backupPopup.appendChild(menuitem);
 			}
 			else {
-				aPopup.insertBefore(menuitem, separator);
+				if (aSession.group) {
+					var groupMenu = get_(aSession.group);
+					if (!groupMenu) {
+						groupMenu = document.createElement("menu");
+						groupMenu.setAttribute("_id", aSession.group);
+						groupMenu.setAttribute("label", aSession.group);
+						groupMenu.setAttribute("accesskey", aSession.group.charAt(0));
+						groupMenu.setAttribute("contextmenu", "sessionmanager-groupContextMenu");
+						var groupPopup = document.createElement("menupopup");
+						groupPopup.setAttribute("onpopupshowing", "event.stopPropagation();");
+						groupMenu.appendChild(groupPopup);
+						aPopup.insertBefore(groupMenu, separator);
+					}
+					var groupPopup = groupMenu.menupopup || groupMenu.lastChild; 
+					groupPopup.appendChild(menuitem);
+				}
+				else aPopup.insertBefore(menuitem, separator);
 			}
 		}, this);
 		backupSep.hidden = backupMenu.hidden = (backupCount == 0);
@@ -677,6 +695,7 @@ const SM_VERSION = "0.6.2.5";
 			}
 			aName = values.text;
 			aFileName = values.name;
+			aGroup = values.group;
 		}
 		if (aName)
 		{
@@ -685,7 +704,7 @@ const SM_VERSION = "0.6.2.5";
 			var file = this.getSessionDir(aFileName || this.makeFileName(aName), !aFileName);
 			try
 			{
-				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.mPref_save_closed_tabs < 2, values.autoSave));
+				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.mPref_save_closed_tabs < 2, values.autoSave, aGroup));
 			}
 			catch (ex)
 			{
@@ -935,6 +954,35 @@ const SM_VERSION = "0.6.2.5";
 		catch (ex)
 		{
 			this.ioError(ex);
+		}
+	},
+	
+	group: function(aSession, aNewGroup)
+	{
+		var values = { multiSelect: true, grouping: true };
+		if (typeof(aNewGroup) == "undefined") {
+			aSession = this.prompt(this._string("group_session"), this._string("group_session_okay"), values, this._string("group_session_text"));
+		}
+		else {
+			values.name = aSession;
+			values.group = aNewGroup;
+		}
+		
+		if (aSession)
+		{
+			values.name.split("\n").forEach(function(aFileName) {
+				try
+				{
+					var file = this.getSessionDir(aFileName);
+					var state = this.readSessionFile(file);
+					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=.+)?/m, function($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group) : ""); });
+					this.writeFile(file, state);
+				}
+				catch (ex)
+				{
+					this.ioError(ex);
+				}
+			}, this);
 		}
 	},
 
@@ -1228,6 +1276,52 @@ const SM_VERSION = "0.6.2.5";
 /* ........ Right click menu handlers .............. */
 // Firefox 2.0 does not close parent menu when context menu closes so force it closed
 
+	group_popupInit: function(aPopup) {
+		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
+		
+		var childMenu = document.popupNode.menupopup || document.popupNode.lastChild;
+		childMenu.hidePopup();
+	},
+	
+	group_rename: function() {
+		if (this.mAppVersion < "1.9") this.hidePopup();
+		var filename = document.popupNode.getAttribute("filename");
+		var parentMenu = document.popupNode.parentNode.parentNode;
+		var group = filename ? ((parentMenu.id != "sessionmanager-toolbar") ? parentMenu.label : "")
+		                     : document.popupNode.getAttribute("label");
+		var newgroup = { value: group };
+		var dummy = {};
+		this.mPromptService.prompt(window, this._string("rename_group"), null, newgroup, null, dummy);
+		if (newgroup.value == this._string("backup_sessions")) {
+			this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, this._string("rename_fail"));
+			return;
+		}
+		else if (newgroup.value != group) {
+			// changing group for one session or multiple sessions?
+			if (filename) this.group(filename, newgroup.value);
+			else {
+				var sessions = this.getSessions();
+				sessions.forEach(function(aSession) {
+					if (aSession.group == group) {
+						this.group(aSession.fileName, newgroup.value);
+					}
+				}, this);
+			}
+		}
+	},
+	
+	group_remove: function() {
+		var group = document.popupNode.getAttribute("label");
+		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm_group"))) {
+			if (this.mAppVersion < "1.9") this.hidePopup();
+			
+			var sessions = this.getSessions();
+			sessions.forEach(function(aSession) {
+				if (aSession.group == group) this.delFile(this.getSessionDir(aSession.fileName));
+			}, this);
+		}
+	},
+
 	session_popupInit: function(aPopup) {
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
@@ -1244,13 +1338,16 @@ const SM_VERSION = "0.6.2.5";
 		// Disable almost everything for currently loaded auto-save session
 		this.setDisabled(get_("loada"), current);
 		this.setDisabled(get_("loadr"), current);
+
+		// Hide change group choice for backup items		
+		get_("changegroup").hidden = (document.popupNode.getAttribute("backup-item") == "true")
 		
 		// Disable setting startup if already startup
 		this.setDisabled(get_("startup"), ((this.mPref_startup == 2) && (document.popupNode.getAttribute("filename") == this.mPref_resume_session)));
 	},
 
 	session_load: function(aReplace) {
-		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
+		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		var oldOverwrite = this.mPref_overwrite;
 		if (aReplace) {
@@ -1267,7 +1364,7 @@ const SM_VERSION = "0.6.2.5";
 	},
 	
 	session_replace: function(aWindow) {
-		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
+		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		if (aWindow) {
 			this.saveWindow(this.mSessionCache[session].name, session);
@@ -1278,15 +1375,15 @@ const SM_VERSION = "0.6.2.5";
 	},
 	
 	session_rename: function() {
-		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
+		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.rename(session);
 	},
-	
+
 	session_remove: function() {
 		var session = document.popupNode.getAttribute("filename");
 		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm"))) {
-			if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
+			if (this.mAppVersion < "1.9") this.hidePopup();
 			// if currently loaded autosave session clear autosave name
 			if (document.popupNode.getAttribute("disabled") == "true") {
 				this.setPref("_autosave_name","");
@@ -1296,10 +1393,19 @@ const SM_VERSION = "0.6.2.5";
 	},
 	
 	session_setStartup: function() {
-		if (this.mAppVersion < "1.9") document.popupNode.parentNode.hidePopup();
+		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.setPref("resume_session", session);
 		this.setPref("startup", 2);
+	},
+	
+	hidePopup: function() {
+		var popup = document.popupNode.parentNode;
+		while (popup.parentNode.id.indexOf("sessionmanager-") == -1) {
+			popup = popup.parentNode;
+		}
+		if (popup.parentNode.id != "sessionmanager-toolbar" ) popup = popup.parentNode.parentNode;
+		popup.hidePopup();
 	},
 	
 /* ........ User Prompts .............. */
@@ -1327,15 +1433,17 @@ const SM_VERSION = "0.6.2.5";
 		params.SetString(6, aValues.text || "");
 		params.SetString(7, aValues.count || "");
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
-						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.allowNamedReplace)?256:0));
+						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) | 
+						  ((aValues.allowNamedReplace)?256:0));
 		
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, (this.mFullyLoaded)?window:null);
 		
 		aValues.name = params.GetString(3);
 		aValues.text = params.GetString(6);
-		aValues.ignore = (params.GetInt(1) && 4)?1:0;
-		aValues.autoSave = (params.GetInt(1) && 8)?1:0;
-		return !params.GetInt(0);
+		aValues.group = params.GetString(7);
+		aValues.ignore = (params.GetInt(1) & 4)?1:0;
+		aValues.autoSave = (params.GetInt(1) & 8)?1:0;
+		return params.GetInt(0);
 	},
 	
 	// the aOverride variable in an optional callback procedure that will be used to get the session list instead
@@ -1346,6 +1454,7 @@ const SM_VERSION = "0.6.2.5";
 	//		windows		- Window count (optional - if omited won't display either window or tab count)
 	//		tabs		- Tab count	(optional - if omited won't display either window or tab count)
 	//		autosave	- Will cause item to be bold (optional)
+	//      group       - Group that session is associated with (optional)
 	//
 	// If the session list is not formatted correctly an error will be dump to the console using the "dump"
 	// function and the session select window will not be displayed.
@@ -1525,7 +1634,7 @@ const SM_VERSION = "0.6.2.5";
 				else if (backupItem && (sessions.latestBackUpTime < cached.timestamp)) {
 					sessions.latestBackUpTime = cached.timestamp;
 				}
-				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs, backup: backupItem });
+				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs, backup: backupItem, group: cached.group });
 				continue;
 			}
 			if (matchArray = this.mSessionRegExp.exec(this.readSessionFile(file, headerOnly)))
@@ -1543,8 +1652,9 @@ const SM_VERSION = "0.6.2.5";
 				else if (backupItem && (sessions.latestBackUpTime < timestamp)) {
 					sessions.latestBackUpTime = timestamp;
 				}
-				sessions.push({ fileName: fileName, name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], windows: matchArray[4], tabs: matchArray[5], backup: backupItem });
-				this.mSessionCache[fileName] = { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: file.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem };
+				var group = backupItem ? (this._string_backup_session || this._string("backup_sessions")) : (matchArray[7] ? matchArray[7] : "");
+				sessions.push({ fileName: fileName, name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group });
+				this.mSessionCache[fileName] = { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: file.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group };
 				
 				// update last file modified time
 				if (this.mSessionCache.timestamp < file.lastModifiedTime) this.mSessionCache.timestamp = file.lastModifiedTime;
@@ -1794,9 +1904,8 @@ const SM_VERSION = "0.6.2.5";
 			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
 			this.writeFile(aFile, state);
 		}
-		// pre autosave and tab/window count
-		else if ((/^\[SessionManager\]\nname=.*\ntimestamp=\d+\n/m.test(state)) &&
-				 (!/^\[SessionManager\]\nname=.*\ntimestamp=\d+\nautosave=(false|session|window)\tcount=[1-9][0-9]*\/[1-9][0-9]*\n/m.test(state)))
+		// Not latest session format
+		else if ((/^\[SessionManager\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!this.mSessionRegExp.test(state)))
 		{
 			// This should always match, but is required to get the RegExp values set correctly.
 			// RegExp.$1 - Entire 4 line header
@@ -2418,7 +2527,7 @@ const SM_VERSION = "0.6.2.5";
 		});
 	},
 
-	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave)
+	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup)
 	{
 		var state = (aOneWindow)?this.mSessionStore().getWindowState(window):this.mSessionStore().getBrowserState();
 		
@@ -2429,7 +2538,8 @@ const SM_VERSION = "0.6.2.5";
 		state = this.decryptEncryptByPreference(state); 
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
-				"\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
+				"\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + 
+				(aGroup? ("\tgroup=" + aGroup) : "") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
 	restoreSession: function(aWindow, aState, aReplaceTabs, aStripClosedTabs, aEntireSession, aOneWindow)

@@ -27,6 +27,7 @@
 				<menuseparator _id="separator"/>
 				<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
 				<menuitem label="&remove.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.remove();"/>
+				<menuitem label="&group.label;" accesskey="&group.accesskey;" oncommand="gSessionManager.group();"/>
 				<menuitem label="&openFolder.label;" accesskey="&openFolder.accesskey;" oncommand="gSessionManager.openFolder();"/>
 				<menuseparator _id="options-separator"/>
 				<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="gSessionManager.openOptions();"/>
@@ -80,6 +81,7 @@
 				<menuseparator _id="separator"/>
 				<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
 				<menuitem label="&remove.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.remove();"/>
+				<menuitem label="&group.label;" accesskey="&group.accesskey;" oncommand="gSessionManager.group();"/>
 				<menuitem label="&openFolder.label;" accesskey="&openFolder.accesskey;" oncommand="gSessionManager.openFolder();"/>
 				<menuseparator _id="options-separator"/>
 				<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="gSessionManager.openOptions();"/>
@@ -113,6 +115,7 @@
 				<menuseparator _id="separator"/>
 				<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
 				<menuitem label="&remove.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.remove();"/>
+				<menuitem label="&group.label;" accesskey="&group.accesskey;" oncommand="gSessionManager.group();"/>
 				<menuitem label="&openFolder.label;" accesskey="&openFolder.accesskey;" oncommand="gSessionManager.openFolder();"/>
 				<menuseparator _id="options-separator"/>
 				<menuitem _id="resume" type="checkbox" label="&resume.label;" accesskey="&resume.accesskey;" oncommand="gSessionManager.toggleResume();"/>
@@ -141,21 +144,29 @@
 		<menuseparator/>
 		<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.session_rename();"/>
 		<menuitem label="&remove_one.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.session_remove();"/>
+		<menuitem _id="changegroup" label="&change_group.label;" accesskey="&change_group.accesskey;" oncommand="gSessionManager.group_rename();"/>
 		<menuseparator/>
 		<menuitem _id="startup" label="&set_startup.label;" accesskey="&set_startup.accesskey;" oncommand="gSessionManager.session_setStartup();"/>
 	</menupopup>
-	
+
+	<menupopup id="sessionmanager-groupContextMenu" onpopupshowing="gSessionManager.group_popupInit(this);">
+		<menuitem label="&rename_group.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.group_rename();"/>
+		<menuitem label="&remove_group.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.group_remove();"/>
+	</menupopup>
+		
 	<menupopup id="sessionmanager-undo-ContextMenu">
 		<menuitem label="&remove_item.label;" accesskey="&remove_item.accesskey;" oncommand="gSessionManager.removeUndoMenuItem(document.popupNode);"/>
 	</menupopup>
 	
 	<popupset id="mainPopupSet"> <!-- Firefox -->
 		<menupopup id="sessionmanager-ContextMenu"/>
+		<menupopup id="sessionmanager-groupContextMenu"/>
 		<menupopup id="sessionmanager-undo-ContextMenu"/>
 	</popupset>
 	
 	<popupset id="taskPopup"> <!-- SeaMonkey -->
 		<menupopup id="sessionmanager-ContextMenu"/>
+		<menupopup id="sessionmanager-groupContextMenu"/>
 		<menupopup id="sessionmanager-undo-ContextMenu"/>
 	</popupset>
 

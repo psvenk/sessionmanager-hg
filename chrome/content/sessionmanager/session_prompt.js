@@ -1,18 +1,27 @@
 var gParams = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
 var gSessionList = null;
 var gTextBox = null;
+var ggMenuList = null;
 var gAcceptButton = null;
 var gSessionNames = {};
+var gGroupNames = [];
+var gBackupGroupName = null;
 var gBannedNames = [];
+var gBackupNames = [];
+// gExistingName is the index of the item with the name in the text field + 1.  Adding 1, makes it easier to check for
+// an existing name since 0 means it does not match an existing name.  Just remember to subtract 1 before using.
 var gExistingName = 0;
 var gNeedSelection = false;
 
-// GetInt bit values
+var sortedBy = 0;
+
+// GetInt 1 bit values
 // 1   = add current session - used when recovering from crash
 // 2   = multiselect enable  - true if allowed to choose multiple sessions (used for deleting)
 // 4   = ignorable           - Displays ignore checkbox
 // 8   = autosaveable        - Displays autosave checkbox
 // 16  = remove              - true if deleting session(s)
+// 32  = grouping            - true if changing grouping
 // 256 = allow name replace  - true if session cannot be overwritten (not currently used)
 
 // GetString values
@@ -23,6 +32,18 @@ var gNeedSelection = false;
 // 5 = Accept Existing Label - Okay button label when overwriting existing session
 // 6 = Default Session Name  - Comes from page title
 // 7 = Count String          - Count String for current crashed session
+
+// SetInt 0 bit values
+// 1 = Accept button pressed
+
+// SetInt 1 bit values
+// 4  = ignore               - ignore checkbox checked
+// 8  = autosave             - autosave checkbox checked
+
+// SetString values
+// 3 = Session Filename
+// 6 = Session Name
+// 7 = Group Name
 
 gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
@@ -45,7 +66,6 @@ gSessionManager.onLoad = function() {
 		}
 		else dump ("Session Manager: Passed override function parameter is not a function\n");
 		if (!sessions || !_isValidSessionList(sessions)) {
-			gParams.SetInt(0, 1);
 			window.close();
 			return;
 		}
@@ -67,76 +87,123 @@ gSessionManager.onLoad = function() {
 	var currentSession = this.getPref("_autosave_name");
 	if (currentSession) gBannedNames[currentSession.trim().toLowerCase()] = true;
 	
-	if (gParams.GetInt(1) & 4) // show the "Don't show [...] again" checkbox
-	{
-		_("checkbox_ignore").hidden = false;
-	}
+	// hide/show the "Don't show [...] again" checkbox
+	_("checkbox_ignore").hidden = !(gParams.GetInt(1) & 4);
 
-	if (gParams.GetInt(1) & 8) // show the Autosave checkbox
-	{
-		_("checkbox_autosave").hidden = false;
-	}
+	// hide/show the Autosave checkbox
+	_("checkbox_autosave").hidden = !(gParams.GetInt(1) & 8);
 	
-	var sessionIndex = 1;
+	gBackupGroupName = this._string("backup_sessions");
+	gBackupNames[this._string("backup_session").trim().toLowerCase()] = true;
+	gBackupNames[this._string("autosave_session").trim().toLowerCase()] = true;
+	
+	var deleting = (gParams.GetInt(1) & 16);
+	var saving = (gParams.GetInt(1) & 8);
+	var grouping = (gParams.GetInt(1) & 32);
+	var groupCount = 0;
 	sessions.forEach(function(aSession) {
-		// Don't display current browser session or window sessions in list for delete or save
-		if (!((gParams.GetInt(1) & 16) || (gParams.GetInt(1) & 8)) || !gBannedNames[aSession.name.trim().toLowerCase()])
+		var trimName = aSession.name.trim().toLowerCase();
+		// ban backup session names
+		if (aSession.backup) gBackupNames[trimName] = true;
+		// Don't display loaded sessions in list for delete or save or backup items in list for save or grouping
+		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && (saving || deleting))))
 		{
-			var label;
-			// add counts if not current browsing session since current session has no counts.
-			if (aSession.fileName != "*" && aSession.windows && aSession.tabs) {
-				label = aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")";
+			// get window and tab counts for crashed session
+			var windowCount = "?";
+			var tabCount = "?";
+			if (aSession.fileName == "*") {
+				if (/(\d)\/(\d)/.test(gParams.GetString(7))) {
+					windowCount = RegExp.$1;
+					tabCount = RegExp.$2;
+				}
 			}
-			else if (aSession.fileName == "*") {
-				label = aSession.name + gParams.GetString(7);
+			else {
+				windowCount = aSession.windows;
+				tabCount = aSession.tabs;
 			}
-			else label = aSession.name;
-			var item = gSessionList.appendItem(label, aSession.fileName);
+			// Build cells
+			var nameCell = document.createElement("listcell");
+			var groupCell = document.createElement("listcell");
+			var wincountCell = document.createElement("listcell");
+			var tabcountCell = document.createElement("listcell");
+			nameCell.setAttribute("label", aSession.name);
+			groupCell.setAttribute("label", aSession.group);
+			// make backup group label gray
+			groupCell.setAttribute("disabled", aSession.backup);
+			wincountCell.setAttribute("label", windowCount);
+			tabcountCell.setAttribute("label", tabCount);
+			// format window and tab count text
+			wincountCell.setAttribute("class", "number");
+			tabcountCell.setAttribute("class", "number");
+			var item = document.createElement("listitem");
+			item.appendChild(nameCell);
+			item.appendChild(groupCell);
+			item.appendChild(wincountCell);
+			item.appendChild(tabcountCell);
+			item.label = aSession.name;
+			item.value = aSession.fileName;
+			if (aSession.group) item.setAttribute("group", aSession.group);
 			item.setAttribute("autosave", aSession.autosave);
-			item.setAttribute("session_loaded", gBannedNames[aSession.name.trim().toLowerCase()] || null);
+			item.setAttribute("session_loaded", gBannedNames[trimName] || null);
 			if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) item.setAttribute("latest",true);
+			gSessionList.appendChild(item);
+			// select passed in item if any
 			if (aSession.fileName == gParams.GetString(3))
 			{
 				setTimeout(function(aItem) { gSessionList.selectItem(aItem); }, 0, item);
 			}
-			gSessionNames[aSession.name.trim().toLowerCase()] = sessionIndex;
-			sessionIndex = sessionIndex + 1;
+			// Add session to name list
+			gSessionNames[trimName] = gSessionList.getIndexOfItem(item) + 1;
+			// Build group menu list
+			if (aSession.group && !aSession.backup) {
+				var regExp = new RegExp("^" + aSession.group + "|," + aSession.group + "$|," + aSession.group + ",");
+				if (!regExp.test(gGroupNames.toString())) {
+					gGroupNames[groupCount++] = aSession.group.trim();
+				}
+			}
 		}
 	}, this);
 	
-	if (gParams.GetString(4)) // enable text box
+	if (gParams.GetString(4)) // enable text boxes
 	{
 		_("text_container").hidden = false;
 		setDescription(_("text_label"), gParams.GetString(4));
-		gTextBox = _("text_box");
 		
-		onTextboxInput(gParams.GetString(6));
-		if ((gBannedNames[gTextBox.value.trim().toLowerCase()] || gExistingName) && !(gParams.GetInt(1) & 256))
+		// If renaming and name already entered, disable the session selection list
+		if (gParams.GetString(3) && !gParams.GetString(5)) gSessionList.disabled = true;
+
+		// If group text input is enabled (saving & group changing)
+		if ((gParams.GetInt(1) & 32) || gParams.GetString(5)) 
 		{
-			if (gExistingName) gParams.SetString(3, sessions[gExistingName - 1].fileName);
-			gTextBox.value = "";
-			onTextboxInput();
+			_("group-text-container").hidden = false;
+			ggMenuList = _("group_menu_list");
+
+			// Pre-populate Group Menu
+			for (var i in gGroupNames) {
+				ggMenuList.appendItem(gGroupNames[i]);
+			}
+		}
+				
+		// If session text input is enabled (saving & renaming)
+		if (!(gParams.GetInt(1) & 32)) 
+		{
+			_("session-text-container").hidden = false;
+			gTextBox = _("text_box");
+		
+			onTextboxInput(gParams.GetString(6));
+			if ((gBannedNames[gTextBox.value.trim().toLowerCase()] || gExistingName) && !(gParams.GetInt(1) & 256))
+			{
+				if (gExistingName) gParams.SetString(3, sessions[gExistingName - 1].fileName);
+				gTextBox.value = "";
+				onTextboxInput();
+			}
 		}
 	}
 
-	if ((gNeedSelection = !gTextBox || !gParams.GetString(5)) || (gParams.GetInt(1) & 256)) // when no textbox or renaming
+	if ((gNeedSelection = !gTextBox || !ggMenuList || !gParams.GetString(5)) || (gParams.GetInt(1) & 256)) // when no textbox or renaming
 	{
 		gSessionList.addEventListener("select", onListboxSelect, false);
 		onListboxSelect();
-	}
-	
-	// add accessibility shortcuts (single-click / double-click / return)
-	for (var i = 0; i < gSessionList.childNodes.length; i++)
-	{
-		gSessionList.childNodes[i].setAttribute("ondblclick", "if (event.button == 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) gAcceptButton.doCommand();");
-		if (gTextBox && !(gParams.GetInt(1) & 256))
-		{
-			gSessionList.childNodes[i].setAttribute("onclick", "if (event.button == 0 && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) onTextboxInput(gSessionList.childNodes[gSessionList.selectedIndex].label);");
-		}
-	}
-	if (gTextBox)
-	{
-		gSessionList.setAttribute("onkeypress", "if (event.keyCode == event.DOM_VK_RETURN && this.selectedIndex > -1) { event.button = 0; eval(this.selectedItem.getAttribute('onclick')); event.preventDefault(); }");
 	}
 	
 	if (gSessionList.hasAttribute("height"))
@@ -150,8 +217,6 @@ gSessionManager.onLoad = function() {
 		document.documentElement.removeAttribute("screenY");
 	}
 	window.sizeToContent();
-	
-	gParams.SetInt(0, 1);
 };
 
 gSessionManager.onUnload = function() {
@@ -171,9 +236,64 @@ gSessionManager.onUnload = function() {
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0));
 };
 
+function onListboxClick(aEvent)
+{
+	if ((aEvent.button == 0) && !aEvent.metaKey && !aEvent.ctrlKey && !aEvent.shiftKey && !aEvent.altKey) {
+		if (aEvent.target.nodeName=="listitem") {
+			switch (aEvent.type) {
+				case "click":
+					if (gTextBox && !(gParams.GetInt(1) & 256)) onTextboxInput(gSessionList.selectedItem.label);
+					break;
+				case "dblclick":
+					gAcceptButton.doCommand();
+					break;
+			}
+		}
+		else if ((aEvent.type == "click") && (aEvent.target.nodeName == "listheader")) {
+			var types = { name: 0, group: 1, win_count: 2, tab_count: 3 };
+			var which = types[aEvent.target.id];
+			
+			// If not already sorted, sortedBy will be 0.  Otherwise it is which + 1 if inversely sorted or -(which + 1) if normally sorted
+			var flag = (Math.abs(sortedBy) == (which + 1)) ? (-sortedBy / Math.abs(sortedBy)) : -1
+
+			var items = [];
+			while (gSessionList.getRowCount() > 0) items.push(gSessionList.removeItemAt(0));
+			
+			// Sort depending on which header is clicked
+			if ((which == 0) || (which == 1)) {
+				items = items.sort(function(a, b) { 
+					return flag * (a.childNodes[which].getAttribute("label").toLowerCase().localeCompare(b.childNodes[which].getAttribute("label").toLowerCase())); 
+				});
+			}
+			else if ((which == 2) || (which == 3)) {
+				items = items.sort(function(a, b) { 
+					return flag * (parseInt(a.childNodes[which].getAttribute("label")) - parseInt(b.childNodes[which].getAttribute("label"))); 
+				});
+			}
+			
+			while (items.length) {
+				var item = items.pop();
+				gSessionList.appendChild(item);	
+				item.removeAttribute("current");
+				var trimName = item.firstChild.getAttribute("label").trim().toLowerCase();
+				gSessionNames[trimName] = gSessionList.getIndexOfItem(item) + 1;
+			}
+			sortedBy = flag * (which + 1);
+		}
+	}
+}
+
+function onListBoxKeyPress(aEvent)
+{
+	if (gTextBox && (aEvent.keyCode == aEvent.DOM_VK_RETURN) && (gSessionList.selectedIndex > -1)) {
+		onTextboxInput(gSessionList.selectedItem.label);
+		aEvent.preventDefault();
+	}
+}
+
 function onListboxSelect()
 {
-	if (!gTextBox)
+	if (!gTextBox || !ggMenuList)
 	{
 		gAcceptButton.disabled = gSessionList.selectedCount == 0;
 	}
@@ -202,32 +322,64 @@ function onTextboxInput(aNewValue)
 	gExistingName = gSessionNames[input] || 0;
 	var newWeight = gExistingName || ((gParams.GetInt(1) & 256) && gSessionList.selectedCount > 0);
 	
-	_("checkbox_autosave").checked = (gExistingName && gSessionList.childNodes[gExistingName - 1])? (gSessionList.childNodes[gExistingName - 1].getAttribute("autosave") == "true") : false;
+	var item;
+	if (gExistingName && (item = gSessionList.getItemAtIndex(gExistingName - 1))) {
+		_("checkbox_autosave").checked = item.getAttribute("autosave") != "false";
+	}
+	else _("checkbox_autosave").checked = false;
 	
 	if (!gNeedSelection && oldWeight != newWeight)
 	{
-		gAcceptButton.label = (newWeight)?gParams.GetString(5):gParams.GetString(2);
+		gAcceptButton.label = (newWeight && gParams.GetString(5))?gParams.GetString(5):gParams.GetString(2);
 		gAcceptButton.style.fontWeight = (newWeight)?"bold":"";
 	}
-	gAcceptButton.disabled = !input || gBannedNames[input] || gNeedSelection && (gSessionList.selectedCount == 0 || gExistingName);
+
+	// Highlight matching item when accept label changes to replace and copy in group value
+	if (newWeight && gParams.GetString(5)) {
+		if (gSessionList.selectedItem != item) gSessionList.selectedItem = item;
+		if (ggMenuList) ggMenuList.value = item.getAttribute("group");
+	}
+		
+	isAcceptable();
+}
+
+function isAcceptable() 
+{
+	var badSessionName = false;
+	var badGroupName = false;
+	
+	if (ggMenuList) {
+		var groupName = ggMenuList.value.trim();
+		badGroupName = (groupName == gBackupGroupName)
+		ggMenuList.inputField.setAttribute("badname", badGroupName);
+	}
+	
+	if (gTextBox) {
+		var input = gTextBox.value.trim().toLowerCase();
+		gTextBox.setAttribute("badname", gBackupNames[input]);
+		badSessionName = !input || gBackupNames[input] || gBannedNames[input];
+	}
+	
+	gAcceptButton.disabled = badSessionName || badGroupName || (gNeedSelection && (gSessionList.selectedCount == 0 || gExistingName));
 }
 
 function onAcceptDialog()
 {
-	gParams.SetInt(0, 0);
+	gParams.SetInt(0, 1);
 	if (gNeedSelection || ((gParams.GetInt(1) & 256) && gSessionList.selectedCount > 0))
 	{
 		gParams.SetString(3, gSessionList.selectedItems.map(function(aItem) { return aItem.value || ""; }).join("\n"));
 	}
 	else if (gExistingName)
 	{
-		gParams.SetString(3, gSessionList.childNodes[gExistingName - 1].value);
+		gParams.SetString(3, gSessionList.getItemAtIndex(gExistingName - 1).value);
 	}
 	else
 	{
 		gParams.SetString(3, "");
 	}
 	gParams.SetString(6, _("text_box").value.trim());
+	gParams.SetString(7, _("group_menu_list").value.trim());
 }
 
 function setDescription(aObj, aValue)

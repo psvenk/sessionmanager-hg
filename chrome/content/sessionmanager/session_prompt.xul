@@ -24,22 +24,44 @@
 	</stringbundleset>
 	
 	<hbox flex="1">
-		<hbox align="center">
-			<image id="info.icon" class="spaced question-icon"/>
-		</hbox>
-		
 		<vbox flex="1">
 			<label id="mac_title" value="&sessionManager;" class="dialogTitle" hidden="true"/>
 			
 			<vbox id="session_label"/>
 			<vbox flex="1">
-				<listbox id="session_list" rows="3" flex="1"/>
+				<listbox id="session_list" rows="5" flex="1" 
+				         onkeypress="onListBoxKeyPress(event)" onclick="onListboxClick(event)" ondblclick="onListboxClick(event)">
+					<listcols>
+						<listcol flex="2"/>
+						<listcol flex="1"/>
+						<listcol/>
+						<listcol/>
+					</listcols>
+					<listhead>
+						<listheader id="name" label="&session_name.label;"/>
+						<listheader id="group" label="&session_group.label;"/>
+						<listheader id="win_count" label="&session_windows.label;"/>
+						<listheader id="tab_count" label="&session_tabs.label;"/>
+					</listhead>
+				</listbox>
 			</vbox>
 			<separator class="thin"/>
 			
 			<vbox id="text_container" hidden="true">
 				<vbox id="text_label" class="header"/>
-				<textbox id="text_box" oninput="onTextboxInput();"/>
+				<hbox id="session-text-container" hidden="true">
+					<label value="&session_name.label;"></label>
+					<textbox flex="1" id="text_box" oninput="onTextboxInput();"/>
+				</hbox>
+				<hbox id="group-text-container" hidden="true">
+					<label value="&session_group.label;"></label>
+					<menulist flex="1" id="group_menu_list" editable="true" onkeyup="isAcceptable();"
+					          onchange="window.setTimeout(function(){isAcceptable();},50)"
+					          onmouseup="window.setTimeout(function(){isAcceptable();},50)">
+						<menupopup>
+						</menupopup>
+					</menulist>
+				</hbox>
 				<separator class="thin"/>
 			</vbox>
 			<hbox id="checkbox_container">
