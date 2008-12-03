@@ -93,3 +93,19 @@ treechildren::-moz-tree-cell-text(disabled),
 #session_list listitem[session_loaded="true"] {
 	color: gray;
 }
+
+
+/* Invalid items are red */
+#text_box[badname="true"],
+#group_menu_list input[class="menulist-editable-input"][badname="true"] {
+	color: red;
+}
+
+/* Center labels in Session Prompt window */
+label {
+	margin-top: 5px !important;
+}
+
+listcell[class="number"] {
+	text-align: center;
+}
