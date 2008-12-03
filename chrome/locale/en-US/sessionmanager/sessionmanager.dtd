@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Reopen the most recently closed tab">
 <!ENTITY prompt.ignore.label "Don&apos;t show this dialog again">
 <!ENTITY prompt.autosave.label "Make this an auto-save session">
+<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
 <!ENTITY load_replace.label "Load (Replace Current Session)">
 <!ENTITY load_replace.accesskey "L">
 <!ENTITY load_append.label "Load (Append To Current Session)">
