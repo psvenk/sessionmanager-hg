@@ -52,3 +52,10 @@
 <!ENTITY backup_sessions.accesskey "B">
 <!ENTITY remove_item.label "Delete Item">
 <!ENTITY remove_item.accesskey "D">
+<!ENTITY session_group.label "Group">
+<!ENTITY rename_group.label "Rename Group...">
+<!ENTITY remove_group.label "Delete Group...">
+<!ENTITY change_group.label "Change Group...">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "Group Session(s)...">
+<!ENTITY group.accesskey "G">
