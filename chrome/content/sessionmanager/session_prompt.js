@@ -336,7 +336,8 @@ function onTextboxInput(aNewValue)
 
 	// Highlight matching item when accept label changes to replace and copy in group value
 	if (newWeight && gParams.GetString(5)) {
-		if (gSessionList.selectedItem != item) gSessionList.selectedItem = item;
+		// Things get screwy if you try to select an item being selected so don't do it.
+		if (!aNewValue) gSessionList.selectedItem = item;
 		if (ggMenuList) ggMenuList.value = item.getAttribute("group");
 	}
 		
