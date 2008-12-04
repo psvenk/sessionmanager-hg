@@ -12,6 +12,7 @@ var gBackupNames = [];
 // an existing name since 0 means it does not match an existing name.  Just remember to subtract 1 before using.
 var gExistingName = 0;
 var gNeedSelection = false;
+var gWidth = 0;
 
 var sortedBy = 0;
 
@@ -217,6 +218,8 @@ gSessionManager.onLoad = function() {
 		document.documentElement.removeAttribute("screenY");
 	}
 	window.sizeToContent();
+	// Firefox 3.0 and above won't resize the listbox correctly so we must manually fix it.  See Firefox Bug 467932
+	if (this.mAppVersion >= "1.9") window.addEventListener("resize", window_resize, false);
 };
 
 gSessionManager.onUnload = function() {
@@ -234,6 +237,8 @@ gSessionManager.onUnload = function() {
 	if (gSessionList) persist(gSessionList, "height", gSessionList.boxObject.height);
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0));
+	
+	if (this.mAppVersion >= "1.9") window.removeEventListener("resize", window_resize, false);	
 };
 
 function onListboxClick(aEvent)
@@ -274,6 +279,8 @@ function onListboxClick(aEvent)
 			while (items.length) {
 				var item = items.pop();
 				gSessionList.appendChild(item);	
+				// Firefox 3.0 and 3.1 incorrecly set the "current" attribute on items added which causes the cells
+				// to be surrounded by a blue dotted box so just remove it if it's there.  See Firefox bug 467830
 				item.removeAttribute("current");
 				var trimName = item.firstChild.getAttribute("label").trim().toLowerCase();
 				gSessionNames[trimName] = gSessionList.getIndexOfItem(item) + 1;
@@ -386,7 +393,7 @@ function onAcceptDialog()
 function setDescription(aObj, aValue)
 {
 	aValue.split("\n").forEach(function(aLine) {
-		aObj.appendChild(document.createElement("description")).setAttribute("value", aLine);
+		aObj.appendChild(document.createElement("description")).textContent = aLine;
 	});
 }
 
@@ -403,4 +410,23 @@ function _isValidSessionList(aSessions)
 		return false;
 	}
 	return true;
+}
+
+// Work around for Firefox bug 467932
+function window_resize(aEvent)
+{
+	// only a problem if new width is smaller than current width
+	if (document.width < gWidth) {
+	
+		// get currently focused element
+		var focused = document.commandDispatcher.focusedElement;
+	
+		// toggle focus for Session List which will force it to redraw and fix listcell widths
+		if (focused == gSessionList) gSessionList.blur();
+		else gSessionList.focus();
+	
+		// restore focus to originally element
+		focused.focus();
+	}
+	gWidth = document.width;
 }
