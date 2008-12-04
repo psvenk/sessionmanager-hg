@@ -3,7 +3,7 @@ gSessionManager.onLoad = function() {
 	this._onLoad(true);
 	
 	var resume_session = _("resume_session");
-	var sessions = this.getSessions(true);
+	var sessions = this.getSessions();
 	resume_session.appendItem(this._string("startup_resume"), this.mBackupSessionName, "");
 	sessions.forEach(function(aSession) {
 		if ((aSession.fileName != this.mAutoSaveSessionName) && (aSession.fileName != this.mBackupSessionName))

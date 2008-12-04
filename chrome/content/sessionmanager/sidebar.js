@@ -74,7 +74,7 @@ var treeView = {
 		if (!this.allowUpdate) return;
 		this.allowUpdate = false;
 		var windowSessions = this.gSessionManager.getWindowSessions();
-		var sessions = this.gSessionManager.getSessions(true);
+		var sessions = this.gSessionManager.getSessions();
 
 		// clear out existing items from tree
 		var children = document.getElementById("sessions");

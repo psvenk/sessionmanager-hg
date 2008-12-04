@@ -247,7 +247,7 @@ function onCmdRenameOK() {
 	);
 	var gSessionManager = window.opener.gSessionManager;
 	gSessionManager.renameSession(getSelectedSession().fileName, new_name);
-	sessionTreeView.setData(window.opener.gSessionManager.getSessions(true));
+	sessionTreeView.setData(window.opener.gSessionManager.getSessions());
 
 	// select the renamed row again
 	var r = sessionTreeView.getRowWhere(
@@ -266,7 +266,7 @@ function onCmdDelete() {
 	dumpnl("delete " + getSelectedSession().fileName);
 	var gSessionManager = window.opener.gSessionManager;
 	gSessionManager.remove(getSelectedSession().fileName);
-	sessionTreeView.setData(window.opener.gSessionManager.getSessions(true));
+	sessionTreeView.setData(window.opener.gSessionManager.getSessions());
 	document.getElementById("sessiontree").focus();
 }
 
@@ -352,7 +352,7 @@ function autoFitColumn(tree, col) {
 function onLoad() {
 	window.addEventListener("unload", onUnload, false);
 
-	sessionTreeView.setData(window.opener.gSessionManager.getSessions(true));
+	sessionTreeView.setData(window.opener.gSessionManager.getSessions());
 	document.getElementById("sessiontree").view = sessionTreeView;
 	var tree = document.getElementById("sessiontree");
 
