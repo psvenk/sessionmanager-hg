@@ -1,4 +1,4 @@
-const SM_VERSION = "0.6.2.5";
+const SM_VERSION = "0.6.2.7";
 
 /*const*/ var gSessionManager = {
 	mSessionStoreValue : null,
@@ -232,31 +232,47 @@ const SM_VERSION = "0.6.2.5";
 			this.delPref("browser.warnOnQuit", true);
 		}
 		
-		// One time message on update
-		if (this.getPref("version", "") != SM_VERSION)
+		// Perform any needed update processing
+		var oldVersion = this.getPref("version", "")
+		if (oldVersion != SM_VERSION)
 		{
 			// this isn't used anymore
-			this.delPref("_no_reload");
+			if (oldVersion < "0.6.2.5") this.delPref("_no_reload");
+
+			// Clean out screenX and screenY persist values from localstore.rdf since we don't persist anymore.
+			if (oldVersion < "0.6.2.1") {
+				var RDF = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
+				var ls = Components.classes["@mozilla.org/rdf/datasource;1?name=local-store"].getService(Components.interfaces.nsIRDFDataSource);
+				var rdfNode = RDF.GetResource("chrome://sessionmanager/content/options.xul#sessionmanagerOptions");
+				var arcOut = ls.ArcLabelsOut(rdfNode);
+				while (arcOut.hasMoreElements()) {
+					var aLabel = arcOut.getNext();
+					if (aLabel instanceof Components.interfaces.nsIRDFResource) {
+						var aTarget = ls.GetTarget(rdfNode, aLabel, true);
+						ls.Unassert(rdfNode, aLabel, aTarget);
+					}
+				}
+				ls.QueryInterface(Components.interfaces.nsIRDFRemoteDataSource).Flush();
+			}
+						
+			// Add backup sessions to backup group
+			if (oldVersion < "0.6.2.7") {
+				var sessions = this.getSessions();
+				sessions.forEach(function(aSession) {
+					if (aSession.backup) {
+						this.group(aSession.fileName, this._string("backup_sessions"));
+					}
+				}, this);
+			}
 			
 			this.setPref("version", SM_VERSION);
+			
+			// One time message on update
 			setTimeout(function() {
 				var tBrowser = getBrowser();
 				tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
 			},100);
 			
-			// Clean out screenX and screenY persist values from localstore.rdf since we don't persist anymore.
-			var RDF = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
-			var ls = Components.classes["@mozilla.org/rdf/datasource;1?name=local-store"].getService(Components.interfaces.nsIRDFDataSource);
-			var rdfNode = RDF.GetResource("chrome://sessionmanager/content/options.xul#sessionmanagerOptions");
-			var arcOut = ls.ArcLabelsOut(rdfNode);
-			while (arcOut.hasMoreElements()) {
-				var aLabel = arcOut.getNext();
-				if (aLabel instanceof Components.interfaces.nsIRDFResource) {
-					var aTarget = ls.GetTarget(rdfNode, aLabel, true);
-					ls.Unassert(rdfNode, aLabel, aTarget);
-				}
-			}
-			ls.QueryInterface(Components.interfaces.nsIRDFRemoteDataSource).Flush();				
 		}
 	},
 
@@ -302,6 +318,7 @@ const SM_VERSION = "0.6.2.5";
 		{
 			this._string_preserve_session = this._string("preserve_session");
 			this._string_backup_session = this._string("backup_session");
+			this._string_backup_sessions = this._string("backup_sessions");
 			this._string_old_backup_session = this._string("old_backup_session");
 			this._string_prompt_not_again = this._string("prompt_not_again");
 			this._string_encrypt_fail = this._string("encrypt_fail");
@@ -585,7 +602,7 @@ const SM_VERSION = "0.6.2.5";
 		this.setDisabled(save.nextSibling, inPrivateBrowsing);
 		
 		var windowSessions = this.getWindowSessions();
-		var sessions = this.getSessions(true);
+		var sessions = this.getSessions();
 		var count = 0;
 		var backupCount = 0;
 		var user_latest = backup_latest = false;
@@ -925,6 +942,8 @@ const SM_VERSION = "0.6.2.5";
 				state[4] = this.decryptEncryptByPreference(state[4]); 
 				state = state.join("\n");
 			}
+			// remove group name if it was a backup session
+			if (this.mSessionCache[values.name].backup) state = state.replace(/\tgroup=.+$/m, "");
 			this.writeFile(newFile || file, this.nameState(state, values.text));
 			if (newFile)
 			{
@@ -974,7 +993,7 @@ const SM_VERSION = "0.6.2.5";
 				{
 					var file = this.getSessionDir(aFileName);
 					var state = this.readSessionFile(file);
-					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=.+)?/m, function($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group) : ""); });
+					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=.+)?$/m, function($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group) : ""); });
 					this.writeFile(file, state);
 				}
 				catch (ex)
@@ -1526,7 +1545,7 @@ const SM_VERSION = "0.6.2.5";
 			}
 			else {
 				// Delete only sessions after startDate
-				var sessions = this.getSessions(true);
+				var sessions = this.getSessions();
 				sessions.forEach(function(aSession, aIx) { 
 					if (range[0] <= aSession.timestamp*1000) {
 						this.delFile(this.getSessionDir(aSession.fileName));
@@ -1602,10 +1621,9 @@ const SM_VERSION = "0.6.2.5";
 	},
 
 	//
-	// headerOnly - only return header data, not the entire session file.  Speeds up grabbing of session names
 	// filter - optional regular expression. If specified, will only return sessions that match that expression
 	//
-	getSessions: function(headerOnly, filter)
+	getSessions: function(filter)
 	{
 		var matchArray;
 		var sessions = [];
@@ -1636,7 +1654,7 @@ const SM_VERSION = "0.6.2.5";
 				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs, backup: backupItem, group: cached.group });
 				continue;
 			}
-			if (matchArray = this.mSessionRegExp.exec(this.readSessionFile(file, headerOnly)))
+			if (matchArray = this.mSessionRegExp.exec(this.readSessionFile(file, true)))
 			{
 				try {
 					if (filter && !filter.test(matchArray[1])) continue;
@@ -1651,7 +1669,7 @@ const SM_VERSION = "0.6.2.5";
 				else if (backupItem && (sessions.latestBackUpTime < timestamp)) {
 					sessions.latestBackUpTime = timestamp;
 				}
-				var group = backupItem ? (this._string_backup_session || this._string("backup_sessions")) : (matchArray[7] ? matchArray[7] : "");
+				var group = matchArray[7] ? matchArray[7] : "";
 				sessions.push({ fileName: fileName, name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group });
 				this.mSessionCache[fileName] = { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: file.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group };
 				
@@ -1792,7 +1810,7 @@ const SM_VERSION = "0.6.2.5";
 		try
 		{
 			if (aForceSave || !this.isPrivateBrowserMode()) {
-				var state = this.getSessionState(this._string("autosave_session"));
+				var state = this.getSessionState(this._string("autosave_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")));
 				this.writeFile(this.getSessionDir(this.mAutoSaveSessionName), state);
 			}
 		}
@@ -1810,7 +1828,7 @@ const SM_VERSION = "0.6.2.5";
 		// Don't save if just a blank window, if there's an error parsing data, just save
 		var state = null;
 		if ((backup > 0) || temp_backup) {
-			state = this.getSessionState(this._string_backup_session || this._string("backup_session"));
+			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")));
 			try {
 				var aState = eval("(" + this.decrypt(state.split("\n")[4]) + ")");
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
@@ -1870,7 +1888,7 @@ const SM_VERSION = "0.6.2.5";
 		
 		if (this.mPref_max_backup_keep != -1)
 		{
-			this.getSessions(true).filter(function(aSession) {
+			this.getSessions().filter(function(aSession) {
 				return /^backup-\d+\.session$/.test(aSession.fileName);
 			}).sort(function(a, b) {
 				return b.timestamp - a.timestamp;
@@ -2399,7 +2417,7 @@ const SM_VERSION = "0.6.2.5";
 			this.delPref("_recovering");
 			this.load(recovering, "startup");
 		}
-		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions(true).length > 0)
+		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
 			var values = { ignorable: true };
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
