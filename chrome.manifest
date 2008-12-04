@@ -23,7 +23,6 @@ locale	sessionmanager	nl-NL	jar:chrome/sessionmanager.jar!/locale/nl-NL/sessionm
 locale	sessionmanager	tr-TR	jar:chrome/sessionmanager.jar!/locale/tr-TR/sessionmanager/
 locale	sessionmanager	sk-SK	jar:chrome/sessionmanager.jar!/locale/sk-SK/sessionmanager/
 locale	sessionmanager	hu-HU	jar:chrome/sessionmanager.jar!/locale/hu-HU/sessionmanager/
-locale	sessionmanager	sr-Yu	jar:chrome/sessionmanager.jar!/locale/sr-Yu/sessionmanager/
 locale	sessionmanager	ko-KR	jar:chrome/sessionmanager.jar!/locale/ko-KR/sessionmanager/
 locale	sessionmanager	sv-SE	jar:chrome/sessionmanager.jar!/locale/sv-SE/sessionmanager/
 locale	sessionmanager	ro-RO	jar:chrome/sessionmanager.jar!/locale/ro-RO/sessionmanager/
