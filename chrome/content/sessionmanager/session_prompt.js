@@ -72,7 +72,7 @@ gSessionManager.onLoad = function() {
 		}
 	}
 	else {
-		sessions = this.getSessions(true);
+		sessions = this.getSessions();
 	}
 	
 	if (gParams.GetInt(1) & 1) // add a "virtual" current session
@@ -300,13 +300,14 @@ function onListBoxKeyPress(aEvent)
 
 function onListboxSelect()
 {
-	if (!gTextBox || !ggMenuList)
+	if (!gTextBox && !ggMenuList)
 	{
 		gAcceptButton.disabled = gSessionList.selectedCount == 0;
 	}
 	else
 	{
-		onTextboxInput();
+		if (gTextBox) onTextboxInput();
+		else isAcceptable();
 	}
 }
 
