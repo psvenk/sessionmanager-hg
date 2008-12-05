@@ -109,18 +109,12 @@ gSessionManager.onLoad = function() {
 		// Don't display loaded sessions in list for delete or save or backup items in list for save or grouping
 		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && (saving || deleting))))
 		{
-			// get window and tab counts for crashed session
-			var windowCount = "?";
-			var tabCount = "?";
+			// get window and tab counts and group name for crashed session
 			if (aSession.fileName == "*") {
-				if (/(\d)\/(\d)/.test(gParams.GetString(7))) {
-					windowCount = RegExp.$1;
-					tabCount = RegExp.$2;
-				}
-			}
-			else {
-				windowCount = aSession.windows;
-				tabCount = aSession.tabs;
+				aSession.group = gBackupGroupName;
+				var counts = gParams.GetString(7).split(",");
+				aSession.windows = counts[0];
+				aSession.tabs = counts[1];
 			}
 			// Build cells
 			var nameCell = document.createElement("listcell");
@@ -131,8 +125,8 @@ gSessionManager.onLoad = function() {
 			groupCell.setAttribute("label", aSession.group);
 			// make backup group label gray
 			groupCell.setAttribute("disabled", aSession.backup);
-			wincountCell.setAttribute("label", windowCount);
-			tabcountCell.setAttribute("label", tabCount);
+			wincountCell.setAttribute("label", aSession.windows);
+			tabcountCell.setAttribute("label", aSession.tabs);
 			// format window and tab count text
 			wincountCell.setAttribute("class", "number");
 			tabcountCell.setAttribute("class", "number");
@@ -219,7 +213,10 @@ gSessionManager.onLoad = function() {
 	}
 	window.sizeToContent();
 	// Firefox 3.0 and above won't resize the listbox correctly so we must manually fix it.  See Firefox Bug 467932
-	if (this.mAppVersion >= "1.9") window.addEventListener("resize", window_resize, false);
+	if (this.mAppVersion >= "1.9") {
+		window.addEventListener("resize", window_resize, false);
+		resize();
+	}
 };
 
 gSessionManager.onUnload = function() {
@@ -417,7 +414,7 @@ function _isValidSessionList(aSessions)
 function window_resize(aEvent)
 {
 	// only a problem if new width is smaller than current width
-	if (document.width < gWidth) {
+	if (!gWidth || (document.width < gWidth)) {
 	
 		// get currently focused element
 		var focused = document.commandDispatcher.focusedElement;
