@@ -102,7 +102,7 @@ treechildren::-moz-tree-cell-text(disabled),
 }
 
 /* Center labels in Session Prompt window */
-label {
+label[class="textbox_label"] {
 	margin-top: 5px !important;
 }
 
