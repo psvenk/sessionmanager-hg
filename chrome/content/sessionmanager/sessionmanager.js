@@ -325,11 +325,11 @@ const SM_VERSION = "0.6.2.7";
 			
 			// This executes in Firefox 2.x if last browser window closes and non-browser windows are still open
 			// or if Firefox is restarted. In Firefox 3.0, it executes whenever the last browser window is closed.
-			if (!this.mPref__stopping) {
-				this.mObserverService.removeObserver(this, "quit-application");
+//			if (!this.mPref__stopping) {
+//				this.mObserverService.removeObserver(this, "quit-application");
 				// Don't do shutdown processing when entering private browsing mode
-				if (!this.doNotShutdown) this.shutDown();
-			}
+//				if (!this.doNotShutdown) this.shutDown();
+//			}
 		}
 		this.mBundle = null;
 		this.mFullyLoaded = false;
@@ -440,7 +440,7 @@ const SM_VERSION = "0.6.2.7";
 		case "quit-application":
 			this.mObserverService.removeObserver(this, "quit-application");
 			// only run shutdown for one window and if not restarting browser
-			if (aData != "restart")
+			if (aData != "restart" && !this.getPref("browser.sessionstore.resume_session_once", false, true))
 			{
 				this.shutDown();
 			}
