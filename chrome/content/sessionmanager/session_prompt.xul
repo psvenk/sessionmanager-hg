@@ -50,11 +50,11 @@
 			<vbox id="text_container" hidden="true">
 				<vbox id="text_label" class="header"/>
 				<hbox id="session-text-container" hidden="true">
-					<label value="&session_name.label;"></label>
+					<label class="textbox_label" value="&session_name.label;"></label>
 					<textbox flex="1" id="text_box" oninput="onTextboxInput();"/>
 				</hbox>
 				<hbox id="group-text-container" hidden="true">
-					<label value="&session_group.label;"></label>
+					<label class="textbox_label" value="&session_group.label;"></label>
 					<menulist flex="1" id="group_menu_list" editable="true" onkeyup="isAcceptable();"
 					          onchange="window.setTimeout(function(){isAcceptable();},50)"
 					          onmouseup="window.setTimeout(function(){isAcceptable();},50)">
