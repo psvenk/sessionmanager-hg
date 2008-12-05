@@ -23,10 +23,10 @@ gSessionManager.restorePrompt = function() {
 			var name = this.getFormattedName("", new Date(file.lastModifiedTime), this._string("crashed_session"));
 			var state = this.readFile(file);
 			count = this.getCount(state);
-			var session = this.nameState(state, name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs);
+			var session = this.nameState(state, name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + "\tgroup=" + this._string("backup_sessions"));
 			var backupFile = this.getSessionDir(this.mBackupSessionName, true);
 			
-			if (count.windows && count.tabs) countString = "   (" + count.windows + "/" + count.tabs + ")";
+			if (count.windows && count.tabs) countString = count.windows + "," + count.tabs;
 		}
 		catch(ex) { 
 			dump(ex + "\n"); 
