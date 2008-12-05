@@ -145,7 +145,8 @@ const SM_VERSION = "0.6.2.7";
 		this.mPrefBranch.addObserver("", this, false);
 		this.mPrefBranch2.addObserver("page", this, false);
 		
-		gBrowser.addEventListener("TabClose", this.onTabClose_proxy, false);
+		gBrowser.addEventListener("TabClose", this.onTabOpenClose, false);
+		gBrowser.addEventListener("TabOpen", this.onTabOpenClose, false)
 		if (this.mPref_reload) {
 			gBrowser.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			gBrowser.addEventListener("SSTabRestored", this.onTabRestored_proxy, false);
@@ -203,12 +204,6 @@ const SM_VERSION = "0.6.2.7";
 		
 		// Workaround for bug 360408 in Firefox 2.0, remove when fixed and uncomment call to onWindowClose in onUnload
 		if (this.mAppVersion < "1.9") eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
-		
-		// Have Tab Mix Plus call our function to update our toolbar button.
-		if (gBrowser.undoRemoveTab)
-		{
-			eval("gBrowser.undoRemoveTab = " + gBrowser.undoRemoveTab.toString().replace("return this", "gSessionManager.mObserverService.notifyObservers(window, 'sessionmanager:windowtabopenclose', 'tab'); $&"));
-		}
 		
 		// SeaMonkey doesn't have an undoCloseTab function so create one
 		if (!undoCloseTab) {
@@ -300,7 +295,8 @@ const SM_VERSION = "0.6.2.7";
 		this.mPrefBranch.removeObserver("", this);
 		this.mPrefBranch2.removeObserver("page", this);
 		
-		gBrowser.removeEventListener("TabClose", this.onTabClose_proxy, false);
+		gBrowser.removeEventListener("TabClose", this.onTabOpenClose, false);
+		gBrowser.removeEventListener("TabOpen", this.onTabOpenClose, false);
 		if (this.mPref_reload) {
 			gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
 			gBrowser.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
@@ -457,9 +453,9 @@ const SM_VERSION = "0.6.2.7";
 		}
 	},
 
-	onTabClose_proxy: function(aEvent)
+	onTabOpenClose: function(aEvent)
 	{
-		gSessionManager.mObserverService.notifyObservers(window, "sessionmanager:windowtabopenclose", "tab");
+		gSessionManager.updateToolbarButton();
 	},
 	
 	// This is to try and prevent tabs that are closed during the restore preocess from actually reloading.  
