@@ -161,7 +161,7 @@ var gSessionSaverConverter = {
 			
 					this.sessions[i] = { windows: jsWindows, selectedWindow: 1 };
 			
-					var sessionListItem = { name: i, fileName: i, autosave: false, windows: jsWindows.length, tabs: totalTabCount }
+					var sessionListItem = { name: i, fileName: i, autosave: false, windows: jsWindows.length, tabs: totalTabCount, group: "[SessionSaver]" };
 					this.sessionList.push(sessionListItem);
 				}
 				else {
@@ -193,7 +193,7 @@ var gSessionSaverConverter = {
 					var aName = this.gSessionManager.getFormattedName("[ SessionSaver ] " + aSession, date);
 					var file = this.gSessionManager.getSessionDir(this.gSessionManager.makeFileName(aName), true);
 					var state = "[SessionManager]\nname=" + aName + "\ntimestamp=" + Date.now() + "\nautosave=false\tcount=" + 
-					             session[0].windows + "/" + session[0].tabs + "\n" + uneval(this.sessions[aSession]);
+					             session[0].windows + "/" + session[0].tabs + "\tgroup=[SessionSaver]\n" + uneval(this.sessions[aSession]);
 					this.gSessionManager.writeFile(file, state);
 				}
 			}, this);
@@ -582,8 +582,16 @@ var gConvertTMPSession = {
 		
 		this.sessionList = [];
 		for (var i in sessions.list) {
-			if (this.SessionManager.getLiteralValue(sessions.path[i], "nameExt")) {
-				var sessionListItem = { name: unescape(sessions.list[i]), fileName: sessions.list[i] };
+			var nameExt = this.SessionManager.getLiteralValue(sessions.path[i], "nameExt");
+			if (nameExt) {
+				var winCount="", tabCount="";
+				// get window and tab counts
+				if (/(((\d+) W, )?(\d+) T)/m.test(nameExt)) {
+					winCount = RegExp.$3 ? RegExp.$3 : "1";
+					tabCount = RegExp.$4 ? RegExp.$4 : "";
+				}
+		
+				var sessionListItem = { name: unescape(sessions.list[i]), fileName: sessions.list[i], autosave: false, windows: winCount, tabs: tabCount, group: "[Tabmix]" };
 				this.sessionList.push(sessionListItem);
 			}
 		}
@@ -597,10 +605,7 @@ var gConvertTMPSession = {
 		sessionsToConvert = sessionsToConvert.split("\n");
 		var convert = [sessions.list.length];
 		for (var i = 0; i < sessions.list.length; i++ ) {
-			if (sessionsToConvert.indexOf(sessions.list[i]) != -1)
-				convert[i] = true;
-			else 
-				convert[i] = false;
+			convert[i] =  (sessionsToConvert.indexOf(sessions.list[i]) != -1)
 		}
 
 		for (var i = 0; i < sessions.path.length; i++ ) {
@@ -608,7 +613,7 @@ var gConvertTMPSession = {
 			var sessionState = this.convertSession.getSessionState(sessions.path[i]);
 
 			// get timestamp from nameExt property
-			var dateString = "", fileDate;
+			var dateString = "", fileDate, winCount="0", tabCount="0";
 			var nameExt = this.SessionManager.getLiteralValue(sessions.path[i], "nameExt");
 			if (nameExt) {
 				var date = nameExt.substr(nameExt.length - 20, 10);
@@ -617,12 +622,18 @@ var gConvertTMPSession = {
 				dateString = " (" + date.split("/").join("-") + " " + time.substr(0, time.length - 3) + ")";
 				var _time = time.split(":");
 				var timestamp = new Date(date).valueOf() + 3600*_time[0] + 60*_time[1] + 1*_time[2];
+				
+				// get window and tab counts
+				if (/(((\d+) W, )?(\d+) T)/m.test(nameExt)) {
+					winCount = RegExp.$3 ? RegExp.$3 : "1";
+					tabCount = RegExp.$4 ? RegExp.$4 : "";
+				}
 			}
 			var sessionName = unescape(sessions.list[i]);
 			var name = "[ Tabmix ] " + sessionName + dateString;
 			var fileName = this.gSessionManager.makeFileName("Tabmix - " + sessionName + fileDate);
 
-			_count += this.save(sessionState, timestamp, name, fileName);
+			_count += this.save(sessionState, timestamp, name, fileName, winCount, tabCount);
 		}
 
 		var msg;
@@ -634,13 +645,14 @@ var gConvertTMPSession = {
 		this._prompt.alert(null, this.gSessionManager._string("sessionManager"), msg);
 	},
 	
-	save: function (aSession, aTimestamp, aName, aFileName) {
+	save: function (aSession, aTimestamp, aName, aFileName, winCount, tabCount) {
 		if (aSession.windows.length == 0)
 			return false;
 
 		if (!aSession.session)
 			aSession.session = { state:"stop" };
-		var oState = "[SessionManager]\nname=" + aName + "\ntimestamp=" + aTimestamp + "\n" + uneval(aSession);
+		var oState = "[SessionManager]\nname=" + aName + "\ntimestamp=" + aTimestamp + "\nautosave=false\tcount=" +
+		             winCount + "/" + tabCount + "\tgroup=[Tabmix]\n" + uneval(aSession);
 		var file = this.gSessionManager.getSessionDir(gSessionManager.makeFileName(aName));
 		try {
 			var file = this.gSessionManager.getSessionDir(aFileName, true);
