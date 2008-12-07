@@ -215,7 +215,7 @@ gSessionManager.onLoad = function() {
 	// Firefox 3.0 and above won't resize the listbox correctly so we must manually fix it.  See Firefox Bug 467932
 	if (this.mAppVersion >= "1.9") {
 		window.addEventListener("resize", window_resize, false);
-		resize();
+		window_resize();
 	}
 };
 
@@ -424,7 +424,7 @@ function window_resize(aEvent)
 		else gSessionList.focus();
 	
 		// restore focus to originally element
-		focused.focus();
+		if (focused) focused.focus();
 	}
 	gWidth = document.width;
 }
