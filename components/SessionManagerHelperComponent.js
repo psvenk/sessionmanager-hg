@@ -88,7 +88,7 @@ var SessionManagerHelperComponent = {
 			{
 				this._handle_crash();
 			}
-			catch (ex) {}
+			catch (ex) { dump(ex); }
 			break;
 		case "sessionstore-state-read":
 			os.removeObserver(this, aTopic);
@@ -109,9 +109,17 @@ var SessionManagerHelperComponent = {
 	{
 		var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 		var crash_resume = prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
-		var sm_running = prefroot.getBoolPref("extensions.sessionmanager._running");
+	
+		var sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"];
+		if (!sessionStartup) sessionStartup = Cc["@mozilla.org/suite/sessionstartup;1"];
+		if (sessionStartup) sessionStartup = sessionStartup.getService(Ci.nsISessionStartup);
+		var resume_once = (sessionStartup && sessionStartup.sessionType && (sessionStartup.sessionType == Ci.nsISessionStartup.RESUME_SESSION)) ||
+		                   prefroot.getBoolPref("browser.sessionstore.resume_session_once");
+
+		var sm_running = (prefroot.getPrefType("extensions.sessionmanager._running") == prefroot.PREF_BOOL) && 
+		                 prefroot.getBoolPref("extensions.sessionmanager._running");
 		
-		if (sm_running && !crash_resume)
+		if (sm_running && !crash_resume && !resume_once)
 		{
 			dump("SessionManager: Removing active session\n");
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_name");
