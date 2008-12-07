@@ -1926,15 +1926,19 @@ const SM_VERSION = "0.6.2.7";
 			// RegExp.$3 - Autosave string (if it exists)
 			// RegExp.$4 - Autosave value (not really used at the moment)
 			// RegExp.$5 - Count string (if it exists)
-			if (/((^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*\n)?)/m.test(state))
+			// RegExp.$6 - Group string and any invalid count string before (if either exists)
+			// RegExp.$7 - Invalid count string (if it exists)
+			// RegExp.$8 - Group string (if it exists)
+			if (/((^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=.+\n))?)/m.test(state))
 			{	
 				var header = RegExp.$1;
 				var nameTime = RegExp.$2;
 				var auto = RegExp.$3;
 				var autoValue = RegExp.$4;
 				var count = RegExp.$5;
+				var group = RegExp.$8 ? RegExp.$8 : "";
 				var goodSession = true;
-				
+
 				// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
 				if (/autosave=(false|true|session|window).*\nautosave=(false|true|session|window)/m.test(state)) {
 					goodSession = false;
@@ -1947,9 +1951,11 @@ const SM_VERSION = "0.6.2.7";
 				{
 					var data = state.split("\n")[((auto) ? 4 : 3)];
 					var countString = (count) ? (count) : getCountString(this.getCount(data));
+					// remove \n from count string if group is there
+					if (group && (countString[countString.length-1] == "\n")) countString = countString.substring(0, countString.length - 1);
 					var autoSaveString = (auto) ? (auto).split("\n")[0] : "autosave=false";
 					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
-					state = nameTime + autoSaveString + countString + this.decryptEncryptByPreference(data)
+					state = nameTime + autoSaveString + countString + group + this.decryptEncryptByPreference(data)
 					// bad session so rename it so it won't load again - This catches case where window and/or 
 					// tab count is zero.  Technically we can load when tab count is 0, but that should never
 					// happen so session is probably corrupted anyway so just flag it so.
