@@ -190,6 +190,12 @@ const SM_VERSION = "0.6.2.7";
 			this.setPref("_running", true);
 			this.mPrefRoot.savePrefFile(null);
 		}
+		else if ((!this.getPref("browser.sessionstore.resume_from_crash", true, true)) &&
+			     (this.getBrowserWindows().length == 1)) {
+			// if crash recovery is disabled force saving the prefrences file to prevent problems
+			// where browser.sessionstore.resume_session_once is false, but stored as true.
+			this.mPrefRoot.savePrefFile(null);
+		}
 		this.mFullyLoaded = true;
 		
 		// Add sessionname to title when browser updates titlebar. Need to hook browser since 
