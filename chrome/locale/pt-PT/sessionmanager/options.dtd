@@ -92,3 +92,5 @@
 <!ENTITY max_display.accesskey "N">
 <!ENTITY hide_tools_menu.label "Não mostrar o menu do Session Manager no menu Ferramentas">
 <!ENTITY hide_tools_menu.accesskey "m">
+<!ENTITY disable_cache_fixer.label "Desactivar funcionalidade de reparação da cache">
+<!ENTITY disable_cache_fixer.accesskey "D">

@@ -92,3 +92,5 @@
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "Nezobrazovať ponuku Správca relácií v ponuke Nástroje">
 <!ENTITY hide_tools_menu.accesskey "e">
+<!ENTITY disable_cache_fixer.label "Vypnúť funkciu opravy vyrovnávacej pamäte">
+<!ENTITY disable_cache_fixer.accesskey "V">

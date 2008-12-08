@@ -88,7 +88,9 @@
 <!ENTITY display.caption "Mostrar">
 <!ENTITY middleclick.label "El botón central reabre la última pestaña cerrada">
 <!ENTITY middleclick.accesskey "c">
-<!ENTITY max_display.label "Número máximo de sesiones a mostrar en el menú">
+<!ENTITY max_display.label "Número máximo de sesiones a mostrar en el menú (-1 para todos)">
 <!ENTITY max_display.accesskey "N">
 <!ENTITY hide_tools_menu.label "No mostrar el menú de Session Manager en el menú Herramientas">
 <!ENTITY hide_tools_menu.accesskey "m">
+<!ENTITY disable_cache_fixer.label "Deshabilitar la opción de recuperación de caché">
+<!ENTITY disable_cache_fixer.accesskey "D">

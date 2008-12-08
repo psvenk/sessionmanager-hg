@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "perguntar se a sessão atual deve ser salva">
 <!ENTITY crashrecovery.label "Ativar Crash Recovery (Recuperação de Falhas)">
 <!ENTITY crashrecovery.accesskey "i">
+<!ENTITY autosave_session.label "Automatically save replaced session">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Restaurar Sessão">
 <!ENTITY sessionList.caption "Lista de Sessões">
 <!ENTITY orderList.label "Ordenar a lista de sessões">
@@ -42,6 +44,8 @@
 <!ENTITY name_format.label "Formato sugerido para nomes de sessões:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Use &#37;t para o título da aba ativa, &#37;d para a data de hoje e &#37;m para a hora; além disso o tamanho do título pode ser limitado com caracteres # : &#37;#t.">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "&quot;SessionStore&quot; Settings">
 <!ENTITY service.description "Não mexa nisso, a menos que saiba o que está fazendo:">
 <!ENTITY interval.label "Intervalo de tempo mínimo entre dois salvamentos de estado (em segundos):">
 <!ENTITY interval.accesskey "i">
@@ -54,9 +58,39 @@
 <!ENTITY privacy.level2 "nenhum site">
 <!ENTITY sessiondir.caption "Local das sessões guardadas">
 <!ENTITY sessiondir.desc "O local pré-definido das sessões guardadas pode ser substituído aqui.">
+<!ENTITY encrypt.caption "Encryption">
+<!ENTITY encrypt.desc "Warning: Encrypted session data can only be opened in profiles with identical key3.db files.  Additionally if a master password is set, sessions cannot be encrypted or decrypted if the master password is not entered.">
+<!ENTITY encrypt.label "Encrypt saved session and closed window data">
+<!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Mudar">
 <!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Pré-definido">
 <!ENTITY default_dir.accesskey "P">
 <!ENTITY sanitizer.label "Session Manager Saved Sessions">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Session Saving">
+<!ENTITY lastpage.label "Show my last loaded page">
+<!ENTITY noSession.label "None">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Prompt for a session">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "Select session">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Save Session Cookies">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "Import Sessions from...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "Apply">
+<!ENTITY save_and_restore.caption "Saving &amp; Restoring">
+<!ENTITY display.caption "Display">
+<!ENTITY middleclick.label "Middle Click re-opens last closed tab">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Maximum number of sessions to display in menu (-1 for all)">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Do not display Session Manager menu in Tools menu">
+<!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "Disable cache fixer feature">
+<!ENTITY disable_cache_fixer.accesskey "D">

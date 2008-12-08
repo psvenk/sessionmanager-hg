@@ -5,12 +5,12 @@
 <!ENTITY resume_sess.accesskey "h">
 <!ENTITY backup_sess.label "Ved nedlukning">
 <!ENTITY backup_sess.accesskey "l">
-<!ENTITY backup_session.label0 "kassér nuværende session">
-<!ENTITY backup_session.label1 "gem nuværende session">
-<!ENTITY backup_session.label2 "spørg om nuværende session skal gemmes eller kasséres">
-<!ENTITY crashrecovery.label "Nedbrudsretablering">
+<!ENTITY backup_session.label0 "kassér den nuværende session">
+<!ENTITY backup_session.label1 "gem den nuværende session">
+<!ENTITY backup_session.label2 "spørg om den nuværende session skal gemmes eller kasseres">
+<!ENTITY crashrecovery.label "Aktivér Nedbrudsretablering">
 <!ENTITY crashrecovery.accesskey "N">
-<!ENTITY autosave_session.label "Gem automatisk overskrevet session">
+<!ENTITY autosave_session.label "Gem automatisk erstattet session">
 <!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Sessionsgenskabelse">
 <!ENTITY sessionList.caption "Sessionsliste">
@@ -25,12 +25,12 @@
 <!ENTITY windowsNtabs.caption "Lukkede vinduer &amp; faneblade">
 <!ENTITY max_closed.label "Maksimalt antal huskede vinduer:">
 <!ENTITY max_closed.accesskey "v">
-<!ENTITY max_tabs.label "Maksimalt antal huskede faneblade (per vindue):">
+<!ENTITY max_tabs.label "Maksimalt antal huskede lukkede faneblade (per vindue):">
 <!ENTITY max_tabs.accesskey "b">
-<!ENTITY submenu.label "Vis lukkede vinduer og faneblade i undermenu">
+<!ENTITY submenu.label "Vis alle lukkede vinduer og faneblade i undermenu">
 <!ENTITY submenu.accesskey "u">
-<!ENTITY persistence.caption "Hukommelse">
-<!ENTITY closed_tabs.label "Genskab listen med vinduer og faneblade der kan genskabes:">
+<!ENTITY persistence.caption "Fastholdelse">
+<!ENTITY closed_tabs.label "Genskab listen med vinduer og faneblade der kan genskabes for alle vinduer:">
 <!ENTITY closed_tabs.accesskey "G">
 <!ENTITY closed_tabs.label0 "aldrig">
 <!ENTITY closed_tabs.label1 "ved opstart">
@@ -43,22 +43,54 @@
 <!ENTITY name_format.caption "Sessionsnavne">
 <!ENTITY name_format.label "Format for foreslåede sessionsnavne:">
 <!ENTITY name_format.accesskey "F">
-<!ENTITY name_format.desc "Brug &#37;t for det aktive faneblads overskrift, &#37;d for dagsdato og &#37;m for tidspunkt; overskriftens kan begrænses til # tegn: &#37;#t.">
-<!ENTITY service.description "Ændr kun på disse hvis du ved hvad du laver:">
+<!ENTITY name_format.desc "Brug &#37;t for det aktive faneblads overskrift, &#37;d for dags dato og &#37;m for tidspunkt; overskriftens kan begrænses til # tegn: &#37;#t.">
+<!ENTITY sessionstore.caption "SessionsArkiv">
+<!ENTITY service.caption "&quot;SessionsArkiv&quot; Indstillinger">
+<!ENTITY service.description "Ændr kun på disse hvis du ved hvad du laver!">
 <!ENTITY interval.label "Minimalt tidsinterval imellem at to tilstande gemmes (i sekunder):">
 <!ENTITY interval.accesskey "i">
-<!ENTITY postdata.label "Maksimalt antal POSTDATA der kan gemmes (i bytes; -1 for alt):">
+<!ENTITY postdata.label "Maksimal mængde POSTDATA der kan gemmes (i bytes; -1 for alt):">
 <!ENTITY postdata.accesskey "P">
-<!ENTITY privacy.label "Gem følsomme data (form data, POSTDATA og cookies) for">
+<!ENTITY privacy.label "Gem følsomme data (formulardata, POSTDATA og cookies) for">
 <!ENTITY privacy.accesskey "d">
 <!ENTITY privacy.level0 "alle websteder">
 <!ENTITY privacy.level1 "kun ukrypterede websteder">
 <!ENTITY privacy.level2 "ingen websteder">
 <!ENTITY sessiondir.caption "Placering af gemte sessioner">
 <!ENTITY sessiondir.desc "Standard placeringen af gemte sessioner kan overskrives her.">
+<!ENTITY encrypt.caption "Kryptering">
+<!ENTITY encrypt.desc "Advarsel: Krypterede sessionsdata kan kun åbnes i profiler med identiske key3.db filer. Her ud over kan sessioner ikke krypteres eller dekrypteres hvis der er påkrævet master-kodeord og master-kodeordet ikke er indtastet.">
+<!ENTITY encrypt.label "Kryptér gemte session og data for lukket vindue">
+<!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Ændr">
 <!ENTITY change_dir.accesskey "Æ">
 <!ENTITY default_dir.label "Genskab standard">
 <!ENTITY default_dir.accesskey "k">
 <!ENTITY sanitizer.label "Session Manager Gemte Sessioner">
 <!ENTITY sanitizer.accesskey "G">
+<!ENTITY saving.caption "Gem session">
+<!ENTITY lastpage.label "Vis min sidst indlæste side">
+<!ENTITY noSession.label "Ingen">
+<!ENTITY noSession.accesskey "n">
+<!ENTITY promptSession.label "Spørg efter session">
+<!ENTITY promptSession.accesskey "p">
+<!ENTITY selectSession.label "Vælg session">
+<!ENTITY selectSession.accesskey "s">
+<!ENTITY cookies.label "Gem session cookies">
+<!ENTITY cookies.accesskey "c">
+<!ENTITY sessionImport.caption "Importer sessioner fra...">
+<!ENTITY importSS.label "SessionsArkiv">
+<!ENTITY importSS.accesskey "i">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "b">
+<!ENTITY apply.label "Anvend">
+<!ENTITY save_and_restore.caption "Gem &amp; genetablering">
+<!ENTITY display.caption "Visning">
+<!ENTITY middleclick.label "Midterklik genåbner senest lukkede faneblad">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Maksimalt antal sessioner der skal vises i menu (-1 for alle)">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Vis ikke Session Manager menu i Funktioner-menuen">
+<!ENTITY hide_tools_menu.accesskey "V">
+<!ENTITY disable_cache_fixer.label "Deaktiver cache-fikser muligheden">
+<!ENTITY disable_cache_fixer.accesskey "D">

@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Znovu otevře poslední zavřený panel">
 <!ENTITY prompt.ignore.label "Toto dialogové okno již znovu nezobrazovat">
 <!ENTITY prompt.autosave.label "Automatické ukládání této relace">
+<!ENTITY prompt.tabprompt.label "Dotázat se na obnovení panelů">
 <!ENTITY load_replace.label "Načíst (nahradit aktuální relaci)">
 <!ENTITY load_replace.accesskey "N">
 <!ENTITY load_append.label "Načíst (přidat k aktuální relaci)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "Z">
 <!ENTITY remove_item.label "Odstranit položku">
 <!ENTITY remove_item.accesskey "d">
+<!ENTITY session_group.label "Skupina">
+<!ENTITY rename_group.label "Přejmenovat skupinu...">
+<!ENTITY remove_group.label "Odstranit skupinu...">
+<!ENTITY change_group.label "Změnit skupinu...">
+<!ENTITY change_group.accesskey "Z">
+<!ENTITY group.label "Skupiny relací...">
+<!ENTITY group.accesskey "S">

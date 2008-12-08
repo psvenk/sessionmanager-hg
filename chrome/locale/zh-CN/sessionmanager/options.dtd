@@ -10,6 +10,8 @@
 <!ENTITY backup_session.label2 "询问是否备份当前会话">
 <!ENTITY crashrecovery.label "启用崩溃恢复">
 <!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "Automatically save replaced session">
+<!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "会话恢复">
 <!ENTITY sessionList.caption "会话列表">
 <!ENTITY orderList.label "排序会话列表">
@@ -42,6 +44,8 @@
 <!ENTITY name_format.label "按照会话名称建议规范化为：">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "&#37;t 表示活动的标签标题， &#37;d 表示今天的日期， &#37;m表示时间， &#37;#t表示标题长度被限制为 # 个字符。">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "&quot;SessionStore&quot; Settings">
 <!ENTITY service.description "不要修改下列选项，除非您知道自己在做什么">
 <!ENTITY interval.label "两次状态保存之间的最小时间间隔 (单位：秒)：">
 <!ENTITY interval.accesskey "i">
@@ -54,9 +58,39 @@
 <!ENTITY privacy.level2 "全都不保存">
 <!ENTITY sessiondir.caption "已保存会话位置">
 <!ENTITY sessiondir.desc "在此已保存会话的默认位置可以被覆盖">
+<!ENTITY encrypt.caption "Encryption">
+<!ENTITY encrypt.desc "Warning: Encrypted session data can only be opened in profiles with identical key3.db files.  Additionally if a master password is set, sessions cannot be encrypted or decrypted if the master password is not entered.">
+<!ENTITY encrypt.label "Encrypt saved session and closed window data">
+<!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "修改">
 <!ENTITY change_dir.accesskey "C">
 <!ENTITY default_dir.label "默认">
 <!ENTITY default_dir.accesskey "D">
 <!ENTITY sanitizer.label "Session Manager 已保存会话">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Session Saving">
+<!ENTITY lastpage.label "Show my last loaded page">
+<!ENTITY noSession.label "None">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Prompt for a session">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "Select session">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Save Session Cookies">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "Import Sessions from...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "Apply">
+<!ENTITY save_and_restore.caption "Saving &amp; Restoring">
+<!ENTITY display.caption "Display">
+<!ENTITY middleclick.label "Middle Click re-opens last closed tab">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Maximum number of sessions to display in menu (-1 for all)">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Do not display Session Manager menu in Tools menu">
+<!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "Disable cache fixer feature">
+<!ENTITY disable_cache_fixer.accesskey "D">

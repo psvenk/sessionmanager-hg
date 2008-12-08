@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Legutoljára bezárt lapok megnyitása">
 <!ENTITY prompt.ignore.label "Ez a párbeszédablak ne jelenjen meg többet">
 <!ENTITY prompt.autosave.label "Automatikus mentés mostantól">
+<!ENTITY prompt.tabprompt.label "Lapok visszaállításának megerősítése">
 <!ENTITY load_replace.label "Betöltés (jelenlegi munkamenet cseréje)">
 <!ENTITY load_replace.accesskey "B">
 <!ENTITY load_append.label "Betöltés (hozzáfűzés a jelenlegi munkamenethez)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "u">
 <!ENTITY remove_item.label "Elem törlése">
 <!ENTITY remove_item.accesskey "t">
+<!ENTITY session_group.label "Csoport">
+<!ENTITY rename_group.label "Csoport átnevezése...">
+<!ENTITY remove_group.label "Csoport törlése...">
+<!ENTITY change_group.label "Csoport módosítása...">
+<!ENTITY change_group.accesskey "s">
+<!ENTITY group.label "Munkamenet(ek) csoportosítása...">
+<!ENTITY group.accesskey "c">

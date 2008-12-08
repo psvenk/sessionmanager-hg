@@ -88,7 +88,9 @@
 <!ENTITY display.caption "Wyświetlanie">
 <!ENTITY middleclick.label "Kliknięcie ś.p.m. otwiera ponownie ostatnio zamkniętą kartę">
 <!ENTITY middleclick.accesskey "N">
-<!ENTITY max_display.label "Maksymalna liczba sesji wyświetlanych w menu">
+<!ENTITY max_display.label "Maksymalna liczba sesji wyświetlanych w menu (-1 wszystkie)">
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "Nie wyświetlaj menu Session Managera w menu Narzędzia">
 <!ENTITY hide_tools_menu.accesskey "U">
+<!ENTITY disable_cache_fixer.label "Wyłącz funkcję naprawiania bufora">
+<!ENTITY disable_cache_fixer.accesskey "F">

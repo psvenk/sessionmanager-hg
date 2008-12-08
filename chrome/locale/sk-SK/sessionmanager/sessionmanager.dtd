@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Znova otvorí naposledy zatvorené karty">
 <!ENTITY prompt.ignore.label "Toto dialógové okno už nezobrazovať">
 <!ENTITY prompt.autosave.label "Nastaviť ako reláciu, ktorá bude ukladaná automaticky">
+<!ENTITY prompt.tabprompt.label "Žiadať o obnovenie kariet">
 <!ENTITY load_replace.label "Načítať (nahradiť aktuálnu reláciu)">
 <!ENTITY load_replace.accesskey "h">
 <!ENTITY load_append.label "Načítať (pripojiť k aktuálnej relácii)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "Z">
 <!ENTITY remove_item.label "Odstrániť položku">
 <!ENTITY remove_item.accesskey "d">
+<!ENTITY session_group.label "Skupina">
+<!ENTITY rename_group.label "Premenovať skupinu...">
+<!ENTITY remove_group.label "Odstrániť skupinu...">
+<!ENTITY change_group.label "Zmeniť skupinu...">
+<!ENTITY change_group.accesskey "Z">
+<!ENTITY group.label "Zoskupiť relácie...">
+<!ENTITY group.accesskey "s">

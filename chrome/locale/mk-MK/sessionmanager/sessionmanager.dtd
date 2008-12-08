@@ -12,7 +12,7 @@
 <!ENTITY rename.accesskey "П">
 <!ENTITY remove.label "Избриши сеси(и)ја">
 <!ENTITY remove.accesskey "И">
-<!ENTITY openFolder.label "Отвори го фолдерот со сесијата">
+<!ENTITY openFolder.label "Отвори ја Папката на Сесијата">
 <!ENTITY openFolder.accesskey "Ф">
 <!ENTITY options.label "&sessionManager; Опции">
 <!ENTITY options.accesskey "О">
@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Повторно отвори ги неодамнешните затворени јазичиња">
 <!ENTITY prompt.ignore.label "Не го покажувај овај дијалог повторно">
 <!ENTITY prompt.autosave.label "Автоматски зачувај ја сесијата">
+<!ENTITY prompt.tabprompt.label "Прашај за обновување на јазичиња">
 <!ENTITY load_replace.label "Вчитај (Заменија Моменталната Сесија)">
 <!ENTITY load_replace.accesskey "В">
 <!ENTITY load_append.label "Вчитај (Додај Во Моменталната Сесија)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "Р">
 <!ENTITY remove_item.label "Избриши елемент">
 <!ENTITY remove_item.accesskey "И">
+<!ENTITY session_group.label "Група">
+<!ENTITY rename_group.label "Применувај ја Групата...">
+<!ENTITY remove_group.label "Избриши ја Групата...">
+<!ENTITY change_group.label "Промени ја Групата...">
+<!ENTITY change_group.accesskey "П">
+<!ENTITY group.label "Сесии на Група...">
+<!ENTITY group.accesskey "Г">

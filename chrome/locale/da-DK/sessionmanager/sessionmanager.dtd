@@ -33,3 +33,30 @@
 <!ENTITY toolbar.undo.tooltip "Genåbn de senest lukkede faneblade">
 <!ENTITY prompt.ignore.label "Vis ikke denne besked igen">
 <!ENTITY prompt.autosave.label "Gør til auto-gem session">
+<!ENTITY prompt.tabprompt.label "Spørg om genetablering af faneblade">
+<!ENTITY load_replace.label "Indlæs (Erstat nuværende session)">
+<!ENTITY load_replace.accesskey "l">
+<!ENTITY load_append.label "Indlæs (Tilføj til nuværende session)">
+<!ENTITY load_append.accesskey "n">
+<!ENTITY replace_all.label "Erstat session med nuværende session">
+<!ENTITY replace_all.accesskey "r">
+<!ENTITY replace_window.label "Erstat session med nuværende vindue">
+<!ENTITY replace_window.accesskey "v">
+<!ENTITY remove_one.label "Slet session...">
+<!ENTITY set_startup.label "Sæt som opstartssession">
+<!ENTITY set_startup.accesskey "s">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Navn">
+<!ENTITY session_windows.label "Vinduer">
+<!ENTITY session_tabs.label "Faneblade">
+<!ENTITY backup_sessions.label "Backup-sessioner">
+<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY remove_item.label "Slet element">
+<!ENTITY remove_item.accesskey "e">
+<!ENTITY session_group.label "Gruppe">
+<!ENTITY rename_group.label "Omdøb gruppe...">
+<!ENTITY remove_group.label "Slet gruppe...">
+<!ENTITY change_group.label "Redigér gruppe...">
+<!ENTITY change_group.accesskey "R">
+<!ENTITY group.label "Gruppe-Session(er)...">
+<!ENTITY group.accesskey "G">

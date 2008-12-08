@@ -2,9 +2,9 @@
 <!ENTITY toolsmenu.accesskey "M">
 <!ENTITY save.label "Oturumu Kaydet...">
 <!ENTITY save.accesskey "S">
-<!ENTITY saveOne.label "Geçerli Pencereyi KAydet...">
+<!ENTITY saveOne.label "Geçerli Pencereyi Kaydet...">
 <!ENTITY saveOne.accesskey "W">
-<!ENTITY closeSession.label "Kaydet ve Oturumu kaat">
+<!ENTITY closeSession.label "Kaydet ve Oturumu kapat">
 <!ENTITY closeSession.accesskey "C">
 <!ENTITY abandonSession.label "Oturumu iptal et">
 <!ENTITY abandonSession.accesskey "A">
@@ -14,7 +14,7 @@
 <!ENTITY remove.accesskey "D">
 <!ENTITY openFolder.label "Oturum Klasötünü Aç">
 <!ENTITY openFolder.accesskey "F">
-<!ENTITY options.label "&sessionManager; Seçenekler">
+<!ENTITY options.label "&sessionManager; Seçenekleri">
 <!ENTITY options.accesskey "O">
 <!ENTITY resume.label "Geçerli Oturume Başlangıçta devam et">
 <!ENTITY resume.accesskey "m">
@@ -29,10 +29,11 @@
 <!ENTITY clearList.label "&apos;Kapatılan&apos; Listesini Temizle...">
 <!ENTITY clearList.accesskey "C">
 <!ENTITY toolbar.tooltip "Geçerli gezinti oturumunu kaydet...">
-<!ENTITY toolbar.undo.label "Kapatmayı Geri A">
+<!ENTITY toolbar.undo.label "Kapatmayı Geri Al">
 <!ENTITY toolbar.undo.tooltip "Önceki kapatılmış sekmeleri yeniden aç">
 <!ENTITY prompt.ignore.label "Bu uyarıyı artık gösterme">
 <!ENTITY prompt.autosave.label "Otomatik kayıt yap">
+<!ENTITY prompt.tabprompt.label "Sekmeleri geri yüklemek için sor">
 <!ENTITY load_replace.label "Yükle (Şimdiki oturumla değiştir)">
 <!ENTITY load_replace.accesskey "L">
 <!ENTITY load_append.label "Yükle (Şimdiki Oturuma Ekle)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "B">
 <!ENTITY remove_item.label "Sil">
 <!ENTITY remove_item.accesskey "D">
+<!ENTITY session_group.label "Gurup">
+<!ENTITY rename_group.label "Gurup Adlandır">
+<!ENTITY remove_group.label "Gurup Sil..">
+<!ENTITY change_group.label "Gurup Değiştir..">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "Gurup Oturum(ları)..">
+<!ENTITY group.accesskey "G">

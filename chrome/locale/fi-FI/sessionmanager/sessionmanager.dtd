@@ -1,35 +1,62 @@
-<!ENTITY sessionManager "Istuntojenhallinta">
-<!ENTITY toolsmenu.accesskey "I">
+<!ENTITY sessionManager "Session Manager">
+<!ENTITY toolsmenu.accesskey "M">
 <!ENTITY save.label "Tallenna istunto...">
-<!ENTITY save.accesskey "T">
+<!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Tallenna nykyinen ikkuna...">
-<!ENTITY saveOne.accesskey "i">
+<!ENTITY saveOne.accesskey "W">
 <!ENTITY closeSession.label "Tallenna ja sulje nykyinen istunto">
-<!ENTITY closeSession.accesskey "j">
+<!ENTITY closeSession.accesskey "C">
 <!ENTITY abandonSession.label "Hylkää nykyinen istunto">
-<!ENTITY abandonSession.accesskey "y">
+<!ENTITY abandonSession.accesskey "A">
 <!ENTITY rename.label "Nimeä istunto uudelleen...">
-<!ENTITY rename.accesskey "N">
+<!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Poista istuntoja...">
-<!ENTITY remove.accesskey "P">
+<!ENTITY remove.accesskey "D">
 <!ENTITY openFolder.label "Avaa istuntokansio">
-<!ENTITY openFolder.accesskey "k">
-<!ENTITY options.label "Istuntojenhallinnan asetukset">
-<!ENTITY options.accesskey "a">
+<!ENTITY openFolder.accesskey "F">
+<!ENTITY options.label "&sessionManager; -asetukset">
+<!ENTITY options.accesskey "O">
 <!ENTITY resume.label "Jatka nykyistä istuntoa seuraavalla käynnistyskerralla">
-<!ENTITY resume.accesskey "J">
+<!ENTITY resume.accesskey "M">
 <!ENTITY reload.label "Lataa uudelleen kaikki palautetut ikkunat">
 <!ENTITY reload.accesskey "L">
 <!ENTITY overwrite.label "Korvaa olemassaolevat ikkunat">
-<!ENTITY overwrite.accesskey "o">
+<!ENTITY overwrite.accesskey "P">
 <!ENTITY undoClosed.label "Avaa suljetut uudelleen...">
-<!ENTITY undoClosed.accesskey "u">
+<!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "Suljetut ikkunat:">
 <!ENTITY closedTabs "Suljetut välilehdet:">
 <!ENTITY clearList.label "Tyhjennä &apos;Suljetut&apos;-lista...">
-<!ENTITY clearList.accesskey "y">
+<!ENTITY clearList.accesskey "C">
 <!ENTITY toolbar.tooltip "Tallenna nykyinen istunto...">
 <!ENTITY toolbar.undo.label "Peruuta sulkeminen">
 <!ENTITY toolbar.undo.tooltip "Avaa uudelleen viimeksi suljettu välilehti">
 <!ENTITY prompt.ignore.label "Älä näytä tätä valintaikkunaa uudelleen">
 <!ENTITY prompt.autosave.label "Tallenna tämä istunto automaattisesti">
+<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
+<!ENTITY load_replace.label "Lataa (korvaa nykyinen istunto)">
+<!ENTITY load_replace.accesskey "L">
+<!ENTITY load_append.label "Lataa (liitä nykyiseen istuntoon)">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "Korvaa istunto nykyisellä istunnolla">
+<!ENTITY replace_all.accesskey "R">
+<!ENTITY replace_window.label "Korvaa istunto nykyisellä ikkunalla">
+<!ENTITY replace_window.accesskey "W">
+<!ENTITY remove_one.label "Poista istunto...">
+<!ENTITY set_startup.label "Aseta aloitusistunnoksi">
+<!ENTITY set_startup.accesskey "S">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Nimi">
+<!ENTITY session_windows.label "Ikkunat">
+<!ENTITY session_tabs.label "Välilehdet">
+<!ENTITY backup_sessions.label "Varmuuskopio-istunnot">
+<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY remove_item.label "Poista">
+<!ENTITY remove_item.accesskey "D">
+<!ENTITY session_group.label "Group">
+<!ENTITY rename_group.label "Rename Group...">
+<!ENTITY remove_group.label "Delete Group...">
+<!ENTITY change_group.label "Change Group...">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "Group Session(s)...">
+<!ENTITY group.accesskey "G">

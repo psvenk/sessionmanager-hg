@@ -12,7 +12,7 @@
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Şterge sesiunea...">
 <!ENTITY remove.accesskey "t">
-<!ENTITY openFolder.label "Deschide dosarul sesiunilor salvate">
+<!ENTITY openFolder.label "Deschide dosarul de arhivare a sesiunilor">
 <!ENTITY openFolder.accesskey "d">
 <!ENTITY options.label "Opţiuni &sessionManager;">
 <!ENTITY options.accesskey "O">
@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Redeschide cele mai recente file închise">
 <!ENTITY prompt.ignore.label "Nu mai afişa această fereastră de dialog">
 <!ENTITY prompt.autosave.label "Activează auto-salvarea acestei sesiuni">
+<!ENTITY prompt.tabprompt.label "Interoghează despre filele de restaurat">
 <!ENTITY load_replace.label "Încarcă sesiunea (înlocuieşte sesiunea curentă)">
 <!ENTITY load_replace.accesskey "c">
 <!ENTITY load_append.label "Încarcă sesiunea (adaugă la sesiunea curentă)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "a">
 <!ENTITY remove_item.label "Şterge elementul">
 <!ENTITY remove_item.accesskey "t">
+<!ENTITY session_group.label "Grupează">
+<!ENTITY rename_group.label "Redenumeşte grupul...">
+<!ENTITY remove_group.label "Şterge grupul...">
+<!ENTITY change_group.label "Schimbă grupul...">
+<!ENTITY change_group.accesskey "c">
+<!ENTITY group.label "Grupează sesiunile...">
+<!ENTITY group.accesskey "G">

@@ -92,3 +92,5 @@
 <!ENTITY max_display.accesskey "x">
 <!ENTITY hide_tools_menu.label "Nu afişa meniul gestionarului de sesiuni în meniul Unelte">
 <!ENTITY hide_tools_menu.accesskey "g">
+<!ENTITY disable_cache_fixer.label "Dezactivează opţiunea de stabilizare a cache-ului">
+<!ENTITY disable_cache_fixer.accesskey "D">

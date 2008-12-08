@@ -92,3 +92,5 @@
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "ツールメニューにセッションマネージャのメニューを表示しない">
 <!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "キャッシュフィクサー機能を無効にする">
+<!ENTITY disable_cache_fixer.accesskey "D">

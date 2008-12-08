@@ -33,3 +33,30 @@
 <!ENTITY toolbar.undo.tooltip "가장 최근 닫은 탭을 다시 엽니다.">
 <!ENTITY prompt.ignore.label "이 메세지를 다시 표시하지 않기">
 <!ENTITY prompt.autosave.label "자동저장 세션으로 만들기">
+<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
+<!ENTITY load_replace.label "Load (Replace Current Session)">
+<!ENTITY load_replace.accesskey "L">
+<!ENTITY load_append.label "Load (Append To Current Session)">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "Replace Session With Current Session">
+<!ENTITY replace_all.accesskey "R">
+<!ENTITY replace_window.label "Replace Session With Current Window">
+<!ENTITY replace_window.accesskey "W">
+<!ENTITY remove_one.label "Delete Session...">
+<!ENTITY set_startup.label "Set As Startup Session">
+<!ENTITY set_startup.accesskey "S">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "Name">
+<!ENTITY session_windows.label "Windows">
+<!ENTITY session_tabs.label "Tabs">
+<!ENTITY backup_sessions.label "Backup Sessions">
+<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY remove_item.label "Delete Item">
+<!ENTITY remove_item.accesskey "D">
+<!ENTITY session_group.label "Group">
+<!ENTITY rename_group.label "Rename Group...">
+<!ENTITY remove_group.label "Delete Group...">
+<!ENTITY change_group.label "Change Group...">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "Group Session(s)...">
+<!ENTITY group.accesskey "G">

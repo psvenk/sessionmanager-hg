@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Återställ senast stängda flik">
 <!ENTITY prompt.ignore.label "Visa inte den här dialogen igen">
 <!ENTITY prompt.autosave.label "Gör det här till en auto-sparnings-session">
+<!ENTITY prompt.tabprompt.label "Fråga efter flikar att återställa">
 <!ENTITY load_replace.label "Ladda in (ersätt nuvarande session)">
 <!ENTITY load_replace.accesskey "L">
 <!ENTITY load_append.label "Ladda in (lägg till på nuvarande session)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "B">
 <!ENTITY remove_item.label "Ta bort">
 <!ENTITY remove_item.accesskey "D">
+<!ENTITY session_group.label "Grupp">
+<!ENTITY rename_group.label "Byt namn på grupp...">
+<!ENTITY remove_group.label "Radera grupp...">
+<!ENTITY change_group.label "Ändra grupp...">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "Gruppsession(er)...">
+<!ENTITY group.accesskey "G">

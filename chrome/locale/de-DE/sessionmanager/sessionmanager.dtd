@@ -12,7 +12,7 @@
 <!ENTITY rename.accesskey "u">
 <!ENTITY remove.label "Sitzung(en) löschen...">
 <!ENTITY remove.accesskey "l">
-<!ENTITY openFolder.label "Sitzungsordner öffnen...">
+<!ENTITY openFolder.label "Sitzungs-Ordner öffnen...">
 <!ENTITY openFolder.accesskey "O">
 <!ENTITY options.label "&sessionManager;-Einstellungen...">
 <!ENTITY options.accesskey "E">
@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Zuletzt geschlossenen Tab wiederherstellen">
 <!ENTITY prompt.ignore.label "Diesen Dialog nicht mehr anzeigen">
 <!ENTITY prompt.autosave.label "Diese Sitzung immer automatisch sichern">
+<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
 <!ENTITY load_replace.label "Laden (aktuelle Sitzung ersetzen)">
 <!ENTITY load_replace.accesskey "L">
 <!ENTITY load_append.label "Laden (zur aktuellen Sitzung hinzufügen)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "G">
 <!ENTITY remove_item.label "Eintrag löschen">
 <!ENTITY remove_item.accesskey "l">
+<!ENTITY session_group.label "Group">
+<!ENTITY rename_group.label "Rename Group...">
+<!ENTITY remove_group.label "Delete Group...">
+<!ENTITY change_group.label "Change Group...">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "Group Session(s)...">
+<!ENTITY group.accesskey "G">

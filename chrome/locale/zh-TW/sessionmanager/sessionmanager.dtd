@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "重新開啟最近關閉的分頁">
 <!ENTITY prompt.ignore.label "不要再顯示此對話視窗">
 <!ENTITY prompt.autosave.label "本瀏覽頁組設為自動存檔">
+<!ENTITY prompt.tabprompt.label "列示分頁以供選擇還原">
 <!ENTITY load_replace.label "載入(替換現行瀏覽頁組)">
 <!ENTITY load_replace.accesskey "L">
 <!ENTITY load_append.label "載入(附加於現行瀏覽頁組末端)">
@@ -46,9 +47,16 @@
 <!ENTITY set_startup.accesskey "S">
 <!ENTITY openSessionManagerSidebar.commandkey "S">
 <!ENTITY session_name.label "名稱">
-<!ENTITY session_windows.label "視窗B">
+<!ENTITY session_windows.label "視窗數">
 <!ENTITY session_tabs.label "分頁數">
 <!ENTITY backup_sessions.label "備份瀏覽頁組">
 <!ENTITY backup_sessions.accesskey "B">
 <!ENTITY remove_item.label "刪除該項目">
 <!ENTITY remove_item.accesskey "D">
+<!ENTITY session_group.label "群組">
+<!ENTITY rename_group.label "重新命名群組">
+<!ENTITY remove_group.label "刪除群組">
+<!ENTITY change_group.label "變更群組">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "對瀏覽頁組設定群組">
+<!ENTITY group.accesskey "G">

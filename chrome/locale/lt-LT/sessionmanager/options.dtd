@@ -68,3 +68,29 @@
 <!ENTITY default_dir.accesskey "A">
 <!ENTITY sanitizer.label "Sesijų tvarkytojo išsaugotos sesijos">
 <!ENTITY sanitizer.accesskey "i">
+<!ENTITY saving.caption "Session Saving">
+<!ENTITY lastpage.label "Show my last loaded page">
+<!ENTITY noSession.label "None">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Prompt for a session">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "Select session">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Save Session Cookies">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "Import Sessions from...">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "Apply">
+<!ENTITY save_and_restore.caption "Saving &amp; Restoring">
+<!ENTITY display.caption "Display">
+<!ENTITY middleclick.label "Middle Click re-opens last closed tab">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Maximum number of sessions to display in menu (-1 for all)">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Do not display Session Manager menu in Tools menu">
+<!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "Disable cache fixer feature">
+<!ENTITY disable_cache_fixer.accesskey "D">

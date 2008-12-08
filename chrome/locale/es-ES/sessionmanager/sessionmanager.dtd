@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Vuelve a abrir la pestaña cerrada más recientemente">
 <!ENTITY prompt.ignore.label "No volver a mostrar este mensaje">
 <!ENTITY prompt.autosave.label "Guardar esta sesión automáticamente">
+<!ENTITY prompt.tabprompt.label "Confirmar la restauración de pestañas">
 <!ENTITY load_replace.label "Cargar (Reemplazar la sesión actual)">
 <!ENTITY load_replace.accesskey "C">
 <!ENTITY load_append.label "Cargar (Añadir a la sesión actual)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "H">
 <!ENTITY remove_item.label "Borrar elemento">
 <!ENTITY remove_item.accesskey "B">
+<!ENTITY session_group.label "Grupo">
+<!ENTITY rename_group.label "Renombrar grupo...">
+<!ENTITY remove_group.label "Borrar grupo...">
+<!ENTITY change_group.label "Cambiar grupo...">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "Grupos de sesiones...">
+<!ENTITY group.accesskey "G">

@@ -1,4 +1,4 @@
-<!ENTITY options.title "&sessionManager; Seçenekler">
+<!ENTITY options.title "&sessionManager; Seçenekleri">
 <!ENTITY general.caption "Genel">
 <!ENTITY startNend.caption "Başlangıç &amp; Kapatma">
 <!ENTITY resume_sess.label "Açılışta daima belirli oturumu yükle:">
@@ -86,9 +86,11 @@
 <!ENTITY apply.label "Tamam">
 <!ENTITY save_and_restore.caption "Kaydetme &amp; Geri Yükleme">
 <!ENTITY display.caption "Görünüm">
-<!ENTITY middleclick.label "Orta tıklaması kapatılan son sekmeyş açar">
+<!ENTITY middleclick.label "Orta tıklaması kapatılan son sekmeyi açar">
 <!ENTITY middleclick.accesskey "M">
 <!ENTITY max_display.label "Menüde gösterilecek En çok oturum sayısı">
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "Araçlar Menüsünde Oturum Yöneticisini gösterme">
 <!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "Cache Fixer özelliğini kapat">
+<!ENTITY disable_cache_fixer.accesskey "D">

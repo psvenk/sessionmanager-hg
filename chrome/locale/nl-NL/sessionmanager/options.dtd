@@ -76,7 +76,7 @@
 <!ENTITY promptSession.accesskey "N">
 <!ENTITY selectSession.label "Sessie selecteren">
 <!ENTITY selectSession.accesskey "S">
-<!ENTITY cookies.label "Sessie-cookies opsaal">
+<!ENTITY cookies.label "Sessie-cookies opslaan">
 <!ENTITY cookies.accesskey "c">
 <!ENTITY sessionImport.caption "Sessies importeren van...">
 <!ENTITY importSS.label "SessionSaver">
@@ -92,3 +92,5 @@
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "Session Manager-menu niet weergeven in menu Extra">
 <!ENTITY hide_tools_menu.accesskey "n">
+<!ENTITY disable_cache_fixer.label "Cache-reparateur uitschakelen">
+<!ENTITY disable_cache_fixer.accesskey "C">

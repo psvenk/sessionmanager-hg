@@ -48,11 +48,11 @@
 <!ENTITY service.caption "A munkamenetek helyreállításának beállításai">
 <!ENTITY service.description "Ne változtassa meg ezeket a beállításokat, ha nem biztos a következményekben.">
 <!ENTITY interval.label "Az aktuális állapot mentése (másodpercekben):">
-<!ENTITY interval.accesskey "A">
+<!ENTITY interval.accesskey "m">
 <!ENTITY postdata.label "Az elmenthető POSTDATA adatok maximális mérete (bájtokban; -1 mindegyiknek):">
 <!ENTITY postdata.accesskey "x">
 <!ENTITY privacy.label "Személyes adatok mentése (űrlapadatok, POSTDATA és sütik)">
-<!ENTITY privacy.accesskey "y">
+<!ENTITY privacy.accesskey "S">
 <!ENTITY privacy.level0 "összes oldal">
 <!ENTITY privacy.level1 "nem titkosított oldal">
 <!ENTITY privacy.level2 "nincs mentés">
@@ -61,9 +61,9 @@
 <!ENTITY encrypt.caption "Titkosítás">
 <!ENTITY encrypt.desc "Figyelmeztetés: A titkosított munkamenet adatai csak azonos key3.db és cert8.db fájlokat tartalamazó profilokban nyithatóak meg. Amennyiben adott a mesterjelszó, a munkamenetek nem titkosíthatók/dekódolhatók a megfelelő mesterjelszó megadásáig.">
 <!ENTITY encrypt.label "Mentett munkamenet és bezárt ablak adatainak titkosítása">
-<!ENTITY encrypt.accesskey "t">
-<!ENTITY change_dir.label "Változtat">
-<!ENTITY change_dir.accesskey "V">
+<!ENTITY encrypt.accesskey "e">
+<!ENTITY change_dir.label "Módosítás">
+<!ENTITY change_dir.accesskey "M">
 <!ENTITY default_dir.label "Alapértelmezett visszaállítása">
 <!ENTITY default_dir.accesskey "A">
 <!ENTITY sanitizer.label "Mentett munkamenetek (Session Manager)">
@@ -90,5 +90,7 @@
 <!ENTITY middleclick.accesskey "u">
 <!ENTITY max_display.label "A menüben megjelenített munkamenetek maximális száma">
 <!ENTITY max_display.accesskey "x">
-<!ENTITY hide_tools_menu.label "Ne jelenjen meg a Session manager menüje az eszközök menüben">
+<!ENTITY hide_tools_menu.label "Ne jelenjen meg a Session Manager menüje az eszközök menüben">
 <!ENTITY hide_tools_menu.accesskey "e">
+<!ENTITY disable_cache_fixer.label "A háttértár-hibák javításának letiltása">
+<!ENTITY disable_cache_fixer.accesskey "l">

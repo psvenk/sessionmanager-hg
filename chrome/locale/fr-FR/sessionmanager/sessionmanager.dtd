@@ -1,7 +1,7 @@
 <!ENTITY sessionManager "Gestionnaire de session">
 <!ENTITY toolsmenu.accesskey "G">
 <!ENTITY save.label "Enregistrer la session…">
-<!ENTITY save.accesskey "g">
+<!ENTITY save.accesskey "E">
 <!ENTITY saveOne.label "Enregistrer la fenêtre courante…">
 <!ENTITY saveOne.accesskey "f">
 <!ENTITY closeSession.label "Enregistrer et fermer la session courante">
@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Ouvrir à nouveau le dernier onglet fermé">
 <!ENTITY prompt.ignore.label "Ne plus afficher cette boîte de dialogue à l&apos;avenir">
 <!ENTITY prompt.autosave.label "Faire en sorte que cette session soit enregistrée automatiquement">
+<!ENTITY prompt.tabprompt.label "Demander les onglets à rétablir">
 <!ENTITY load_replace.label "Charger (remplacer la session courante)">
 <!ENTITY load_replace.accesskey "C">
 <!ENTITY load_append.label "Charger (ajouter à la session courante)">
@@ -48,7 +49,14 @@
 <!ENTITY session_name.label "Nom">
 <!ENTITY session_windows.label "Fenêtres">
 <!ENTITY session_tabs.label "Onglets">
-<!ENTITY backup_sessions.label "Sauvegarder les sessions">
-<!ENTITY backup_sessions.accesskey "g">
+<!ENTITY backup_sessions.label "Sessions sauvegardées">
+<!ENTITY backup_sessions.accesskey "v">
 <!ENTITY remove_item.label "Supprimer l&apos;élément">
 <!ENTITY remove_item.accesskey "u">
+<!ENTITY session_group.label "Groupe">
+<!ENTITY rename_group.label "Renommer le groupe…">
+<!ENTITY remove_group.label "Supprimer le groupe…">
+<!ENTITY change_group.label "Changer le groupe…">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "Regroupement de session(s)…">
+<!ENTITY group.accesskey "G">

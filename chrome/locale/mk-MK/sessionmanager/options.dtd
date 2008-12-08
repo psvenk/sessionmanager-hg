@@ -44,6 +44,8 @@
 <!ENTITY name_format.label "Формат за предлозите за имиња на сесијата:">
 <!ENTITY name_format.accesskey "п">
 <!ENTITY name_format.desc "Користи &#37;t за наслови на активните јазичиња, &#37;d за денешниот датум, &#37;m за време; додатно може да се ограничи должината на насловот на # знаци: &#37;#t.">
+<!ENTITY sessionstore.caption "SessionStore">
+<!ENTITY service.caption "Поставки на &quot;SessionStore&quot;">
 <!ENTITY service.description "Не ги допирај овие, освен ако знаеш што правиш!">
 <!ENTITY interval.label "Минимум временски интервал помеѓу две зачувувања на состојбата(во секунди):">
 <!ENTITY interval.accesskey "в">
@@ -57,6 +59,8 @@
 <!ENTITY sessiondir.caption "Локација на зачуваните сесии">
 <!ENTITY sessiondir.desc "Тука може да се премине преку зададената локација на зачуваните сесии.">
 <!ENTITY encrypt.caption "Енкрипција">
+<!ENTITY encrypt.desc "Предупредување: Енкриптираните податоци од сесијата можат да бидат отворени само во профили со идентични key3.db датотеки. Ако додатно се постави главна лозинка, сесиите не можат да бидат енкриптирани или декриптирани ако главната лозинка не е внесена.">
+<!ENTITY encrypt.label "Енкриптирај ја зачуваната сесија и затворените податоци од прозорецот">
 <!ENTITY encrypt.accesskey "е">
 <!ENTITY change_dir.label "Промени">
 <!ENTITY change_dir.accesskey "и">
@@ -75,7 +79,18 @@
 <!ENTITY cookies.label "Зачувај ги Колачињата на Сесијата">
 <!ENTITY cookies.accesskey "К">
 <!ENTITY sessionImport.caption "Внеси Сесии од...">
+<!ENTITY importSS.label "SessionSaver">
 <!ENTITY importSS.accesskey "В">
+<!ENTITY importTMP.label "Tab Mix Plus">
 <!ENTITY importTMP.accesskey "В">
 <!ENTITY apply.label "Примени">
+<!ENTITY save_and_restore.caption "Зачувување &amp; Обновување">
 <!ENTITY display.caption "Прикажи">
+<!ENTITY middleclick.label "Среден Клик го отвара последното затворено јазиче">
+<!ENTITY middleclick.accesskey "С">
+<!ENTITY max_display.label "Максимален број на сесии да бидат прикажани во менито (-1 за сите)">
+<!ENTITY max_display.accesskey "М">
+<!ENTITY hide_tools_menu.label "Не го прикажувај менито на Менаџерот на Сесијата во менито за Алатки">
+<!ENTITY hide_tools_menu.accesskey "Н">
+<!ENTITY disable_cache_fixer.label "Исклучи ја можноста на поправачот на кешот">
+<!ENTITY disable_cache_fixer.accesskey "И">

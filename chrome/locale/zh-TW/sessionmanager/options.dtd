@@ -88,7 +88,9 @@
 <!ENTITY display.caption "設定顯示">
 <!ENTITY middleclick.label "滑鼠中鍵重開最後關閉的分頁">
 <!ENTITY middleclick.accesskey "M">
-<!ENTITY max_display.label "顯示於選單的最大頁組數">
+<!ENTITY max_display.label "顯示於選單的最大頁組數(-1表示全部都顯示)">
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "工具選單中不要顯示瀏覽頁組管理員選單">
 <!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "停用「修正快取記憶區」功能">
+<!ENTITY disable_cache_fixer.accesskey "D">

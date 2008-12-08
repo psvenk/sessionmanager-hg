@@ -88,7 +88,9 @@
 <!ENTITY display.caption "Anzeige">
 <!ENTITY middleclick.label "Mit Mittelklick auf die Tab-Leiste zuletzt geschlossenen Tab wiederherstellen">
 <!ENTITY middleclick.accesskey "M">
-<!ENTITY max_display.label "Maximale Anzahl der im Menü angezeigten Sitzungen:">
+<!ENTITY max_display.label "Maximale Anzahl der im Menü angezeigten Sitzungen (-1 = alle):">
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "Eintrag &quot;Sitzungs-Manager&quot; nicht im Menü &quot;Extras&quot; anzeigen">
 <!ENTITY hide_tools_menu.accesskey "n">
+<!ENTITY disable_cache_fixer.label "Cache-Fixer-Funktion deaktivieren">
+<!ENTITY disable_cache_fixer.accesskey "D">

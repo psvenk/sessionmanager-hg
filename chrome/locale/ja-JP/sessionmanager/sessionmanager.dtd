@@ -33,6 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "最近閉じたタブを元に戻す">
 <!ENTITY prompt.ignore.label "再びこのダイアログを表示しない">
 <!ENTITY prompt.autosave.label "セッションを自動保存する">
+<!ENTITY prompt.tabprompt.label "タブの復元を確認">
 <!ENTITY load_replace.label "読み込み (現在のセッションを取り替える)">
 <!ENTITY load_replace.accesskey "L">
 <!ENTITY load_append.label "読み込み (現在のセッションに追加)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "B">
 <!ENTITY remove_item.label "アイテムを削除">
 <!ENTITY remove_item.accesskey "D">
+<!ENTITY session_group.label "グループ">
+<!ENTITY rename_group.label "グループ名の変更...">
+<!ENTITY remove_group.label "グループを削除...">
+<!ENTITY change_group.label "グループを変更...">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "グループセッション...">
+<!ENTITY group.accesskey "G">

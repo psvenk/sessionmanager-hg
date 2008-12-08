@@ -32,7 +32,8 @@
 <!ENTITY toolbar.undo.label "Cofnij">
 <!ENTITY toolbar.undo.tooltip "Otwiera ponownie ostatnio zamknięte karty">
 <!ENTITY prompt.ignore.label "Nie pokazuj tego okna ponownie">
-<!ENTITY prompt.autosave.label "Ustanów jako automatycznie zapisywaną sesję">
+<!ENTITY prompt.autosave.label "Ustaw jako automatycznie zapisywaną sesję">
+<!ENTITY prompt.tabprompt.label "Przypominaj o kartach do odtworzenia">
 <!ENTITY load_replace.label "Wczytaj (zamień bieżącą sesję)">
 <!ENTITY load_replace.accesskey "W">
 <!ENTITY load_append.label "Wczytaj (dołącz do bieżącej sesji)">
@@ -52,3 +53,10 @@
 <!ENTITY backup_sessions.accesskey "K">
 <!ENTITY remove_item.label "Usuń element">
 <!ENTITY remove_item.accesskey "U">
+<!ENTITY session_group.label "Grupa">
+<!ENTITY rename_group.label "Zmiana nazwy grupy...">
+<!ENTITY remove_group.label "Usuń grupę...">
+<!ENTITY change_group.label "Zmień grupę...">
+<!ENTITY change_group.accesskey "M">
+<!ENTITY group.label "Sesje grupy...">
+<!ENTITY group.accesskey "G">
