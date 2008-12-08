@@ -16,6 +16,7 @@ pref("extensions.sessionmanager.name_format", "%40t-%d");
 pref("extensions.sessionmanager.options_selected_tab", 0);
 pref("extensions.sessionmanager.overwrite", true);
 pref("extensions.sessionmanager.reload", false);
+pref("extensions.sessionmanager.restore_temporary", false);
 pref("extensions.sessionmanager.resume_session", "backup.session");
 pref("extensions.sessionmanager.save_closed_tabs", 1);
 pref("extensions.sessionmanager.save_cookies", true);
