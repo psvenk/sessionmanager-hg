@@ -12,7 +12,7 @@ const SM_VERSION = "0.6.2.7";
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mComponents: Components,
 
-	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted", "private-browsing"],
+	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager-list-update", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted", "private-browsing"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mBackupSessionRegEx: /^backup(-[1-9](\d)*)?\.session$/,
@@ -21,6 +21,10 @@ const SM_VERSION = "0.6.2.7";
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
 	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
 
+	mLastState: null,
+	mCleanBrowser: null,
+	mClosedWindowName: null,
+	
 	mSessionCache: { timestamp: 0 },
 	mClosedWindowsCache: { timestamp: 0, data: null },
 	
@@ -113,11 +117,15 @@ const SM_VERSION = "0.6.2.7";
 			return;
 		}
 		
+		// This will handle any left over processing that results from closing the last browser window, but
+		// not actually exiting the browser and then opening a new browser window.
+		if (this.getBrowserWindows().length == 1) this.mObserverService.notifyObservers(window, "sessionmanager:process-closed-window", null);
+		
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.addObserver(this, aTopic, false);
 		}, this);
 		this.mObserverService.addObserver(this, "quit-application", false);
-		this.mObserverService.addObserver(this, "sessionmanager-list-update", false);
+		this.mObserverService.addObserver(this, "sessionmanager:process-closed-window", false);
 		// The following is needed to handle extensions who issue bad restarts in Firefox 2.0
 		if (this.mAppVersion < "1.9") this.mObserverService.addObserver(this, "quit-application-requested", false);
 		
@@ -297,7 +305,6 @@ const SM_VERSION = "0.6.2.7";
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.removeObserver(this, aTopic);
 		}, this);
-		this.mObserverService.removeObserver(this, "sessionmanager-list-update");
 		this.mPrefBranch.removeObserver("", this);
 		this.mPrefBranch2.removeObserver("page", this);
 		
@@ -311,13 +318,24 @@ const SM_VERSION = "0.6.2.7";
 		
 		// Last window closing will leaks briefly since "quit-application" observer is not removed from it 
 		// until after shutdown is run, but since browser is closing anyway, who cares?
-		if (numWindows != 0) this.mObserverService.removeObserver(this, "quit-application");
+		if (numWindows != 0) {
+			this.mObserverService.removeObserver(this, "sessionmanager:process-closed-window");
+			this.mObserverService.removeObserver(this, "quit-application");
+		}
 
 		// Only do the following in Firefox 3.0 and above where bug 360408 is fixed.
 		if (this.mAppVersion >= "1.9") this.onWindowClose();
 				
 		if (this.mPref__running && numWindows == 0)
 		{
+			// store current window or session data in case it's needed later
+			this.mLastState = (this.mPref__autosave_name) ? 
+			                   this.getSessionState(this.mPref__autosave_name, null, this.mPref_save_closed_tabs < 2, true) :
+			                   this.getSessionState(null, true); 
+			this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
+			this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+			                   
+			
 			this._string_preserve_session = this._string("preserve_session");
 			this._string_backup_session = this._string("backup_session");
 			this._string_backup_sessions = this._string("backup_sessions");
@@ -349,6 +367,24 @@ const SM_VERSION = "0.6.2.7";
 			// only update all windows if window state changed.
 			if ((aData != "tab") || (window == aSubject)) this.updateToolbarButton();
 			break;
+		case "sessionmanager:process-closed-window":
+			// This will handle any left over processing that results from closing the last browser window, but
+			// not actually exiting the browser and then opening a new browser window.  The window will be
+			// autosaved or saved into the closed window list depending on if it was an autosave session or not.
+			// The observers will then be removed which will result in the window being removed from memory.
+			if (window != aSubject) {
+				try { 
+					if (!this.closeSession()) this.onWindowClose();
+				}
+				catch(ex) { dump(ex + "\n"); }
+				this.mLastState = null;
+				this.mCleanBrowser = null;
+				this.mClosedWindowName = null;
+				this.mObserverService.removeObserver(this, "sessionmanager:process-closed-window");
+				this.mObserverService.removeObserver(this, "quit-application");
+				//dump("done processing closed window\n");
+			}
+			break;
 		case "sessionmanager:updatetitlebar":
 			gBrowser.updateTitlebar();
 			break;
@@ -379,7 +415,7 @@ const SM_VERSION = "0.6.2.7";
 			// this session cache from updated window so this window doesn't need to read from disk
 			if (window != aSubject) {
 				if (this.mSessionCache.timestamp < aSubject.gSessionManager.mSessionCache.timestamp) {
-					//dump("Updating window " + window.title + "\n");
+					//dump("Updating window " + window.window.document.title + "\n");
 					this.mSessionCache = aSubject.gSessionManager.mSessionCache;
 				}
 			}
@@ -444,9 +480,10 @@ const SM_VERSION = "0.6.2.7";
 			}
 			break;
 		case "quit-application":
+			this.mObserverService.removeObserver(this, "sessionmanager:process-closed-window");
 			this.mObserverService.removeObserver(this, "quit-application");
 			// only run shutdown for one window and if not restarting browser
-			if (aData != "restart" && !this.getPref("browser.sessionstore.resume_session_once", false, true))
+			if (aData != "restart")
 			{
 				this.shutDown();
 			}
@@ -538,7 +575,7 @@ const SM_VERSION = "0.6.2.7";
 		}
 			
 		// only save closed window if running, not shutting down and this isn't the last window of any type open
-		if (this.mPref__running && !this.mPref__stopping && this.mWindowMediator.getEnumerator(null).hasMoreElements())
+		if (this.mPref__running && !this.mPref__stopping && (this.getBrowserWindows().length > 0))
 		{
 			// Don't need to save autosave name in FF 3.0+ since when closed window is restored it will be overwritten
 			// and it will cause an exception if window's data has been wiped.
@@ -1698,7 +1735,7 @@ const SM_VERSION = "0.6.2.7";
 		
 		// Notify all other open windows so they can copy the session list cache - this minimizes disk reads
 		//dump("Needed to read disk is " + (trueUpdate?"true\n":"false\n"));
-		if (trueUpdate) this.mObserverService.notifyObservers(window, "sessionmanager-list-update", "");
+		if (trueUpdate) this.mObserverService.notifyObservers(window, "sessionmanager-list-update", null);
 		return (this.mPref_session_list_order < 0)?sessions.reverse():sessions;
 	},
 
@@ -1742,12 +1779,14 @@ const SM_VERSION = "0.6.2.7";
 
 	appendClosedWindow: function(aState)
 	{
-		if (this.mPref_max_closed_undo == 0 || this.isPrivateBrowserMode() || Array.every(gBrowser.browsers, this.isCleanBrowser))
+		var cleanBrowser = (this.mCleanBrowser != null) ? this.mCleanBrowser : Array.every(gBrowser.browsers, this.isCleanBrowser);
+		if (this.mPref_max_closed_undo == 0 || this.isPrivateBrowserMode() || cleanBrowser)
 		{
 			return;
 		}
 		
-		var name = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+		var name = this.mClosedWindowName ? this.mClosedWindowName :
+		           content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
 		var windows = this.getClosedWindows();
 		
 		aState = aState.replace(/^\n+|\n+$/g, "").replace(/\n{2,}/g, "\n");
@@ -1766,6 +1805,11 @@ const SM_VERSION = "0.6.2.7";
 
 	shutDown: function()
 	{
+		// Make sure to pull in fresh state data at shut down
+		this.mLastState = null;
+		this.mCleanBrowser = null;
+		this.mClosedWindowName = null;
+		
 		// Handle sanitizing if sanitize on shutdown without prompting
 		if ((this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true)) &&
 			(!this.getPref("privacy.sanitize.promptOnSanitize", true, true)) &&
@@ -1845,14 +1889,22 @@ const SM_VERSION = "0.6.2.7";
 		if (backup == 2)
 		{
 			var dontPrompt = { value: false };
+			var saveRestore = !(this.getPref("browser.sessionstore.resume_session_once", false, true) || this.doResumeCurrent());
 			var flags = this.mPromptService.BUTTON_TITLE_SAVE * this.mPromptService.BUTTON_POS_0 + 
-			            this.mPromptService.BUTTON_TITLE_DONT_SAVE * this.mPromptService.BUTTON_POS_1 +
-			            this.mPromptService.BUTTON_TITLE_IS_STRING * this.mPromptService.BUTTON_POS_2; 
+			            this.mPromptService.BUTTON_TITLE_DONT_SAVE * this.mPromptService.BUTTON_POS_1 + 
+			            (saveRestore ? (this.mPromptService.BUTTON_TITLE_IS_STRING * this.mPromptService.BUTTON_POS_2) : 0); 
 			var results = this.mPromptService.confirmEx(null, this.mTitle, this._string_preserve_session || this._string("preserve_session"), flags,
 			              null, null, this._string_save_and_restore || this._string("save_and_restore"),
 			              this._string_prompt_not_again || this._string("prompt_not_again"), dontPrompt);
 			backup = (results == 1)?-1:1;
-			if (results == 2) this.setPref("restore_temporary", true);
+			if (results == 2) {
+				if (dontPrompt.value) {
+					this.setPref("resume_session", this.mBackupSessionName);
+					this.setPref("startup", 2);
+					this.synchStartup();
+				}
+				else this.setPref("restore_temporary", true);
+			}
 			if (dontPrompt.value)
 			{
 				this.setPref("backup_session", (backup == -1)?0:1);
@@ -2555,6 +2607,12 @@ const SM_VERSION = "0.6.2.7";
 
 	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup)
 	{
+		// Return last closed window state if it is stored.
+		if (this.mLastState) {
+			//dump("Returning stored state\n");
+			return this.mLastState;
+		}
+		
 		var state = (aOneWindow)?this.mSessionStore().getWindowState(window):this.mSessionStore().getBrowserState();
 		
 		state = this.modifySessionData(state, aNoUndoData, true, (this.mAppVersion < "1.9"));
