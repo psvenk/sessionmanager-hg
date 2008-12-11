@@ -328,13 +328,14 @@ const SM_VERSION = "0.6.2.7";
 				
 		if (this.mPref__running && numWindows == 0)
 		{
-			// store current window or session data in case it's needed later
-			this.mLastState = (this.mPref__autosave_name) ? 
-			                   this.getSessionState(this.mPref__autosave_name, null, this.mPref_save_closed_tabs < 2, true) :
-			                   this.getSessionState(null, true); 
-			this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
-			this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
-			                   
+			// store current window or session data in case it's needed later (not needed on shutdown)
+			if (!this.mPref__stopping) {
+				this.mLastState = (this.mPref__autosave_name) ? 
+			    	               this.getSessionState(this.mPref__autosave_name, null, this.mPref_save_closed_tabs < 2, true) :
+			        	           this.getSessionState(null, true); 
+				this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
+				this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+			}
 			
 			this._string_preserve_session = this._string("preserve_session");
 			this._string_backup_session = this._string("backup_session");
