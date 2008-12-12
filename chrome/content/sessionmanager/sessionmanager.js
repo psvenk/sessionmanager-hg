@@ -330,9 +330,10 @@ const SM_VERSION = "0.6.2.7";
 		{
 			// store current window or session data in case it's needed later (not needed on shutdown)
 			if (!this.mPref__stopping) {
-				this.mLastState = (this.mPref__autosave_name) ? 
-			    	               this.getSessionState(this.mPref__autosave_name, null, this.mPref_save_closed_tabs < 2, true) :
-			        	           this.getSessionState(null, true); 
+				var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : this.__window_session_name;
+				this.mLastState = (name) ? 
+			    	               this.getSessionState(name, null, this.mPref_save_closed_tabs < 2, true, null, true) :
+			        	           this.getSessionState(null, true, null, null, null, true); 
 				this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
 				this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
 			}
@@ -375,7 +376,7 @@ const SM_VERSION = "0.6.2.7";
 			// The observers will then be removed which will result in the window being removed from memory.
 			if (window != aSubject) {
 				try { 
-					if (!this.closeSession()) this.onWindowClose();
+					if (!this.closeSession(false)) this.onWindowClose();
 				}
 				catch(ex) { dump(ex + "\n"); }
 				this.mLastState = null;
@@ -581,7 +582,7 @@ const SM_VERSION = "0.6.2.7";
 			// Don't need to save autosave name in FF 3.0+ since when closed window is restored it will be overwritten
 			// and it will cause an exception if window's data has been wiped.
 			if (this.mAppVersion < "1.9") this.mSessionStore().setWindowValue(window,"_sm_autosave_name","");
-			var state = this.getSessionState(null, true);
+			var state = this.getSessionState(null, true, null, null, null, true);
 			this.appendClosedWindow(state);
 			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 		}
@@ -1790,6 +1791,9 @@ const SM_VERSION = "0.6.2.7";
 		           content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
 		var windows = this.getClosedWindows();
 		
+		// encrypt state if encryption preference set
+		if (this.mPref_encrypt_sessions) aState = this.decryptEncryptByPreference(aState);
+				
 		aState = aState.replace(/^\n+|\n+$/g, "").replace(/\n{2,}/g, "\n");
 		windows.unshift({ name: name, state: aState });
 		this.storeClosedWindows(windows.slice(0, this.mPref_max_closed_undo));
@@ -1876,9 +1880,9 @@ const SM_VERSION = "0.6.2.7";
 		// Don't save if just a blank window, if there's an error parsing data, just save
 		var state = null;
 		if ((backup > 0) || temp_backup) {
-			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")));
+			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")), true);
 			try {
-				var aState = eval("(" + this.decrypt(state.split("\n")[4]) + ")");
+				var aState = eval("(" + state.split("\n")[4] + ")");
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
 		    		(aState.windows[0].tabs[0].entries.length > 1) || 
 		    		((aState.windows[0].tabs[0].entries.length == 1 && aState.windows[0].tabs[0].entries[0].url != "about:blank")))) {
@@ -1914,6 +1918,14 @@ const SM_VERSION = "0.6.2.7";
 		if (backup > 0 || temp_backup)
 		{
 			this.keepOldBackups(backup > 0);
+			
+			// encrypt state if encryption preference set
+			if (this.mPref_encrypt_sessions) {
+				state = state.split("\n")
+				state[4] = this.decryptEncryptByPreference(state[4]);
+				state = state.join("\n");
+			}
+			
 			try
 			{
 				this.writeFile(this.getSessionDir(this.mBackupSessionName), state);
@@ -2606,11 +2618,19 @@ const SM_VERSION = "0.6.2.7";
 		});
 	},
 
-	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup)
+	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt)
 	{
 		// Return last closed window state if it is stored.
 		if (this.mLastState) {
 			//dump("Returning stored state\n");
+			// encrypt state if encryption preference set
+			if (this.mPref_encrypt_sessions) {
+				var state = this.mLastState.split("\n")
+				// if there is a state[4] it's a session otherwise it's a closed window
+				if (state[4]) state[4] = this.decryptEncryptByPreference(state[4]);
+				else state[0] = this.decryptEncryptByPreference(state[0]);
+				this.mLastState = state.join("\n");
+			}
 			return this.mLastState;
 		}
 		
@@ -2619,8 +2639,8 @@ const SM_VERSION = "0.6.2.7";
 		state = this.modifySessionData(state, aNoUndoData, true, (this.mAppVersion < "1.9"));
 		var count = this.getCount(state);
 		
-		// encrypt state if encryption preference set
-		state = this.decryptEncryptByPreference(state); 
+		// encrypt state if encryption preference set and flag not set
+		if (!aDoNotEncrypt) state = this.decryptEncryptByPreference(state); 
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
 				"\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + 
