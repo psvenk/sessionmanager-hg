@@ -23,5 +23,6 @@ pref("extensions.sessionmanager.save_cookies", true);
 pref("extensions.sessionmanager.save_window_list", false);
 pref("extensions.sessionmanager.sessions_dir", "");
 pref("extensions.sessionmanager.session_list_order", 1);
+pref("extensions.sessionmanager.shutdown_on_last_window_close", false);
 pref("extensions.sessionmanager.startup", 0);
 pref("extensions.sessionmanager.submenus", false);
