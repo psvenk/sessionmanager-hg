@@ -283,6 +283,11 @@ function onListboxClick(aEvent)
 				gSessionNames[trimName] = gSessionList.getIndexOfItem(item) + 1;
 			}
 			sortedBy = flag * (which + 1);
+
+			// update header arrorws			
+			for (var i=0; i < aEvent.target.parentNode.childNodes.length; i++) {
+				aEvent.target.parentNode.childNodes[i].setAttribute("sortDirection", (((i == which) || (flag == 0)) ? ((flag<0) ? "ascending" : "descending") : "natural"))
+			}
 		}
 	}
 }
