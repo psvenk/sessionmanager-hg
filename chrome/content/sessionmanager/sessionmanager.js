@@ -1,4 +1,4 @@
-const SM_VERSION = "0.6.2.7";
+const SM_VERSION = "0.6.2.8";
 
 /*const*/ var gSessionManager = {
 	mSessionStoreValue : null,
@@ -145,6 +145,7 @@ const SM_VERSION = "0.6.2.7";
 		this.mPref_save_cookies = this.getPref("save_cookies", false);
 		this.mPref_save_window_list = this.getPref("save_window_list", false);
 		this.mPref_session_list_order = this.getPref("session_list_order", 1);
+		this.mPref_shutdown_on_last_window_close = this.getPref("shutdown_on_last_window_close", false);
 		this.mPref_hide_tools_menu = this.getPref("hide_tools_menu", false);
 		this.mPref_startup = this.getPref("startup",0);
 		this.mPref_submenus = this.getPref("submenus", false);
@@ -265,7 +266,7 @@ const SM_VERSION = "0.6.2.7";
 			}
 						
 			// Add backup sessions to backup group
-			if (oldVersion < "0.6.2.7") {
+			if (oldVersion < "0.6.2.8") {
 				var sessions = this.getSessions();
 				sessions.forEach(function(aSession) {
 					if (aSession.backup) {
@@ -328,8 +329,9 @@ const SM_VERSION = "0.6.2.7";
 				
 		if (this.mPref__running && numWindows == 0)
 		{
-			// store current window or session data in case it's needed later (not needed on shutdown)
-			if (!this.mPref__stopping) {
+			// store current window or session data in case it's needed later
+			// Don't do this on shutdown or if preference to shutdown on last window closed is set.
+			if (!this.mPref__stopping && !this.mPref_shutdown_on_last_window_close) {
 				var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : this.__window_session_name;
 				this.mLastState = (name) ? 
 			    	               this.getSessionState(name, null, this.mPref_save_closed_tabs < 2, true, null, true) :
@@ -351,11 +353,12 @@ const SM_VERSION = "0.6.2.7";
 			
 			// This executes in Firefox 2.x if last browser window closes and non-browser windows are still open
 			// or if Firefox is restarted. In Firefox 3.0, it executes whenever the last browser window is closed.
-//			if (!this.mPref__stopping) {
-//				this.mObserverService.removeObserver(this, "quit-application");
+			if (this.mPref_shutdown_on_last_window_close && !this.mPref__stopping) {
+				this.mObserverService.removeObserver(this, "sessionmanager:process-closed-window");
+				this.mObserverService.removeObserver(this, "quit-application");
 				// Don't do shutdown processing when entering private browsing mode
-//				if (!this.doNotShutdown) this.shutDown();
-//			}
+				if (!this.doNotShutdown) this.shutDown();
+			}
 		}
 		this.mBundle = null;
 		this.mFullyLoaded = false;
