@@ -1890,6 +1890,7 @@ const SM_VERSION = "0.6.2.8";
 		    		(aState.windows[0].tabs[0].entries.length > 1) || 
 		    		((aState.windows[0].tabs[0].entries.length == 1 && aState.windows[0].tabs[0].entries[0].url != "about:blank")))) {
 					backup = 0;
+					temp_backup = false;
 				}
 			} catch(ex) { dump(ex); }
 		}
