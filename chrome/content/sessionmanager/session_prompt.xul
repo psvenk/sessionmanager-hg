@@ -36,6 +36,7 @@
 						<listcol flex="1"/>
 						<listcol/>
 						<listcol/>
+						<listcol id="scroll_spacer" hidden="true"/>
 					</listcols>
 					<listhead>
 						<listheader id="name" label="&session_name.label;"/>

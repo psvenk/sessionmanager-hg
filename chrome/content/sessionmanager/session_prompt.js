@@ -127,6 +127,7 @@ gSessionManager.onLoad = function() {
 			groupCell.setAttribute("disabled", aSession.backup);
 			wincountCell.setAttribute("label", aSession.windows);
 			tabcountCell.setAttribute("label", aSession.tabs);
+			tabcountCell.setAttribute("crop", "false");
 			// format window and tab count text
 			wincountCell.setAttribute("class", "number");
 			tabcountCell.setAttribute("class", "number");
@@ -418,6 +419,9 @@ function _isValidSessionList(aSessions)
 // Work around for Firefox bug 467932
 function window_resize(aEvent)
 {
+	// If scroll bar will be shown, make it so Tab count displays without being cropped.
+	_("scroll_spacer").hidden = (gSessionList.getRowCount() <= gSessionList.getNumberOfVisibleRows()); 
+		
 	// only a problem if new width is smaller than current width
 	if (!gWidth || (document.width < gWidth)) {
 	
