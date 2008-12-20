@@ -929,7 +929,7 @@ const SM_VERSION = "0.6.2.8";
 			try {
 				state = this.decrypt(state);
 		
-				var tempState = eval("(" + state + ")");
+				var tempState = this._safeEval("(" + state + ")");
 				for (var i in tempState.windows) {
 					for (var j in tempState.windows[i].tabs) {
 						if (tempState.windows[i].tabs[j].entries && tempState.windows[i].tabs[j].entries.length != 0) {
@@ -1154,7 +1154,7 @@ const SM_VERSION = "0.6.2.8";
 		
 		var closedTabs = this.mSessionStore().getClosedTabData(window);
 		var mClosedTabs = [];
-		closedTabs = eval(closedTabs);
+		closedTabs = this._safeEval(closedTabs);
 		if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
@@ -1278,7 +1278,7 @@ const SM_VERSION = "0.6.2.8";
 
 			if (aIx >= 0) {
 				// get closed-tabs from nsSessionStore
-				var closedTabs = eval("(" + this.mSessionStore().getClosedTabData(window) + ")");
+				var closedTabs = this._safeEval("(" + this.mSessionStore().getClosedTabData(window) + ")");
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
 				if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 				// purge closed tab at aIndex
@@ -1887,7 +1887,7 @@ const SM_VERSION = "0.6.2.8";
 		if ((backup > 0) || temp_backup) {
 			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")), true);
 			try {
-				var aState = eval("(" + state.split("\n")[4] + ")");
+				var aState = this._safeEval("(" + state.split("\n")[4] + ")");
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
 		    		(aState.windows[0].tabs[0].entries.length > 1) || 
 		    		((aState.windows[0].tabs[0].entries.length == 1 && aState.windows[0].tabs[0].entries[0].url != "about:blank")))) {
@@ -2358,7 +2358,7 @@ const SM_VERSION = "0.6.2.8";
 		aObj["_closedTabs"] = [];
 
 		closedTabs.forEach(function(aValue, aIndex) {
-			aObj["_closedTabs"][aIndex] = eval(({ state : uneval(aValue[0]) }));
+			aObj["_closedTabs"][aIndex] = this._safeEval(({ state : uneval(aValue[0]) }));
 		}, this);
 	},
 
@@ -2581,7 +2581,7 @@ const SM_VERSION = "0.6.2.8";
 		try {
 			aState = this.decrypt(aState);
 		
-			aState = eval("(" + aState + ")");
+			aState = this._safeEval("(" + aState + ")");
 			aState.windows.forEach(function(aWindow) {
 				windows = windows + 1;
 				tabs = tabs + aWindow.tabs.length;
@@ -2675,6 +2675,13 @@ const SM_VERSION = "0.6.2.8";
 
 		//Try and fix bug35058 even in FF 3.0, because session might have been saved under FF 2.0
 		aState = this.modifySessionData(aState, aStripClosedTabs, false, true, aEntireSession);  
+
+		// In Firefox 3.1 this will prompt for windows and tabs		
+//		let pageData = {
+//			url: "about:sessionrestore",
+//			formdata: { "#sessionData": aState }
+//		};
+//		aState = uneval({ windows: [{ tabs: [{ entries: [pageData] }] }] });
 		
 		if (aEntireSession)
 		{
@@ -2701,7 +2708,7 @@ const SM_VERSION = "0.6.2.8";
 	
 	makeOneWindow: function(aState)
 	{
-		aState = eval("(" + aState + ")");
+		aState = this._safeEval("(" + aState + ")");
 		if (aState.windows.length > 1)
 		{
 			// take off first window
@@ -2724,7 +2731,7 @@ const SM_VERSION = "0.6.2.8";
 	
 	modifySessionData: function(aState, aStrip, aSaving, afixBug350558, aReplacingWindow)
 	{
-		aState = eval("(" + aState + ")");
+		aState = this._safeEval("(" + aState + ")");
 		aState.windows.forEach(function(aWindow) {
 			// Strip out cookies if user doesn't want to save them
 			if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
@@ -2835,6 +2842,11 @@ const SM_VERSION = "0.6.2.8";
 	_string: function(aName)
 	{
 		return this.mBundle.getString(aName);
+	},
+	
+	// safe eval'ing
+	_safeEval: function(aStr) {
+		return this.mComponents.utils.evalInSandbox(aStr, new this.mComponents.utils.Sandbox("about:blank"));
 	}
 };
 
