@@ -68,6 +68,7 @@
 			<hbox id="checkbox_container">
 				<checkbox id="checkbox_ignore" label="&prompt.ignore.label;" hidden="true"/>
 				<checkbox id="checkbox_autosave" label="&prompt.autosave.label;" hidden="true"/>
+				<checkbox id="checkbox_tabprompt" label="&prompt.tabprompt.label;" hidden="true"/>
 			</hbox>
 		</vbox>
 	</hbox>

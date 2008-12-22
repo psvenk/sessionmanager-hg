@@ -23,6 +23,7 @@ var sortedBy = 0;
 // 8   = autosaveable        - Displays autosave checkbox
 // 16  = remove              - true if deleting session(s)
 // 32  = grouping            - true if changing grouping
+// 64  = tabprompt           - Displays tab prompt checkbox
 // 256 = allow name replace  - true if session cannot be overwritten (not currently used)
 
 // GetString values
@@ -40,6 +41,7 @@ var sortedBy = 0;
 // SetInt 1 bit values
 // 4  = ignore               - ignore checkbox checked
 // 8  = autosave             - autosave checkbox checked
+// 64 = tabprompt            - tabprompt checbox checked
 
 // SetString values
 // 3 = Session Filename
@@ -93,6 +95,8 @@ gSessionManager.onLoad = function() {
 
 	// hide/show the Autosave checkbox
 	_("checkbox_autosave").hidden = !(gParams.GetInt(1) & 8);
+	// hide/show Tab Prompt checkbox
+	_("checkbox_tabprompt").hidden = !(gParams.GetInt(1) & 64);
 	
 	gBackupGroupName = this._string("backup_sessions");
 	gBackupNames[this._string("backup_session").trim().toLowerCase()] = true;
@@ -234,8 +238,9 @@ gSessionManager.onUnload = function() {
 	}
 	if (gSessionList) persist(gSessionList, "height", gSessionList.boxObject.height);
 	
-	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0));
-	
+	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
+	                  ((_("checkbox_tabprompt").checked)?64:0));
+
 	if (this.mAppVersion >= "1.9") window.removeEventListener("resize", window_resize, false);	
 };
 
