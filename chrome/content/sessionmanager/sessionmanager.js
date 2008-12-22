@@ -648,6 +648,8 @@ const SM_VERSION = "0.6.2.8";
 		
 		var windowSessions = this.getWindowSessions();
 		var sessions = this.getSessions();
+		var groupNames = [];
+		var groupMenus = {};
 		var count = 0;
 		var backupCount = 0;
 		var user_latest = backup_latest = false;
@@ -679,7 +681,7 @@ const SM_VERSION = "0.6.2.8";
 			}
 			else {
 				if (aSession.group) {
-					var groupMenu = get_(aSession.group);
+					var groupMenu = groupMenus[aSession.group];
 					if (!groupMenu) {
 						groupMenu = document.createElement("menu");
 						groupMenu.setAttribute("_id", aSession.group);
@@ -689,7 +691,9 @@ const SM_VERSION = "0.6.2.8";
 						var groupPopup = document.createElement("menupopup");
 						groupPopup.setAttribute("onpopupshowing", "event.stopPropagation();");
 						groupMenu.appendChild(groupPopup);
-						aPopup.insertBefore(groupMenu, separator);
+						
+						groupNames.push(aSession.group);
+						groupMenus[aSession.group] = groupMenu;
 					}
 					var groupPopup = groupMenu.menupopup || groupMenu.lastChild; 
 					groupPopup.appendChild(menuitem);
@@ -697,6 +701,17 @@ const SM_VERSION = "0.6.2.8";
 				else aPopup.insertBefore(menuitem, separator);
 			}
 		}, this);
+		
+		// Display groups in alphabetical order at the top of the list
+		if (groupNames.length) {
+			groupNames.sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+			var insertBeforeEntry = startSep.nextSibling;
+			
+			groupNames.forEach(function(aGroup, aIx) {
+				aPopup.insertBefore(groupMenus[aGroup], insertBeforeEntry);
+			},this);
+		}
+		
 		backupSep.hidden = backupMenu.hidden = (backupCount == 0);
 		separator.hidden = (this.mPref_max_display == 0) || ((sessions.length - backupCount) == 0);
 		this.setDisabled(separator.nextSibling, separator.hidden && backupSep.hidden);
@@ -834,7 +849,7 @@ const SM_VERSION = "0.6.2.8";
 		}
 	},
 
-	load: function(aFileName, aMode)
+	load: function(aFileName, aMode, aTabPrompt)
 	{
 		var state = this.readSessionFile(this.getSessionDir(aFileName));
 		if (!state)
@@ -945,7 +960,7 @@ const SM_VERSION = "0.6.2.8";
 		
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode);
+			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode, aTabPrompt);
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
@@ -1498,7 +1513,7 @@ const SM_VERSION = "0.6.2.8";
 		params.SetString(6, aValues.text || "");
 		params.SetString(7, aValues.count || "");
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
-						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) | 
+						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) | ((aValues.tabprompt)?64:0) |
 						  ((aValues.allowNamedReplace)?256:0));
 		
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, (this.mFullyLoaded)?window:null);
@@ -1508,6 +1523,7 @@ const SM_VERSION = "0.6.2.8";
 		aValues.group = params.GetString(7);
 		aValues.ignore = (params.GetInt(1) & 4)?1:0;
 		aValues.autoSave = (params.GetInt(1) & 8)?1:0;
+		aValues.promptForTabs = (params.GetInt(1) & 64)?1:0;
 		return params.GetInt(0);
 	},
 	
@@ -1568,6 +1584,17 @@ const SM_VERSION = "0.6.2.8";
 				this.setPref("no_clear_list_prompt", true);
 			}
 		}
+	},
+	
+	promptForTabs: function(aState)
+	{
+		dump("Prompting for tabs\n");
+
+		let pageData = {
+			url: "about:sessionrestore",
+			formdata: { "#sessionData": aState }
+		};
+		return uneval({ windows: [{ tabs: [{ entries: [pageData] }] }] });
 	},
 
 /* ........ File Handling .............. */
@@ -2494,16 +2521,23 @@ const SM_VERSION = "0.6.2.8";
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
+			var tabprompt = false;
+			if (this.mAppVersion >= "1.9.1") tabprompt = this.getPref("_prompt_for_tabs");
 			this.delPref("_recovering");
-			this.load(recovering, "startup");
+			this.delPref("_prompt_for_tabs"); // delete prompt for tab preference if set
+			this.load(recovering, "startup", tabprompt);
 		}
 		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
 			var values = { ignorable: true };
+			
+			// allow prompting for tabs in Firefox 3.1
+			if (this.mAppVersion >= "1.9.1") values.tabprompt = true;
+			
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
 			if (session && this.getSessionDir(session).exists())
 			{
-				this.load(session, "startup");
+				this.load(session, "startup", values.promptForTabs);
 			}
 			// if user set to resume previous session, don't clear this so that way user can choose whether to backup
 			// current session or not and still have it restore.
@@ -2653,7 +2687,7 @@ const SM_VERSION = "0.6.2.8";
 				(aGroup? ("\tgroup=" + aGroup) : "") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aStripClosedTabs, aEntireSession, aOneWindow)
+	restoreSession: function(aWindow, aState, aReplaceTabs, aStripClosedTabs, aEntireSession, aOneWindow, aTabPrompt)
 	{
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
@@ -2664,7 +2698,7 @@ const SM_VERSION = "0.6.2.8";
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
 			aWindow.__SM_restore = function() {
 				this.removeEventListener("load", this.__SM_restore, true);
-				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aStripClosedTabs);
+				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aStripClosedTabs, null, null, aTabPrompt);
 				this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore().getWindowValue(aWindow,"_sm_window_session_name"));
 				//dump("restore win " + this.gSessionManager.__window_session_name + "\n");
 				delete this.__SM_restore;
@@ -2676,13 +2710,9 @@ const SM_VERSION = "0.6.2.8";
 		//Try and fix bug35058 even in FF 3.0, because session might have been saved under FF 2.0
 		aState = this.modifySessionData(aState, aStripClosedTabs, false, true, aEntireSession);  
 
-		// In Firefox 3.1 this will prompt for windows and tabs		
-//		let pageData = {
-//			url: "about:sessionrestore",
-//			formdata: { "#sessionData": aState }
-//		};
-//		aState = uneval({ windows: [{ tabs: [{ entries: [pageData] }] }] });
-		
+		// prompt for tabs
+		if (aTabPrompt) aState = this.promptForTabs(aState);
+
 		if (aEntireSession)
 		{
 			this.mSessionStore().setBrowserState(aState);
