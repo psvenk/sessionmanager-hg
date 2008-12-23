@@ -217,6 +217,7 @@
 			<preference id="extensions.sessionmanager.disable_cache_fixer" name="extensions.sessionmanager.disable_cache_fixer" type="bool"/>
 			<preference id="extensions.sessionmanager.sessions_dir" name="extensions.sessionmanager.sessions_dir" type="string"/>
 			<preference id="extensions.sessionmanager.encrypt_sessions" name="extensions.sessionmanager.encrypt_sessions" type="bool"/>
+			<preference id="extensions.sessionmanager.encrypted_only" name="extensions.sessionmanager.encrypted_only" type="bool"/>
 		</preferences>
 
 		<groupbox>
@@ -231,7 +232,9 @@
 		<groupbox>
 			<caption label="&encrypt.caption;"/>
 			<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" preference="extensions.sessionmanager.encrypt_sessions" 
-								oncommand="this.checked = checkEncryption(this.checked);"/>
+			          id="encrypt_sessions" oncommand="this.checked = checkEncryption(this.checked);"/>
+			<checkbox id="encrypted_only" disabled="true" label="&encrypted_only.label;" accesskey="&encrypted_only.accesskey;" 
+			          preference="extensions.sessionmanager.encrypted_only"/>
 			<separator style="height: 0.5em;" orient="vertical"/>
 			<description style="width: 26em; color:red;" class="indent">&encrypt.desc;</description>
 		</groupbox>

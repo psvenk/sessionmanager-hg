@@ -42,7 +42,10 @@ gSessionManager.onLoad = function() {
 		
 		if (browser.gSingleWindowMode) _("overwrite").label = gSessionManager._string("overwrite_tabs");
 	}
-	
+
+	// Disable/enable the encrypt only checkbox based on state of encryption checkbox
+	_disable(_("encrypted_only"), !_("encrypt_sessions").checked);
+		
 	// Disable default help window for Firefox 2.0 and below
 	if (this.mAppVersion < "1.9") _("sessionmanagerOptions").openHelp = function () {}
 };
@@ -131,6 +134,8 @@ function checkEncryption(aState) {
 		gSessionManager.cryptError(gSessionManager._string("change_encryption_fail"));
 		return !aState;
 	}
+	_disable(_("encrypted_only"), !aState);
+	
 	return aState;
 }
 
