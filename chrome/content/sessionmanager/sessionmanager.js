@@ -2515,24 +2515,22 @@ const SM_VERSION = "0.6.2.8";
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called, in FF2 SessionStart doesn't set this value
 		var sessionstart = (this.mAppVersion >= "1.9")
-		                    ?(this.mSessionStartupValue.sessionType == Components.interfaces.nsISessionStartup.RESUME_SESSION)
+		                    ?(this.mSessionStartupValue.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
 		                    :this.getPref("browser.sessionstore.resume_session_once", false, true);
 		var recoverOnly = this.mPref__running || sessionstart;
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
 			var tabprompt = false;
-			if (this.mAppVersion >= "1.9.1") tabprompt = this.getPref("_prompt_for_tabs");
+			tabprompt = this.getPref("_prompt_for_tabs");
 			this.delPref("_recovering");
 			this.delPref("_prompt_for_tabs"); // delete prompt for tab preference if set
 			this.load(recovering, "startup", tabprompt);
 		}
 		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
-			var values = { ignorable: true };
-			
 			// allow prompting for tabs in Firefox 3.1
-			if (this.mAppVersion >= "1.9.1") values.tabprompt = true;
+			var values = { ignorable: true, tabprompt: (this.mAppVersion >= "1.9.1") };
 			
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
 			if (session && this.getSessionDir(session).exists())
@@ -2707,7 +2705,7 @@ const SM_VERSION = "0.6.2.8";
 			return true;
 		}
 
-		//Try and fix bug35058 even in FF 3.0, because session might have been saved under FF 2.0
+		//Try and fix bug35058 even in newer versions of Firefox, because session might have been saved under FF 2.0
 		aState = this.modifySessionData(aState, aStripClosedTabs, false, true, aEntireSession);  
 
 		// prompt for tabs
