@@ -152,7 +152,14 @@ var SessionManagerHelperComponent = {
         	Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher).
         		openWindow(null, "chrome://sessionmanager/content/restore_prompt.xul", "_blank", "chrome,modal,centerscreen,titlebar", params);
         	if (params.GetInt(0) == 1) aStateDataString.QueryInterface(Ci.nsISupportsString).data = "";
+        	else if (initialState.session) {
+	        	// don't prompt for tabs if checkbox not checked
+	        	delete(initialState.session.lastUpdate);
+	        	delete(initialState.session.recentCrashes);
+	        	aStateDataString.QueryInterface(Ci.nsISupportsString).data = uneval(initialState);
+        	}
     	}
+    	initialState = null;
 	},
 
 	// code adapted from Danil Ivanov's "Cache Fixer" extension
