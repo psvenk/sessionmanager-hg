@@ -36,7 +36,7 @@ gSessionManager.restorePrompt = function() {
 	var params = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
 	params.SetInt(0, 0);
 			
-	var values = { name: "*", addCurrentSession: true, ignorable: false, count: countString }
+	var values = { name: "*", addCurrentSession: true, ignorable: false, tabprompt: (this.mAppVersion >= "1.9.1"), count: countString }
 	var fileName = (location.search != "?cancel")?(this.prompt(this._string("recover_session"), this._string("recover_session_ok"), values)?values.name:""):"";
 	if (fileName != "*")
 	{
@@ -56,6 +56,17 @@ gSessionManager.restorePrompt = function() {
 		this.writeFile(backupFile, session);
 	}
 	
+	// If user chose to prompt for tabs and selected a filename
+	if (fileName && values.promptForTabs) {
+		// if recovering current session, recover it from our backup file
+		if (fileName == "*") {
+			fileName = backupFile.leafName;
+			params.SetInt(0, 1); // don't recover the crashed session
+			this.setPref("_recovering", fileName);
+		}
+		this.setPref("_prompt_for_tabs", true);
+	}
+		
 	// find if there was an autosave session active at time of crash and get its name
 	if (/_sm_autosave_name:\"([^\s]*)\"/m.test(state))
 	{
@@ -71,8 +82,8 @@ gSessionManager.restorePrompt = function() {
 					chosen_name = RegExp.$2;
 				}
 				
-				// not recovering autosave session
-				if (chosen_name != autosave_name)
+				// not recovering autosave session or current session (selecting tabs), save the autosave session first
+				if ((chosen_name != autosave_name) && (fileName != backupFile.leafName))
 				{
 					var autosave_state = this.nameState(this.readFile(file), autosave_name + 
 					                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=session");
@@ -83,9 +94,12 @@ gSessionManager.restorePrompt = function() {
 				{
 					this.setPref("_autosave_name", autosave_name);
 					
-					// Let Firefox handle the recovery, else use our backup
-					this.delPref("_recovering");
-					params.SetInt(0, 0);
+					// if not selecting tabs, let Firefox handle the recovery, else use our backup
+					if (!values.promptForTabs) {
+						this.delPref("_recovering");
+						params.SetInt(0, 0);
+					}
+					else this.setPref("_recovering", backupFile.leafName);
 				}
 			}
 			// recovering last session
