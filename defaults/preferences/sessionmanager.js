@@ -8,6 +8,7 @@ pref("extensions.sessionmanager.backup_temporary", false);
 pref("extensions.sessionmanager.click_restore_tab", true);
 pref("extensions.sessionmanager.disable_cache_fixer", false);
 pref("extensions.sessionmanager.encrypt_sessions", false);
+pref("extensions.sessionmanager.encrypted_only", false);
 pref("extensions.sessionmanager.hide_tools_menu", false);
 pref("extensions.sessionmanager.max_backup_keep", 10);
 pref("extensions.sessionmanager.max_closed_undo", 10);
