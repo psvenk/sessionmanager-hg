@@ -133,6 +133,7 @@ const SM_VERSION = "0.6.2.8";
 		this.mPref_backup_session = this.getPref("backup_session", 1);
 		this.mPref_click_restore_tab = this.getPref("click_restore_tab", true);
 		this.mPref_encrypt_sessions = this.getPref("encrypt_sessions", false);
+		this.mPref_encrypted_only = this.getPref("encrypted_only", false);
 		this.mPref_max_backup_keep = this.getPref("max_backup_keep", 0);
 		this.mPref_max_closed_undo = this.getPref("max_closed_undo", 10);
 		this.mPref_max_display = this.getPref("max_display", 20);
@@ -346,6 +347,7 @@ const SM_VERSION = "0.6.2.8";
 			this._string_old_backup_session = this._string("old_backup_session");
 			this._string_prompt_not_again = this._string("prompt_not_again");
 			this._string_encrypt_fail = this._string("encrypt_fail");
+			this._string_encrypt_fail2 = this._string("encrypt_fail2");
 			this._string_save_and_restore = this._string("save_and_restore");
 			
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
@@ -943,6 +945,7 @@ const SM_VERSION = "0.6.2.8";
 		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
 			try {
 				state = this.decrypt(state);
+				if (!state) return;
 		
 				var tempState = this._safeEval("(" + state + ")");
 				for (var i in tempState.windows) {
@@ -1002,6 +1005,7 @@ const SM_VERSION = "0.6.2.8";
 				if (!state[4]) return;
 				state[4] = state[4].replace(/_sm_window_session_name:\"[^\s]*\"/, '_sm_window_session_name:\"' + escape(values.text) + '\"');
 				state[4] = this.decryptEncryptByPreference(state[4]); 
+				if (!state[4]) return;
 				state = state.join("\n");
 			}
 			// remove group name if it was a backup session
@@ -1561,6 +1565,11 @@ const SM_VERSION = "0.6.2.8";
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, (this.mBundle)?this.mBundle.getFormattedString("io_error", [(aException)?aException.message:this._string("unknown_error")]):aException);
 	},
 
+	sessionError: function(aException)
+	{
+		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, (this.mBundle)?this.mBundle.getFormattedString("session_error", [(aException)?aException.message:this._string("unknown_error")]):aException);
+	},
+
 	openWindow: function(aChromeURL, aFeatures, aArgument, aParent)
 	{
 		if (!aArgument || typeof aArgument == "string")
@@ -1590,7 +1599,7 @@ const SM_VERSION = "0.6.2.8";
 	{
 		dump("Prompting for tabs\n");
 
-		let pageData = {
+		var pageData = {
 			url: "about:sessionrestore",
 			formdata: { "#sessionData": aState }
 		};
@@ -1824,7 +1833,10 @@ const SM_VERSION = "0.6.2.8";
 		var windows = this.getClosedWindows();
 		
 		// encrypt state if encryption preference set
-		if (this.mPref_encrypt_sessions) aState = this.decryptEncryptByPreference(aState);
+		if (this.mPref_encrypt_sessions) {
+			aState = this.decryptEncryptByPreference(aState);
+			if (!aState) return;
+		}
 				
 		aState = aState.replace(/^\n+|\n+$/g, "").replace(/\n{2,}/g, "\n");
 		windows.unshift({ name: name, state: aState });
@@ -1895,6 +1907,7 @@ const SM_VERSION = "0.6.2.8";
 		{
 			if (aForceSave || !this.isPrivateBrowserMode()) {
 				var state = this.getSessionState(this._string("autosave_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")));
+				if (!state) return;
 				this.writeFile(this.getSessionDir(this.mAutoSaveSessionName), state);
 			}
 		}
@@ -1956,6 +1969,7 @@ const SM_VERSION = "0.6.2.8";
 			if (this.mPref_encrypt_sessions) {
 				state = state.split("\n")
 				state[4] = this.decryptEncryptByPreference(state[4]);
+				if (!state[4]) return;
 				state = state.join("\n");
 			}
 			
@@ -2055,12 +2069,20 @@ const SM_VERSION = "0.6.2.8";
 				if (goodSession)
 				{
 					var data = state.split("\n")[((auto) ? 4 : 3)];
+					data = this.decrypt(data, true);
+					if (!data) {
+						// master password entered, but still could not be encrypted - either corrupt or saved under different profile
+						if (data == false) {
+							this.moveToCorruptFolder(aFile);
+						}
+						return null;
+					}
 					var countString = (count) ? (count) : getCountString(this.getCount(data));
 					// remove \n from count string if group is there
 					if (group && (countString[countString.length-1] == "\n")) countString = countString.substring(0, countString.length - 1);
 					var autoSaveString = (auto) ? (auto).split("\n")[0] : "autosave=false";
 					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
-					state = nameTime + autoSaveString + countString + group + this.decryptEncryptByPreference(data)
+					state = nameTime + autoSaveString + countString + group + this.decryptEncryptByPreference(data);
 					// bad session so rename it so it won't load again - This catches case where window and/or 
 					// tab count is zero.  Technically we can load when tab count is 0, but that should never
 					// happen so session is probably corrupted anyway so just flag it so.
@@ -2072,10 +2094,8 @@ const SM_VERSION = "0.6.2.8";
 							return null;
 						}
 						else {
-							state = state.replace(/^\[SessionManager\]\n/,"[Bad-SessionManager]\n");
-							var leafName = aFile.leafName;
-							this.delFile(aFile, true);
-							aFile = this.getSessionDir(aFile.leafName + ".bad");
+							this.moveToCorruptFolder(aFile);
+							return null;
 						}
 					}
 					this.writeFile(aFile, state);
@@ -2122,6 +2142,7 @@ const SM_VERSION = "0.6.2.8";
 
 	writeFile: function(aFile, aData)
 	{
+		if (!aData) return;  // this handles case where data could not be encrypted and null was passed to writeFile
 		var stream = this.mComponents.classes["@mozilla.org/network/file-output-stream;1"].createInstance(this.mComponents.interfaces.nsIFileOutputStream);
 		stream.init(aFile, 0x02 | 0x08 | 0x20, 0600, 0);
 		var cvstream = this.mComponents.classes["@mozilla.org/intl/converter-output-stream;1"].createInstance(this.mComponents.interfaces.nsIConverterOutputStream);
@@ -2149,15 +2170,35 @@ const SM_VERSION = "0.6.2.8";
 			}
 		}
 	},
+	
+	moveToCorruptFolder: function(aFile, aSilent)
+	{
+		try {
+			if (aFile.exists()) 
+			{
+				var dir = this.getSessionDir();
+				dir.append("Corrupt_Sessions");
+		
+				if (!dir.exists()) {
+					dir.create(this.mComponents.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+				}
+		
+				aFile.moveTo(dir, null);
+			}
+		}	
+		catch (ex) { 
+			if (!aSilent) this.ioError(ex); 
+		}
+	},
 
 /* ........ Encryption functions .............. */
 
-	cryptError: function(aException)
+	cryptError: function(aException, notSaved)
 	{
 		var text;
 		if (aException.message) {
 			if (aException.message.indexOf("decryptString") != -1) {
-				if (aException.message.indexOf("NS_ERROR_FAILURE") != -1) {
+				if (aException.name != "NS_ERROR_NOT_AVAILABLE") {
 					text = this._string("decrypt_fail1");
 				}
 				else {
@@ -2165,14 +2206,14 @@ const SM_VERSION = "0.6.2.8";
 				}
 			}
 			else {
-				text = this._string_encrypt_fail || this._string("encrypt_fail");
+				text = notSaved ? (this._string_encrypt_fail2 || this._string("encrypt_fail2")) : (this._string_encrypt_fail || this._string("encrypt_fail"));
 			}
 		}
 		else text = aException;
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, text);
 	},
 
-	decrypt: function(aData)
+	decrypt: function(aData, aNoError)
 	{
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
 		if (aData.indexOf(":") == -1)
@@ -2181,7 +2222,11 @@ const SM_VERSION = "0.6.2.8";
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 			catch (ex) { 
-				this.cryptError(ex); 
+				if (!aNoError) this.cryptError(ex); 
+				// encrypted file corrupt, return false so as to not break things checking for aData.
+				if (ex.name != "NS_ERROR_NOT_AVAILABLE") { 
+					return false;
+				}
 				return null;
 			}
 		}
@@ -2193,18 +2238,24 @@ const SM_VERSION = "0.6.2.8";
 	decryptEncryptByPreference: function(aData)
 	{
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
-		var encryped = (aData.indexOf(":") == -1);
+		var encrypted = (aData.indexOf(":") == -1);
 		try {
-			if (this.mPref_encrypt_sessions && !encryped)
+			if (this.mPref_encrypt_sessions && !encrypted)
 			{
 				aData = this.mSecretDecoderRing.encryptString(aData);
 			}
-			else if (!this.mPref_encrypt_sessions && encryped)
+			else if (!this.mPref_encrypt_sessions && encrypted)
 			{
 				aData = this.mSecretDecoderRing.decryptString(aData);
 			}
 		}
-		catch (ex) { this.cryptError(ex); }
+		catch (ex) { 
+			if (!encrypted && this.mPref_encrypted_only) {
+				this.cryptError(ex, true);
+				return null;
+			}
+			else this.cryptError(ex);
+		}
 		return aData;
 	},
 
@@ -2611,8 +2662,6 @@ const SM_VERSION = "0.6.2.8";
 		var windows = 0, tabs = 0;
 		
 		try {
-			aState = this.decrypt(aState);
-		
 			aState = this._safeEval("(" + aState + ")");
 			aState.windows.forEach(function(aWindow) {
 				windows = windows + 1;
@@ -2662,11 +2711,17 @@ const SM_VERSION = "0.6.2.8";
 		if (this.mLastState) {
 			//dump("Returning stored state\n");
 			// encrypt state if encryption preference set
-			if (this.mPref_encrypt_sessions) {
+			if (!aDoNotEncrypt) {
 				var state = this.mLastState.split("\n")
 				// if there is a state[4] it's a session otherwise it's a closed window
-				if (state[4]) state[4] = this.decryptEncryptByPreference(state[4]);
-				else state[0] = this.decryptEncryptByPreference(state[0]);
+				if (state[4]) {
+					state[4] = this.decryptEncryptByPreference(state[4]);
+					if (!state[4]) return null;
+				}
+				else {
+					state[0] = this.decryptEncryptByPreference(state[0]);
+					if (!state[0]) return null;
+				}
 				this.mLastState = state.join("\n");
 			}
 			return this.mLastState;
@@ -2678,7 +2733,10 @@ const SM_VERSION = "0.6.2.8";
 		var count = this.getCount(state);
 		
 		// encrypt state if encryption preference set and flag not set
-		if (!aDoNotEncrypt) state = this.decryptEncryptByPreference(state); 
+		if (!aDoNotEncrypt) {
+			state = this.decryptEncryptByPreference(state); 
+			if (!state) return null;
+		}
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
 				"\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + 
@@ -2874,7 +2932,13 @@ const SM_VERSION = "0.6.2.8";
 	
 	// safe eval'ing
 	_safeEval: function(aStr) {
-		return this.mComponents.utils.evalInSandbox(aStr, new this.mComponents.utils.Sandbox("about:blank"));
+		try {
+			return this.mComponents.utils.evalInSandbox(aStr, new this.mComponents.utils.Sandbox("about:blank"));
+		}
+		catch(ex) {
+			this.sessionError(ex);
+			return { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }] };
+		}
 	}
 };
 
