@@ -956,7 +956,7 @@ const SM_VERSION = "0.6.2.8";
 						}
 					}
 				}
-				state = uneval(tempState);
+				state = tempState.toSource();
 			}
 			catch (ex) { dump(ex + "\n"); };
 		}
@@ -1306,7 +1306,7 @@ const SM_VERSION = "0.6.2.8";
 			}
 
 			// replace existing _closedTabs
-			this.mSessionStore().setWindowState(window, uneval(state), false);
+			this.mSessionStore().setWindowState(window, state.toSource(), false);
 			
 			// update the remaining entries
 			this.updateClosedList(aTarget, aIx, state.windows[0]._closedTabs.length, "tab");
@@ -1603,7 +1603,7 @@ const SM_VERSION = "0.6.2.8";
 			url: "about:sessionrestore",
 			formdata: { "#sessionData": aState }
 		};
-		return uneval({ windows: [{ tabs: [{ entries: [pageData] }] }] });
+		return { windows: [{ tabs: [{ entries: [pageData] }] }] }.toSource();
 	},
 
 /* ........ File Handling .............. */
@@ -2030,7 +2030,7 @@ const SM_VERSION = "0.6.2.8";
 			var timestamp = parseInt(RegExp.$2) || aFile.lastModifiedTime;
 			if (headerOnly) state = this.readFile(aFile);
 			state = state.substring(state.indexOf("[Window1]\n"), state.length);
-			state = uneval(this.decodeOldFormat(state, true));
+			state = this.decodeOldFormat(state, true).toSource();
 			state = state.substring(1,state.length-1);
 			var countString = getCountString(this.getCount(state));
 			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
@@ -2436,7 +2436,7 @@ const SM_VERSION = "0.6.2.8";
 		aObj["_closedTabs"] = [];
 
 		closedTabs.forEach(function(aValue, aIndex) {
-			aObj["_closedTabs"][aIndex] = this._safeEval(({ state : uneval(aValue[0]) }));
+			aObj["_closedTabs"][aIndex] = this._safeEval(({ state : aValue[0].toSource() }));
 		}, this);
 	},
 
@@ -2812,7 +2812,7 @@ const SM_VERSION = "0.6.2.8";
 			aState.windows = [];
 			aState.windows[0] = firstWindow;
 		}
-		return uneval(aState);
+		return aState.toSource();
 	},
 	
 	modifySessionData: function(aState, aStrip, aSaving, afixBug350558, aReplacingWindow)
@@ -2834,7 +2834,7 @@ const SM_VERSION = "0.6.2.8";
 		if (aReplacingWindow && (aState.windows.length == 1) && aState.windows[0].hidden) {
 			delete (aState.windows[0].hidden);
 		}
-		return uneval(aState);
+		return aState.toSource();
 	},
 
 	getFormattedName: function(aTitle, aDate, aFormat)

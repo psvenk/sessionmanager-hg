@@ -193,7 +193,7 @@ var gSessionSaverConverter = {
 					var aName = this.gSessionManager.getFormattedName("[ SessionSaver ] " + aSession, date);
 					var file = this.gSessionManager.getSessionDir(this.gSessionManager.makeFileName(aName), true);
 					var state = "[SessionManager]\nname=" + aName + "\ntimestamp=" + Date.now() + "\nautosave=false\tcount=" + 
-					             session[0].windows + "/" + session[0].tabs + "\tgroup=[SessionSaver]\n" + uneval(this.sessions[aSession]);
+					             session[0].windows + "/" + session[0].tabs + "\tgroup=[SessionSaver]\n" + this.sessions[aSession].toSource();
 					this.gSessionManager.writeFile(file, state);
 				}
 			}, this);
@@ -652,7 +652,7 @@ var gConvertTMPSession = {
 		if (!aSession.session)
 			aSession.session = { state:"stop" };
 		var oState = "[SessionManager]\nname=" + aName + "\ntimestamp=" + aTimestamp + "\nautosave=false\tcount=" +
-		             winCount + "/" + tabCount + "\tgroup=[Tabmix]\n" + uneval(aSession);
+		             winCount + "/" + tabCount + "\tgroup=[Tabmix]\n" + aSession.toSource();
 		var file = this.gSessionManager.getSessionDir(gSessionManager.makeFileName(aName));
 		try {
 			var file = this.gSessionManager.getSessionDir(aFileName, true);
