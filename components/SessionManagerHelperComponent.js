@@ -108,24 +108,26 @@ var SessionManagerHelperComponent = {
 	_handle_crash: function()
 	{
 		var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-		var crash_resume = prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
-	
 		var sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"];
 		if (!sessionStartup) sessionStartup = Cc["@mozilla.org/suite/sessionstartup;1"];
 		if (sessionStartup) sessionStartup = sessionStartup.getService(Ci.nsISessionStartup);
-		var resume_once = (sessionStartup && sessionStartup.sessionType && (sessionStartup.sessionType == Ci.nsISessionStartup.RESUME_SESSION)) ||
-		                   prefroot.getBoolPref("browser.sessionstore.resume_session_once");
+		var resuming = (sessionStartup && sessionStartup.sessionType && (sessionStartup.sessionType != Ci.nsISessionStartup.NO_SESSION)) ||
+		               prefroot.getBoolPref("browser.sessionstore.resume_session_once") || 
+		               prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
 
 		var sm_running = (prefroot.getPrefType("extensions.sessionmanager._running") == prefroot.PREF_BOOL) && 
 		                 prefroot.getBoolPref("extensions.sessionmanager._running");
 		
-		if (sm_running && !crash_resume && !resume_once)
+		//dump("running = " + sm_running + "\nresuming = " + resuming + "\n");
+		//report("running = " + sm_running + "\nresuming = " + resuming + "\n");
+		if (sm_running && !resuming)
 		{
 			dump("SessionManager: Removing active session\n");
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_name");
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_time");
 			prefroot.deleteBranch("extensions.sessionmanager._running");
 			prefroot.deleteBranch("extensions.sessionmanager._allow_reload");
+			prefroot.deleteBranch("extensions.sessionmanager._encrypt_file");
 		}
 	},
 	
