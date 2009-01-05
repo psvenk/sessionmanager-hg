@@ -2,6 +2,7 @@ gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
 	this._onLoad(true);
 	
+	// Populate select session list and select previously selected session
 	var resume_session = _("resume_session");
 	var sessions = this.getSessions();
 	resume_session.appendItem(this._string("startup_resume"), this.mBackupSessionName, "");
@@ -48,6 +49,43 @@ gSessionManager.onLoad = function() {
 		
 	// Disable default help window for Firefox 2.0 and below
 	if (this.mAppVersion < "1.9") _("sessionmanagerOptions").openHelp = function () {}
+
+	// Disable Apply Button by default
+	_("sessionmanagerOptions").getButton("extra1").disabled = true;
+		
+	// Localize strings aren't used when the initial height is used to calculate the size of the context-box
+	// and preference window.  The height is calculated correctly once the window is drawn, but the context-box
+	// and preference window heights are never updated.
+	// To fix this, we need to explicitly set the height style of any element with a localized string that is more 
+	// than one line (the descriptions).  This will correct the heights when the panes are selected.
+	var largestNewPaneHeight = 0;
+	var biggestPane = null;
+	for (var i=0; i < _("sessionmanagerOptions").preferencePanes.length; i++) {
+		var pane = _("sessionmanagerOptions").preferencePanes[i];
+		var descriptions = pane.getElementsByTagName('description');
+		var adjustHeight = 0;
+		for (var j=0; j<descriptions.length; j++) {
+			descriptions[j].style.height = window.getComputedStyle(descriptions[j], null).height;
+			var height = parseInt(window.getComputedStyle(descriptions[j], null).height) - 26;
+			adjustHeight += isNaN(height) ? 0 : height;
+		}
+		adjustHeight = pane.contentHeight + adjustHeight;
+		if (adjustHeight > largestNewPaneHeight) {
+			largestNewPaneHeight = adjustHeight;
+			biggestPane = pane;
+		}
+	}
+	// The exception to this is if the largest pane is already selected when the preference window is opened.  In
+	// this case the window inner height must be correct as well as the context-box height (if animation is disabled).
+	var currentPane = _("sessionmanagerOptions").currentPane;
+	if (currentPane == biggestPane) {
+		var change = largestNewPaneHeight - parseInt(window.getComputedStyle(currentPane._content, null).height);
+		// content box isn't sized correctly if animation is disabled so size it
+		if (!gSessionManager.getPref("browser.preferences.animateFadeIn", false, true)) {
+			currentPane._content.height = largestNewPaneHeight;
+		}
+		window.innerHeight += change;
+	}
 };
 
 gSessionManager.onUnload = function() {
@@ -139,16 +177,14 @@ function checkEncryption(aState) {
 	return aState;
 }
 
-function onLoad() {
-	// For whatever reason, even though the height is calculated correction, the prefpane won't be sized correctly 
-	// unless the description elements' style.height values are explicitly set so just set them to their current computed heights.
-	var descriptions = document.getElementsByTagName('description'); 
-	for (var i=0; i<descriptions.length; i++) {
-		descriptions[i].style.height=document.defaultView.getComputedStyle(descriptions[i], null).getPropertyValue("height");
+function checkEncryptOnly(aState) {
+	if (aState && !_("extensions.sessionmanager.encrypted_only").valueFromPreferences) {
+		if (!gSessionManager.mPromptService.confirm(window, gSessionManager.mTitle, gSessionManager._string("encrypt_only_confirm"))) {
+			aState = false;
+		}
 	}
 	
-	// Disable Apply Button by default
-	document.getElementById("sessionmanagerOptions").getButton("extra1").disabled = true;
+	return aState;
 }
 
 function startupSelect(index) {

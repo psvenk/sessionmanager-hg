@@ -17,7 +17,7 @@
 						xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 						buttons="accept,cancel,extra1,help" buttonlabelextra1="&apply.label;"
 						ondialogextra1="savePrefs();" onchange="enableApply();"
-						onload="onLoad();" ondialogaccept="setStartValue();" ondialoghelp="goHelp();"
+						ondialogaccept="setStartValue();" ondialoghelp="goHelp();"
 						windowtype="SessionManager:Options" persist="lastSelected">
 	
 	<!-- ************************************** -->
@@ -233,10 +233,12 @@
 			<caption label="&encrypt.caption;"/>
 			<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" preference="extensions.sessionmanager.encrypt_sessions" 
 			          id="encrypt_sessions" oncommand="this.checked = checkEncryption(this.checked);"/>
-			<checkbox id="encrypted_only" disabled="true" label="&encrypted_only.label;" accesskey="&encrypted_only.accesskey;" 
-			          preference="extensions.sessionmanager.encrypted_only"/>
 			<separator style="height: 0.5em;" orient="vertical"/>
 			<description style="width: 26em; color:red;" class="indent">&encrypt.desc;</description>
+			<checkbox id="encrypted_only" disabled="true" label="&encrypted_only.label;" accesskey="&encrypted_only.accesskey;" 
+			          preference="extensions.sessionmanager.encrypted_only" oncommand="this.checked = checkEncryptOnly(this.checked)"/>
+			<separator style="height: 0.5em;" orient="vertical"/>
+			<description style="width: 26em; color:red;" class="indent">&encrypt2.desc;</description>
 		</groupbox>
 		<checkbox label="&disable_cache_fixer.label;" accesskey="&disable_cache_fixer.accesskey;" 
 		          preference="extensions.sessionmanager.disable_cache_fixer"/>
