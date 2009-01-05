@@ -97,6 +97,7 @@ treechildren::-moz-tree-cell-text(disabled),
 
 /* Invalid items are red */
 #text_box[badname="true"],
+#autosave_time[badname="true"],
 #group_menu_list input[class="menulist-editable-input"][badname="true"] {
 	color: red;
 }
