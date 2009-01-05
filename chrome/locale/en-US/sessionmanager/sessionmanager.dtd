@@ -60,4 +60,5 @@
 <!ENTITY change_group.accesskey "C">
 <!ENTITY group.label "Group Session(s)...">
 <!ENTITY group.accesskey "G">
-<!ENTITY prompt.autosave2.label "Time in seconds">
+<!ENTITY prompt.save_every1.label "Save every">
+<!ENTITY prompt.save_every2.label "minutes (disabled if blank)">
