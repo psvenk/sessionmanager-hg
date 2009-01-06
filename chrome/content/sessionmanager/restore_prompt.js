@@ -2,19 +2,15 @@ gSessionManager.restorePrompt = function() {
 	this.onLoad(true);
 	this.onLoad = function() { };
 	this.onUnload = function() { };
-			
-	// Delete stored autosave name by default
-	this.delPref("_autosave_name");
-	
-	// Backup and delete autosave time by default
-	var autosave_time = this.getPref("_autosave_time", 0);
-	this.delPref("_autosave_time");
-	
-	// Don't allow reloading
-	this.delPref("_allow_reload");
-	
+				
+	// Set to not delete stored autosave name and time by default
+	var deletePrefs = false;
+
 	// Don't try to encrypt backup file by default
 	this.delPref("_encrypt_file");
+	
+	// Don't recover by default
+	this.delPref("_recovering");
 	
 	// default count variable
 	var countString = "";
@@ -75,62 +71,59 @@ gSessionManager.restorePrompt = function() {
 		this.setPref("_prompt_for_tabs", true);
 	}
 		
-	// find if there was an autosave session active at time of crash and get its name
-	state = this._safeEval(state);
-	if (state && (state.windows.length > 0) && state.windows[0].extData && state.windows[0].extData._sm_autosave_name)
+	var autosave_name = this.getPref("_autosave_name", "");
+	if (autosave_name)
 	{
-		var autosave_name = unescape(state.windows[0].extData._sm_autosave_name);
-		//dump("autosave_name = " + autosave_name + "\n");
-		if (autosave_name != "")
+		// if not recovering last session (does not including recovering last session, but selecting tabs)
+		if (fileName != "*")
 		{
-			// if not recovering last session (does not including recovering last session, but selecting tabs)
-			if (fileName != "*")
+			// Get name of chosen session
+			var chosen_name = null;
+			if (/^(\[SessionManager\])(?:\nname=(.*))?/m.test(this.readSessionFile(this.getSessionDir(fileName), true))) {
+				chosen_name = RegExp.$2;
+			}
+			
+			// not recovering autosave session or current session (selecting tabs), save the autosave session first
+			if ((chosen_name != autosave_name) && (fileName != backupFile.leafName))
 			{
-				// Get name of chosen session
-				var chosen_name = null;
-				if (/^(\[SessionManager\])(?:\nname=(.*))?/m.test(this.readSessionFile(this.getSessionDir(fileName), true))) {
-					chosen_name = RegExp.$2;
+				// delete autosave preferences
+				deletePrefs = true;
+				
+				//dump("Saving crashed autosave session " + autosave_name + "\n");
+				var temp_state = this.readFile(file);
+				// encrypt if encryption enabled
+				if (this.mPref_encrypt_sessions) {
+					this.mPref_encrypted_only = this.getPref("encrypted_only", false);
+					temp_state = this.decryptEncryptByPreference(temp_state);
 				}
 				
-				// not recovering autosave session or current session (selecting tabs), save the autosave session first
-				if ((chosen_name != autosave_name) && (fileName != backupFile.leafName))
-				{
-					//dump("Saving crashed autosave session " + autosave_name + "\n");
-					var temp_state = this.readFile(file);
-					// encrypt if encryption enabled
-					if (this.mPref_encrypt_sessions) {
-						this.mPref_encrypted_only = this.getPref("encrypted_only", false);
-						temp_state = this.decryptEncryptByPreference(temp_state);
-					}
-					
-					if (temp_state) {
-						var autosave_state = this.nameState(temp_state, autosave_name + 
-						                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=session");
-						this.writeFile(this.getSessionDir(this.makeFileName(autosave_name)), autosave_state);
-					}
-				}
-				// choose to recover autosave session so just recover last session
-				else 
-				{
-					//dump("Restoring chosen autosave session " + autosave_name + "\n");
-					this.setPref("_autosave_name", autosave_name);
-					if (autosave_time) this.setPref("_autosave_time", autosave_time);
-					
-					// if not selecting tabs, let Firefox handle the recovery, else use our backup
-					if (!values.promptForTabs) {
-						this.delPref("_recovering");
-						params.SetInt(0, 0);
-					}
-					else this.setPref("_recovering", backupFile.leafName);
+				if (temp_state) {
+					var autosave_time = this.getPref("_autosave_time", 0);
+					var autosave_state = this.nameState(temp_state, autosave_name + 
+					                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=session/" + autosave_time);
+					this.writeFile(this.getSessionDir(this.makeFileName(autosave_name)), autosave_state);
 				}
 			}
-			// recovering last session
-			else {
-				//dump("Restoring previous session which is an autosave session named " + autosave_name + "\n");
-				this.setPref("_autosave_name", autosave_name);
-				if (autosave_time) this.setPref("_autosave_time", autosave_time);
+			// choose to recover autosave session so just recover last session
+			else 
+			{
+				// if not selecting tabs, let Firefox handle the recovery, else use our backup
+				// we could delete the autosave preferences here, but it doesn't matter (actually it saves us from saving prefs.js file again)
+				if (!values.promptForTabs) {
+					this.delPref("_recovering");
+					params.SetInt(0, 0);
+				}
+				else this.setPref("_recovering", backupFile.leafName);
 			}
 		}
+	}
+	
+	// delete autosave preferences and save preference file
+	if (deletePrefs) {
+		this.delPref("_autosave_name");
+		this.delPref("_autosave_time");
+		// do this via a preference so we don't save twice in case user loads a different auto save sessions
+		this.setPref("_save_prefs", true);  
 	}
 };
 		
