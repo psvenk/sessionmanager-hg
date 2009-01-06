@@ -13,6 +13,7 @@ var gBackupNames = [];
 var gExistingName = 0;
 var gNeedSelection = false;
 var gWidth = 0;
+var gInvalidTime = false;
 
 var sortedBy = 0;
 
@@ -93,8 +94,10 @@ gSessionManager.onLoad = function() {
 	// hide/show the "Don't show [...] again" checkbox
 	_("checkbox_ignore").hidden = !(gParams.GetInt(1) & 4);
 
-	// hide/show the Autosave checkbox
+	// hide/show the Autosave checkboxes
 	_("checkbox_autosave").hidden = !(gParams.GetInt(1) & 8);
+	_("save_every").hidden = _("checkbox_autosave").hidden || !_("checkbox_autosave").checked;
+
 	// hide/show Tab Prompt checkbox
 	_("checkbox_tabprompt").hidden = !(gParams.GetInt(1) & 64);
 	
@@ -143,7 +146,11 @@ gSessionManager.onLoad = function() {
 			item.label = aSession.name;
 			item.value = aSession.fileName;
 			if (aSession.group) item.setAttribute("group", aSession.group);
-			item.setAttribute("autosave", aSession.autosave);
+			if (aSession.autosave) {
+				var autosave = aSession.autosave.split("/");
+				item.setAttribute("autosave", autosave[0]);
+				item.setAttribute("autosave_time", autosave[1] ? autosave[1] : "");
+			}
 			item.setAttribute("session_loaded", gBannedNames[trimName] || null);
 			if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) item.setAttribute("latest",true);
 			gSessionList.appendChild(item);
@@ -240,6 +247,7 @@ gSessionManager.onUnload = function() {
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
 	                  ((_("checkbox_tabprompt").checked)?64:0));
+	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
 
 	if (this.mAppVersion >= "1.9") window.removeEventListener("resize", window_resize, false);	
 };
@@ -339,10 +347,18 @@ function onTextboxInput(aNewValue)
 	var newWeight = gExistingName || ((gParams.GetInt(1) & 256) && gSessionList.selectedCount > 0);
 	
 	var item;
-	if (gExistingName && (item = gSessionList.getItemAtIndex(gExistingName - 1))) {
-		_("checkbox_autosave").checked = item.getAttribute("autosave") != "false";
+	if (!_("checkbox_autosave").hidden) {
+		var currentChecked = _("checkbox_autosave").checked;
+		if (gExistingName && (item = gSessionList.getItemAtIndex(gExistingName - 1))) {
+			_("checkbox_autosave").checked = item.getAttribute("autosave") != "false";
+			_("autosave_time").value = item.getAttribute("autosave_time");
+		}
+		else {
+			_("checkbox_autosave").checked = false;
+			_("autosave_time").value = "";
+		}
+		if (currentChecked != _("checkbox_autosave").checked) _save_every_update();
 	}
-	else _("checkbox_autosave").checked = false;
 	
 	if (!gNeedSelection && oldWeight != newWeight)
 	{
@@ -377,7 +393,7 @@ function isAcceptable()
 		badSessionName = !input || gBackupNames[input] || gBannedNames[input];
 	}
 	
-	gAcceptButton.disabled = badSessionName || badGroupName || (gNeedSelection && (gSessionList.selectedCount == 0 || gExistingName));
+	gAcceptButton.disabled = gInvalidTime || badSessionName || badGroupName || (gNeedSelection && (gSessionList.selectedCount == 0 || gExistingName));
 }
 
 function onAcceptDialog()
@@ -421,6 +437,31 @@ function _isValidSessionList(aSessions)
 	return true;
 }
 
+function _save_every_update()
+{
+	var checked = _('checkbox_autosave').checked;
+	
+	_('save_every').hidden = !checked;
+	
+	// resize window
+	if (checked) {
+		this._save_every_height = parseInt(window.getComputedStyle(_('save_every'), "").height);
+		if (isNaN(this._save_every_height)) this._save_every_height = 0;
+		window.innerHeight += this._save_every_height;
+	}
+	else {
+		if (this._save_every_height) window.innerHeight -= this._save_every_height;
+	}
+}
+
+function isNumber(aTextBox)
+{
+	gInvalidTime = !/^([1-9]\d*)?$/.test(aTextBox.value);
+	aTextBox.setAttribute("badname", gInvalidTime ? "true" : "false");
+	
+	isAcceptable();
+}
+
 // Work around for Firefox bug 467932
 function window_resize(aEvent)
 {
@@ -438,7 +479,7 @@ function window_resize(aEvent)
 		else gSessionList.focus();
 	
 		// restore focus to originally element
-		if (focused) focused.focus();
+		if (focused) setTimeout(function() { focused.focus() },0);
 	}
 	gWidth = document.width;
 }

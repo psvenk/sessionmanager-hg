@@ -57,19 +57,27 @@
 				<hbox id="group-text-container" hidden="true">
 					<label class="textbox_label" value="&session_group.label;"></label>
 					<menulist flex="1" id="group_menu_list" editable="true" onkeyup="isAcceptable();"
-					          onchange="window.setTimeout(function(){isAcceptable();},50)"
-					          onmouseup="window.setTimeout(function(){isAcceptable();},50)">
+					          onchange="window.setTimeout(isAcceptable,50)"
+					          onmouseup="window.setTimeout(isAcceptable,50)">
 						<menupopup>
 						</menupopup>
 					</menulist>
 				</hbox>
 				<separator class="thin"/>
 			</vbox>
-			<hbox id="checkbox_container">
-				<checkbox id="checkbox_tabprompt" label="&prompt.tabprompt.label;" hidden="true"/>
-				<checkbox id="checkbox_ignore" label="&prompt.ignore.label;" hidden="true"/>
-				<checkbox id="checkbox_autosave" label="&prompt.autosave.label;" hidden="true"/>
-			</hbox>
+			<vbox>
+				<hbox id="checkbox_container">
+					<checkbox id="checkbox_tabprompt" label="&prompt.tabprompt.label;" hidden="true"/>
+					<checkbox id="checkbox_ignore" label="&prompt.ignore.label;" hidden="true"/>
+					<checkbox id="checkbox_autosave" label="&prompt.autosave.label;" hidden="true"
+					          onclick="window.setTimeout(_save_every_update,0)"/>
+				</hbox>
+				<hbox id="save_every" hidden="true">
+					<label class="textbox_label" id="autosave_label" value="&prompt.save_every1.label;"/>
+					<textbox flex="1" minwidth="25" id="autosave_time" onkeyup="isNumber(this);"/>
+					<label class="textbox_label" id="autosave_label2" value="&prompt.save_every2.label;"/>
+				</hbox>
+			</vbox>
 		</vbox>
 	</hbox>
 </dialog>
