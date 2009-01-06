@@ -9,6 +9,8 @@ var SessionManagerHelperComponent = {
 	mContractID: "@zeniko/sessionmanager-helper;1",
 	mClassName: "Session Manager Helper Component",
 	mCategory: "a-sessionmanagerhelpher",
+	mTimer: null,
+	mPrefService: null,
 
 /* ........ nsIModule .............. */
 
@@ -89,6 +91,12 @@ var SessionManagerHelperComponent = {
 				this._handle_crash();
 			}
 			catch (ex) { dump(ex); }
+			
+			// stuff to handle preference file saving
+			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+			this.mPrefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
+			os.addObserver(this, "quit-application-granted", false);
+			os.addObserver(this, "sessionmanager-preference-save", false);
 			break;
 		case "sessionstore-state-read":
 			os.removeObserver(this, aTopic);
@@ -97,6 +105,15 @@ var SessionManagerHelperComponent = {
 				this._check_for_crash(aSubject);
 			}
 			catch (ex) { report(ex); }
+			break;
+		case "sessionmanager-preference-save":
+			// Save preference file after one 1/4 second to delay in case another preference changes at same time as first
+			this.mTimer.cancel();
+			this.mTimer.initWithCallback({notify:function (aTimer) {SessionManagerHelperComponent.mPrefService.savePrefFile(null);}}, 250, Ci.nsITimer.TYPE_ONE_SHOT);
+			break;
+		case "quit-application-granted":
+			os.removeObserver(this, "sessionmanager-preference-save");
+			os.removeObserver(this, aTopic);
 			break;
 		}
 	},
@@ -126,7 +143,7 @@ var SessionManagerHelperComponent = {
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_name");
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_time");
 			prefroot.deleteBranch("extensions.sessionmanager._running");
-			prefroot.deleteBranch("extensions.sessionmanager._allow_reload");
+			prefroot.deleteBranch("extensions.sessionmanager._recovering");
 			prefroot.deleteBranch("extensions.sessionmanager._encrypt_file");
 		}
 	},
