@@ -1,6 +1,8 @@
 const SM_VERSION = "0.6.2.8";
 
 /*const*/ var gSessionManager = {
+	_timer : null,
+	
 	mSessionStoreValue : null,
 	mSessionStartupValue : null,
 	mObserverService: Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService),
@@ -19,7 +21,7 @@ const SM_VERSION = "0.6.2.8";
 	mAutoSaveSessionName: "autosave.session",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
-	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
+	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
 
 	mLastState: null,
 	mCleanBrowser: null,
@@ -152,6 +154,7 @@ const SM_VERSION = "0.6.2.8";
 		this.mPref_submenus = this.getPref("submenus", false);
 		this.mPref__running = this.getPref("_running", false);
 		this.mPref__autosave_name = this.getPref("_autosave_name", "");
+		this.mPref__autosave_time = this.getPref("_autosave_time", 0);
 		this.mPrefBranch.addObserver("", this, false);
 		this.mPrefBranch2.addObserver("page", this, false);
 		
@@ -198,13 +201,12 @@ const SM_VERSION = "0.6.2.8";
 			
 			// make sure that the _running preference is saved in case we crash
 			this.setPref("_running", true);
-			this.mPrefRoot.savePrefFile(null);
 		}
-		else if ((!this.getPref("browser.sessionstore.resume_from_crash", true, true)) &&
-			     (this.getBrowserWindows().length == 1)) {
-			// if crash recovery is disabled force saving the prefrences file to prevent problems
-			// where browser.sessionstore.resume_session_once is false, but stored as true.
-			this.mPrefRoot.savePrefFile(null);
+		else if (this.getPref("_save_prefs",false)) {
+			// Save preference file if this preference is true in order to prevent problems on a crash.
+			// It is set to true if an autosave session crashed and user did not resume it.
+			this.delPref("_save_prefs");
+			this.mObserverService.notifyObservers(null,"sessionmanager-preference-save",null);
 		}
 		this.mFullyLoaded = true;
 		
@@ -302,7 +304,8 @@ const SM_VERSION = "0.6.2.8";
 
 	onUnload: function()
 	{
-		var numWindows = this.getBrowserWindows().length;
+		var allWindows = this.getBrowserWindows();
+		var numWindows = allWindows.length;
 		
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.removeObserver(this, aTopic);
@@ -323,6 +326,14 @@ const SM_VERSION = "0.6.2.8";
 		if (numWindows != 0) {
 			this.mObserverService.removeObserver(this, "sessionmanager:process-closed-window");
 			this.mObserverService.removeObserver(this, "quit-application");
+		}
+		
+		// Stop timer and start another if needed
+		if (this._timer) { 
+			dump("Timer stopped because window closed\n");
+			this._timer.cancel();
+			this._timer = null;
+			if (numWindows != 0) allWindows[0].gSessionManager.checkTimer();
 		}
 
 		// Only do the following in Firefox 3.0 and above where bug 360408 is fixed.
@@ -458,7 +469,7 @@ const SM_VERSION = "0.6.2.8";
 				this.synchStartup(aData);
 				break;
 			case "_autosave_name":
-				this.mSessionStore().setWindowValue(window,"_sm_autosave_name",escape(this.mPref__autosave_name));
+				this.checkTimer();
 				gBrowser.updateTitlebar();
 				break;
 			case "hide_tools_menu":
@@ -499,6 +510,12 @@ const SM_VERSION = "0.6.2.8";
 			// quit granted so stop listening for closed windows
 			this.mPref__stopping = true;
 			this._mUserDirectory = this.getUserDir("sessions");
+			break;
+		// timer periodic call
+		case "timer-callback":
+			// save auto-save session if open, but don't close it
+			dump("Timer callback\n");
+			this.closeSession(false, false, true);
 			break;
 		}
 	},
@@ -576,17 +593,11 @@ const SM_VERSION = "0.6.2.8";
 		if (this.__window_session_name) 
 		{
 			this.closeSession(true);
-			// Don't need to save autosave name in FF 3.0+ since when closed window is restored it will be overwritten
-			// and it will cause an exception if window's data has been wiped.
-			if (this.mAppVersion < "1.9") this.mSessionStore().setWindowValue(window,"_sm_autosave_name","");
 		}
 			
 		// only save closed window if running, not shutting down and this isn't the last window of any type open
 		if (this.mPref__running && !this.mPref__stopping && (this.getBrowserWindows().length > 0))
 		{
-			// Don't need to save autosave name in FF 3.0+ since when closed window is restored it will be overwritten
-			// and it will cause an exception if window's data has been wiped.
-			if (this.mAppVersion < "1.9") this.mSessionStore().setWindowValue(window,"_sm_autosave_name","");
 			var state = this.getSessionState(null, true, null, null, null, true);
 			this.appendClosedWindow(state);
 			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
@@ -784,7 +795,7 @@ const SM_VERSION = "0.6.2.8";
 			var file = this.getSessionDir(aFileName || this.makeFileName(aName), !aFileName);
 			try
 			{
-				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.mPref_save_closed_tabs < 2, values.autoSave, aGroup));
+				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.mPref_save_closed_tabs < 2, values.autoSave, aGroup, null, values.autoSaveTime));
 			}
 			catch (ex)
 			{
@@ -795,6 +806,7 @@ const SM_VERSION = "0.6.2.8";
 //		{
 			if (values.autoSave)
 			{
+				if (values.autoSaveTime) this.setPref("_autosave_time", values.autoSaveTime);
 				this.setPref("_autosave_name",aName);
 			}
 			else if (this.mPref__autosave_name == aName)
@@ -816,7 +828,7 @@ const SM_VERSION = "0.6.2.8";
 	},
 	
 	// if aOneWindow is true, then close the window session otherwise close the browser session
-	closeSession: function(aOneWindow, aForceSave)
+	closeSession: function(aOneWindow, aForceSave, keepOpen)
 	{
 		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
 		if (name != "")
@@ -824,15 +836,17 @@ const SM_VERSION = "0.6.2.8";
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
 			{
-				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true));
+				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true, null, null, this.mPref__autosave_time));
 			}
 			catch (ex)
 			{
 				this.ioError(ex);
 			}
 		
-			if (!aOneWindow) this.setPref("_autosave_name","");
-			else this.__window_session_name = null;
+			if (!keepOpen) {
+				if (!aOneWindow) this.setPref("_autosave_name","");
+				else this.__window_session_name = null;
+			}
 			return true;
 		}
 		return false;
@@ -883,8 +897,10 @@ const SM_VERSION = "0.6.2.8";
 			
 			// If this is an autosave session, keep track of it if there is not already an active session and not in private
 			// browsing mode
-			if (autosave == "session" && this.mPref__autosave_name=="" && !this.isPrivateBrowserMode()) 
+			if (/^session\/?(\d*)$/.test(autosave) && this.mPref__autosave_name=="" && !this.isPrivateBrowserMode()) 
 			{
+				var time = parseInt(RegExp.$1);
+				if (!isNaN(time)) this.setPref("_autosave_time", time);
 				this.setPref("_autosave_name", name);
 			}
 		}
@@ -1003,7 +1019,16 @@ const SM_VERSION = "0.6.2.8";
 				state = state.split("\n")
 				state[4] = this.decrypt(state[4]);
 				if (!state[4]) return;
-				state[4] = state[4].replace(/_sm_window_session_name:\"[^\s]*\"/, '_sm_window_session_name:\"' + escape(values.text) + '\"');
+				state[4] = this._safeEval(state[4]);
+				if (state[4] && state[4].windows) {
+					// replace window session name in window session window
+					for (var i=0; i<state[4].windows.length; i++) {
+						if (state[4].windows[i].extData && (state[4].windows[i].extData._sm_window_session_name == escape(oldname))) {
+							state[4].windows[i].extData._sm_window_session_name = escape(values.text);
+						}
+					}
+				}
+				state[4] = state[4].toSource();
 				state[4] = this.decryptEncryptByPreference(state[4]); 
 				if (!state[4]) return;
 				state = state.join("\n");
@@ -1528,6 +1553,7 @@ const SM_VERSION = "0.6.2.8";
 		aValues.ignore = (params.GetInt(1) & 4)?1:0;
 		aValues.autoSave = (params.GetInt(1) & 8)?1:0;
 		aValues.promptForTabs = (params.GetInt(1) & 64)?1:0;
+		aValues.autoSaveTime = params.GetInt(2) | null;
 		return params.GetInt(0);
 	},
 	
@@ -1717,6 +1743,8 @@ const SM_VERSION = "0.6.2.8";
 		while (filesEnum.hasMoreElements())
 		{
 			var file = filesEnum.getNext().QueryInterface(this.mComponents.interfaces.nsIFile);
+			// don't try to read a directory
+			if (file.isDirectory()) continue;
 			var fileName = file.leafName;
 			var backupItem = (this.mBackupSessionRegEx.test(fileName) || (fileName == this.mAutoSaveSessionName));
 			var cached = this.mSessionCache[fileName] || null;
@@ -1865,7 +1893,6 @@ const SM_VERSION = "0.6.2.8";
 			(this.getPref("privacy.item.extensions-sessionmanager", false, true)))
 		{
 			this.sanitize();
-			this.setPref("_autosave_name","");
 		}
 		// otherwise
 		else
@@ -1888,8 +1915,11 @@ const SM_VERSION = "0.6.2.8";
 			this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
 		}
 		
-		this.delPref("_encrypted");
 		this.delPref("_running");
+		this.delPref("_autosave_time");
+		this.delPref("_autosave_name");
+		this.delPref("_encrypt_file");
+		this.delPref("_recovering");
 		this.mPref__running = false;
 
 		// Cleanup left over files from Crash Recovery
@@ -2048,7 +2078,7 @@ const SM_VERSION = "0.6.2.8";
 			// RegExp.$6 - Group string and any invalid count string before (if either exists)
 			// RegExp.$7 - Invalid count string (if it exists)
 			// RegExp.$8 - Group string (if it exists)
-			if (/((^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=.+\n))?)/m.test(state))
+			if (/((^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=.+\n))?)/m.test(state))
 			{	
 				var header = RegExp.$1;
 				var nameTime = RegExp.$2;
@@ -2059,7 +2089,7 @@ const SM_VERSION = "0.6.2.8";
 				var goodSession = true;
 
 				// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
-				if (/autosave=(false|true|session|window).*\nautosave=(false|true|session|window)/m.test(state)) {
+				if (/autosave=(false|true|session\/?\d*|window).*\nautosave=(false|true|session\/?\d*|window)/m.test(state)) {
 					goodSession = false;
 				}
 				
@@ -2081,7 +2111,7 @@ const SM_VERSION = "0.6.2.8";
 					// remove \n from count string if group is there
 					if (group && (countString[countString.length-1] == "\n")) countString = countString.substring(0, countString.length - 1);
 					var autoSaveString = (auto) ? (auto).split("\n")[0] : "autosave=false";
-					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session";
+					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session/";
 					state = nameTime + autoSaveString + countString + group + this.decryptEncryptByPreference(data);
 					// bad session so rename it so it won't load again - This catches case where window and/or 
 					// tab count is zero.  Technically we can load when tab count is 0, but that should never
@@ -2261,41 +2291,36 @@ const SM_VERSION = "0.6.2.8";
 
 	encryptionChange: function()
 	{
-		if (this.getPref("_encrypted","no") != this.mPref_encrypt_sessions) {
-			this.setPref("_encrypted",this.mPref_encrypt_sessions);
+		try {
+			// force a master password prompt so we don't waste time if user cancels it
+			this.mSecretDecoderRing.encryptString("");
 			
-			try {
-				// force a master password prompt so we don't waste time if user cancels it
-				this.mSecretDecoderRing.encryptString("");
-				
-				var sessions = this.getSessions();
-				sessions.forEach(function(aSession) {
-					var file = this.getSessionDir(aSession.fileName);
-					var state = this.readSessionFile(file);
-					if (state) 
+			var sessions = this.getSessions();
+			sessions.forEach(function(aSession) {
+				var file = this.getSessionDir(aSession.fileName);
+				var state = this.readSessionFile(file);
+				if (state) 
+				{
+					if (this.mSessionRegExp.test(state))
 					{
-						if (this.mSessionRegExp.test(state))
-						{
-							state = state.split("\n")
-							state[4] = this.decryptEncryptByPreference(state[4]);
-							state = state.join("\n");
-							this.writeFile(file, state);
-						}
+						state = state.split("\n")
+						state[4] = this.decryptEncryptByPreference(state[4]);
+						state = state.join("\n");
+						this.writeFile(file, state);
 					}
-				}, this);
+				}
+			}, this);
 		
-				var windows = this.getClosedWindows();
-				windows.forEach(function(aWindow) {
-					aWindow.state = this.decryptEncryptByPreference(aWindow.state);
-				}, this);
-				this.storeClosedWindows(windows);
-			}
-			// failed to encrypt/decrypt so revert setting
-			catch (ex) {
-				this.setPref("_encrypted",!this.mPref_encrypt_sessions);
-				this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
-				this.cryptError(this._string("change_encryption_fail"));
-			}
+			var windows = this.getClosedWindows();
+			windows.forEach(function(aWindow) {
+				aWindow.state = this.decryptEncryptByPreference(aWindow.state);
+			}, this);
+			this.storeClosedWindows(windows);
+		}
+		// failed to encrypt/decrypt so revert setting
+		catch (ex) {
+			this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
+			this.cryptError(this._string("change_encryption_fail"));
 		}
 	},
 
@@ -2463,6 +2488,21 @@ const SM_VERSION = "0.6.2.8";
 
 /* ........ Preference Access .............. */
 
+	// Certain preferences should be force saved in case of a crash
+	checkForForceSave: function(aName, aValue, aUseRootBranch)
+	{
+		var names = [ "_running", "_autosave_name", "_autosave_time" ];
+		
+		for (var i=0; i<names.length; i++) {
+			if (aName == names[i]) {
+				var currentValue = this.getPref(aName, null, aUseRootBranch);
+				return (currentValue != aValue);
+			}
+		}
+		return false;
+	},
+		
+
 	getPref: function(aName, aDefault, aUseRootBranch)
 	{
 		try
@@ -2487,6 +2527,8 @@ const SM_VERSION = "0.6.2.8";
 
 	setPref: function(aName, aValue, aUseRootBranch)
 	{
+		var forceSave = this.checkForForceSave(aName, aValue, aUseRootBranch);
+		
 		var pb = (aUseRootBranch)?this.mPrefRoot:this.mPrefBranch;
 		switch (typeof aValue)
 		{
@@ -2505,6 +2547,8 @@ const SM_VERSION = "0.6.2.8";
 
 			break;
 		}
+		
+		if (forceSave) this.mObserverService.notifyObservers(null,"sessionmanager-preference-save",null);
 	},
 
 	delPref: function(aName, aUseRootBranch)
@@ -2602,10 +2646,34 @@ const SM_VERSION = "0.6.2.8";
 		}
 		// handle browser reload with same session and when opening new windows
 		else if (recoverOnly) {
-			setTimeout(function() {
-				//dump("Recovery autosave_name: " + gSessionManager.mPref__autosave_name + "\n");
-				gSessionManager.mSessionStore().setWindowValue(window,"_sm_autosave_name",escape(gSessionManager.mPref__autosave_name));
-			}, 100);
+			this.checkTimer();
+		}
+		
+		// If need to encrypt backup file, do it
+		var backupFile = this.getPref("_encrypt_file");
+		if (backupFile) {
+			this.delPref("_encrypt_file");
+			var file = this.getSessionDir(backupFile);
+			var state = this.readSessionFile(file);
+			if (state) 
+			{
+				if (this.mSessionRegExp.test(state))
+				{
+					state = state.split("\n")
+					state[4] = this.decryptEncryptByPreference(state[4]);
+					// if could be encrypted or encryption failed but user allows unencrypted sessions
+					if (state[4]) {
+						// if encrypted save it
+						if (state[4].indexOf(":") == -1) {
+							state = state.join("\n");
+							this.writeFile(file, state);
+						}
+					}
+					// couldn't encrypt and user does not want unencrypted files so delete it
+					else this.delFile(file);
+				}
+				else this.delFile(file);
+			}
 		}
 	},
 
@@ -2648,6 +2716,33 @@ const SM_VERSION = "0.6.2.8";
 		}
 	},
 
+	checkTimer: function()
+	{
+		// only act if timer already started
+		if ((this._timer) && ((this.mPref__autosave_time <= 0) || (this.mPref__autosave_name == ""))) {
+			this._timer.cancel();
+			this._timer = null;
+			this.setPref("_autosave_time", 0);
+			dump("Timer stopped\n");
+		}
+		else if (!this._timer && (this.mPref__autosave_time > 0) && (this.mPref__autosave_name != "")) {
+			dump("Check if timer already running and if not start it\n");
+			var allWindows = this.getBrowserWindows();
+			var timerRunning = false;
+			for (var i in allWindows) {
+				if (allWindows[i].gSessionManager._timer) {
+					timerRunning = true;
+					break;
+				}
+			}
+			if (!timerRunning) {
+				this._timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+				this._timer.init(gSessionManager, this.mPref__autosave_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
+				dump("Timer started for " + this.mPref__autosave_time + " minutes\n");
+			}
+		}
+	},
+	
 /* ........ Auxiliary Functions .............. */
 	// Undo closed tab function for SeaMonkey
 	undoCloseTabSM: function (aIndex)
@@ -2705,7 +2800,7 @@ const SM_VERSION = "0.6.2.8";
 		});
 	},
 
-	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt)
+	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt, aAutoSaveTime)
 	{
 		// Return last closed window state if it is stored.
 		if (this.mLastState) {
@@ -2739,7 +2834,7 @@ const SM_VERSION = "0.6.2.8";
 		}
 		
 		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
-				"\nautosave=" + ((aAutoSave)?("session"):"false") + "\tcount=" + count.windows + "/" + count.tabs + 
+				"\nautosave=" + ((aAutoSave)?("session/" + aAutoSaveTime):"false") + "\tcount=" + count.windows + "/" + count.tabs + 
 				(aGroup? ("\tgroup=" + aGroup) : "") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
