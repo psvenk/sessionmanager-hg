@@ -348,6 +348,7 @@ function onSessionTreeSelect()
 	if (!gTextBox && !ggMenuList)
 	{
 		gAcceptButton.disabled = gSessionTree.view.selection.count == 0;
+		_("tree_splitter").hidden = _("windows_tab_tree").hidden = gAcceptButton.disabled || (gParams.GetInt(1) & 16);
 	}
 	else
 	{

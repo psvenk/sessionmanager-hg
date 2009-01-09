@@ -29,16 +29,29 @@
 			
 			<vbox id="session_label"/>
 			<vbox flex="1">
-				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" rows="5" flex="1" 
+				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" rows="5" flex="1" flags="dont-build-content"
 				      onkeypress="onSessionTreeKeyPress(event)" onclick="onSessionTreeClick(event)" ondblclick="onSessionTreeClick(event)">
 					<treecols>
-						<treecol id="name" label="&session_name.label;" persist="width" flex="2"/>
+						<treecol id="name" label="&session_name.label;" persist="width" flex="2" ignoreincolumnpicker="true"/>
 						<splitter class="tree-splitter"/>
 						<treecol id="group" label="&session_group.label;" persist="width hidden" flex="1"/>
 						<splitter class="tree-splitter"/>
 						<treecol id="win_count" persist="width hidden" label="&session_windows.label;"/>
 						<splitter class="tree-splitter"/>
 						<treecol id="tab_count" persist="width hidden" label="&session_tabs.label;"/>
+					</treecols>
+					<treechildren flex="1"/>
+				</tree>
+				<splitter id="tree_splitter" hidden="true" state="open" collapse="after">
+				    <grippy/>
+				</splitter>
+				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="windows_tab_tree" flex="1" hidden="true"
+				      seltype="single" hidecolumnpicker="true" onclick="onTabTreeClick(event);" onkeydown="onTabTreeKeyDown(event);"
+				      _window_label="&winTabTree.windowLabel;">
+					<treecols>
+						<treecol id="restore" type="checkbox" label="&winTabTree.restoreHeader;"/>
+						<splitter class="tree-splitter"/>
+						<treecol primary="true" id="title" label="&winTabTree.listHeader;" flex="1"/>
 					</treecols>
 					<treechildren flex="1"/>
 				</tree>
