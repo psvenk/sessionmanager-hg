@@ -62,3 +62,7 @@
 <!ENTITY group.accesskey "G">
 <!ENTITY prompt.save_every1.label "Save every">
 <!ENTITY prompt.save_every2.label "minutes (disabled if blank)">
+<!ENTITY winTabTree.restoreHeader "Restore">
+<!ENTITY winTabTree.listHeader "Windows and Tabs">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
+<!ENTITY winTabTree.windowLabel "Window &#37;S">
