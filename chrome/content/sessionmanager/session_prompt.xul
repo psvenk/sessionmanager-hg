@@ -29,22 +29,19 @@
 			
 			<vbox id="session_label"/>
 			<vbox flex="1">
-				<listbox id="session_list" rows="5" flex="1" 
-				         onkeypress="onListBoxKeyPress(event)" onclick="onListboxClick(event)" ondblclick="onListboxClick(event)">
-					<listcols>
-						<listcol flex="2"/>
-						<listcol flex="1"/>
-						<listcol/>
-						<listcol/>
-						<listcol id="scroll_spacer" hidden="true"/>
-					</listcols>
-					<listhead>
-						<listheader id="name" label="&session_name.label;"/>
-						<listheader id="group" label="&session_group.label;"/>
-						<listheader id="win_count" label="&session_windows.label;"/>
-						<listheader id="tab_count" label="&session_tabs.label;"/>
-					</listhead>
-				</listbox>
+				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" rows="5" flex="1" 
+				      onkeypress="onSessionTreeKeyPress(event)" onclick="onSessionTreeClick(event)" ondblclick="onSessionTreeClick(event)">
+					<treecols>
+						<treecol id="name" label="&session_name.label;" persist="width" flex="2"/>
+						<splitter class="tree-splitter"/>
+						<treecol id="group" label="&session_group.label;" persist="width hidden" flex="1"/>
+						<splitter class="tree-splitter"/>
+						<treecol id="win_count" persist="width hidden" label="&session_windows.label;"/>
+						<splitter class="tree-splitter"/>
+						<treecol id="tab_count" persist="width hidden" label="&session_tabs.label;"/>
+					</treecols>
+					<treechildren flex="1"/>
+				</tree>
 			</vbox>
 			<separator class="thin"/>
 			

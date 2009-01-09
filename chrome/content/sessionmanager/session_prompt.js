@@ -1,5 +1,5 @@
 var gParams = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
-var gSessionList = null;
+var gSessionTree = null;
 var gTextBox = null;
 var ggMenuList = null;
 var gAcceptButton = null;
@@ -8,9 +8,10 @@ var gGroupNames = [];
 var gBackupGroupName = null;
 var gBannedNames = [];
 var gBackupNames = [];
-// gExistingName is the index of the item with the name in the text field + 1.  Adding 1, makes it easier to check for
-// an existing name since 0 means it does not match an existing name.  Just remember to subtract 1 before using.
-var gExistingName = 0;
+var gSessionTreeData = [];
+var gOriginalSessionTreeData;
+// gExistingName is the index of the item with the name in the text field.  -1 means no match
+var gExistingName = -1;
 var gNeedSelection = false;
 var gWidth = 0;
 var gInvalidTime = false;
@@ -83,8 +84,8 @@ gSessionManager.onLoad = function() {
 		sessions.unshift({ name: this._string("current_session"), fileName: "*" });
 	}
 	
-	gSessionList = _("session_list");
-	gSessionList.selType = (gParams.GetInt(1) & 2)?"multiple":"single";
+	gSessionTree = _("session_tree");
+	gSessionTree.selType = (gParams.GetInt(1) & 2)?"multiple":"single";
 	
 	// Do not allow overwriting of open window or browser sessions
 	gBannedNames = this.getWindowSessions();
@@ -109,6 +110,7 @@ gSessionManager.onLoad = function() {
 	var saving = (gParams.GetInt(1) & 8);
 	var grouping = (gParams.GetInt(1) & 32);
 	var groupCount = 0;
+	var selected;
 	sessions.forEach(function(aSession) {
 		var trimName = aSession.name.trim().toLowerCase();
 		// ban backup session names
@@ -123,44 +125,31 @@ gSessionManager.onLoad = function() {
 				aSession.windows = counts[0];
 				aSession.tabs = counts[1];
 			}
-			// Build cells
-			var nameCell = document.createElement("listcell");
-			var groupCell = document.createElement("listcell");
-			var wincountCell = document.createElement("listcell");
-			var tabcountCell = document.createElement("listcell");
-			nameCell.setAttribute("label", aSession.name);
-			groupCell.setAttribute("label", aSession.group);
-			// make backup group label gray
-			groupCell.setAttribute("disabled", aSession.backup);
-			wincountCell.setAttribute("label", aSession.windows);
-			tabcountCell.setAttribute("label", aSession.tabs);
-			tabcountCell.setAttribute("crop", "false");
-			// format window and tab count text
-			wincountCell.setAttribute("class", "number");
-			tabcountCell.setAttribute("class", "number");
-			var item = document.createElement("listitem");
-			item.appendChild(nameCell);
-			item.appendChild(groupCell);
-			item.appendChild(wincountCell);
-			item.appendChild(tabcountCell);
-			item.label = aSession.name;
-			item.value = aSession.fileName;
-			if (aSession.group) item.setAttribute("group", aSession.group);
+			
+			// Break out Autosave variables
 			if (aSession.autosave) {
 				var autosave = aSession.autosave.split("/");
-				item.setAttribute("autosave", autosave[0]);
-				item.setAttribute("autosave_time", autosave[1] ? autosave[1] : "");
+				aSession.autosave = autosave[0];
+				aSession.autosave_time = autosave[1];
 			}
-			item.setAttribute("session_loaded", gBannedNames[trimName] || null);
-			if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) item.setAttribute("latest",true);
-			gSessionList.appendChild(item);
-			// select passed in item if any
-			if (aSession.fileName == gParams.GetString(3))
-			{
-				setTimeout(function(aItem) { gSessionList.selectItem(aItem); }, 0, item);
+			
+			// Mark if session loaded
+			aSession.loaded = gBannedNames[trimName] || null;
+			
+			// Flag latest session
+			if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) {
+				aSession.latest = true;
 			}
+
+			// select passed in item (if any)
+			if (aSession.fileName == gParams.GetString(3)) selected = gSessionTreeData.length;
+
 			// Add session to name list
-			gSessionNames[trimName] = gSessionList.getIndexOfItem(item) + 1;
+			gSessionNames[trimName] = gSessionTreeData.length;
+			
+			// Push to Tree database and backup
+			gSessionTreeData.push(aSession);
+			
 			// Build group menu list
 			if (aSession.group && !aSession.backup) {
 				var regExp = new RegExp("^" + aSession.group + "|," + aSession.group + "$|," + aSession.group + ",");
@@ -171,15 +160,25 @@ gSessionManager.onLoad = function() {
 		}
 	}, this);
 	
-	if (gParams.GetString(4)) // enable text boxes
+	// Make a copy of array
+	gOriginalSessionTreeData = gSessionTreeData.slice(0);
+	
+	// Display Tree
+	gSessionTree.view = sessionTreeView;
+	
+	// select passed in item (if any)
+	if (selected != undefined) gSessionTree.view.selection.select(selected);
+
+	// If there is a text box label, enable text boxes
+	if (gParams.GetString(4))
 	{
 		_("text_container").hidden = false;
 		setDescription(_("text_label"), gParams.GetString(4));
 		
 		// If renaming and name already entered, disable the session selection list
-		if (gParams.GetString(3) && !gParams.GetString(5)) gSessionList.disabled = true;
+		if (gParams.GetString(3) && !gParams.GetString(5)) gSessionTree.disabled = true;
 
-		// If group text input is enabled (saving & group changing)
+		// group text input is enabled when saving or group changing
 		if ((gParams.GetInt(1) & 32) || gParams.GetString(5)) 
 		{
 			_("group-text-container").hidden = false;
@@ -191,31 +190,33 @@ gSessionManager.onLoad = function() {
 			}
 		}
 				
-		// If session text input is enabled (saving & renaming)
+		// session text input is enabled when not group chaning (i.e., when saving or renaming)
 		if (!(gParams.GetInt(1) & 32)) 
 		{
 			_("session-text-container").hidden = false;
 			gTextBox = _("text_box");
 		
-			onTextboxInput(gParams.GetString(6));
-			if ((gBannedNames[gTextBox.value.trim().toLowerCase()] || gExistingName) && !(gParams.GetInt(1) & 256))
+			// Pre-populate the text box with default session name if saving and the name is not banned or already existing.
+			// Otherwise disable accept button
+			var trimname = gParams.GetString(6).trim().toLowerCase();
+			if (gParams.GetString(5) && !gBannedNames[trimname] && ((gSessionNames[trimname] == undefined) || (gParams.GetInt(1) & 256)))
 			{
-				if (gExistingName) gParams.SetString(3, sessions[gExistingName - 1].fileName);
-				gTextBox.value = "";
-				onTextboxInput();
+				onTextboxInput(gParams.GetString(6));
 			}
+			else gAcceptButton.disabled = true;
 		}
 	}
-
-	if ((gNeedSelection = !gTextBox || !ggMenuList || !gParams.GetString(5)) || (gParams.GetInt(1) & 256)) // when no textbox or renaming
+	
+	// Force user to make a selection if no text or group box or not saving (i.e., deleting or renaming)
+	if ((gNeedSelection = !gTextBox || !ggMenuList || !gParams.GetString(5)) || (gParams.GetInt(1) & 256))
 	{
-		gSessionList.addEventListener("select", onListboxSelect, false);
-		onListboxSelect();
+		gSessionTree.addEventListener("select", onSessionTreeSelect, false);
+		onSessionTreeSelect();
 	}
 	
-	if (gSessionList.hasAttribute("height"))
+	if (gSessionTree.hasAttribute("height"))
 	{
-		gSessionList.height = gSessionList.getAttribute("height");
+		gSessionTree.height = gSessionTree.getAttribute("height");
 	}
 	if (!window.opener)
 	{
@@ -224,11 +225,6 @@ gSessionManager.onLoad = function() {
 		document.documentElement.removeAttribute("screenY");
 	}
 	window.sizeToContent();
-	// Firefox 3.0 and above won't resize the listbox correctly so we must manually fix it.  See Firefox Bug 467932
-	if (this.mAppVersion >= "1.9") {
-		window.addEventListener("resize", window_resize, false);
-		window_resize();
-	}
 };
 
 gSessionManager.onUnload = function() {
@@ -243,82 +239,115 @@ gSessionManager.onUnload = function() {
 		persist(document.documentElement, "screenX", window.screenX - window.opener.screenX);
 		persist(document.documentElement, "screenY", window.screenY - window.opener.screenY);
 	}
-	if (gSessionList) persist(gSessionList, "height", gSessionList.boxObject.height);
+	if (gSessionTree) persist(gSessionTree, "height", gSessionTree.treeBoxObject.height);
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
 	                  ((_("checkbox_tabprompt").checked)?64:0));
 	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
-
-	if (this.mAppVersion >= "1.9") window.removeEventListener("resize", window_resize, false);	
 };
 
-function onListboxClick(aEvent)
+function onSessionTreeClick(aEvent)
 {
 	if ((aEvent.button == 0) && !aEvent.metaKey && !aEvent.ctrlKey && !aEvent.shiftKey && !aEvent.altKey) {
-		if (aEvent.target.nodeName=="listitem") {
+		if (aEvent.target.nodeName=="treechildren") {
 			switch (aEvent.type) {
 				case "click":
-					if (gTextBox && !(gParams.GetInt(1) & 256)) onTextboxInput(gSessionList.selectedItem.label);
+					if (gTextBox && !(gParams.GetInt(1) & 256)) onTextboxInput(gSessionTreeData[gSessionTree.currentIndex].name);
 					break;
 				case "dblclick":
 					gAcceptButton.doCommand();
 					break;
 			}
 		}
-		else if ((aEvent.type == "click") && (aEvent.target.nodeName == "listheader")) {
+		else if ((aEvent.type == "click") && (aEvent.target.nodeName == "treecol")) {
 			var types = { name: 0, group: 1, win_count: 2, tab_count: 3 };
 			var which = types[aEvent.target.id];
 			
-			// If not already sorted, sortedBy will be 0.  Otherwise it is which + 1 if inversely sorted or -(which + 1) if normally sorted
-			var flag = (Math.abs(sortedBy) == (which + 1)) ? (-sortedBy / Math.abs(sortedBy)) : -1
+			// If not already sorted, sortedBy will be 0.  Otherwise it is which + 1 if sorted or -(which + 1) if inversely sorted
+			var flag = (Math.abs(sortedBy) == (which + 1)) ? (-sortedBy / Math.abs(sortedBy)) : 1
+			
+			// Save selected items so they can be restored
+			var selectedFileNames = {};
+			var start = new Object();
+			var end = new Object();
+			var numRanges = gSessionTree.view.selection.getRangeCount();
 
-			var items = [];
-			while (gSessionList.getRowCount() > 0) items.push(gSessionList.removeItemAt(0));
-			
-			// Sort depending on which header is clicked
-			if ((which == 0) || (which == 1)) {
-				items = items.sort(function(a, b) { 
-					return flag * (a.childNodes[which].getAttribute("label").toLowerCase().localeCompare(b.childNodes[which].getAttribute("label").toLowerCase())); 
-				});
-			}
-			else if ((which == 2) || (which == 3)) {
-				items = items.sort(function(a, b) { 
-					return flag * (parseInt(a.childNodes[which].getAttribute("label")) - parseInt(b.childNodes[which].getAttribute("label"))); 
-				});
+			for (var t = 0; t < numRanges; t++) {
+				gSessionTree.view.selection.getRangeAt(t,start,end);
+				for (var v = start.value; v <= end.value; v++){
+					selectedFileNames[gSessionTreeData[v].fileName] = true;
+				}
 			}
 			
-			while (items.length) {
-				var item = items.pop();
-				gSessionList.appendChild(item);	
-				// Firefox 3.0 and 3.1 incorrecly set the "current" attribute on items added which causes the cells
-				// to be surrounded by a blue dotted box so just remove it if it's there.  See Firefox bug 467830
-				item.removeAttribute("current");
-				var trimName = item.firstChild.getAttribute("label").trim().toLowerCase();
-				gSessionNames[trimName] = gSessionList.getIndexOfItem(item) + 1;
+			// Clear all selected items
+			gSessionTree.view.selection.clearSelection();
+			
+			// If inversely sorted and user clicks header again, go back to original order
+			if (flag && sortedBy < 0) {
+				flag = 0;
+				gSessionTreeData = gOriginalSessionTreeData.slice(0);
+			}
+			else {
+				// Sort depending on which header is clicked
+				switch (which) {
+					case 0:
+						gSessionTreeData = gSessionTreeData.sort(function(a, b) { 
+							return flag * (a.name.toLowerCase().localeCompare(b.name.toLowerCase())); 
+						});
+						break;
+					case 1:
+						gSessionTreeData = gSessionTreeData.sort(function(a, b) { 
+							return flag * (a.group.toLowerCase().localeCompare(b.group.toLowerCase())); 
+						});
+						break;
+					case 2:
+						gSessionTreeData = gSessionTreeData.sort(function(a, b) { 
+							return flag * (parseInt(a.windows) - parseInt(b.windows)); 
+						});
+						break;
+					case 3:
+						gSessionTreeData = gSessionTreeData.sort(function(a, b) { 
+							return flag * (parseInt(a.tabs) - parseInt(b.tabs)); 
+						});
+						break;
+				}
+			}
+			
+			// Recreate Session List index and restore selected items
+			for (var i=0; i<gSessionTreeData.length; i++) {
+				var trimName = gSessionTreeData[i].name.trim().toLowerCase();
+				gSessionNames[trimName] = i;
+				
+				if (selectedFileNames[gSessionTreeData[i].fileName]) {
+					gSessionTree.view.selection.toggleSelect(i);
+				}
 			}
 			sortedBy = flag * (which + 1);
 
 			// update header arrorws			
 			for (var i=0; i < aEvent.target.parentNode.childNodes.length; i++) {
-				aEvent.target.parentNode.childNodes[i].setAttribute("sortDirection", (((i == which) || (flag == 0)) ? ((flag<0) ? "ascending" : "descending") : "natural"))
+				var sortText = flag ? ((flag>0) ? "ascending" : "descending") : "natural";
+				aEvent.target.parentNode.childNodes[i].setAttribute("sortDirection", ((aEvent.target.parentNode.childNodes[i] == aEvent.target) ? sortText : "natural"))
 			}
 		}
 	}
 }
 
-function onListBoxKeyPress(aEvent)
+function onSessionTreeKeyPress(aEvent)
 {
-	if (gTextBox && (aEvent.keyCode == aEvent.DOM_VK_RETURN) && (gSessionList.selectedIndex > -1)) {
-		onTextboxInput(gSessionList.selectedItem.label);
+	if (gTextBox && (aEvent.keyCode == aEvent.DOM_VK_RETURN) && (gSessionTree.view.selection.count > 0)) {
+		onTextboxInput(gSessionTreeData[gSessionTree.currentIndex].name);
 		aEvent.preventDefault();
 	}
 }
 
-function onListboxSelect()
+function onSessionTreeSelect()
 {
+	// If no session name or group name text box, disable the accept button if nothing selected.
+	// Otherwise isAcceptable when changing groups or onTextboxInput otherwise.
 	if (!gTextBox && !ggMenuList)
 	{
-		gAcceptButton.disabled = gSessionList.selectedCount == 0;
+		gAcceptButton.disabled = gSessionTree.view.selection.count == 0;
 	}
 	else
 	{
@@ -343,15 +372,14 @@ function onTextboxInput(aNewValue)
 	var input = gTextBox.value.trim().toLowerCase();
 	var oldWeight = !!gAcceptButton.style.fontWeight;
 	
-	gExistingName = gSessionNames[input] || 0;
-	var newWeight = gExistingName || ((gParams.GetInt(1) & 256) && gSessionList.selectedCount > 0);
+	gExistingName = (gSessionNames[input] != undefined) ? gSessionNames[input] : -1;
+	var newWeight = !!((gExistingName >= 0) || ((gParams.GetInt(1) & 256) && gSessionTree.view.selection.count > 0));
 	
-	var item;
 	if (!_("checkbox_autosave").hidden) {
 		var currentChecked = _("checkbox_autosave").checked;
-		if (gExistingName && (item = gSessionList.getItemAtIndex(gExistingName - 1))) {
-			_("checkbox_autosave").checked = item.getAttribute("autosave") != "false";
-			_("autosave_time").value = item.getAttribute("autosave_time");
+		if (gExistingName >= 0) {
+			_("checkbox_autosave").checked = gSessionTreeData[gExistingName].autosave != "false";
+			_("autosave_time").value = gSessionTreeData[gExistingName].autosave_time;
 		}
 		else {
 			_("checkbox_autosave").checked = false;
@@ -366,11 +394,10 @@ function onTextboxInput(aNewValue)
 		gAcceptButton.style.fontWeight = (newWeight)?"bold":"";
 	}
 
-	// Highlight matching item when accept label changes to replace and copy in group value
+	// Highlight matching item when accept label changes to replace and copy in group value (only when saving)
 	if (newWeight && gParams.GetString(5)) {
-		// Things get screwy if you try to select an item being selected so don't do it.
-		if (!aNewValue) gSessionList.selectedItem = item;
-		if (ggMenuList) ggMenuList.value = item.getAttribute("group");
+		gSessionTree.view.selection.select(gExistingName);
+		if (ggMenuList) ggMenuList.value = gSessionTreeData[gExistingName].group;
 	}
 		
 	isAcceptable();
@@ -393,19 +420,30 @@ function isAcceptable()
 		badSessionName = !input || gBackupNames[input] || gBannedNames[input];
 	}
 	
-	gAcceptButton.disabled = gInvalidTime || badSessionName || badGroupName || (gNeedSelection && (gSessionList.selectedCount == 0 || gExistingName));
+	gAcceptButton.disabled = gInvalidTime || badSessionName || badGroupName || (gNeedSelection && (gSessionTree.view.selection.count == 0 || (gExistingName >= 0)));
 }
 
 function onAcceptDialog()
 {
 	gParams.SetInt(0, 1);
-	if (gNeedSelection || ((gParams.GetInt(1) & 256) && gSessionList.selectedCount > 0))
+	if (gNeedSelection || ((gParams.GetInt(1) & 256) && gSessionTree.view.selection.count > 0))
 	{
-		gParams.SetString(3, gSessionList.selectedItems.map(function(aItem) { return aItem.value || ""; }).join("\n"));
+		var selectedFileNames = [];
+		var start = new Object();
+		var end = new Object();
+		var numRanges = gSessionTree.view.selection.getRangeCount();
+
+		for (var t = 0; t < numRanges; t++) {
+			gSessionTree.view.selection.getRangeAt(t,start,end);
+			for (var v = start.value; v <= end.value; v++){
+				selectedFileNames.push(gSessionTreeData[v].fileName);
+			}
+		}
+		gParams.SetString(3, selectedFileNames.join("\n"));
 	}
-	else if (gExistingName)
+	else if (gExistingName >= 0)
 	{
-		gParams.SetString(3, gSessionList.getItemAtIndex(gExistingName - 1).value);
+		gParams.SetString(3, gSessionTreeData[gExistingName].fileName);
 	}
 	else
 	{
@@ -462,24 +500,84 @@ function isNumber(aTextBox)
 	isAcceptable();
 }
 
-// Work around for Firefox bug 467932
-function window_resize(aEvent)
-{
-	// If scroll bar will be shown, make it so Tab count displays without being cropped.
-	_("scroll_spacer").hidden = (gSessionList.getRowCount() <= gSessionList.getNumberOfVisibleRows()); 
-		
-	// only a problem if new width is smaller than current width
-	if (!gWidth || (document.width < gWidth)) {
-	
-		// get currently focused element
-		var focused = document.commandDispatcher.focusedElement;
-	
-		// toggle focus for Session List which will force it to redraw and fix listcell widths
-		if (focused == gSessionList) gSessionList.blur();
-		else gSessionList.focus();
-	
-		// restore focus to originally element
-		if (focused) setTimeout(function() { focused.focus() },0);
-	}
-	gWidth = document.width;
-}
+// Tree controller
+
+var sessionTreeView = {
+	_atoms: {},
+	_getAtom: function(aName)
+	{
+		if (!this._atoms[aName]) {
+			var as = Components.classes["@mozilla.org/atom-service;1"].getService(Components.interfaces.nsIAtomService);
+			this._atoms[aName] = as.getAtom(aName);
+		}
+		return this._atoms[aName];
+	},
+
+	treeBox: null,
+	selection: null,
+
+	get rowCount()                     { return gSessionTreeData.length; },
+	setTree: function(treeBox)         { this.treeBox = treeBox; },
+	getCellText: function(idx, column) { 
+		switch(column.id) {
+			case "name":
+				return gSessionTreeData[idx].name;
+				break;
+			case "group":
+				return gSessionTreeData[idx].group;
+				break;
+			case "win_count":
+				return gSessionTreeData[idx].windows;
+				break;
+			case "tab_count":
+				return gSessionTreeData[idx].tabs;
+				break;
+		}
+		return null;
+	},
+	canDrop: function(idx, orient)      { return false; },
+	isContainer: function(idx)          { return false; },
+	isContainerOpen: function(idx)      { return false; },
+	isContainerEmpty: function(idx)     { return false; },
+	isSelectable: function(idx, column) { return false; },
+	isSeparator: function(idx)          { return false; },
+	isSorted: function()                { return sortedBy != 0; },
+	isEditable: function(idx, column)   { return false; },
+	getLevel: function(idx)             { return 0; },
+	getParentIndex: function(idx)       { return -1; },
+	getImageSrc: function(idx, column)  { return null; },
+
+	hasNextSibling: function(idx, after) {
+		return (idx <= after) && (idx < gSessionTreeData.length - 1) && (after < gSessionTreeData.length - 1);
+	},
+
+	getCellProperties: function(idx, column, prop) {
+		if ((column.id == "group") && (gSessionTreeData[idx].backup)) 
+			prop.AppendElement(this._getAtom("disabled"));
+		if (gSessionTreeData[idx].latest) 
+			prop.AppendElement(this._getAtom("latest"));
+		if (gSessionTreeData[idx].loaded)
+			prop.AppendElement(this._getAtom("disabled"));
+		if (gSessionTreeData[idx].autosave)
+			prop.AppendElement(this._getAtom(gSessionTreeData[idx].autosave));
+	},
+
+	getRowProperties: function(idx, prop) {
+		if (idx % 2 != 0)
+			prop.AppendElement(this._getAtom("alternate"));
+	},
+
+	drop: function(row, orient) { },
+	getCellValue: function(idx, column) { },
+	getProgressMode : function(idx, column) { },
+	toggleOpenState: function(idx) { },
+	cycleHeader: function(column) { },
+	cycleCell: function(idx, column) { },
+	selectionChanged: function() { },
+	setCellValue: function() { },
+	setCellText: function() { },
+	performAction: function(action) { },
+	performActionOnCell: function(action, index, column) { },
+	performActionOnRow: function(action, index) { },
+	getColumnProperties: function(column, prop) { }
+};
