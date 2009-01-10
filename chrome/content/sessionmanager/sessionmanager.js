@@ -90,6 +90,13 @@ const SM_VERSION = "0.6.2.8";
 		this.mTitle = this._string("sessionManager");
 		this.mEOL = this.getEOL();
 		
+		// Fix tooltips for toolbar buttons
+		var buttons = [document.getElementById("sessionmanager-toolbar"), document.getElementById("sessionmanager-undo")];
+		for (var i=0; i < buttons.length; i++) {
+			if (buttons[i] && buttons[i].boxObject && buttons[i].boxObject.firstChild)
+				buttons[i].boxObject.firstChild.tooltipText = buttons[i].getAttribute("buttontooltiptext");
+		}
+		
 		// Determine Mozilla version to see what is supported
 		this.mAppVersion = "0";
 		try {

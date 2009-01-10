@@ -12,8 +12,8 @@
 	
 	<!-- Menu in toolbar -->
 	<toolbarpalette id="BrowserToolbarPalette"> <!-- Firefox (toolbar) -->
-		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" 
-		               oncommand="gSessionManager.save(null, null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.tooltip;" contextmenu="">
+		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" buttontooltiptext="&toolbar.tooltip;"
+		               oncommand="gSessionManager.save(null, null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.menu.tooltip;" contextmenu="">
 			<menupopup onpopupshowing="gSessionManager.init(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
 				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
@@ -45,9 +45,9 @@
 			</menupopup>
 		</toolbarbutton>
 		
-		<toolbarbutton id="sessionmanager-undo" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&toolbar.undo.label;" 
+		<toolbarbutton id="sessionmanager-undo" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&toolbar.undo.label;" buttontooltiptext="&toolbar.undo.tooltip;"
 		               oncommand="if (event.shiftKey) gSessionManager.undoCloseWindow(); else if (gSessionManager.mSessionStore().getClosedTabCount(window)) undoCloseTab(); else this.open = true;" 
-		               onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.undo.tooltip;" contextmenu="">
+		               onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.undo.menu.tooltip;" contextmenu="">
 			<menupopup onpopupshowing="gSessionManager.initUndo(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
 				<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
 				<menuseparator _id="closed-separator"/>
