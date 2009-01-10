@@ -38,7 +38,7 @@ gSessionManager.restorePrompt = function() {
 	var params = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
 	params.SetInt(0, 0);
 			
-	var values = { name: "*", addCurrentSession: true, ignorable: false, tabprompt: (this.mAppVersion >= "1.9.1"), count: countString }
+	var values = { name: "*", addCurrentSession: true, ignorable: false, count: countString }
 	var fileName = (location.search != "?cancel")?(this.prompt(this._string("recover_session"), this._string("recover_session_ok"), values)?values.name:""):"";
 	if (fileName != "*")
 	{

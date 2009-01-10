@@ -1542,7 +1542,7 @@ const SM_VERSION = "0.6.2.8";
 		params.SetString(6, aValues.text || "");
 		params.SetString(7, aValues.count || "");
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
-						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) | ((aValues.tabprompt)?64:0) |
+						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) |
 						  ((aValues.allowNamedReplace)?256:0));
 		
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, (this.mFullyLoaded)?window:null);
@@ -2625,7 +2625,7 @@ const SM_VERSION = "0.6.2.8";
 		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
 			// allow prompting for tabs in Firefox 3.1
-			var values = { ignorable: true, tabprompt: (this.mAppVersion >= "1.9.1") };
+			var values = { ignorable: true };
 			
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
 			if (session && this.getSessionDir(session).exists())
