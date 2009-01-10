@@ -15,6 +15,7 @@ var gExistingName = -1;
 var gNeedSelection = false;
 var gWidth = 0;
 var gInvalidTime = false;
+var gAlreadyResized = false;
 
 var sortedBy = 0;
 
@@ -25,7 +26,6 @@ var sortedBy = 0;
 // 8   = autosaveable        - Displays autosave checkbox
 // 16  = remove              - true if deleting session(s)
 // 32  = grouping            - true if changing grouping
-// 64  = tabprompt           - Displays tab prompt checkbox
 // 256 = allow name replace  - true if session cannot be overwritten (not currently used)
 
 // GetString values
@@ -99,9 +99,6 @@ gSessionManager.onLoad = function() {
 	_("checkbox_autosave").hidden = !(gParams.GetInt(1) & 8);
 	_("save_every").hidden = _("checkbox_autosave").hidden || !_("checkbox_autosave").checked;
 
-	// hide/show Tab Prompt checkbox
-	_("checkbox_tabprompt").hidden = !(gParams.GetInt(1) & 64);
-	
 	gBackupGroupName = this._string("backup_sessions");
 	gBackupNames[this._string("backup_session").trim().toLowerCase()] = true;
 	gBackupNames[this._string("autosave_session").trim().toLowerCase()] = true;
@@ -242,7 +239,7 @@ gSessionManager.onUnload = function() {
 	if (gSessionTree) persist(gSessionTree, "height", gSessionTree.treeBoxObject.height);
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
-	                  ((_("checkbox_tabprompt").checked)?64:0));
+	                  ((!gAllTabsChecked)?64:0));
 	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
 };
 
@@ -348,7 +345,17 @@ function onSessionTreeSelect()
 	if (!gTextBox && !ggMenuList)
 	{
 		gAcceptButton.disabled = gSessionTree.view.selection.count == 0;
-		_("tree_splitter").hidden = _("windows_tab_tree").hidden = gAcceptButton.disabled || (gParams.GetInt(1) & 16);
+		
+		var hideTabTree = gAcceptButton.disabled || (gParams.GetInt(1) & 16);
+		_("tree_splitter").hidden = _("tabTree").hidden = hideTabTree;
+		if (!hideTabTree) {
+			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
+			// Resize window first time tab selection is shown.
+			if (!gAlreadyResized) {
+				gAlreadyResized = true;
+				window.innerHeight += parseInt(window.getComputedStyle(_("tabTree"), null).height);
+			}
+		}
 	}
 	else
 	{
