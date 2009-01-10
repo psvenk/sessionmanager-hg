@@ -12,7 +12,8 @@
 	
 	<!-- Menu in toolbar -->
 	<toolbarpalette id="BrowserToolbarPalette"> <!-- Firefox (toolbar) -->
-		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" oncommand="gSessionManager.save(null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.tooltip;" contextmenu="">
+		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" 
+		               oncommand="gSessionManager.save(null, null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.tooltip;" contextmenu="">
 			<menupopup onpopupshowing="gSessionManager.init(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
 				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
