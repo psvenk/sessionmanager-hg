@@ -775,6 +775,7 @@ const SM_VERSION = "0.6.2.8";
 	save: function(aName, aFileName, aOneWindow)
 	{
 		if (this.isPrivateBrowserMode()) return;
+		aOneWindow = aOneWindow && (this.getBrowserWindows().length > 1);
 		
 		var aGroup = null;
 		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString(), autoSaveable : true };
