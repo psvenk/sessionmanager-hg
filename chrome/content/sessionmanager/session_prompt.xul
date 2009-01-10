@@ -16,6 +16,7 @@
 	persist="width"
 >
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
+	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionbrowser.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/session_prompt.js"/>
 	
 	<stringbundleset id="stringbundleset">
@@ -29,7 +30,7 @@
 			
 			<vbox id="session_label"/>
 			<vbox flex="1">
-				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" rows="5" flex="1" flags="dont-build-content"
+				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" rows="8" flex="1" flags="dont-build-content"
 				      onkeypress="onSessionTreeKeyPress(event)" onclick="onSessionTreeClick(event)" ondblclick="onSessionTreeClick(event)">
 					<treecols>
 						<treecol id="name" label="&session_name.label;" persist="width" flex="2" ignoreincolumnpicker="true"/>
@@ -45,7 +46,7 @@
 				<splitter id="tree_splitter" hidden="true" state="open" collapse="after">
 				    <grippy/>
 				</splitter>
-				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="windows_tab_tree" flex="1" hidden="true"
+				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="tabTree" rows="8" flex="1" hidden="true"
 				      seltype="single" hidecolumnpicker="true" onclick="onTabTreeClick(event);" onkeydown="onTabTreeKeyDown(event);"
 				      _window_label="&winTabTree.windowLabel;">
 					<treecols>
@@ -77,7 +78,6 @@
 			</vbox>
 			<vbox>
 				<hbox id="checkbox_container">
-					<checkbox id="checkbox_tabprompt" label="&prompt.tabprompt.label;" hidden="true"/>
 					<checkbox id="checkbox_ignore" label="&prompt.ignore.label;" hidden="true"/>
 					<checkbox id="checkbox_autosave" label="&prompt.autosave.label;" hidden="true"
 					          onclick="window.setTimeout(_save_every_update,0)"/>
