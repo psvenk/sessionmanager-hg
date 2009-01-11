@@ -100,7 +100,7 @@ function initTreeView(aFileName) {
 
 // User actions
 
-function restoreSession() {
+function storeSession() {
   // remove all unselected tabs from the state before restoring it
   var ix = gStateObject.windows.length - 1;
   for (var t = gTreeData.length - 1; t >= 0; t--) {
@@ -118,26 +118,8 @@ function restoreSession() {
   }
   var stateString = gStateObject.toSource();
   
-  var ss = Cc["@mozilla.org/browser/sessionstore;1"].getService(Ci.nsISessionStore);
-  var top = getBrowserWindow();
-  if (!top) return;
-  
-  // if there's only this page open, reuse the window for restoring the session
-  if (top.gBrowser.tabContainer.childNodes.length == 1) {
-    ss.setWindowState(top, stateString, true);
-    return;
-  }
-  
-  // restore the session into a new window and close the current tab
-  var newWindow = top.openDialog(top.location, "_blank", "chrome,dialog=no,all");
-  newWindow.addEventListener("load", function() {
-    newWindow.removeEventListener("load", arguments.callee, true);
-    ss.setWindowState(newWindow, stateString, true);
-    
-    var tabbrowser = top.gBrowser;
-    var tabIndex = tabbrowser.getBrowserIndexForDocument(document);
-    tabbrowser.removeTab(tabbrowser.tabContainer.childNodes[tabIndex]);
-  }, true);
+  var smHelper = Cc["@morac/sessionmanager-helper;1"].getService(Ci.nsISessionManangerHelperComponent);
+  smHelper.setSessionData(gStateObject.toSource());
 }
 
 function onTabTreeClick(aEvent) {
