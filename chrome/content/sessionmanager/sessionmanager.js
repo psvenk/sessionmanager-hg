@@ -337,7 +337,7 @@ const SM_VERSION = "0.6.2.8";
 		
 		// Stop timer and start another if needed
 		if (this._timer) { 
-			dump("Timer stopped because window closed\n");
+			//dump("Timer stopped because window closed\n");
 			this._timer.cancel();
 			this._timer = null;
 			if (numWindows != 0) allWindows[0].gSessionManager.checkTimer();
@@ -521,7 +521,7 @@ const SM_VERSION = "0.6.2.8";
 		// timer periodic call
 		case "timer-callback":
 			// save auto-save session if open, but don't close it
-			dump("Timer callback\n");
+			//dump("Timer callback\n");
 			this.closeSession(false, false, true);
 			break;
 		}
@@ -2730,10 +2730,10 @@ const SM_VERSION = "0.6.2.8";
 			this._timer.cancel();
 			this._timer = null;
 			this.setPref("_autosave_time", 0);
-			dump("Timer stopped\n");
+			//dump("Timer stopped\n");
 		}
 		else if (!this._timer && (this.mPref__autosave_time > 0) && (this.mPref__autosave_name != "")) {
-			dump("Check if timer already running and if not start it\n");
+			//dump("Check if timer already running and if not start it\n");
 			var allWindows = this.getBrowserWindows();
 			var timerRunning = false;
 			for (var i in allWindows) {
@@ -2745,7 +2745,7 @@ const SM_VERSION = "0.6.2.8";
 			if (!timerRunning) {
 				this._timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 				this._timer.init(gSessionManager, this.mPref__autosave_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
-				dump("Timer started for " + this.mPref__autosave_time + " minutes\n");
+				//dump("Timer started for " + this.mPref__autosave_time + " minutes\n");
 			}
 		}
 	},
