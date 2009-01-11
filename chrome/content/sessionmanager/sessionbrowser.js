@@ -45,19 +45,38 @@ var gAllTabsChecked = true;
 
 function initTreeView(aFileName) {
 
-  var state = gSessionManager.readSessionFile(gSessionManager.getSessionDir(aFileName));
-  if (!state)
-  {
-    gSessionManager.ioError();
-    return;
-  }
+  var state = null;
 
-  if (!gSessionManager.mSessionRegExp.test(state))
-  {
-    gSessionManager.sessionError();
-    return;
+  // if chose crashed session read from sessionstore.js instead of session file
+  if (aFileName == "*") {
+    try {
+      var file = gSessionManager.getProfileFile("sessionstore.js");
+	  if (file.exists()) {
+        state = gSessionManager.readFile(file);
+      }
+    }
+    catch(ex) {}
+    if (!state)
+    {
+      gSessionManager.ioError();
+      return;
+    }
   }
-  state = state.split("\n")[4];
+  else {
+    state = gSessionManager.readSessionFile(gSessionManager.getSessionDir(aFileName));
+    if (!state)
+    {
+      gSessionManager.ioError();
+      return;
+    }
+
+    if (!gSessionManager.mSessionRegExp.test(state))
+    {
+      gSessionManager.sessionError();
+      return;
+    }
+    state = state.split("\n")[4];
+  }
 
   var tabTree = document.getElementById("tabTree");
   var winLabel = tabTree.getAttribute("_window_label");
