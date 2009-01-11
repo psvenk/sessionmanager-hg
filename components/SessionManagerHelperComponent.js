@@ -6,11 +6,12 @@ const report = Components.utils.reportError;
 
 var SessionManagerHelperComponent = {
 	mCID: Components.ID("{5714d620-47ce-11db-b0de-0800200c9a66}"),
-	mContractID: "@zeniko/sessionmanager-helper;1",
+	mContractID: "@morac/sessionmanager-helper;1",
 	mClassName: "Session Manager Helper Component",
 	mCategory: "a-sessionmanagerhelpher",
 	mTimer: null,
 	mPrefService: null,
+	mSessionData: null,
 
 /* ........ nsIModule .............. */
 
@@ -116,6 +117,14 @@ var SessionManagerHelperComponent = {
 			os.removeObserver(this, aTopic);
 			break;
 		}
+	},
+
+/* ........ public methods ............... */
+
+	// this will save the passed in session data into the mSessionData variable
+	setSessionData: function(aState) 
+	{
+		this.mSessionData = aState;
 	},
 
 /* ........ private methods .............. */
@@ -235,7 +244,8 @@ var SessionManagerHelperComponent = {
 
 	QueryInterface: function(aIID)
 	{
-		if (!aIID.equals(Ci.nsISupports) && !aIID.equals(Ci.nsIModule) && !aIID.equals(Ci.nsIFactory) && !aIID.equals(Ci.nsIObserver))
+		if (!aIID.equals(Ci.nsISupports) && !aIID.equals(Ci.nsIModule) && !aIID.equals(Ci.nsIFactory) && 
+		    !aIID.equals(Ci.nsIObserver) && !aIID.equals(Ci.nsISessionManangerHelperComponent))
 		{
 			Components.returnCode = Cr.NS_ERROR_NO_INTERFACE;
 			return null;

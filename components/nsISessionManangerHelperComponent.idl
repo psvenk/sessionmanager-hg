@@ -1,0 +1,9 @@
+#include "nsISupports.idl"
+
+[scriptable, uuid(5714d620-47ce-11db-b0de-0800200c9a66)]
+interface nsISessionManangerHelperComponent : nsISupports
+{
+	readonly attribute AString mSessionData;
+	
+	void setSessionData(in AString aState);
+};
