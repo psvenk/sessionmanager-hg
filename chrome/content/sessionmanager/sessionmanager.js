@@ -873,9 +873,19 @@ const SM_VERSION = "0.6.2.8";
 		}
 	},
 
-	load: function(aFileName, aMode, aTabPrompt)
+	load: function(aFileName, aMode, aChoseTabs)
 	{
-		var state = this.readSessionFile(this.getSessionDir(aFileName));
+		var state, chosenState;
+		if (aChoseTabs) {
+			// Get windows and tabs chosen by user
+			var smHelper = Cc["@morac/sessionmanager-helper;1"].getService(Ci.nsISessionManangerHelperComponent);
+			chosenState = smHelper.mSessionData;
+			smHelper.setSessionData("");
+			
+			// Get session header data from disk
+			state = this.readSessionFile(this.getSessionDir(aFileName), true);
+		}
+		else state = this.readSessionFile(this.getSessionDir(aFileName));
 		if (!state)
 		{
 			this.ioError();
@@ -886,7 +896,7 @@ const SM_VERSION = "0.6.2.8";
 		{
 			var name = RegExp.$1;
 			var autosave = RegExp.$3;
-			state = state.split("\n")[4];
+			state = (aChoseTabs && chosenState) ? chosenState : state.split("\n")[4];
 			
 			// Don't save current session on startup since there isn't any.  Don't save if opening
 			// new window or appending to current session since nothing is lost in that case.
@@ -987,7 +997,7 @@ const SM_VERSION = "0.6.2.8";
 		
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode, aTabPrompt);
+			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode);
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
@@ -1560,7 +1570,7 @@ const SM_VERSION = "0.6.2.8";
 		aValues.group = params.GetString(7);
 		aValues.ignore = (params.GetInt(1) & 4)?1:0;
 		aValues.autoSave = (params.GetInt(1) & 8)?1:0;
-		aValues.promptForTabs = (params.GetInt(1) & 64)?1:0;
+		aValues.choseTabs = (params.GetInt(1) & 64)?1:0;
 		aValues.autoSaveTime = params.GetInt(2) | null;
 		return params.GetInt(0);
 	},
@@ -1629,17 +1639,6 @@ const SM_VERSION = "0.6.2.8";
 		}
 	},
 	
-	promptForTabs: function(aState)
-	{
-		dump("Prompting for tabs\n");
-
-		var pageData = {
-			url: "about:sessionrestore",
-			formdata: { "#sessionData": aState }
-		};
-		return { windows: [{ tabs: [{ entries: [pageData] }] }] }.toSource();
-	},
-
 /* ........ File Handling .............. */
 
 	sanitize: function()
@@ -2624,11 +2623,11 @@ const SM_VERSION = "0.6.2.8";
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
-			var tabprompt = false;
-			tabprompt = this.getPref("_prompt_for_tabs");
+			var choseTabs = false;
+			choseTabs = this.getPref("_chose_tabs");
 			this.delPref("_recovering");
-			this.delPref("_prompt_for_tabs"); // delete prompt for tab preference if set
-			this.load(recovering, "startup", tabprompt);
+			this.delPref("_chose_tabs"); // delete chose tabs preference if set
+			this.load(recovering, "startup", choseTabs);
 		}
 		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
@@ -2638,7 +2637,7 @@ const SM_VERSION = "0.6.2.8";
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
 			if (session && this.getSessionDir(session).exists())
 			{
-				this.load(session, "startup", values.promptForTabs);
+				this.load(session, "startup", values.choseTabs);
 			}
 			// if user set to resume previous session, don't clear this so that way user can choose whether to backup
 			// current session or not and still have it restore.
@@ -2846,7 +2845,7 @@ const SM_VERSION = "0.6.2.8";
 				(aGroup? ("\tgroup=" + aGroup) : "") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aStripClosedTabs, aEntireSession, aOneWindow, aTabPrompt)
+	restoreSession: function(aWindow, aState, aReplaceTabs, aStripClosedTabs, aEntireSession, aOneWindow)
 	{
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
@@ -2857,7 +2856,7 @@ const SM_VERSION = "0.6.2.8";
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
 			aWindow.__SM_restore = function() {
 				this.removeEventListener("load", this.__SM_restore, true);
-				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aStripClosedTabs, null, null, aTabPrompt);
+				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aStripClosedTabs);
 				this.gSessionManager.__window_session_name = unescape(this.gSessionManager.mSessionStore().getWindowValue(aWindow,"_sm_window_session_name"));
 				//dump("restore win " + this.gSessionManager.__window_session_name + "\n");
 				delete this.__SM_restore;
@@ -2868,9 +2867,6 @@ const SM_VERSION = "0.6.2.8";
 
 		//Try and fix bug35058 even in newer versions of Firefox, because session might have been saved under FF 2.0
 		aState = this.modifySessionData(aState, aStripClosedTabs, false, true, aEntireSession);  
-
-		// prompt for tabs
-		if (aTabPrompt) aState = this.promptForTabs(aState);
 
 		if (aEntireSession)
 		{

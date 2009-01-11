@@ -12,6 +12,9 @@ gSessionManager.restorePrompt = function() {
 	// Don't recover by default
 	this.delPref("_recovering");
 	
+	// Default to user not selecting tabs
+	this.delPref("_chose_tabs");
+	
 	// default count variable
 	var countString = "";
 	
@@ -61,14 +64,14 @@ gSessionManager.restorePrompt = function() {
 	}
 	
 	// If user chose to prompt for tabs and selected a filename
-	if (fileName && values.promptForTabs) {
+	if (fileName && values.choseTabs) {
 		// if recovering current session, recover it from our backup file
 		if (fileName == "*") {
 			fileName = backupFile.leafName;
 			params.SetInt(0, 1); // don't recover the crashed session
 			this.setPref("_recovering", fileName);
 		}
-		this.setPref("_prompt_for_tabs", true);
+		this.setPref("_chose_tabs", true);
 	}
 		
 	var autosave_name = this.getPref("_autosave_name", "");
@@ -109,7 +112,7 @@ gSessionManager.restorePrompt = function() {
 			{
 				// if not selecting tabs, let Firefox handle the recovery, else use our backup
 				// we could delete the autosave preferences here, but it doesn't matter (actually it saves us from saving prefs.js file again)
-				if (!values.promptForTabs) {
+				if (!values.choseTabs) {
 					this.delPref("_recovering");
 					params.SetInt(0, 0);
 				}
