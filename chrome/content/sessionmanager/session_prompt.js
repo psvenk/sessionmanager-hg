@@ -238,6 +238,8 @@ gSessionManager.onUnload = function() {
 	}
 	if (gSessionTree) persist(gSessionTree, "height", gSessionTree.treeBoxObject.height);
 	
+	if (!gAllTabsChecked) storeSession();
+	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
 	                  ((!gAllTabsChecked)?64:0));
 	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
