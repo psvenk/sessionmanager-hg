@@ -914,8 +914,8 @@ const SM_VERSION = "0.6.2.8";
 			}
 			
 			// If this is an autosave session, keep track of it if there is not already an active session and not in private
-			// browsing mode
-			if (/^session\/?(\d*)$/.test(autosave) && this.mPref__autosave_name=="" && !this.isPrivateBrowserMode()) 
+			// browsing mode and did not chose tabs
+			if (!aChoseTabs && /^session\/?(\d*)$/.test(autosave) && this.mPref__autosave_name=="" && !this.isPrivateBrowserMode()) 
 			{
 				var time = parseInt(RegExp.$1);
 				if (!isNaN(time)) this.setPref("_autosave_time", time);
