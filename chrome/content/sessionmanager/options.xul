@@ -235,10 +235,12 @@
 			          id="encrypt_sessions" oncommand="this.checked = checkEncryption(this.checked);"/>
 			<separator style="height: 0.5em;" orient="vertical"/>
 			<description style="width: 26em; color:red;" class="indent">&encrypt.desc;</description>
-			<checkbox id="encrypted_only" disabled="true" label="&encrypted_only.label;" accesskey="&encrypted_only.accesskey;" 
-			          preference="extensions.sessionmanager.encrypted_only" oncommand="this.checked = checkEncryptOnly(this.checked)"/>
-			<separator style="height: 0.5em;" orient="vertical"/>
-			<description style="width: 26em; color:red;" class="indent">&encrypt2.desc;</description>
+			<vbox id="encrypted_only">
+				<checkbox label="&encrypted_only.label;" accesskey="&encrypted_only.accesskey;" 
+				          preference="extensions.sessionmanager.encrypted_only" oncommand="this.checked = checkEncryptOnly(this.checked)"/>
+				<separator style="height: 0.5em;" orient="vertical"/>
+				<description style="width: 26em; color:red;" class="indent">&encrypt2.desc;</description>
+			</vbox>
 		</groupbox>
 		<checkbox label="&disable_cache_fixer.label;" accesskey="&disable_cache_fixer.accesskey;" 
 		          preference="extensions.sessionmanager.disable_cache_fixer"/>
