@@ -45,6 +45,11 @@ var gAllTabsChecked = true;
 
 function initTreeView(aFileName) {
 
+  // Initialize tree data to default state
+  gNoTabsChecked = false;
+  gAllTabsChecked = true;
+  treeView.initialize();
+  
   var state = null;
 
   // if chose crashed session read from sessionstore.js instead of session file
@@ -81,10 +86,12 @@ function initTreeView(aFileName) {
   var tabTree = document.getElementById("tabTree");
   var winLabel = tabTree.getAttribute("_window_label");
 
+  // Decrypt first, then evaluate
+  state = gSessionManager.decrypt(state);
+  if (!state) return;
   gStateObject = gSessionManager._safeEval(state);
   if (!gStateObject) return;
   
-  gTreeData = [];
   gStateObject.windows.forEach(function(aWinData, aIx) {
     var winState = {
       label: winLabel.replace("%S", (aIx + 1)),
@@ -114,7 +121,7 @@ function initTreeView(aFileName) {
   gAllTabsChecked = true;  
   
   tabTree.view = treeView;
-  tabTree.view.selection.select(0);
+  //tabTree.view.selection.select(0);
 }
 
 // User actions
@@ -318,6 +325,14 @@ var treeView = {
     if (column.id == "title")
       return gTreeData[idx].src || null;
     return null;
+  },
+  
+  initialize: function() {
+    var count;
+	if (gTreeData) count = this.rowCount;
+    gTreeData = [];
+    if (this.treeBox && count)
+	  this.treeBox.rowCountChanged(0, -count);
   },
 
   getProgressMode : function(idx, column) { },
