@@ -1,5 +1,3 @@
-var alreadyAdjusted = false;
-
 gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
 	this._onLoad(true);
@@ -46,16 +44,15 @@ gSessionManager.onLoad = function() {
 		if (browser.gSingleWindowMode) _("overwrite").label = gSessionManager._string("overwrite_tabs");
 	}
 
-	// Disable/enable the encrypt only checkbox based on state of encryption checkbox
-	_("encrypted_only").hidden = !_("encrypt_sessions").checked;
-		
 	// Disable default help window for Firefox 2.0 and below
 	if (this.mAppVersion < "1.9") _("sessionmanagerOptions").openHelp = function () {}
 
 	// Disable Apply Button by default
 	_("sessionmanagerOptions").getButton("extra1").disabled = true;
 
-	adjustContentHeight();
+	// Delay for Firefox 2.0.0.20 because it doesn't set window.innerHeight until after we run.
+	if (this.mAppVersion < "1.9") setTimeout(adjustContentHeight,0);
+	else adjustContentHeight();
 };
 
 gSessionManager.onUnload = function() {
@@ -143,14 +140,10 @@ function checkEncryption(aState) {
 		return !aState;
 	}
 	_("encrypted_only").hidden = !aState;
-	if (aState) {
-		if (!alreadyAdjusted) adjustContentHeight();
-		alreadyAdjusted = true;
-		if (gSessionManager.getPref("browser.preferences.animateFadeIn", false, true)) {
-			_("sessionmanagerOptions").showPane(_("sessionstorePrefPane"));
-			_("sessionmanagerOptions").showPane(_("advancedPrefPane"));
-		}
-	}
+	
+	// When animating preferences the window can get cut off so just refresh the window size here
+	if (aState && gSessionManager.getPref("browser.preferences.animateFadeIn", false, true))
+		window.sizeToContent();
 	
 	return aState;
 }
@@ -256,6 +249,7 @@ function adjustContentHeight() {
 	// To fix this, we need to explicitly set the height style of any element with a localized string that is more 
 	// than one line (the descriptions).  This will correct the heights when the panes are selected.
 	var largestNewPaneHeight = 0;
+	var largestCurrentPaneHeight = 0;
 	var biggestPane = null;
 	for (var i=0; i < _("sessionmanagerOptions").preferencePanes.length; i++) {
 		var pane = _("sessionmanagerOptions").preferencePanes[i];
@@ -273,20 +267,36 @@ function adjustContentHeight() {
 			largestNewPaneHeight = adjustHeight;
 			biggestPane = pane;
 		}
+		if (pane.contentHeight > largestCurrentPaneHeight) 
+			largestCurrentPaneHeight = pane.contentHeight;
 	}
 	// The exception to this is if the largest pane is already selected when the preference window is opened.  In
 	// this case the window inner height must be correct as well as the context-box height (if animation is disabled).
 	var currentPane = _("sessionmanagerOptions").currentPane;
 	var animate = gSessionManager.getPref("browser.preferences.animateFadeIn", false, true);
-	if (currentPane == biggestPane) {
-		var change = largestNewPaneHeight - parseInt(window.getComputedStyle(currentPane._content, null).height);
-		// content box isn't sized correctly if animation is disabled so size it
-		if (!animate) currentPane._content.height = largestNewPaneHeight;
-		window.innerHeight += change;
+
+	// When not animating, the largest pane's content height is not correct when it is opened first so update it.
+	// Also the window needs to be resized to take into account the changes to the description height.
+	if (!animate) {
+		biggestPane._content.height = largestNewPaneHeight;
+		window.sizeToContent();
 	}
-	// animate doesn't size windows some panes correctly so fix it
-	if (animate) {
-		if (currentPane == _("undoclosePrefPane")) window.innerHeight -= 52;
-		else if (currentPane == _("sessionstorePrefPane")) window.innerHeight -= 130;
+	// When animating the window needs to be resized to take into account the changes to the description height and
+	// then shrunk since the opening pane is sized to the largest pane height which is wrong.
+	else {
+		var FF2 = gSessionManager.mAppVersion < "1.9";
+		// Hide/show the encrypt only check box here when opening the largest pane to prevent window looking to large.
+		if (currentPane == biggestPane) {
+			FF2 |= _("encrypted_only").hidden = !_("encrypt_sessions").checked;
+		}
+	
+		window.sizeToContent();
+		// FF 2 needs to use largestCurrentPaneHeight - (largestNewPaneHeight - largestCurrentPaneHeight) size correctly
+		// as does FF 3 and above when the encrypt only checkbox was hidden above
+		var adjuster = (FF2) ? (2 * largestCurrentPaneHeight - largestNewPaneHeight) : largestCurrentPaneHeight;
+		window.innerHeight -= adjuster - currentPane.contentHeight;
 	}
+	
+	// Hide/show the encrypt only checkbox based on state of encryption checkbox
+	_("encrypted_only").hidden = !_("encrypt_sessions").checked;
 }
