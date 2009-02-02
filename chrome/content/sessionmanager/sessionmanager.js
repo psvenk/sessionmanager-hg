@@ -160,8 +160,8 @@ const SM_VERSION = "0.6.3";
 		this.mPref_startup = this.getPref("startup",0);
 		this.mPref_submenus = this.getPref("submenus", false);
 		this.mPref__running = this.getPref("_running", false);
-		this.mPref__autosave_name = this.getPref("_autosave_name", "");
-		this.mPref__autosave_time = this.getPref("_autosave_time", 0);
+		// split out name and group
+		this.getAutoSaveValues(this.getPref("_autosave_values", ""));
 		this.mPrefBranch.addObserver("", this, false);
 		this.mPrefBranch2.addObserver("page", this, false);
 		
@@ -353,7 +353,7 @@ const SM_VERSION = "0.6.3";
 			if (!this.mPref__stopping && !this.mPref_shutdown_on_last_window_close) {
 				var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : this.__window_session_name;
 				this.mLastState = (name) ? 
-			    	               this.getSessionState(name, null, this.mPref_save_closed_tabs < 2, true, null, true) :
+			    	               this.getSessionState(name, null, this.mPref_save_closed_tabs < 2, true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
 			        	           this.getSessionState(null, true, null, null, null, true); 
 				this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
 				this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
@@ -475,7 +475,10 @@ const SM_VERSION = "0.6.3";
 			case "resume_session":
 				this.synchStartup(aData);
 				break;
-			case "_autosave_name":
+			case "_autosave_values":
+				// split out name and group
+				this.getAutoSaveValues(this.mPref__autosave_values);
+				this.mPref__autosave_values = null;
 				this.checkTimer();
 				gBrowser.updateTitlebar();
 				break;
@@ -814,13 +817,12 @@ const SM_VERSION = "0.6.3";
 //		{
 			if (values.autoSave)
 			{
-				if (values.autoSaveTime) this.setPref("_autosave_time", values.autoSaveTime);
-				this.setPref("_autosave_name",aName);
+				this.setPref("_autosave_values", this.mergeAutoSaveValues(aName, aGroup, values.autoSaveTime));
 			}
 			else if (this.mPref__autosave_name == aName)
 			{
 				// If in auto-save session and user saves on top of it as manual turn off autosave
-				this.setPref("_autosave_name","");
+				this.setPref("_autosave_values","");
 			}
 //		}
 //		else 
@@ -839,12 +841,14 @@ const SM_VERSION = "0.6.3";
 	closeSession: function(aOneWindow, aForceSave, keepOpen)
 	{
 		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
+		var group = (aOneWindow) ? null : this.mPref__autosave_group;
+		var time = (aOneWindow) ? 0 : this.mPref__autosave_time;
 		if (name != "")
 		{
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
 			{
-				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true, null, null, this.mPref__autosave_time));
+				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true, group, null, time));
 			}
 			catch (ex)
 			{
@@ -852,7 +856,7 @@ const SM_VERSION = "0.6.3";
 			}
 		
 			if (!keepOpen) {
-				if (!aOneWindow) this.setPref("_autosave_name","");
+				if (!aOneWindow) this.setPref("_autosave_values","");
 				else this.__window_session_name = null;
 			}
 			return true;
@@ -865,7 +869,7 @@ const SM_VERSION = "0.6.3";
 		var dontPrompt = { value: false };
 		if (this.getPref("no_abandon_prompt") || this.mPromptService.confirmEx(null, this.mTitle, this._string("abandom_prompt"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
 		{
-			this.setPref("_autosave_name","");
+			this.setPref("_autosave_values","");
 			if (dontPrompt.value)
 			{
 				this.setPref("no_abandon_prompt", true);
@@ -896,6 +900,7 @@ const SM_VERSION = "0.6.3";
 		{
 			var name = RegExp.$1;
 			var autosave = RegExp.$3;
+			var group = RegExp.$7;
 			state = (aChoseTabs && chosenState) ? chosenState : state.split("\n")[4];
 			
 			// Don't save current session on startup since there isn't any.  Don't save if opening
@@ -915,11 +920,10 @@ const SM_VERSION = "0.6.3";
 			
 			// If this is an autosave session, keep track of it if there is not already an active session and not in private
 			// browsing mode and did not chose tabs
-			if (!aChoseTabs && /^session\/?(\d*)$/.test(autosave) && this.mPref__autosave_name=="" && !this.isPrivateBrowserMode()) 
+			if (!aChoseTabs && this.mPref__autosave_name=="" && /^session\/?(\d*)$/.test(autosave) && !this.isPrivateBrowserMode()) 
 			{
 				var time = parseInt(RegExp.$1);
-				if (!isNaN(time)) this.setPref("_autosave_time", time);
-				this.setPref("_autosave_name", name);
+				this.setPref("_autosave_values", this.mergeAutoSaveValues(name, group, time));
 			}
 		}
 		else {
@@ -1008,7 +1012,7 @@ const SM_VERSION = "0.6.3";
 				}
 			}
 			// failed to load so clear autosession in case user tried to load one
-			else gSessionManager.setPref("_autosave_name", "");
+			else gSessionManager.setPref("_autosave_values", "");
 		}, 0);
 	},
 
@@ -1067,7 +1071,7 @@ const SM_VERSION = "0.6.3";
 			// Renamed active session
 			if (this.mPref__autosave_name == oldname)
 			{
-				this.setPref("_autosave_name", values.text);
+				this.setPref("_autosave_values", this.mergeAutoSaveValues(values.text, this.mPref__autosave_group, this.mPref__autosave_time));
 			}
 			// Renamed window session
 			this.getBrowserWindows().forEach(function(aWindow) {
@@ -1097,6 +1101,7 @@ const SM_VERSION = "0.6.3";
 		
 		if (aSession)
 		{
+			var auto_save_file_name = this.makeFileName(this.mPref__autosave_name);
 			values.name.split("\n").forEach(function(aFileName) {
 				try
 				{
@@ -1104,11 +1109,18 @@ const SM_VERSION = "0.6.3";
 					var state = this.readSessionFile(file);
 					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=.+)?$/m, function($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group) : ""); });
 					this.writeFile(file, state);
+
+					// Grouped active session
+					if (auto_save_file_name == aFileName)
+					{
+						this.setPref("_autosave_values", this.mergeAutoSaveValues(this.mPref__autosave_name, values.group, this.mPref__autosave_time));
+					}
 				}
 				catch (ex)
 				{
 					this.ioError(ex);
 				}
+				
 			}, this);
 		}
 	},
@@ -1444,7 +1456,11 @@ const SM_VERSION = "0.6.3";
 			
 			var sessions = this.getSessions();
 			sessions.forEach(function(aSession) {
-				if (aSession.group == group) this.delFile(this.getSessionDir(aSession.fileName));
+				if (aSession.group == group) {
+					this.delFile(this.getSessionDir(aSession.fileName));
+					// if loaded autosave session in deleted group, clear preference
+					if (aSession.name == this.mPref__autosave_name) this.setPref("_autosave_values","");
+				}
 			}, this);
 		}
 	},
@@ -1513,7 +1529,7 @@ const SM_VERSION = "0.6.3";
 			if (this.mAppVersion < "1.9") this.hidePopup();
 			// if currently loaded autosave session clear autosave name
 			if (document.popupNode.getAttribute("disabled") == "true") {
-				this.setPref("_autosave_name","");
+				this.setPref("_autosave_values","");
 			}
 			this.remove(session);
 		}
@@ -1923,8 +1939,7 @@ const SM_VERSION = "0.6.3";
 		}
 		
 		this.delPref("_running");
-		this.delPref("_autosave_time");
-		this.delPref("_autosave_name");
+		this.delPref("_autosave_values");
 		this.delPref("_encrypt_file");
 		this.delPref("_recovering");
 		this.mPref__running = false;
@@ -2498,7 +2513,7 @@ const SM_VERSION = "0.6.3";
 	// Certain preferences should be force saved in case of a crash
 	checkForForceSave: function(aName, aValue, aUseRootBranch)
 	{
-		var names = [ "_running", "_autosave_name", "_autosave_time" ];
+		var names = [ "_running", "_autosave_values" ];
 		
 		for (var i=0; i<names.length; i++) {
 			if (aName == names[i]) {
@@ -2565,6 +2580,22 @@ const SM_VERSION = "0.6.3";
 
 /* ........ Miscellaneous Enhancements .............. */
 
+	// Read Autosave values from preference and store into global variables
+	getAutoSaveValues: function(aValues)
+	{
+		var values = aValues.split("\n");
+		this.mPref__autosave_name = values[0];
+		this.mPref__autosave_group = values[1];
+		this.mPref__autosave_time = isNaN(values[2]) ? 0 : values[2] ;
+	},
+
+	// Merge autosave variables into a a string
+	mergeAutoSaveValues: function(name, group, time)
+	{
+		var values = [ name, group, time ];
+		return values.join("\n");
+	},
+	
 	// Bug 374288 causes all elements that don't have a specified tooltip or tooltiptext to inherit their
 	// ancestors tooltip/tooltiptext.  To work around this set a blank tooltiptext for all descendents of aNode.
 	//
@@ -2729,7 +2760,6 @@ const SM_VERSION = "0.6.3";
 		if ((this._timer) && ((this.mPref__autosave_time <= 0) || (this.mPref__autosave_name == ""))) {
 			this._timer.cancel();
 			this._timer = null;
-			this.setPref("_autosave_time", 0);
 			//dump("Timer stopped\n");
 		}
 		else if (!this._timer && (this.mPref__autosave_time > 0) && (this.mPref__autosave_name != "")) {

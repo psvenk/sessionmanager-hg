@@ -18,7 +18,7 @@ gSessionManager.restorePrompt = function() {
 	// default count variable
 	var countString = "";
 	
-	var session = null, backupFile = null, state = null;
+	var session = null, backupFile = null, state = null, count = null;
 			
 	// Get count from crashed session and prepare to save it.  Don't save it yet or it will show up in selection list.
 	var file = this.getProfileFile("sessionstore.js");
@@ -74,7 +74,8 @@ gSessionManager.restorePrompt = function() {
 		this.setPref("_chose_tabs", true);
 	}
 		
-	var autosave_name = this.getPref("_autosave_name", "");
+	var autosave_values = this.getPref("_autosave_values", "").split("\n");
+	var autosave_name = autosave_values[0];
 	if (autosave_name)
 	{
 		// if not recovering last session (does not including recovering last session, but selecting tabs)
@@ -101,9 +102,11 @@ gSessionManager.restorePrompt = function() {
 				}
 				
 				if (temp_state) {
-					var autosave_time = this.getPref("_autosave_time", 0);
+					var autosave_time = isNaN(autosave_values[2]) ? 0 : autosave_values[2];
 					var autosave_state = this.nameState(temp_state, autosave_name + 
-					                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=session/" + autosave_time);
+					                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=session/" + autosave_time +
+										 "\tcount=" + count.windows + "/" + count.tabs + 
+										 (autosave_values[1] ? ("\tgroup=" + autosave_values[1]) : ""));
 					this.writeFile(this.getSessionDir(this.makeFileName(autosave_name)), autosave_state);
 				}
 			}
@@ -123,8 +126,7 @@ gSessionManager.restorePrompt = function() {
 	
 	// delete autosave preferences and save preference file
 	if (deletePrefs) {
-		this.delPref("_autosave_name");
-		this.delPref("_autosave_time");
+		this.delPref("_autosave_values");
 		// do this via a preference so we don't save twice in case user loads a different auto save sessions
 		this.setPref("_save_prefs", true);  
 	}
