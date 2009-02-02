@@ -89,7 +89,7 @@ gSessionManager.onLoad = function() {
 	
 	// Do not allow overwriting of open window or browser sessions
 	gBannedNames = this.getWindowSessions();
-	var currentSession = this.getPref("_autosave_name");
+	var currentSession = this.getPref("_autosave_values", "").split("\n")[0];
 	if (currentSession) gBannedNames[currentSession.trim().toLowerCase()] = true;
 	
 	// hide/show the "Don't show [...] again" checkbox
