@@ -149,8 +149,7 @@ var SessionManagerHelperComponent = {
 		if (sm_running && !resuming)
 		{
 			dump("SessionManager: Removing active session\n");
-			prefroot.deleteBranch("extensions.sessionmanager._autosave_name");
-			prefroot.deleteBranch("extensions.sessionmanager._autosave_time");
+			prefroot.deleteBranch("extensions.sessionmanager._autosave_values");
 			prefroot.deleteBranch("extensions.sessionmanager._running");
 			prefroot.deleteBranch("extensions.sessionmanager._recovering");
 			prefroot.deleteBranch("extensions.sessionmanager._encrypt_file");
