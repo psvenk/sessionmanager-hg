@@ -348,7 +348,7 @@ function onSessionTreeSelect()
 	{
 		gAcceptButton.disabled = gSessionTree.view.selection.count == 0;
 		
-		var hideTabTree = gAcceptButton.disabled || (gParams.GetInt(1) & 16);
+		var hideTabTree = gAcceptButton.disabled || (gParams.GetInt(1) & 2);
 		_("tree_splitter").hidden = _("tabTree").hidden = hideTabTree;
 		if (!hideTabTree) {
 			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
