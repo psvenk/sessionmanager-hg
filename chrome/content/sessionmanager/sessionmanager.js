@@ -606,7 +606,16 @@ const SM_VERSION = "0.6.3";
 	{
 		if (aEvent.button == 1)
 		{
-			eval("var event = { shiftKey: true }; " + aButton.getAttribute("oncommand"));
+			// simulate shift left clicking toolbar button when middle click is used
+			if (this.mAppVersion < "1.9") {
+				// The dispatch event method won't work for "command" in Firefox 2.0, so we need to use eval()
+				eval("var event = { shiftKey: true }; " + aButton.getAttribute("oncommand"));
+			}
+			else {
+				var event = document.createEvent("XULCommandEvents");
+				event.initCommandEvent("command", false, true, window, 0, false, false, true, false, null);
+				aButton.dispatchEvent(event);
+			}
 		}
 		else if (aEvent.button == 2 && aButton.getAttribute("disabled") != "true")
 		{
