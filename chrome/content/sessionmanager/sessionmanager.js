@@ -27,6 +27,9 @@ const SM_VERSION = "0.6.3";
 	mCleanBrowser: null,
 	mClosedWindowName: null,
 	
+	// Used to store original closeWindow function
+	mOrigCloseWindow: null,
+	
 	mSessionCache: { timestamp: 0 },
 	mClosedWindowsCache: { timestamp: 0, data: null },
 	
@@ -217,9 +220,9 @@ const SM_VERSION = "0.6.3";
 		}
 		this.mFullyLoaded = true;
 		
-		// Add sessionname to title when browser updates titlebar. Need to hook browser since 
+		// Watch for changes to the titlebar so we can add our sessionname after it since 
 		// DOMTitleChanged doesn't fire every time the title changes in the titlebar.
-		eval("gBrowser.updateTitlebar = " + gBrowser.updateTitlebar.toString().replace("this.ownerDocument.title = newTitle;", "$&gSessionManager.updateTitlebar();"));
+		gBrowser.ownerDocument.watch("title", gSessionManager.updateTitlebar);
 		gBrowser.updateTitlebar();
 
 		// Workaround for bug 366986
@@ -227,12 +230,17 @@ const SM_VERSION = "0.6.3";
 		// so make the image tag persistant so it can be read later from the xultab variable.
 		this.mSessionStore().persistTabAttribute("image");
 		
-		// Workaround for bug 360408 in Firefox 2.0, remove when fixed and uncomment call to onWindowClose in onUnload
-		if (this.mAppVersion < "1.9") eval("closeWindow = " + closeWindow.toString().replace("if (aClose)", "gSessionManager.onWindowClose(); $&"));
+		// Workaround for bug 360408 in Firefox 2.0.  Wrap closeWindow function so our function gets called when window closes.
+		if (this.mAppVersion < "1.9") {
+			this.mOrigCloseWindow = closeWindow;
+			closeWindow = function() { 
+				if (gSessionManager.mOrigCloseWindow.apply(this, arguments)) gSessionManager.onWindowClose();
+			}
+		}
 		
 		// SeaMonkey doesn't have an undoCloseTab function so create one
 		if (!undoCloseTab) {
-			eval("undoCloseTab = gSessionManager.undoCloseTabSM");
+			undoCloseTab = function () { gSessionManager.undoCloseTabSM; }
 		}
 		
 		// add call to gSessionManager_Sanitizer (code take from Tab Mix Plus)
@@ -327,6 +335,15 @@ const SM_VERSION = "0.6.3";
 			gBrowser.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 		}
 		gBrowser.mStrip.removeEventListener("click", this.onTabBarClick, false);
+		
+		// restore original close window functionality
+		if (this.mOrigCloseWindow) {
+			closeWindow = this.mOrigCloseWindow;
+			this.mOrigCloseWindow = null;
+		}
+		
+		// stop watching for titlebar changes
+		gBrowser.ownerDocument.unwatch("title");
 		
 		// Last window closing will leaks briefly since "quit-application" observer is not removed from it 
 		// until after shutdown is run, but since browser is closing anyway, who cares?
@@ -615,16 +632,24 @@ const SM_VERSION = "0.6.3";
 	},
 	
 	// Put current session name in browser titlebar
-	updateTitlebar: function()
+	// This is a watch function which is called any time the titlebar text changes
+	// See https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Object/watch
+	updateTitlebar: function(id, oldVal, newVal)
 	{
-		// Don't kill browser if something goes wrong
-		try {
-			var sessionTitleName = (this.mPref__autosave_name) ? (" - (" + this._string("current_session2") + " " + this.mPref__autosave_name + ")") : "";
-			var windowTitleName = (this.__window_session_name) ? (" - (" + this._string("current_session2") + " " + this.__window_session_name + ")") : "";
+		if (id == "title") {
+			// Don't kill browser if something goes wrong
+			try {
+				var sessionTitleName = (gSessionManager.mPref__autosave_name) ? (" - (" + gSessionManager._string("current_session2") + " " + gSessionManager.mPref__autosave_name + ")") : "";
+				var windowTitleName = (gSessionManager.__window_session_name) ? (" - (" + gSessionManager._string("current_session2") + " " + gSessionManager.__window_session_name + ")") : "";
 		
-			// Add window and browser session titles
-			gBrowser.ownerDocument.title = gBrowser.ownerDocument.title.replace(/(- \(([^:|.]*): ([^:|.]*)\)+( - \(([^:|.]*): ([^:|.]*)\))*)?$/, windowTitleName + sessionTitleName);
-		} catch (ex) { dump(ex); }
+				// Add window and browser session titles
+				newVal = newVal + windowTitleName + sessionTitleName;
+			} 
+			catch (ex) { 
+				dump(ex + "\n"); 
+			}
+		}
+		return newVal;
 	},
 	
 	// Undo close tab if middle click on tab bar if enabled by user - only do this if Tab Clicking Options
