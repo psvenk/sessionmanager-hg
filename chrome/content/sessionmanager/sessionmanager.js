@@ -1558,14 +1558,18 @@ const SM_VERSION = "0.6.3";
 	},
 
 	session_remove: function() {
+		var dontPrompt = { value: false };
 		var session = document.popupNode.getAttribute("filename");
-		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm"))) {
+		if (this.getPref("no_delete_prompt") || this.mPromptService.confirmEx(window, this.mTitle, this._string("delete_confirm"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0) {
 			if (this.mAppVersion < "1.9") this.hidePopup();
 			// if currently loaded autosave session clear autosave name
 			if (document.popupNode.getAttribute("disabled") == "true") {
 				this.setPref("_autosave_values","");
 			}
 			this.remove(session);
+			if (dontPrompt.value) {
+				this.setPref("no_delete_prompt", true);
+			}
 		}
 	},
 	
