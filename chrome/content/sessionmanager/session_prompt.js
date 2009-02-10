@@ -26,7 +26,8 @@ var sortedBy = 0;
 // 8   = autosaveable        - Displays autosave checkbox
 // 16  = remove              - true if deleting session(s)
 // 32  = grouping            - true if changing grouping
-// 256 = allow name replace  - true if session cannot be overwritten (not currently used)
+// 256 = allow name replace  - true if double clicking a session name on save will replace existing session, but use default session name.
+//                                  (This is currently only settable via a userChrome.js script).
 
 // GetString values
 // 1 = Session Label         - Label at top of window
@@ -404,8 +405,8 @@ function onTextboxInput(aNewValue)
 		gAcceptButton.style.fontWeight = (newWeight)?"bold":"";
 	}
 
-	// Highlight matching item when accept label changes to replace and copy in group value (only when saving)
-	if (newWeight && gParams.GetString(5)) {
+	// Highlight matching item when accept label changes to replace and copy in group value (only when saving and not replacing name)
+	if (newWeight && gParams.GetString(5) && !(gParams.GetInt(1) & 256)) {
 		gSessionTree.view.selection.select(gExistingName);
 		if (ggMenuList) ggMenuList.value = gSessionTreeData[gExistingName].group;
 	}
