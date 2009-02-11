@@ -10,8 +10,8 @@
 <!ENTITY backup_session.label2 "perguntar se a sessão atual deve ser salva">
 <!ENTITY crashrecovery.label "Ativar Crash Recovery (Recuperação de Falhas)">
 <!ENTITY crashrecovery.accesskey "i">
-<!ENTITY autosave_session.label "Automatically save replaced session">
-<!ENTITY autosave_session.accesskey "a">
+<!ENTITY autosave_session.label "Salvar automaticamente sessão substituída">
+<!ENTITY autosave_session.accesskey "t">
 <!ENTITY restoring.caption "Restaurar Sessão">
 <!ENTITY sessionList.caption "Lista de Sessões">
 <!ENTITY orderList.label "Ordenar a lista de sessões">
@@ -19,7 +19,7 @@
 <!ENTITY orderList.label1 "alfabeticamente">
 <!ENTITY orderList.label2 "da mais antiga para a mais nova">
 <!ENTITY orderList.label_2 "da mais nova para a mais antiga">
-<!ENTITY max_backup.label "Número de sessões mais antigas (falhadas) a guardar:">
+<!ENTITY max_backup.label "Número de sessões mais antigas (falhas) a guardar:">
 <!ENTITY max_backup.accesskey "N">
 <!ENTITY undoClose.caption "Desfazer Fechar">
 <!ENTITY windowsNtabs.caption "Janelas &amp; Abas Fechadas">
@@ -30,7 +30,7 @@
 <!ENTITY submenu.label "Listar todas as janelas e abas fechadas em um sub-menu">
 <!ENTITY submenu.accesskey "L">
 <!ENTITY persistence.caption "Persistência">
-<!ENTITY closed_tabs.label "Restaurar a lista de abas fechadas reabríveis para todas as janelas:">
+<!ENTITY closed_tabs.label "Restaurar a lista de abas fechadas que podem ser reabertas para todas as janelas:">
 <!ENTITY closed_tabs.accesskey "e">
 <!ENTITY closed_tabs.label0 "nunca">
 <!ENTITY closed_tabs.label1 "ao iniciar">
@@ -44,8 +44,8 @@
 <!ENTITY name_format.label "Formato sugerido para nomes de sessões:">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "Use &#37;t para o título da aba ativa, &#37;d para a data de hoje e &#37;m para a hora; além disso o tamanho do título pode ser limitado com caracteres # : &#37;#t.">
-<!ENTITY sessionstore.caption "SessionStore">
-<!ENTITY service.caption "&quot;SessionStore&quot; Settings">
+<!ENTITY sessionstore.caption "Armazenamento de Sessões">
+<!ENTITY service.caption "Opções do &quot;Armazenamento de Sessões&quot;">
 <!ENTITY service.description "Não mexa nisso, a menos que saiba o que está fazendo:">
 <!ENTITY interval.label "Intervalo de tempo mínimo entre dois salvamentos de estado (em segundos):">
 <!ENTITY interval.accesskey "i">
@@ -58,39 +58,42 @@
 <!ENTITY privacy.level2 "nenhum site">
 <!ENTITY sessiondir.caption "Local das sessões guardadas">
 <!ENTITY sessiondir.desc "O local pré-definido das sessões guardadas pode ser substituído aqui.">
-<!ENTITY encrypt.caption "Encryption">
-<!ENTITY encrypt.desc "Warning: Encrypted session data can only be opened in profiles with identical key3.db files.  Additionally if a master password is set, sessions cannot be encrypted or decrypted if the master password is not entered.">
-<!ENTITY encrypt.label "Encrypt saved session and closed window data">
+<!ENTITY encrypt.caption "Encriptação">
+<!ENTITY encrypt.desc "Alerta: Os dados de sess~ao encriptados somente podem ser abertos com arquivos key3.db idênticos. Adicionalmente se uma senha mestra for escolhida, as sessões não podem ser encriptadas nem desencriptadas se a senha mestra não é digitada.">
+<!ENTITY encrypt.label "Encriptar sessão salva e fechar dados da janela">
 <!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Mudar">
 <!ENTITY change_dir.accesskey "M">
-<!ENTITY default_dir.label "Pré-definido">
+<!ENTITY default_dir.label "Padrão">
 <!ENTITY default_dir.accesskey "P">
-<!ENTITY sanitizer.label "Session Manager Saved Sessions">
+<!ENTITY sanitizer.label "Sessões Salvas do Session Manager">
 <!ENTITY sanitizer.accesskey "M">
-<!ENTITY saving.caption "Session Saving">
-<!ENTITY lastpage.label "Show my last loaded page">
-<!ENTITY noSession.label "None">
+<!ENTITY saving.caption "Salvamento de Sessão">
+<!ENTITY lastpage.label "Mostrar minha última página carregada">
+<!ENTITY noSession.label "Nenhuma">
 <!ENTITY noSession.accesskey "N">
-<!ENTITY promptSession.label "Prompt for a session">
-<!ENTITY promptSession.accesskey "P">
-<!ENTITY selectSession.label "Select session">
+<!ENTITY promptSession.label "Lembrar uma sessão">
+<!ENTITY promptSession.accesskey "L">
+<!ENTITY selectSession.label "Selecionar sessão">
 <!ENTITY selectSession.accesskey "S">
-<!ENTITY cookies.label "Save Session Cookies">
+<!ENTITY cookies.label "Salvar Cookies da Sessão">
 <!ENTITY cookies.accesskey "C">
-<!ENTITY sessionImport.caption "Import Sessions from...">
+<!ENTITY sessionImport.caption "Importar Sessões de...">
 <!ENTITY importSS.label "SessionSaver">
-<!ENTITY importSS.accesskey "I">
+<!ENTITY importSS.accesskey "|">
 <!ENTITY importTMP.label "Tab Mix Plus">
-<!ENTITY importTMP.accesskey "I">
-<!ENTITY apply.label "Apply">
-<!ENTITY save_and_restore.caption "Saving &amp; Restoring">
-<!ENTITY display.caption "Display">
-<!ENTITY middleclick.label "Middle Click re-opens last closed tab">
+<!ENTITY importTMP.accesskey "|">
+<!ENTITY apply.label "Aplicar">
+<!ENTITY save_and_restore.caption "Salvamento &amp; Restauração">
+<!ENTITY display.caption "Mostrar">
+<!ENTITY middleclick.label "Clique do meio reabre as últimas abas fechadas">
 <!ENTITY middleclick.accesskey "M">
-<!ENTITY max_display.label "Maximum number of sessions to display in menu (-1 for all)">
+<!ENTITY max_display.label "Máximo número de sessões para mostrar no menu (-1 para todas)">
 <!ENTITY max_display.accesskey "M">
-<!ENTITY hide_tools_menu.label "Do not display Session Manager menu in Tools menu">
-<!ENTITY hide_tools_menu.accesskey "D">
-<!ENTITY disable_cache_fixer.label "Disable cache fixer feature">
+<!ENTITY hide_tools_menu.label "Não mostrar o menu do Session Manager no menu Ferramentas">
+<!ENTITY hide_tools_menu.accesskey "N">
+<!ENTITY disable_cache_fixer.label "Desativar função reparadora de cache">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Se a encriptação falhar, NÃO salvará dados sem encriptação.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Alerta: Se estiver marcado os dados de uma sessão ou janela não poderão ser encriptados, os dados serão perdidos sem a possibilidade de recuperação. A encriptação vai falhar se a senha mestra for requerida, mas não for digitada, portanto pense com cuidado antes de marcar essa caixa">

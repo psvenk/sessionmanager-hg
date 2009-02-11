@@ -8,7 +8,7 @@
 <!ENTITY backup_session.label0 "înlătură sesiunea curentă">
 <!ENTITY backup_session.label1 "arhivează sesiunea curentă">
 <!ENTITY backup_session.label2 "întreabă dacă se arhivează sesiunea curentă">
-<!ENTITY crashrecovery.label "Activează recuperarea după o închidere forţată">
+<!ENTITY crashrecovery.label "Activează recuperarea după o eşuare">
 <!ENTITY crashrecovery.accesskey "f">
 <!ENTITY autosave_session.label "Salvează automat sesiunea înlocuită">
 <!ENTITY autosave_session.accesskey "S">
@@ -19,7 +19,7 @@
 <!ENTITY orderList.label1 "alfabetic">
 <!ENTITY orderList.label2 "de la cea mai veche la cea mai recentă">
 <!ENTITY orderList.label_2 "de la cea mai recentă la cea mai veche">
-<!ENTITY max_backup.label "Numărul de sesiuni vechi (sau închise forţat) care se păstrează:">
+<!ENTITY max_backup.label "Numărul de sesiuni vechi (sau eşuate) care se păstrează:">
 <!ENTITY max_backup.accesskey "v">
 <!ENTITY undoClose.caption "Recuperări">
 <!ENTITY windowsNtabs.caption "Ferestre şi file închise">
@@ -56,15 +56,15 @@
 <!ENTITY privacy.level0 "toate saiturile">
 <!ENTITY privacy.level1 "saiturile necriptate">
 <!ENTITY privacy.level2 "nici un sait">
-<!ENTITY sessiondir.caption "Dosarul de salvare a sesiunilor">
-<!ENTITY sessiondir.desc "Dosarul implicit de salvare poate fi reselectat aici.">
+<!ENTITY sessiondir.caption "Dosar de salvare a sesiunilor">
+<!ENTITY sessiondir.desc "Dosarul implicit de salvare a sesiunilor:">
 <!ENTITY encrypt.caption "Criptare">
 <!ENTITY encrypt.desc "Avertisment: Datele din sesiunile criptate pot fi accesate numai din profiluri ce au fişierele &quot;key3.db&quot; şi &quot;cert8.db&quot; identice.  În plus, dacă o parolă principală este activată, sesiunea nu poate fi criptată sau decriptată dacă această parolă nu este furnizată.">
 <!ENTITY encrypt.label "Criptează sesiunea salvată şi închide fereastra">
 <!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Modifică">
 <!ENTITY change_dir.accesskey "M">
-<!ENTITY default_dir.label "Implicit">
+<!ENTITY default_dir.label "Iniţializează">
 <!ENTITY default_dir.accesskey "I">
 <!ENTITY sanitizer.label "Sesiuni salvate de Gestionarul de sesiuni">
 <!ENTITY sanitizer.accesskey "G">
@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "g">
 <!ENTITY disable_cache_fixer.label "Dezactivează opţiunea de stabilizare a cache-ului">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Dacă criptarea eşuează, NU salva datele necriptat.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Avertisment: Dacă opţiunea este activă şi sesiunea sau fereastra nu poate fi criptată, datele se vor pierde fără posibilitatea de a fi recuperate. Criptarea va eşua dacă parola principală va fi cerută şi nu va fi furnizată, aşa că gândiţi-vă bine înainte de a activa această opţiune!">

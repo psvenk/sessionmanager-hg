@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "C">
 <!ENTITY group.label "Gurup Oturum(ları)..">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "Oturum Yöneticisi menüsünü aç">
+<!ENTITY toolbar.undo.menu.tooltip "Kapatılmış pencere ve sekmeler menüsünü aç">
+<!ENTITY prompt.save_every1.label "Herbirini kaydet">
+<!ENTITY prompt.save_every2.label "dakika (boş ise devre dışıdır)">
+<!ENTITY winTabTree.restoreHeader "Geri yükle">
+<!ENTITY winTabTree.listHeader "Pencereler ve Sekmeler">
+<!ENTITY winTabTree.windowLabel "Pencere &#37;S">

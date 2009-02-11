@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "C">
 <!ENTITY group.label "Gruppsession(er)...">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "Öppna sessionshanteringsmeny">
+<!ENTITY toolbar.undo.menu.tooltip "Öppna meny för nyligen stängda fönster och flikar">
+<!ENTITY prompt.save_every1.label "Spara post">
+<!ENTITY prompt.save_every2.label "minuter (inaktiverad om tom)">
+<!ENTITY winTabTree.restoreHeader "Återställ">
+<!ENTITY winTabTree.listHeader "Fönster och flikar">
+<!ENTITY winTabTree.windowLabel "Fönster &#37;S">

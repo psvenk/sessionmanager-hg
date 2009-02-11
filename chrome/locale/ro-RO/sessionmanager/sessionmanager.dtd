@@ -1,4 +1,4 @@
-<!ENTITY sessionManager "Gestionar sesiuni">
+<!ENTITY sessionManager "Gestionar de sesiuni">
 <!ENTITY toolsmenu.accesskey "G">
 <!ENTITY save.label "Salvează sesiunea curentă...">
 <!ENTITY save.accesskey "S">
@@ -32,7 +32,7 @@
 <!ENTITY toolbar.undo.label "Redeschide">
 <!ENTITY toolbar.undo.tooltip "Redeschide cele mai recente file închise">
 <!ENTITY prompt.ignore.label "Nu mai afişa această fereastră de dialog">
-<!ENTITY prompt.autosave.label "Activează auto-salvarea acestei sesiuni">
+<!ENTITY prompt.autosave.label "Activează salvarea automată a acestei sesiuni">
 <!ENTITY prompt.tabprompt.label "Interoghează despre filele de restaurat">
 <!ENTITY load_replace.label "Încarcă sesiunea (înlocuieşte sesiunea curentă)">
 <!ENTITY load_replace.accesskey "c">
@@ -53,10 +53,17 @@
 <!ENTITY backup_sessions.accesskey "a">
 <!ENTITY remove_item.label "Şterge elementul">
 <!ENTITY remove_item.accesskey "t">
-<!ENTITY session_group.label "Grupează">
+<!ENTITY session_group.label "Grup">
 <!ENTITY rename_group.label "Redenumeşte grupul...">
 <!ENTITY remove_group.label "Şterge grupul...">
 <!ENTITY change_group.label "Schimbă grupul...">
 <!ENTITY change_group.accesskey "c">
 <!ENTITY group.label "Grupează sesiunile...">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "Meniu gestionare sesiuni">
+<!ENTITY toolbar.undo.menu.tooltip "Meniu redeschidere ferestre şi file închise recent">
+<!ENTITY prompt.save_every1.label "Salvează la fiecare">
+<!ENTITY prompt.save_every2.label "minute (dezactivat dacă este necompletat)">
+<!ENTITY winTabTree.restoreHeader "Restaurare">
+<!ENTITY winTabTree.listHeader "Ferestre şi file">
+<!ENTITY winTabTree.windowLabel "Fereastra &#37;S">

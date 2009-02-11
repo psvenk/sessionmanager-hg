@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "C">
 <!ENTITY group.label "Grupos de sesiones...">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "Abrir el menú de administración de sesiones">
+<!ENTITY toolbar.undo.menu.tooltip "Abrir el menú de las ventanas y pestañas cerradas recientemente">
+<!ENTITY prompt.save_every1.label "Guardar cada">
+<!ENTITY prompt.save_every2.label "minutos (deshabilitado si se deja en blanco)">
+<!ENTITY winTabTree.restoreHeader "Restaurar">
+<!ENTITY winTabTree.listHeader "Ventanas y pestañas">
+<!ENTITY winTabTree.windowLabel "Ventana &#37;S">

@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "D">
 <!ENTITY disable_cache_fixer.label "Poista välimuistin korjaustoiminto käytöstä">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "If encryption fails, do NOT save data unencrypted.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Warning: If this is checked and the session or window data cannot be encrypted, the data will be lost with no way to recover it.  Encryption will fail if the master password is requested and not entered, so think carefully before checking this box. ">

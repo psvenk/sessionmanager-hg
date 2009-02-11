@@ -33,7 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Zuletzt geschlossenen Tab wiederherstellen">
 <!ENTITY prompt.ignore.label "Diesen Dialog nicht mehr anzeigen">
 <!ENTITY prompt.autosave.label "Diese Sitzung immer automatisch sichern">
-<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
+<!ENTITY prompt.tabprompt.label "Zum Wiederherstellen von Tabs auffordern">
 <!ENTITY load_replace.label "Laden (aktuelle Sitzung ersetzen)">
 <!ENTITY load_replace.accesskey "L">
 <!ENTITY load_append.label "Laden (zur aktuellen Sitzung hinzufügen)">
@@ -49,14 +49,21 @@
 <!ENTITY session_name.label "Name">
 <!ENTITY session_windows.label "Fenster">
 <!ENTITY session_tabs.label "Tabs">
-<!ENTITY backup_sessions.label "Gesicherte Sitzungen">
-<!ENTITY backup_sessions.accesskey "G">
+<!ENTITY backup_sessions.label "Sitzungs-Backups">
+<!ENTITY backup_sessions.accesskey "B">
 <!ENTITY remove_item.label "Eintrag löschen">
 <!ENTITY remove_item.accesskey "l">
-<!ENTITY session_group.label "Group">
-<!ENTITY rename_group.label "Rename Group...">
-<!ENTITY remove_group.label "Delete Group...">
-<!ENTITY change_group.label "Change Group...">
-<!ENTITY change_group.accesskey "C">
-<!ENTITY group.label "Group Session(s)...">
-<!ENTITY group.accesskey "G">
+<!ENTITY session_group.label "Gruppe">
+<!ENTITY rename_group.label "Gruppe umbenennen...">
+<!ENTITY remove_group.label "Gruppe löschen...">
+<!ENTITY change_group.label "Gruppe ändern...">
+<!ENTITY change_group.accesskey "d">
+<!ENTITY group.label "Sitzung(en) gruppieren...">
+<!ENTITY group.accesskey "g">
+<!ENTITY toolbar.menu.tooltip "Menü zur Sitzungs-Verwaltung öffnen">
+<!ENTITY toolbar.undo.menu.tooltip "Menü für kürzlich geschlossene Fenster und Tabs öffnen">
+<!ENTITY prompt.save_every1.label "Alle">
+<!ENTITY prompt.save_every2.label "Minuten sichern (deaktiviert wenn leer)">
+<!ENTITY winTabTree.restoreHeader "Wiederherstellen">
+<!ENTITY winTabTree.listHeader "Fenster und Tabs">
+<!ENTITY winTabTree.windowLabel "Fenster &#37;S">

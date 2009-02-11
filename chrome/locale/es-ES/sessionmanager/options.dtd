@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "m">
 <!ENTITY disable_cache_fixer.label "Deshabilitar la opción de recuperación de caché">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Si el cifrado falla, NO guardar los datos sin cifrar.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Aviso: Si marca esta opción y los datos de la sesión o la ventana no pueden cifrarse, los datos se perderán sin tener opción a recuperarlos. El cifrado fallará si se le pide la contraseña maestra y no la introduce, así que téngalo en cuenta antes de marcar esta casilla.">

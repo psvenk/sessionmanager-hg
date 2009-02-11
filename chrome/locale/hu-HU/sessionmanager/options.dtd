@@ -9,7 +9,7 @@
 <!ENTITY backup_session.label1 "jelenlegi munkamenet biztonsági mentése">
 <!ENTITY backup_session.label2 "biztonsági mentésre rákérdez">
 <!ENTITY crashrecovery.label "Helyreállítás engedélyezése összeomlás után">
-<!ENTITY crashrecovery.accesskey "V">
+<!ENTITY crashrecovery.accesskey "H">
 <!ENTITY autosave_session.label "Lecserélt munkamenet automatikus mentése">
 <!ENTITY autosave_session.accesskey "e">
 <!ENTITY restoring.caption "Munkamenet visszaállítása">
@@ -52,19 +52,19 @@
 <!ENTITY postdata.label "Az elmenthető POSTDATA adatok maximális mérete (bájtokban; -1 mindegyiknek):">
 <!ENTITY postdata.accesskey "x">
 <!ENTITY privacy.label "Személyes adatok mentése (űrlapadatok, POSTDATA és sütik)">
-<!ENTITY privacy.accesskey "S">
-<!ENTITY privacy.level0 "összes oldal">
+<!ENTITY privacy.accesskey "a">
+<!ENTITY privacy.level0 "mindegyik oldal">
 <!ENTITY privacy.level1 "nem titkosított oldal">
 <!ENTITY privacy.level2 "nincs mentés">
 <!ENTITY sessiondir.caption "Mentett munkamenetek mappája">
 <!ENTITY sessiondir.desc "Mentett munkamenetek alapértelmezett mappáját változtathatja meg itt.">
 <!ENTITY encrypt.caption "Titkosítás">
 <!ENTITY encrypt.desc "Figyelmeztetés: A titkosított munkamenet adatai csak azonos key3.db és cert8.db fájlokat tartalamazó profilokban nyithatóak meg. Amennyiben adott a mesterjelszó, a munkamenetek nem titkosíthatók/dekódolhatók a megfelelő mesterjelszó megadásáig.">
-<!ENTITY encrypt.label "Mentett munkamenet és bezárt ablak adatainak titkosítása">
+<!ENTITY encrypt.label "Mentett munkamenetek és bezárt ablakok adatainak titkosítása">
 <!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Módosítás">
 <!ENTITY change_dir.accesskey "M">
-<!ENTITY default_dir.label "Alapértelmezett visszaállítása">
+<!ENTITY default_dir.label "Alapértelmezések visszaállítása">
 <!ENTITY default_dir.accesskey "A">
 <!ENTITY sanitizer.label "Mentett munkamenetek (Session Manager)">
 <!ENTITY sanitizer.accesskey "e">
@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "e">
 <!ENTITY disable_cache_fixer.label "A háttértár-hibák javításának letiltása">
 <!ENTITY disable_cache_fixer.accesskey "l">
+<!ENTITY encrypted_only.label "Ha a titkosítás nem sikeres, NE mentse az adatokat titkosítás nélkül.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Figyelmeztetés: Ha bekapcsolva és a munkamenet/ablak adatait nem lehet titkosítani, az adatok elvesznek (nem lehet őket visszaállítani). A titkosítás nem lesz sikeres, ha a kért mesterjelszó nincs megadva. Legyen tehát körültekintő az opció bekapcsolásakor.">

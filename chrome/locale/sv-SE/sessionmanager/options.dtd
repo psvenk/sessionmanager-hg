@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "D">
 <!ENTITY disable_cache_fixer.label "Inaktivera cache-fixar funktionen">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Om kryptering misslyckas, spara INTE data okrypterad.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Varning: Om detta är markerat och sessions- elelr fönsterdatan inte kan krypteras så kommer datan att förloras utan någon möjlighet att återställa den. Kryptering kommer att misslyckas om huvudlösenordet krävs men inte skrivs in, så tänk efter noggrant innan du kryssar i den här rutan.">

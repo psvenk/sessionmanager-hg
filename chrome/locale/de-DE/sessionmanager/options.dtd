@@ -3,7 +3,7 @@
 <!ENTITY startNend.caption "Starten &amp; Beenden">
 <!ENTITY resume_sess.label "Beim Starten des Browsers folgende Sitzung laden:">
 <!ENTITY resume_sess.accesskey "S">
-<!ENTITY backup_sess.label "Beim Beenden">
+<!ENTITY backup_sess.label "Beim Beenden:">
 <!ENTITY backup_sess.accesskey "B">
 <!ENTITY backup_session.label0 "die aktuelle Sitzung verwerfen">
 <!ENTITY backup_session.label1 "die aktuelle Sitzung sichern">
@@ -19,7 +19,7 @@
 <!ENTITY orderList.label1 "alphabetisch">
 <!ENTITY orderList.label2 "älteste bis neueste">
 <!ENTITY orderList.label_2 "neueste bis älteste">
-<!ENTITY max_backup.label "Anzahl zusätzlicher Kopien vorhergehender (abgestürzter) Sitzungen:">
+<!ENTITY max_backup.label "Anzahl vorhergehender (abgestürzter) Sitzungs-Backups:">
 <!ENTITY max_backup.accesskey "K">
 <!ENTITY undoClose.caption "Wiederherstellen">
 <!ENTITY windowsNtabs.caption "Geschlossene Fenster &amp; Tabs">
@@ -27,7 +27,7 @@
 <!ENTITY max_closed.accesskey "F">
 <!ENTITY max_tabs.label "Maximale Anzahl wiederherstellbarer Tabs (pro Fenster):">
 <!ENTITY max_tabs.accesskey "T">
-<!ENTITY submenu.label "Alle geschlossenen Fenster und Tabs im Untermenü anzeigen">
+<!ENTITY submenu.label "Alle geschlossenen Fenster und Tabs in Untermenü anzeigen">
 <!ENTITY submenu.accesskey "U">
 <!ENTITY persistence.caption "Beständigkeit der Liste">
 <!ENTITY closed_tabs.label "Liste der geschlossenen Tabs für alle Fenster wiederherstellen:">
@@ -59,14 +59,14 @@
 <!ENTITY sessiondir.caption "Zielordner für gesicherte Sitzungen">
 <!ENTITY sessiondir.desc "Der Standard-Zielordner für die gesicherten Sitzungen kann hier geändert werden.">
 <!ENTITY encrypt.caption "Verschlüsselung">
-<!ENTITY encrypt.desc "Achtung: Verschlüsselte Sitzungsdaten können nur in Profilen mit identischen key3.db- und cert8.db-Dateien geöffnet werden! Wenn zudem ein Master-Passwort gesetzt wurde, können die Sitzungen nicht ohne Eingabe des Master-Passworts ver- oder entschlüsselt werden.">
+<!ENTITY encrypt.desc "Warnung: Verschlüsselte Sitzungsdaten können nur in Profilen mit identischen key3.db- und cert8.db-Dateien geöffnet werden! Wenn zudem ein Master-Passwort gesetzt wurde, können die Sitzungen nicht ohne Eingabe des Master-Passworts ver- oder entschlüsselt werden.">
 <!ENTITY encrypt.label "Gesicherte Sitzungen und Daten für geschlossene Fenster verschlüsseln">
 <!ENTITY encrypt.accesskey "v">
 <!ENTITY change_dir.label "Ändern...">
-<!ENTITY change_dir.accesskey "n">
+<!ENTITY change_dir.accesskey "Ä">
 <!ENTITY default_dir.label "Standard wiederherstellen">
 <!ENTITY default_dir.accesskey "w">
-<!ENTITY sanitizer.label "Gespeicherte Sitzungen des Sitzungs-Managers">
+<!ENTITY sanitizer.label "Gesicherte Sitzungen des Sitzungs-Managers">
 <!ENTITY sanitizer.accesskey "z">
 <!ENTITY saving.caption "Sitzungen sichern">
 <!ENTITY lastpage.label "Zuletzt geladene Seite anzeigen">
@@ -74,11 +74,11 @@
 <!ENTITY noSession.accesskey "K">
 <!ENTITY promptSession.label "Nach einer Sitzung fragen">
 <!ENTITY promptSession.accesskey "f">
-<!ENTITY selectSession.label "Sitzung auswählen">
+<!ENTITY selectSession.label "Sitzung festlegen">
 <!ENTITY selectSession.accesskey "S">
 <!ENTITY cookies.label "Sitzungs-Cookies sichern">
 <!ENTITY cookies.accesskey "C">
-<!ENTITY sessionImport.caption "Sitzungen importieren von....">
+<!ENTITY sessionImport.caption "Sitzungen importieren von...">
 <!ENTITY importSS.label "SessionSaver">
 <!ENTITY importSS.accesskey "I">
 <!ENTITY importTMP.label "Tab Mix Plus">
@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "n">
 <!ENTITY disable_cache_fixer.label "Cache-Fixer-Funktion deaktivieren">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Falls die Verschlüsselung fehlschlägt, Daten NICHT unverschlüsselt sichern">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Warnung: Alle Daten gehen unwiederbringlich verloren, wenn diese Option aktiviert wird und Sitzungs- oder Fensterdaten nicht verschlüsselt werden können. Dies ist der Fall, wenn das Master-Passwort verlangt aber nicht eingegeben wird. Überlegen Sie also gut, ob sie diese Option aktivieren!">

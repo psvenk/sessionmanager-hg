@@ -10,7 +10,7 @@
 <!ENTITY backup_session.label2 "perguntar se guarda a sessão actual">
 <!ENTITY crashrecovery.label "Activar Crash Recovery">
 <!ENTITY crashrecovery.accesskey "i">
-<!ENTITY autosave_session.label "Guardar automaticamente  a sessão substituida">
+<!ENTITY autosave_session.label "Guardar automaticamente  a sessão substituída">
 <!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Restauro de sessão">
 <!ENTITY sessionList.caption "Lista de sessões">
@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "m">
 <!ENTITY disable_cache_fixer.label "Desactivar funcionalidade de reparação da cache">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Se a cifra falhar, NÃO guarde dados não cifrados.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Aviso: Se isto estiver seleccionado e a sessão ou dados da janela não forem cifrados, os dados serão perdidos sem hipótese de os recuperar. A cifra irá falhar se a senha mestra for pedida e não for introduzida, por isso pense cuidadosamente antes de seleccionar esta caixa.">

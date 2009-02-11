@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "M">
 <!ENTITY group.label "Grupo de sessões...">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "Abrir o menu de gestão de sessão">
+<!ENTITY toolbar.undo.menu.tooltip "Abrir as janelas e o menu de separadores fechados recentemente">
+<!ENTITY prompt.save_every1.label "Guardar a cada">
+<!ENTITY prompt.save_every2.label "minutos (desactivado se em branco)">
+<!ENTITY winTabTree.restoreHeader "Restaurar">
+<!ENTITY winTabTree.listHeader "Janelas e separadores">
+<!ENTITY winTabTree.windowLabel "Janela &#37;S">

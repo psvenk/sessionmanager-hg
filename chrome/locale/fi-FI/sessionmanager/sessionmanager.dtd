@@ -33,7 +33,7 @@
 <!ENTITY toolbar.undo.tooltip "Avaa uudelleen viimeksi suljettu välilehti">
 <!ENTITY prompt.ignore.label "Älä näytä tätä valintaikkunaa uudelleen">
 <!ENTITY prompt.autosave.label "Tallenna tämä istunto automaattisesti">
-<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
+<!ENTITY prompt.tabprompt.label "Kysy palautettavat välilehdet">
 <!ENTITY load_replace.label "Lataa (korvaa nykyinen istunto)">
 <!ENTITY load_replace.accesskey "L">
 <!ENTITY load_append.label "Lataa (liitä nykyiseen istuntoon)">
@@ -53,10 +53,17 @@
 <!ENTITY backup_sessions.accesskey "B">
 <!ENTITY remove_item.label "Poista">
 <!ENTITY remove_item.accesskey "D">
-<!ENTITY session_group.label "Group">
-<!ENTITY rename_group.label "Rename Group...">
-<!ENTITY remove_group.label "Delete Group...">
-<!ENTITY change_group.label "Change Group...">
-<!ENTITY change_group.accesskey "C">
-<!ENTITY group.label "Group Session(s)...">
-<!ENTITY group.accesskey "G">
+<!ENTITY session_group.label "Ryhmä">
+<!ENTITY rename_group.label "Vaihda ryhmän nimi...">
+<!ENTITY remove_group.label "Poista ryhmä...">
+<!ENTITY change_group.label "Vaihda ryhmä...">
+<!ENTITY change_group.accesskey "V">
+<!ENTITY group.label "Istunnot-ryhmä...">
+<!ENTITY group.accesskey "I">
+<!ENTITY toolbar.menu.tooltip "Open session management menu">
+<!ENTITY toolbar.undo.menu.tooltip "Open recently closed windows and tabs menu">
+<!ENTITY prompt.save_every1.label "Save every">
+<!ENTITY prompt.save_every2.label "minutes (disabled if blank)">
+<!ENTITY winTabTree.restoreHeader "Restore">
+<!ENTITY winTabTree.listHeader "Windows and Tabs">
+<!ENTITY winTabTree.windowLabel "Window &#37;S">

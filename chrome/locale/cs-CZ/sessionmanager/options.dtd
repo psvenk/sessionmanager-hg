@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "N">
 <!ENTITY disable_cache_fixer.label "Vypnout možnost opravy vyrovnávací paměti">
 <!ENTITY disable_cache_fixer.accesskey "v">
+<!ENTITY encrypted_only.label "Pokud šifrování selže, NEUKLÁDEJTE data nezašifrovaná.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Varování: Pokud je tato volba zaškrtnutá a dala relace nebo okna nemohou být zašifrována, data budou navždy ztracena bez možnosti jejich obnovy. Šifrování selže, pokud bude vyžádáno hlavní heslo a nebude zadáno. Zaškrtnutí této volby si tedy pečlivě promyslete.">

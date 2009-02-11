@@ -1,13 +1,13 @@
-<!ENTITY sessionManager "Gerenciador de Sessões">
+<!ENTITY sessionManager "Session Manager">
 <!ENTITY toolsmenu.accesskey "G">
 <!ENTITY save.label "Salvar Sessão...">
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "Salvar Janela Atual...">
 <!ENTITY saveOne.accesskey "J">
-<!ENTITY closeSession.label "Save and Close Current Session">
-<!ENTITY closeSession.accesskey "C">
-<!ENTITY abandonSession.label "Abandon Current Session">
-<!ENTITY abandonSession.accesskey "A">
+<!ENTITY closeSession.label "Salvar e Fechar Sessão Atual">
+<!ENTITY closeSession.accesskey "H">
+<!ENTITY abandonSession.label "Abandonar Sessão Atual">
+<!ENTITY abandonSession.accesskey "N">
 <!ENTITY rename.label "Renomear Sessão...">
 <!ENTITY rename.accesskey "R">
 <!ENTITY remove.label "Excluir Sessão(ões)...">
@@ -31,32 +31,39 @@
 <!ENTITY toolbar.tooltip "Salva a sessão de navegação atual...">
 <!ENTITY toolbar.undo.label "Desfazer Fechar">
 <!ENTITY toolbar.undo.tooltip "Reabre a aba fechada mais recentemente">
-<!ENTITY prompt.ignore.label "Não mostrar este diálogo novamente">
-<!ENTITY prompt.autosave.label "Make this an auto-save session">
-<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
-<!ENTITY load_replace.label "Load (Replace Current Session)">
+<!ENTITY prompt.ignore.label "Não mostrar essa mensagem novamente">
+<!ENTITY prompt.autosave.label "Fazer com que essa sessão se salve automaticamente">
+<!ENTITY prompt.tabprompt.label "Lembrar abas para restaurar">
+<!ENTITY load_replace.label "Carregar (Substitui a Sessão Atual)">
 <!ENTITY load_replace.accesskey "L">
-<!ENTITY load_append.label "Load (Append To Current Session)">
+<!ENTITY load_append.label "Carregar (Anexa à Sessão Atual)">
 <!ENTITY load_append.accesskey "A">
-<!ENTITY replace_all.label "Replace Session With Current Session">
-<!ENTITY replace_all.accesskey "R">
-<!ENTITY replace_window.label "Replace Session With Current Window">
-<!ENTITY replace_window.accesskey "W">
-<!ENTITY remove_one.label "Delete Session...">
-<!ENTITY set_startup.label "Set As Startup Session">
-<!ENTITY set_startup.accesskey "S">
+<!ENTITY replace_all.label "Substituir Sessão com a Sessão Atual">
+<!ENTITY replace_all.accesskey "S">
+<!ENTITY replace_window.label "Substituir Sessão com a Janela Atual">
+<!ENTITY replace_window.accesskey "J">
+<!ENTITY remove_one.label "Apagar sessão...">
+<!ENTITY set_startup.label "Ajustar como sessão de início">
+<!ENTITY set_startup.accesskey "I">
 <!ENTITY openSessionManagerSidebar.commandkey "S">
-<!ENTITY session_name.label "Name">
-<!ENTITY session_windows.label "Windows">
-<!ENTITY session_tabs.label "Tabs">
-<!ENTITY backup_sessions.label "Backup Sessions">
+<!ENTITY session_name.label "Nome">
+<!ENTITY session_windows.label "Janelas">
+<!ENTITY session_tabs.label "Abas">
+<!ENTITY backup_sessions.label "Backup das Sessões">
 <!ENTITY backup_sessions.accesskey "B">
-<!ENTITY remove_item.label "Delete Item">
-<!ENTITY remove_item.accesskey "D">
-<!ENTITY session_group.label "Group">
-<!ENTITY rename_group.label "Rename Group...">
-<!ENTITY remove_group.label "Delete Group...">
-<!ENTITY change_group.label "Change Group...">
-<!ENTITY change_group.accesskey "C">
-<!ENTITY group.label "Group Session(s)...">
+<!ENTITY remove_item.label "Apagar item">
+<!ENTITY remove_item.accesskey "A">
+<!ENTITY session_group.label "Grupo">
+<!ENTITY rename_group.label "Renomear Grupo...">
+<!ENTITY remove_group.label "Apagar Grupo...">
+<!ENTITY change_group.label "Alterar Grupo...">
+<!ENTITY change_group.accesskey "A">
+<!ENTITY group.label "Sessões do Grupo...">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "Abrir menu de gerenciamento de sessão">
+<!ENTITY toolbar.undo.menu.tooltip "Abrir janelas recentemente fechadas e o menu de abas">
+<!ENTITY prompt.save_every1.label "Salvar a cada">
+<!ENTITY prompt.save_every2.label "minutos (se estiver em branco será desativado)">
+<!ENTITY winTabTree.restoreHeader "Restaurar">
+<!ENTITY winTabTree.listHeader "Janelas e Abas">
+<!ENTITY winTabTree.windowLabel "Janela &#37;S">

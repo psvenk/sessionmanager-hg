@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "U">
 <!ENTITY disable_cache_fixer.label "Wyłącz funkcję naprawiania bufora">
 <!ENTITY disable_cache_fixer.accesskey "F">
+<!ENTITY encrypted_only.label "Jeśli szyfrowanie uległo awarii, nie zapisuj niezaszyfrowanych danych">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Ostrzeżenie! Włączenie tej funkcji spowoduje, że jeśli sesja lub dane okna nie mogą być zaszyfrowane, wszystkie dane zostaną utracone bezpowrotnie. Szyfrowanie nie będzie działało jeżeli hasło główne jest wymagane a nie zostało wprowadzone. Proszę rozważnie i ostrożnie włączać tę funkcję.">

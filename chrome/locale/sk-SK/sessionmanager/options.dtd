@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "e">
 <!ENTITY disable_cache_fixer.label "Vypnúť funkciu opravy vyrovnávacej pamäte">
 <!ENTITY disable_cache_fixer.accesskey "V">
+<!ENTITY encrypted_only.label "Ak zašifrovanie zlyhá, neukladať údaje nezašifrované">
+<!ENTITY encrypted_only.accesskey "z">
+<!ENTITY encrypt2.desc "Upozornenie: Ak je táto voľba označená a údaje o relácii alebo okne nemohli byť zašifrované, tieto sa stratia bez možnosti ich obnovy. Zašifrovanie zlyhá, ak je nastavené Hlavné heslo a nie je zadané, takže buďte pri nastavení tejto voľby opatrný.">

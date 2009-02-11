@@ -19,9 +19,9 @@
 <!ENTITY resume.label "Jelenlegi munkamenet használata indításkor">
 <!ENTITY resume.accesskey "J">
 <!ENTITY reload.label "Minden ablak újratöltése">
-<!ENTITY reload.accesskey "s">
+<!ENTITY reload.accesskey "d">
 <!ENTITY overwrite.label "Létező ablakok lecserélése">
-<!ENTITY overwrite.accesskey "f">
+<!ENTITY overwrite.accesskey "a">
 <!ENTITY undoClosed.label "Bezárt lapok és ablakok megnyitása...">
 <!ENTITY undoClosed.accesskey "g">
 <!ENTITY closedWindows "Bezárt ablakok:">
@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "s">
 <!ENTITY group.label "Munkamenet(ek) csoportosítása...">
 <!ENTITY group.accesskey "c">
+<!ENTITY toolbar.menu.tooltip "Munkamenet-kezelő megnyitása">
+<!ENTITY toolbar.undo.menu.tooltip "Legutoljára bezárt lapok és fül menü megnyitása">
+<!ENTITY prompt.save_every1.label "Mentés minden">
+<!ENTITY prompt.save_every2.label "percben (letiltáshoz hagyja üresen)">
+<!ENTITY winTabTree.restoreHeader "Visszaállítás">
+<!ENTITY winTabTree.listHeader "Ablakok és lapok">
+<!ENTITY winTabTree.windowLabel "Ablak &#37;S">

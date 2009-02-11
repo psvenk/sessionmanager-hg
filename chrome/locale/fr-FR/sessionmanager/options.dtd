@@ -91,6 +91,9 @@
 <!ENTITY max_display.label "Nombre maximum de sessions à afficher dans le menu">
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "Ne pas afficher l&apos;entrée « Gestionnaire de session » dans le menu « Outils »">
-<!ENTITY hide_tools_menu.accesskey "N">
+<!ENTITY hide_tools_menu.accesskey "P">
 <!ENTITY disable_cache_fixer.label "Désactiver la fonctionnalité Cache Fixer">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Si le chiffrement a échoué, NE PAS enregistrer les données non chiffrées.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Avertissement : si cette option est cochée et que les données de session ou de fenêtre ne peuvent pas être chiffrées, les données seront perdues sans aucun moyen de les récupérer. Le chiffrement échoue lorsque le mot de passe principal est demandé et n&apos;est pas indiqué, veuillez donc bien y réfléchir à deux fois avant de cocher cette case.">

@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "D">
 <!ENTITY disable_cache_fixer.label "キャッシュフィクサー機能を無効にする">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "暗号化が失敗するならば、暗号化されていないデータを保存しない。">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "警告:これをチェックして、セッションかウインドウのデータを暗号化できないとデータを失った場合回復する方法がありません。マスターパスワードが要求されて入れられないと暗号化が失敗するので、この項目をチェックする前に慎重に考えてください。">

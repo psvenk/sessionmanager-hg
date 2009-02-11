@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "M">
 <!ENTITY group.label "Sesje grupy...">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "Otwiera menu zarządzania sesją">
+<!ENTITY toolbar.undo.menu.tooltip "Otwiera menu ostatnio zamkniętych okien i kart">
+<!ENTITY prompt.save_every1.label "Zapisuj co">
+<!ENTITY prompt.save_every2.label "min (puste pole powoduje wyłączenie funkcji)">
+<!ENTITY winTabTree.restoreHeader "Odtwórz">
+<!ENTITY winTabTree.listHeader "Okna i karty">
+<!ENTITY winTabTree.windowLabel "Okno &#37;S">

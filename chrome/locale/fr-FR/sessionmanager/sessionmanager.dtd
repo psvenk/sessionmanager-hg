@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "C">
 <!ENTITY group.label "Regroupement de session(s)…">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "Ouverture du menu se chargeant de la gestion de session">
+<!ENTITY toolbar.undo.menu.tooltip "Ouverture des menus et onglets de menu récemment fermés">
+<!ENTITY prompt.save_every1.label "Enregistrer toutes les">
+<!ENTITY prompt.save_every2.label "minutes (désactivé si vide)">
+<!ENTITY winTabTree.restoreHeader "Rétablir">
+<!ENTITY winTabTree.listHeader "Fenêtres et onglets">
+<!ENTITY winTabTree.windowLabel "Fenêtre &#37;S">

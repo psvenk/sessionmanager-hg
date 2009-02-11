@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "П">
 <!ENTITY group.label "Сесии на Група...">
 <!ENTITY group.accesskey "Г">
+<!ENTITY toolbar.menu.tooltip "Отвори го менито за управување со сесиите">
+<!ENTITY toolbar.undo.menu.tooltip "Отвори го менито за неодамна затворените прозорци и јазичиња">
+<!ENTITY prompt.save_every1.label "Зачувај секои">
+<!ENTITY prompt.save_every2.label "минути (оневозможено ако е празно)">
+<!ENTITY winTabTree.restoreHeader "Обнови">
+<!ENTITY winTabTree.listHeader "Прозорци и Јазичиња">
+<!ENTITY winTabTree.windowLabel "Прозорец &#37;S">

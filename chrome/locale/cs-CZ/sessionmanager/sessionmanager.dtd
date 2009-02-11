@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "Z">
 <!ENTITY group.label "Skupiny relací...">
 <!ENTITY group.accesskey "S">
+<!ENTITY toolbar.menu.tooltip "Otevře nabídku správy relací">
+<!ENTITY toolbar.undo.menu.tooltip "Otevře nabídku posledních zavřených oken a panelů">
+<!ENTITY prompt.save_every1.label "Uložit každých">
+<!ENTITY prompt.save_every2.label "minut (prázdné pole vypne funkci)">
+<!ENTITY winTabTree.restoreHeader "Obnovit">
+<!ENTITY winTabTree.listHeader "Okna a panely">
+<!ENTITY winTabTree.windowLabel "Okno &#37;S">

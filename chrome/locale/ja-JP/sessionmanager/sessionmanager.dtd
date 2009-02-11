@@ -60,3 +60,10 @@
 <!ENTITY change_group.accesskey "C">
 <!ENTITY group.label "グループセッション...">
 <!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "セッション管理メニューを開く">
+<!ENTITY toolbar.undo.menu.tooltip "最近閉じたウインドウとタブメニューを開く">
+<!ENTITY prompt.save_every1.label "常に保存する">
+<!ENTITY prompt.save_every2.label "分(空白の場合は無効)">
+<!ENTITY winTabTree.restoreHeader "リストア">
+<!ENTITY winTabTree.listHeader "ウインドウとタブ">
+<!ENTITY winTabTree.windowLabel "ウインドウ &#37;S">
