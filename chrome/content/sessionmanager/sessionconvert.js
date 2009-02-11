@@ -35,6 +35,21 @@ var gSessionSaverConverter = {
 		var windowMediator  = Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator);
 		var chromeWin = windowMediator.getMostRecentWindow("navigator:browser");
 		this.gSessionManager = chromeWin.gSessionManager;
+		
+		// if encrypting, force master password and exit if not entered
+		try {
+			if (this.gSessionManager.mPref_encrypt_sessions) this.gSessionManager.mSecretDecoderRing.encryptString("");
+		}
+		catch(ex) {
+			this.gSessionManager.cryptError(gSessionManager._string("encrypt_fail2"));
+			this.prefService = null;
+			this.rootBranch = null;
+			this.Branch = null;
+			this.staticBranch = null;
+			this.windowBranch = null;
+			this.gSessionManager = null;
+			return;
+		}
 			
 		var aObj = {}, aObj2 = {}; 
 		this.staticBranch.getChildList("", aObj);
@@ -68,12 +83,12 @@ var gSessionSaverConverter = {
 		else {
 			if (!this.confirm(this.gSessionManager._string("ss_confirm_import"))) this.importSession();
 		}
-		delete(this.prefService);
-		delete(this.rootBranch);
-		delete(this.Branch);
-		delete(this.staticBranch);
-		delete(this.windowBranch);
-		delete(this.gSessionManager);
+		this.prefService = null;
+		this.rootBranch = null;
+		this.Branch = null;
+		this.staticBranch = null;
+		this.windowBranch = null;
+		this.gSessionManager = null;
 	},
 
 	confirm: function (aMsg) {
@@ -193,7 +208,8 @@ var gSessionSaverConverter = {
 					var aName = this.gSessionManager.getFormattedName("[ SessionSaver ] " + aSession, date);
 					var file = this.gSessionManager.getSessionDir(this.gSessionManager.makeFileName(aName), true);
 					var state = "[SessionManager]\nname=" + aName + "\ntimestamp=" + Date.now() + "\nautosave=false\tcount=" + 
-					             session[0].windows + "/" + session[0].tabs + "\tgroup=[SessionSaver]\n" + this.sessions[aSession].toSource();
+					             session[0].windows + "/" + session[0].tabs + "\tgroup=[SessionSaver]\n" + 
+								 this.gSessionManager.decryptEncryptByPreference(this.gSessionManager.JSON_encode(this.sessions[aSession]));
 					this.gSessionManager.writeFile(file, state);
 				}
 			}, this);
@@ -464,6 +480,18 @@ var gConvertTMPSession = {
 		var windowMediator  = Components.classes['@mozilla.org/appshell/window-mediator;1'].getService(Components.interfaces.nsIWindowMediator);
 		var chromeWin = windowMediator.getMostRecentWindow("navigator:browser");
 		this.gSessionManager = chromeWin.gSessionManager;
+
+		// if encryption, force master password and exit if not entered
+		try {
+			if (this.gSessionManager.mPref_encrypt_sessions) this.gSessionManager.mSecretDecoderRing.encryptString("");
+		}
+		catch(ex) {
+			this.gSessionManager.cryptError(gSessionManager._string("encrypt_fail2"));
+			this.RDFService = null;
+			this.RDFResource = null;
+			this.gSessionManager = null;
+			return;
+		}
 		
 		// Determine Mozilla version to see what is supported
 		try {
@@ -486,6 +514,10 @@ var gConvertTMPSession = {
 				}
 			}
 		}
+
+		this.RDFService = null;
+		this.RDFResource = null;
+		this.gSessionManager = null;
 	},
 		
 	//
@@ -652,7 +684,8 @@ var gConvertTMPSession = {
 		if (!aSession.session)
 			aSession.session = { state:"stop" };
 		var oState = "[SessionManager]\nname=" + aName + "\ntimestamp=" + aTimestamp + "\nautosave=false\tcount=" +
-		             winCount + "/" + tabCount + "\tgroup=[Tabmix]\n" + aSession.toSource();
+		             winCount + "/" + tabCount + "\tgroup=[Tabmix]\n" + 
+					 this.gSessionManager.decryptEncryptByPreference(this.gSessionManager.JSON_encode(aSession));
 		var file = this.gSessionManager.getSessionDir(gSessionManager.makeFileName(aName));
 		try {
 			var file = this.gSessionManager.getSessionDir(aFileName, true);
