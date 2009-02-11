@@ -1019,7 +1019,7 @@ const SM_VERSION = "0.6.3";
 				state = this.decrypt(state);
 				if (!state) return;
 		
-				var tempState = this._safeEval("(" + state + ")");
+				var tempState = this.JSON_decode(state);
 				for (var i in tempState.windows) {
 					for (var j in tempState.windows[i].tabs) {
 						if (tempState.windows[i].tabs[j].entries && tempState.windows[i].tabs[j].entries.length != 0) {
@@ -1028,7 +1028,7 @@ const SM_VERSION = "0.6.3";
 						}
 					}
 				}
-				state = tempState.toSource();
+				state = this.JSON_encode(tempState);
 			}
 			catch (ex) { dump(ex + "\n"); };
 		}
@@ -1075,7 +1075,7 @@ const SM_VERSION = "0.6.3";
 				state = state.split("\n")
 				state[4] = this.decrypt(state[4]);
 				if (!state[4]) return;
-				state[4] = this._safeEval(state[4]);
+				state[4] = this.JSON_decode(state[4]);
 				if (state[4] && state[4].windows) {
 					// replace window session name in window session window
 					for (var i=0; i<state[4].windows.length; i++) {
@@ -1084,7 +1084,7 @@ const SM_VERSION = "0.6.3";
 						}
 					}
 				}
-				state[4] = state[4].toSource();
+				state[4] = this.JSON_encode(state[4]);
 				state[4] = this.decryptEncryptByPreference(state[4]); 
 				if (!state[4]) return;
 				state = state.join("\n");
@@ -1262,7 +1262,7 @@ const SM_VERSION = "0.6.3";
 		
 		var closedTabs = this.mSessionStore().getClosedTabData(window);
 		var mClosedTabs = [];
-		closedTabs = this._safeEval(closedTabs);
+		closedTabs = this.JSON_decode(closedTabs);
 		if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
@@ -1386,7 +1386,7 @@ const SM_VERSION = "0.6.3";
 
 			if (aIx >= 0) {
 				// get closed-tabs from nsSessionStore
-				var closedTabs = this._safeEval("(" + this.mSessionStore().getClosedTabData(window) + ")");
+				var closedTabs = this.JSON_decode(this.mSessionStore().getClosedTabData(window));
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
 				if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 				// purge closed tab at aIndex
@@ -1395,7 +1395,7 @@ const SM_VERSION = "0.6.3";
 			}
 
 			// replace existing _closedTabs
-			this.mSessionStore().setWindowState(window, state.toSource(), false);
+			this.mSessionStore().setWindowState(window, this.JSON_encode(state), false);
 			
 			// update the remaining entries
 			this.updateClosedList(aTarget, aIx, state.windows[0]._closedTabs.length, "tab");
@@ -2017,7 +2017,7 @@ const SM_VERSION = "0.6.3";
 		if ((backup > 0) || temp_backup) {
 			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")), true);
 			try {
-				var aState = this._safeEval("(" + state.split("\n")[4] + ")");
+				var aState = this.JSON_decode(state.split("\n")[4]);
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
 		    		(aState.windows[0].tabs[0].entries.length > 1) || 
 		    		((aState.windows[0].tabs[0].entries.length == 1 && aState.windows[0].tabs[0].entries[0].url != "about:blank")))) {
@@ -2120,7 +2120,7 @@ const SM_VERSION = "0.6.3";
 			var timestamp = parseInt(RegExp.$2) || aFile.lastModifiedTime;
 			if (headerOnly) state = this.readFile(aFile);
 			state = state.substring(state.indexOf("[Window1]\n"), state.length);
-			state = this.decodeOldFormat(state, true).toSource();
+			state = this.JSON_encode(this.decodeOldFormat(state, true));
 			state = state.substring(1,state.length-1);
 			var countString = getCountString(this.getCount(state));
 			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
@@ -2521,7 +2521,7 @@ const SM_VERSION = "0.6.3";
 		aObj["_closedTabs"] = [];
 
 		closedTabs.forEach(function(aValue, aIndex) {
-			aObj["_closedTabs"][aIndex] = this._safeEval(({ state : aValue[0].toSource() }));
+			aObj["_closedTabs"][aIndex] = this.JSON_decode({ state : this.JSON_encode(aValue[0]) });
 		}, this);
 	},
 
@@ -2832,7 +2832,7 @@ const SM_VERSION = "0.6.3";
 		var windows = 0, tabs = 0;
 		
 		try {
-			aState = this._safeEval("(" + aState + ")");
+			aState = this.JSON_decode(aState);
 			aState.windows.forEach(function(aWindow) {
 				windows = windows + 1;
 				tabs = tabs + aWindow.tabs.length;
@@ -2961,7 +2961,7 @@ const SM_VERSION = "0.6.3";
 	
 	makeOneWindow: function(aState)
 	{
-		aState = this._safeEval("(" + aState + ")");
+		aState = this.JSON_decode(aState);
 		if (aState.windows.length > 1)
 		{
 			// take off first window
@@ -2979,12 +2979,12 @@ const SM_VERSION = "0.6.3";
 			aState.windows = [];
 			aState.windows[0] = firstWindow;
 		}
-		return aState.toSource();
+		return this.JSON_encode(aState);
 	},
 	
 	modifySessionData: function(aState, aStrip, aSaving, afixBug350558, aReplacingWindow)
 	{
-		aState = this._safeEval("(" + aState + ")");
+		aState = this.JSON_decode(aState);
 		aState.windows.forEach(function(aWindow) {
 			// Strip out cookies if user doesn't want to save them
 			if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
@@ -3001,7 +3001,7 @@ const SM_VERSION = "0.6.3";
 		if (aReplacingWindow && (aState.windows.length == 1) && aState.windows[0].hidden) {
 			delete (aState.windows[0].hidden);
 		}
-		return aState.toSource();
+		return this.JSON_encode(aState);
 	},
 
 	getFormattedName: function(aTitle, aDate, aFormat)
@@ -3096,16 +3096,145 @@ const SM_VERSION = "0.6.3";
 	{
 		return this.mBundle.getString(aName);
 	},
+
+	/**
+	* Converts a JavaScript object into a JSON string
+	* (see http://www.json.org/ for the full grammar).  Only used in Firefox 2.0
+	*
+	* The inverse operation consists of eval("(" + JSON_string + ")");
+	* and should be provably safe.
+	*
+	* @param aJSObject is the object to be converted
+	* @return the object's JSON representation
+	*/
+	toJSONString: function toJSONString(aJSObject) {
+		// these characters have a special escape notation
+		const charMap = { "\b": "\\b", "\t": "\\t", "\n": "\\n", "\f": "\\f",
+		                  "\r": "\\r", '"': '\\"', "\\": "\\\\" };
+		// we use a single string builder for efficiency reasons
+		var parts = [];
+		
+		// this recursive function walks through all objects and appends their
+		// JSON representation to the string builder
+		function jsonIfy(aObj) {
+			if (typeof aObj == "boolean") {
+				parts.push(aObj ? "true" : "false");
+			}
+			else if (typeof aObj == "number" && isFinite(aObj)) {
+				// there is no representation for infinite numbers or for NaN!
+				parts.push(aObj.toString());
+			}
+			else if (typeof aObj == "string") {
+				aObj = aObj.replace(/[\\"\x00-\x1F\u0080-\uFFFF]/g, function($0) {
+				// use the special escape notation if one exists, otherwise
+				// produce a general unicode escape sequence
+				return charMap[$0] ||
+					"\\u" + ("0000" + $0.charCodeAt(0).toString(16)).slice(-4);
+				});
+				parts.push('"' + aObj + '"')
+			}
+			else if (aObj == null) {
+				parts.push("null");
+			}
+			// if it looks like an array, treat it as such -
+			// this is required for all arrays from a sandbox
+			else if (aObj instanceof Array ||
+					typeof aObj == "object" && "length" in aObj &&
+					(aObj.length === 0 || aObj[aObj.length - 1] !== undefined)) {
+				parts.push("[");
+				for (var i = 0; i < aObj.length; i++) {
+					jsonIfy(aObj[i]);
+					parts.push(",");
+				}
+				if (parts[parts.length - 1] == ",")
+					parts.pop(); // drop the trailing colon
+				parts.push("]");
+			}
+			else if (typeof aObj == "object") {
+				parts.push("{");
+				for (var key in aObj) {
+					if (key == "_tab")
+						continue; // XXXzeniko we might even want to drop all private members
+			
+					jsonIfy(key.toString());
+					parts.push(":");
+					jsonIfy(aObj[key]);
+					parts.push(",");
+				}
+				if (parts[parts.length - 1] == ",")
+					parts.pop(); // drop the trailing colon
+				parts.push("}");
+			}
+			else {
+				throw new Error("No JSON representation for this object!");
+			}
+		}
+		jsonIfy(aJSObject);
+		
+		var newJSONString = parts.join(" ");
+		// sanity check - so that API consumers can just eval this string
+		if (/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(
+			newJSONString.replace(/"(\\.|[^"\\])*"/g, "")
+		))
+		throw new Error("JSON conversion failed unexpectedly!");
+		
+		return newJSONString;
+	},
 	
-	// safe eval'ing
-	_safeEval: function(aStr) {
+	// Decode JSON string to javascript object - use JSON if built-in.
+	JSON_decode: function(aStr) {
+		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }] };
 		try {
-			return this.mComponents.utils.evalInSandbox(aStr, new this.mComponents.utils.Sandbox("about:blank"));
+			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
+			var needParens = typeof(JSON) == "undefined";
+		
+			if (needParens && !hasParens) {
+				aStr = '(' + aStr + ')';
+			}
+			if (!needParens && hasParens) {
+				aStr = aStr.substring(1, aStr.length - 1);
+			}
+		
+			if (!needParens) {
+				// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
+				try {
+					jsObject = JSON.parse(aStr);
+				}
+				catch (ex) {
+					jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
+				}
+			}
+			else {
+				jsObject = this.mComponents.utils.evalInSandbox(aStr, new this.mComponents.utils.Sandbox("about:blank"));
+			}
+		}
+		catch(ex) {
+			dump(ex + "\n");
+			this.sessionError(ex);
+		}
+		return jsObject;
+	},
+	
+	// Encode javascript object to JSON string - use JSON if built-in.
+	JSON_encode: function(aObj) {
+		var jsString = null;
+		try {
+			if (typeof(JSON) != "undefined") {
+				jsString = JSON.stringify(aObj);
+				jsString = "(" + jsString + ")";
+			}
+			else if (this.mComponents.classes["@mozilla.org/dom/json;1"]) {
+				var nativeJSON = this.mComponents.classes["@mozilla.org/dom/json;1"].createInstance(this.mComponents.interfaces.nsIJSON);
+				jsString = "(" + nativeJSON.encode(aObj) + ")";
+			}
+			else {
+				jsString = this.toJSONString(aObj);
+			}
 		}
 		catch(ex) {
 			this.sessionError(ex);
-			return { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }] };
 		}
+		return jsString;
 	}
 };
 

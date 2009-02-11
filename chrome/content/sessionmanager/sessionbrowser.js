@@ -89,7 +89,7 @@ function initTreeView(aFileName) {
   // Decrypt first, then evaluate
   state = gSessionManager.decrypt(state);
   if (!state) return;
-  gStateObject = gSessionManager._safeEval(state);
+  gStateObject = gSessionManager.JSON_decode(state);
   if (!gStateObject) return;
   
   gStateObject.windows.forEach(function(aWinData, aIx) {
@@ -141,10 +141,10 @@ function storeSession() {
       ix--;
     }
   }
-  var stateString = gStateObject.toSource();
+  var stateString = gSessionManager.JSON_encode(gStateObject);
   
   var smHelper = Cc["@morac/sessionmanager-helper;1"].getService(Ci.nsISessionManangerHelperComponent);
-  smHelper.setSessionData(gStateObject.toSource());
+  smHelper.setSessionData(gSessionManager.JSON_encode(gStateObject));
 }
 
 function onTabTreeClick(aEvent) {
@@ -236,7 +236,7 @@ function restoreSingleTab(aIx, aShifted) {
   var ss = Cc["@mozilla.org/browser/sessionstore;1"].getService(Ci.nsISessionStore);
   var tabState = gStateObject.windows[item.parent.ix]
                              .tabs[aIx - gTreeData.indexOf(item.parent) - 1];
-  ss.setTabState(newTab, tabState.toSource());
+  ss.setTabState(newTab, gSessionManager.JSON_encode(tabState));
   
   // respect the preference as to whether to select the tab (the Shift key inverses)
   var prefBranch = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
