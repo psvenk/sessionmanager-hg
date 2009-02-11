@@ -816,12 +816,11 @@ const SM_VERSION = "0.6.3";
 		}
 	},
 
-	save: function(aName, aFileName, aOneWindow)
+	save: function(aName, aFileName, aGroup, aOneWindow)
 	{
 		if (this.isPrivateBrowserMode()) return;
 		aOneWindow = aOneWindow && (this.getBrowserWindows().length > 1);
 		
-		var aGroup = null;
 		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString(), autoSaveable : true };
 		if (!aName)
 		{
@@ -866,9 +865,9 @@ const SM_VERSION = "0.6.3";
 //		}
 	},
 
-	saveWindow: function(aName, aFileName)
+	saveWindow: function(aName, aFileName, aGroup)
 	{
-		this.save(aName, aFileName, true);
+		this.save(aName, aFileName, aGroup, true);
 	},
 	
 	// if aOneWindow is true, then close the window session otherwise close the browser session
@@ -1543,11 +1542,16 @@ const SM_VERSION = "0.6.3";
 	session_replace: function(aWindow) {
 		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
+		var parent = document.popupNode.parentNode.parentNode;
+		var group = null;
+		if (parent.id.indexOf("sessionmanager-") == -1) {
+			group = parent.label;
+		}
 		if (aWindow) {
-			this.saveWindow(this.mSessionCache[session].name, session);
+			this.saveWindow(this.mSessionCache[session].name, session, group);
 		}
 		else {
-			this.save(this.mSessionCache[session].name, session);
+			this.save(this.mSessionCache[session].name, session, group);
 		}
 	},
 	
