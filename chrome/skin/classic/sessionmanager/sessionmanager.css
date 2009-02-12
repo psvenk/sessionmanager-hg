@@ -1,3 +1,7 @@
+/* Use our icons if chrome://browser/skin/aboutSessionRestore.css doesn't exist */
+@import url(chrome://sessionmanager/skin/tabwintree.css);
+@import url(chrome://browser/skin/aboutSessionRestore.css);
+
 #sessionmanager-menu menuitem[_id="windows"],
 #sessionmanager-toolbar menuitem[_id="windows"],
 #sessionmanager-undo menuitem[_id="windows"],
@@ -105,30 +109,4 @@ treechildren::-moz-tree-cell-text(disabled),
 /* Center labels in Session Prompt window */
 label[class="textbox_label"] {
 	margin-top: 5px !important;
-}
-
-/* Window and Tab tree */
-treechildren::-moz-tree-image(icon),
-treechildren::-moz-tree-image(noicon) {
-  padding-right: 2px;
-  margin: 0px 2px;
-  width: 16px;
-  height: 16px;
-}
-
-treechildren::-moz-tree-image(noicon) {
-  list-style-image: url("chrome://mozapps/skin/places/defaultFavicon.png");
-}
-treechildren::-moz-tree-image(container, noicon) {
-  list-style-image: url("chrome://global/skin/icons/folder-item.png");
-  -moz-image-region: rect(0px, 32px, 16px, 16px);
-}
-treechildren::-moz-tree-image(container, open, noicon) {
-  -moz-image-region: rect(16px, 32px, 32px, 16px);
-}
-treechildren::-moz-tree-image(checked) {
-  list-style-image: url("chrome://global/skin/checkbox/cbox-check.gif");
-}
-treechildren::-moz-tree-image(partial) {
-  list-style-image: url("chrome://global/skin/checkbox/cbox-check-dis.gif");
 }
