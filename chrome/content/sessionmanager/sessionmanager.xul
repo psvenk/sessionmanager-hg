@@ -11,7 +11,7 @@
 	</stringbundleset>
 	
 	<!-- Menu in toolbar -->
-	<toolbarpalette id="BrowserToolbarPalette"> <!-- Firefox (toolbar) -->
+	<toolbarpalette id="BrowserToolbarPalette"> <!-- Firefox/SeaMonkey (toolbar) -->
 		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" buttontooltiptext="&toolbar.tooltip;"
 		               oncommand="gSessionManager.save(null, null, null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.menu.tooltip;" contextmenu="">
 			<menupopup onpopupshowing="gSessionManager.init(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
@@ -68,74 +68,53 @@
 			insertbefore="devToolsSeparator"
 		/-->
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="devToolsSeparator">
-			<menupopup onpopupshowing="gSessionManager.init(this);">
-				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
-				<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
-				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
-				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
-				<menuseparator _id="backup-separator"/>
-				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
-					<menupopup onpopupshowing="event.stopPropagation();">
-					</menupopup>
-				</menu>
-				<menuseparator _id="start-separator"/>
-				<menuseparator _id="separator"/>
-				<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
-				<menuitem label="&remove.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.remove();"/>
-				<menuitem label="&group.label;" accesskey="&group.accesskey;" oncommand="gSessionManager.group();"/>
-				<menuitem label="&openFolder.label;" accesskey="&openFolder.accesskey;" oncommand="gSessionManager.openFolder();"/>
-				<menuseparator _id="options-separator"/>
-				<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="gSessionManager.openOptions();"/>
-				<menuseparator/>
-				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
-					<menupopup onpopupshowing="event.stopPropagation();">
-						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
-						<menuseparator _id="closed-separator"/>
-						<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
-						<menuseparator _id="end-separator"/>
-						<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="gSessionManager.clearUndoListPrompt();"/>
-					</menupopup>
-				</menu>
-			</menupopup>
+				<menupopup id="sessionmanager-menu-popup"/>
 		</menu>
 	</menupopup>
 	
 	<menupopup id="taskPopup"> <!-- SeaMonkey -->
+		<!--menuitem
+			id="sessionexplorer-item"
+			label="Session Explorer"
+			accesskey="E"
+			oncommand="gSessionManager.openSessionExplorer()"
+			insertbefore="devToolsSeparator"
+		/-->
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="navBeginGlobalItems">
-			<menupopup onpopupshowing="gSessionManager.init(this);">
-				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
-				<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
-				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
-				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
-				<menuseparator _id="backup-separator"/>
-				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
-					<menupopup onpopupshowing="event.stopPropagation();">
-					</menupopup>
-				</menu>
-				<menuseparator _id="start-separator"/>
-				<menuseparator _id="separator"/>
-				<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
-				<menuitem label="&remove.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.remove();"/>
-				<menuitem label="&group.label;" accesskey="&group.accesskey;" oncommand="gSessionManager.group();"/>
-				<menuitem label="&openFolder.label;" accesskey="&openFolder.accesskey;" oncommand="gSessionManager.openFolder();"/>
-				<menuseparator _id="options-separator"/>
-				<menuitem _id="resume" type="checkbox" label="&resume.label;" accesskey="&resume.accesskey;" oncommand="gSessionManager.toggleResume();"/>
-				<menuitem _id="reload" type="checkbox" label="&reload.label;" accesskey="&reload.accesskey;" oncommand="gSessionManager.toggleReload();"/>
-				<menuitem _id="overwrite" type="checkbox" label="&overwrite.label;" accesskey="&overwrite.accesskey;" oncommand="gSessionManager.toggleOverwrite();"/>
-				<menuseparator/>
-				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
-					<menupopup onpopupshowing="event.stopPropagation();">
-						<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
-						<menuseparator _id="closed-separator"/>
-						<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
-						<menuseparator _id="end-separator"/>
-						<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="gSessionManager.clearUndoListPrompt();"/>
-					</menupopup>
-				</menu>
-			</menupopup>
+				<menupopup id="sessionmanager-menu-popup"/>
 		</menu>
 	</menupopup>
 	
+	<menupopup id="sessionmanager-menu-popup" onpopupshowing="gSessionManager.init(this);">
+		<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
+		<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
+		<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
+		<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
+		<menuseparator _id="backup-separator"/>
+		<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
+			<menupopup onpopupshowing="event.stopPropagation();">
+			</menupopup>
+		</menu>
+		<menuseparator _id="start-separator"/>
+		<menuseparator _id="separator"/>
+		<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.rename();"/>
+		<menuitem label="&remove.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.remove();"/>
+		<menuitem label="&group.label;" accesskey="&group.accesskey;" oncommand="gSessionManager.group();"/>
+		<menuitem label="&openFolder.label;" accesskey="&openFolder.accesskey;" oncommand="gSessionManager.openFolder();"/>
+		<menuseparator _id="options-separator"/>
+		<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="gSessionManager.openOptions();"/>
+		<menuseparator/>
+		<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
+			<menupopup onpopupshowing="event.stopPropagation();">
+				<menuitem _id="windows" label="&closedWindows;" disabled="true"/>
+				<menuseparator _id="closed-separator"/>
+				<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
+				<menuseparator _id="end-separator"/>
+				<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="gSessionManager.clearUndoListPrompt();"/>
+			</menupopup>
+		</menu>
+	</menupopup>
+
 	<menupopup id="sessionmanager-ContextMenu" onpopupshowing="gSessionManager.session_popupInit(this);">
 		<menuitem _id="loadr" label="&load_replace.label;" accesskey="&load_replace.accesskey;" oncommand="gSessionManager.session_load(true);"/>
 		<menuitem _id="loada" label="&load_append.label;" accesskey="&load_append.accesskey;" oncommand="gSessionManager.session_load(false);"/>

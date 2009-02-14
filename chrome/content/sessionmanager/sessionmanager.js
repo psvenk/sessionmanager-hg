@@ -47,7 +47,7 @@ const SM_VERSION = "0.6.3";
 					getService(this.mComponents.interfaces.nsISessionStartup);
 			}
 			// SeaMonkey
-			else if (this.mComponents.classes["@mozilla.org/suite/sessionstore ;1"]) {
+			else if (this.mComponents.classes["@mozilla.org/suite/sessionstore;1"]) {
 				this.mSessionStoreValue = this.mComponents.classes["@mozilla.org/suite/sessionstore;1"].
 					getService(this.mComponents.interfaces.nsISessionStore);
 				this.mSessionStartupValue = this.mComponents.classes["@mozilla.org/suite/sessionstartup;1"].
@@ -68,8 +68,8 @@ const SM_VERSION = "0.6.3";
 		    		var liExtensionManager = this.mComponents.classes["@mozilla.org/extensions/manager;1"].getService(this.mComponents.interfaces.nsIExtensionManager);
 					liExtensionManager.uninstallItem("{1280606b-2510-4fe0-97ef-9b5a22eafe30}");
 					this.setPref("browser.sessionmanager.uninstalled", true, true);
-					window.addEventListener("unload", gSessionManager.onUnload_Uninstall, false);
 				}
+				window.addEventListener("unload", gSessionManager.onUnload_Uninstall, false);
 			}
 		}
 		return this.mSessionStoreValue;
@@ -239,7 +239,7 @@ const SM_VERSION = "0.6.3";
 		}
 		
 		// SeaMonkey doesn't have an undoCloseTab function so create one
-		if (!undoCloseTab) {
+		if (typeof(undoCloseTab) == "undefined") {
 			undoCloseTab = function () { gSessionManager.undoCloseTabSM; }
 		}
 		
@@ -308,7 +308,11 @@ const SM_VERSION = "0.6.3";
 	onUnload_Uninstall: function()
 	{
 		this.removeEventListener("unload", gSessionManager.onUnload_Uninstall, false);
-		gSessionManager.delPref("browser.sessionmanager.uninstalled", true);
+		
+		// last window closing, delete preference
+		if (gSessionManager.getBrowserWindows().length == 1) {
+			gSessionManager.delPref("browser.sessionmanager.uninstalled", true);
+		}
 	},
 	
 	onUnload_proxy: function()
@@ -1210,21 +1214,6 @@ const SM_VERSION = "0.6.3";
 		}
 		
 		openDialog("chrome://sessionmanager/content/options.xul", "_blank", "chrome,titlebar,toolbar,centerscreen," + ((this.getPref("browser.preferences.instantApply", false, true))?"dialog=no":"modal"));
-	},
-
-	toggleResume: function()
-	{
-		this.setResumeCurrent(!this.doResumeCurrent());
-	},
-
-	toggleReload: function()
-	{
-		this.setPref("reload", !this.mPref_reload);
-	},
-
-	toggleOverwrite: function()
-	{
-		this.setPref("overwrite", !this.mPref_overwrite);
 	},
 
 /* ........ Undo Menu Event Handlers .............. */
