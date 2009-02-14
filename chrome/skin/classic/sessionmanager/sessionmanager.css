@@ -1,6 +1,7 @@
-/* Use our icons if chrome://browser/skin/aboutSessionRestore.css doesn't exist */
+/* Use our icons if built in aboutSessionRestore.css doesn't exist */
 @import url(chrome://sessionmanager/skin/tabwintree.css);
-@import url(chrome://browser/skin/aboutSessionRestore.css);
+@import url(chrome://communicator/skin/aboutSessionRestore.css);  /* SeaMonkey */
+@import url(chrome://browser/skin/aboutSessionRestore.css);       /* Firefox */
 
 #sessionmanager-menu menuitem[_id="windows"],
 #sessionmanager-toolbar menuitem[_id="windows"],
