@@ -234,7 +234,16 @@ const SM_VERSION = "0.6.3";
 		if (this.mAppVersion < "1.9") {
 			this.mOrigCloseWindow = closeWindow;
 			closeWindow = function() { 
-				if (gSessionManager.mOrigCloseWindow.apply(this, arguments)) gSessionManager.onWindowClose();
+				var result = gSessionManager.mOrigCloseWindow.apply(this, arguments);
+				if (result) {
+					try {
+						gSessionManager.onWindowClose();
+					}
+					catch (ex) {
+						dump(ex + "\n");
+					}
+				}
+				return result;
 			}
 		}
 		
@@ -369,17 +378,6 @@ const SM_VERSION = "0.6.3";
 				
 		if (this.mPref__running && numWindows == 0)
 		{
-			// store current window or session data in case it's needed later
-			// Don't do this on shutdown or if preference to shutdown on last window closed is set.
-			if (!this.mPref__stopping && !this.mPref_shutdown_on_last_window_close) {
-				var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : this.__window_session_name;
-				this.mLastState = (name) ? 
-			    	               this.getSessionState(name, null, this.mPref_save_closed_tabs < 2, true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
-			        	           this.getSessionState(null, true, null, null, null, true); 
-				this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
-				this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
-			}
-			
 			this._string_preserve_session = this._string("preserve_session");
 			this._string_backup_session = this._string("backup_session");
 			this._string_backup_sessions = this._string("backup_sessions");
@@ -635,12 +633,33 @@ const SM_VERSION = "0.6.3";
 			this.closeSession(true);
 		}
 			
-		// only save closed window if running, not shutting down and this isn't the last window of any type open
-		if (this.mPref__running && !this.mPref__stopping && (this.getBrowserWindows().length > 0))
+		// only save closed window if running and not shutting down 
+		if (this.mPref__running && !this.mPref__stopping)
 		{
-			var state = this.getSessionState(null, true, null, null, null, true);
-			this.appendClosedWindow(state);
-			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+			// Get number of windows open after closing this one.  Firefox 2.0 counts the closing window as open so decrement by one.
+			var numWindows = this.getBrowserWindows().length;
+			if (!this.mLastState && (this.mAppVersion < "1.9")) numWindows--;
+			
+			// save window in closed window list if not last window, otherwise store the last window state for use later
+			if (numWindows > 0)
+			{
+				var state = this.getSessionState(null, true, null, null, null, true);
+				this.appendClosedWindow(state);
+				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+			}
+			else
+			{
+				// store current window or session data in case it's needed later
+				// Don't do this if preference to shutdown on last window closed is set.
+				if (!this.mPref_shutdown_on_last_window_close) {
+					var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : this.__window_session_name;
+					this.mLastState = (name) ? 
+		    	               this.getSessionState(name, null, this.mPref_save_closed_tabs < 2, true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
+		        	           this.getSessionState(null, true, null, null, null, true); 
+					this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
+					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+				}
+			}
 		}
 	},
 	
@@ -1899,7 +1918,11 @@ const SM_VERSION = "0.6.3";
 			this.mClosedWindowsCache.data = null;
 			this.mClosedWindowsCache.timestamp = 0;
 		}
-		this.updateToolbarButton(aList.length + this.mSessionStore().getClosedTabCount(window)  > 0);
+		
+		// Firefox 2.0 will throw an exception if getClosedTabCount is called for a closed window so just fake it
+		// if mLastState is set, because parameter will always be true in that case.
+		if (this.mLastState) this.updateToolbarButton(true);
+		else this.updateToolbarButton(aList.length + this.mSessionStore().getClosedTabCount(window)  > 0);
 	},
 
 	appendClosedWindow: function(aState)
