@@ -102,18 +102,9 @@ const SM_VERSION = "0.6.3";
 		
 		// Determine Mozilla version to see what is supported
 		this.mAppVersion = "0";
-		this.mAppId = "UNKNOWN";
 		try {
-			var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
-			this.mAppVersion = appInfo.platformVersion;
-			switch (appInfo.ID) {
-				case "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-					this.mAppID = "FIREFOX";
-					break;
-				case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
-					this.mAppID = "SEAMONKEY";
-					break;
-			}
+			this.mAppVersion = Components.classes["@mozilla.org/xre/app-info;1"].
+			                   getService(Components.interfaces.nsIXULAppInfo).platformVersion;
 		} catch (e) { dump(e + "\n"); }
 
 		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
@@ -3247,8 +3238,6 @@ const SM_VERSION = "0.6.3";
 		try {
 			if (typeof(JSON) != "undefined") {
 				jsString = JSON.stringify(aObj);
-				// Seamonkey can't handle () enclosed JSON strings, but Firefox needs them.
-				if (this.mAppID != "SEAMONKEY") jsString = "(" + jsString + ")";
 			}
 			else if (this.mComponents.classes["@mozilla.org/dom/json;1"]) {
 				var nativeJSON = this.mComponents.classes["@mozilla.org/dom/json;1"].createInstance(this.mComponents.interfaces.nsIJSON);
