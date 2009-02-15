@@ -102,9 +102,18 @@ const SM_VERSION = "0.6.3";
 		
 		// Determine Mozilla version to see what is supported
 		this.mAppVersion = "0";
+		this.mAppId = "UNKNOWN";
 		try {
-			this.mAppVersion = Components.classes["@mozilla.org/xre/app-info;1"].
-			                   getService(Components.interfaces.nsIXULAppInfo).platformVersion;
+			var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
+			this.mAppVersion = appInfo.platformVersion;
+			switch (appInfo.ID) {
+				case "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+					this.mAppID = "FIREFOX";
+					break;
+				case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
+					this.mAppID = "SEAMONKEY";
+					break;
+			}
 		} catch (e) { dump(e + "\n"); }
 
 		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
@@ -249,7 +258,7 @@ const SM_VERSION = "0.6.3";
 		
 		// SeaMonkey doesn't have an undoCloseTab function so create one
 		if (typeof(undoCloseTab) == "undefined") {
-			undoCloseTab = function () { gSessionManager.undoCloseTabSM; }
+			undoCloseTab = function (aIndex) { gSessionManager.undoCloseTabSM(aIndex); }
 		}
 		
 		// add call to gSessionManager_Sanitizer (code take from Tab Mix Plus)
@@ -551,7 +560,8 @@ const SM_VERSION = "0.6.3";
 
 	onTabOpenClose: function(aEvent)
 	{
-		gSessionManager.updateToolbarButton();
+		// Give browser a chance to update count closed tab count.  Only SeaMonkey currently needs this, but it doesn't hurt Firefox.
+		setTimeout(function () { gSessionManager.updateToolbarButton(); }, 0);
 	},
 	
 	// This is to try and prevent tabs that are closed during the restore preocess from actually reloading.  
@@ -3237,7 +3247,8 @@ const SM_VERSION = "0.6.3";
 		try {
 			if (typeof(JSON) != "undefined") {
 				jsString = JSON.stringify(aObj);
-				jsString = "(" + jsString + ")";
+				// Seamonkey can't handle () enclosed JSON strings, but Firefox needs them.
+				if (this.mAppID != "SEAMONKEY") jsString = "(" + jsString + ")";
 			}
 			else if (this.mComponents.classes["@mozilla.org/dom/json;1"]) {
 				var nativeJSON = this.mComponents.classes["@mozilla.org/dom/json;1"].createInstance(this.mComponents.interfaces.nsIJSON);
