@@ -20,9 +20,9 @@ treechildren::-moz-tree-image(container, noicon, open) {
 }
 
 treechildren::-moz-tree-checkbox(checked) {
-  list-style-image: url("chrome://sessionmanager/skin/cbox-check-sm.gif");
+  list-style-image: url("chrome://sessionmanager/skin/cbox-check.gif");
 }
 
 treechildren::-moz-tree-checkbox(partial) {
-  list-style-image: url("chrome://sessionmanager/skin/cbox-check-dis-sm.gif");
+  list-style-image: url("chrome://sessionmanager/skin/cbox-check-dis.gif");
 }
