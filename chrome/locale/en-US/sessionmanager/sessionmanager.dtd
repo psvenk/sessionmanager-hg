@@ -68,3 +68,7 @@
 <!ENTITY winTabTree.listHeader "Windows and Tabs">
 <!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Window &#37;S">
+<!ENTITY load.label "Load Session...">
+<!ENTITY load.accesskey "L">
+<!ENTITY prompt.append.label "Append to Session">
+<!ENTITY prompt.replace.label "Replace Session">
