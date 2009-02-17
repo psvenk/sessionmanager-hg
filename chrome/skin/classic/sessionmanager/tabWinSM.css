@@ -1,0 +1,28 @@
+/* Window and Tab tree */
+treechildren::-moz-tree-image(icon),
+treechildren::-moz-tree-image(noicon) {
+  padding-right: 2px;
+  margin: 0px 2px;
+  width: 16px;
+  height: 16px;
+}
+
+treechildren::-moz-tree-image(noicon) {
+  list-style-image: url("chrome://sessionmanager/skin/bookmark-item.png");
+}
+
+treechildren::-moz-tree-image(container, noicon) {
+  list-style-image: url("chrome://sessionmanager/skin/bookmark-folder-closed.png");
+}
+
+treechildren::-moz-tree-image(container, noicon, open) {
+  list-style-image: url("chrome://sessionmanager/skin/bookmark-folder-open.png");
+}
+
+treechildren::-moz-tree-checkbox(checked) {
+  list-style-image: url("chrome://sessionmanager/skin/cbox-check-sm.gif");
+}
+
+treechildren::-moz-tree-checkbox(partial) {
+  list-style-image: url("chrome://sessionmanager/skin/cbox-check-dis-sm.gif");
+}

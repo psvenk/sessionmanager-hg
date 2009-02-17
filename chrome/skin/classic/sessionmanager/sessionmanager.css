@@ -106,33 +106,3 @@ treechildren::-moz-tree-cell-text(disabled),
 label[class="textbox_label"] {
 	margin-top: 5px !important;
 }
-
-/* Window and Tab tree */
-treechildren::-moz-tree-image(icon),
-treechildren::-moz-tree-image(noicon) {
-  padding-right: 2px;
-  margin: 0px 2px;
-  width: 16px;
-  height: 16px;
-}
-
-treechildren::-moz-tree-image(noicon) {
-  list-style-image: url("chrome://sessionmanager/skin/defaultFavicon.png");
-}
-
-treechildren::-moz-tree-image(container, noicon) {
-  list-style-image: url("chrome://sessionmanager/skin/folder-item.png");
-  -moz-image-region: rect(0px, 32px, 16px, 16px);
-}
-
-treechildren::-moz-tree-image(container, noicon, open) {
-  -moz-image-region: rect(16px, 32px, 32px, 16px);
-}
-
-treechildren::-moz-tree-checkbox(checked) {
-  list-style-image: url("chrome://sessionmanager/skin/cbox-check.gif");
-}
-
-treechildren::-moz-tree-checkbox(partial) {
-  list-style-image: url("chrome://sessionmanager/skin/cbox-check-dis.gif");
-}
