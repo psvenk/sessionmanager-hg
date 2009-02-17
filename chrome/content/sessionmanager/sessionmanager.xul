@@ -15,6 +15,7 @@
 		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" buttontooltiptext="&toolbar.tooltip;"
 		               oncommand="gSessionManager.save(null, null, null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.menu.tooltip;" contextmenu="">
 			<menupopup onpopupshowing="gSessionManager.init(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
+				<menuitem label="&load.label;" accesskey="&load.accesskey;" oncommand="gSessionManager.load();"/>
 				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
 				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>

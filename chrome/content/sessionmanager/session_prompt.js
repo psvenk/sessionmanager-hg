@@ -26,6 +26,7 @@ var sortedBy = 0;
 // 8   = autosaveable        - Displays autosave checkbox
 // 16  = remove              - true if deleting session(s)
 // 32  = grouping            - true if changing grouping
+// 64  = append/replace      - true if displaying the append/replace radio group, false otherwise
 // 256 = allow name replace  - true if double clicking a session name on save will replace existing session, but use default session name.
 //                                  (This is currently only settable via a userChrome.js script).
 
@@ -44,7 +45,8 @@ var sortedBy = 0;
 // SetInt 1 bit values
 // 4  = ignore               - ignore checkbox checked
 // 8  = autosave             - autosave checkbox checked
-// 64 = tabprompt            - tabprompt checbox checked
+// 16 = tabprompt            - tabprompt checbox checked
+// 32 = append flag          - true if append session, false if replace
 
 // SetString values
 // 3 = Session Filename
@@ -99,6 +101,10 @@ gSessionManager.onLoad = function() {
 	// hide/show the Autosave checkboxes
 	_("checkbox_autosave").hidden = !(gParams.GetInt(1) & 8);
 	_("save_every").hidden = _("checkbox_autosave").hidden || !_("checkbox_autosave").checked;
+	
+	// hide/show the append/replace checkboxes
+	_("radio_append_replace").hidden = !(gParams.GetInt(1) & 64);
+	_("radio_append_replace").selectedIndex = this.getPref("overwrite", false) ? 1 : 0;
 
 	gBackupGroupName = this._string("backup_sessions");
 	gBackupNames[this._string("backup_session").trim().toLowerCase()] = true;
@@ -242,7 +248,7 @@ gSessionManager.onUnload = function() {
 	if (!gAllTabsChecked) storeSession();
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
-	                  ((!gAllTabsChecked)?64:0));
+	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected)?32:0));
 	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
 };
 

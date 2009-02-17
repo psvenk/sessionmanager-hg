@@ -798,14 +798,6 @@ const SM_VERSION = "0.6.3";
 		this.setDisabled(separator.nextSibling, separator.hidden && backupSep.hidden);
 		this.setDisabled(separator.nextSibling.nextSibling, separator.hidden && backupSep.hidden);
 		
-		try
-		{
-			get_("resume").setAttribute("checked", this.doResumeCurrent());
-			get_("overwrite").setAttribute("checked", this.mPref_overwrite);
-			get_("reload").setAttribute("checked", this.mPref_reload);
-		}
-		catch (ex) { } // not available for Firefox
-		
 		var undoMenu = get_("undo-menu");
 		while (aPopup.lastChild != undoMenu)
 		{
@@ -937,9 +929,16 @@ const SM_VERSION = "0.6.3";
 	load: function(aFileName, aMode, aChoseTabs)
 	{
 		var state, chosenState;
+		if (!aFileName) {
+			var values = { append_replace: true };
+			aFileName = this.selectSession(this._string("load_session"), this._string("load_session_ok"), values);
+			if (!aFileName || !this.getSessionDir(aFileName).exists()) return;
+			aChoseTabs = values.choseTabs;
+			aMode = values.append ? "newwindow" : "overwrite";
+		}
 		if (aChoseTabs) {
 			// Get windows and tabs chosen by user
-			var smHelper = Cc["@morac/sessionmanager-helper;1"].getService(Ci.nsISessionManangerHelperComponent);
+			var smHelper = Components.classes["@morac/sessionmanager-helper;1"].getService(Components.interfaces.nsISessionManangerHelperComponent);
 			chosenState = smHelper.mSessionData;
 			smHelper.setSessionData("");
 			
@@ -1628,7 +1627,7 @@ const SM_VERSION = "0.6.3";
 		params.SetString(7, aValues.count || "");
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
 						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) |
-						  ((aValues.allowNamedReplace)?256:0));
+						  ((aValues.append_replace)?64:0) | ((aValues.allowNamedReplace)?256:0));
 		
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, (this.mFullyLoaded)?window:null);
 		
@@ -1637,7 +1636,8 @@ const SM_VERSION = "0.6.3";
 		aValues.group = params.GetString(7);
 		aValues.ignore = (params.GetInt(1) & 4)?1:0;
 		aValues.autoSave = (params.GetInt(1) & 8)?1:0;
-		aValues.choseTabs = (params.GetInt(1) & 64)?1:0;
+		aValues.choseTabs = (params.GetInt(1) & 16)?1:0;
+		aValues.append = (params.GetInt(1) & 32)?1:0;
 		aValues.autoSaveTime = params.GetInt(2) | null;
 		return params.GetInt(0);
 	},

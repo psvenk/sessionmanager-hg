@@ -78,6 +78,10 @@
 			</vbox>
 			<vbox>
 				<hbox id="checkbox_container">
+					<radiogroup id="radio_append_replace" hidden="true">
+						<radio id="radio_append" label="&prompt.append.label;"/>
+						<radio id="radio_replace" label="&prompt.replace.label;"/>
+					</radiogroup>
 					<checkbox id="checkbox_ignore" label="&prompt.ignore.label;" hidden="true"/>
 					<checkbox id="checkbox_autosave" label="&prompt.autosave.label;" hidden="true"
 					          onclick="window.setTimeout(_save_every_update,0)"/>
