@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Geri yükle">
 <!ENTITY winTabTree.listHeader "Pencereler ve Sekmeler">
 <!ENTITY winTabTree.windowLabel "Pencere &#37;S">
+<!ENTITY load.label "Oturum Yükle...">
+<!ENTITY load.accesskey "L">
+<!ENTITY prompt.append.label "Oturuma Ekle">
+<!ENTITY prompt.replace.label "Oturum Değiştir">

@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Wiederherstellen">
 <!ENTITY winTabTree.listHeader "Fenster und Tabs">
 <!ENTITY winTabTree.windowLabel "Fenster &#37;S">
+<!ENTITY load.label "Sitzung laden...">
+<!ENTITY load.accesskey "l">
+<!ENTITY prompt.append.label "Sitzung hinzufügen">
+<!ENTITY prompt.replace.label "Sitzung ersetzen">

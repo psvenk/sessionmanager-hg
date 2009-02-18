@@ -60,10 +60,3 @@
 <!ENTITY change_group.accesskey "V">
 <!ENTITY group.label "Istunnot-ryhmä...">
 <!ENTITY group.accesskey "I">
-<!ENTITY toolbar.menu.tooltip "Open session management menu">
-<!ENTITY toolbar.undo.menu.tooltip "Open recently closed windows and tabs menu">
-<!ENTITY prompt.save_every1.label "Save every">
-<!ENTITY prompt.save_every2.label "minutes (disabled if blank)">
-<!ENTITY winTabTree.restoreHeader "Restore">
-<!ENTITY winTabTree.listHeader "Windows and Tabs">
-<!ENTITY winTabTree.windowLabel "Window &#37;S">

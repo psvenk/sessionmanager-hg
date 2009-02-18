@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Restaurar">
 <!ENTITY winTabTree.listHeader "Janelas e separadores">
 <!ENTITY winTabTree.windowLabel "Janela &#37;S">
+<!ENTITY load.label "Carregar sessão...">
+<!ENTITY load.accesskey "C">
+<!ENTITY prompt.append.label "Anexar à sessão">
+<!ENTITY prompt.replace.label "Substituir sessão">

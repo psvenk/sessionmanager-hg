@@ -33,37 +33,3 @@
 <!ENTITY toolbar.undo.tooltip "Восстановить последнюю закрытую вкладку">
 <!ENTITY prompt.ignore.label "Не показывать это сообщение в дальнейшем">
 <!ENTITY prompt.autosave.label "Сделать автосохраняемую сессию">
-<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
-<!ENTITY load_replace.label "Load (Replace Current Session)">
-<!ENTITY load_replace.accesskey "L">
-<!ENTITY load_append.label "Load (Append To Current Session)">
-<!ENTITY load_append.accesskey "A">
-<!ENTITY replace_all.label "Replace Session With Current Session">
-<!ENTITY replace_all.accesskey "R">
-<!ENTITY replace_window.label "Replace Session With Current Window">
-<!ENTITY replace_window.accesskey "W">
-<!ENTITY remove_one.label "Delete Session...">
-<!ENTITY set_startup.label "Set As Startup Session">
-<!ENTITY set_startup.accesskey "S">
-<!ENTITY openSessionManagerSidebar.commandkey "S">
-<!ENTITY session_name.label "Название">
-<!ENTITY session_windows.label "Окна">
-<!ENTITY session_tabs.label "Вкладки">
-<!ENTITY backup_sessions.label "Backup Sessions">
-<!ENTITY backup_sessions.accesskey "B">
-<!ENTITY remove_item.label "Delete Item">
-<!ENTITY remove_item.accesskey "D">
-<!ENTITY session_group.label "Group">
-<!ENTITY rename_group.label "Rename Group...">
-<!ENTITY remove_group.label "Delete Group...">
-<!ENTITY change_group.label "Change Group...">
-<!ENTITY change_group.accesskey "C">
-<!ENTITY group.label "Group Session(s)...">
-<!ENTITY group.accesskey "G">
-<!ENTITY toolbar.menu.tooltip "Open session management menu">
-<!ENTITY toolbar.undo.menu.tooltip "Open recently closed windows and tabs menu">
-<!ENTITY prompt.save_every1.label "Save every">
-<!ENTITY prompt.save_every2.label "minutes (disabled if blank)">
-<!ENTITY winTabTree.restoreHeader "Restore">
-<!ENTITY winTabTree.listHeader "Windows and Tabs">
-<!ENTITY winTabTree.windowLabel "Window &#37;S">

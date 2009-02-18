@@ -1,4 +1,4 @@
-<!ENTITY options.title "&sessionManager; - ustawienia">
+<!ENTITY options.title "&sessionManager; – ustawienia">
 <!ENTITY general.caption "Ogólne">
 <!ENTITY startNend.caption "Otwieranie/zamykanie przeglądarki">
 <!ENTITY resume_sess.label "Podczas uruchamiania wczytuj następującą sesję:">
@@ -19,13 +19,13 @@
 <!ENTITY orderList.label1 "alfabetycznie">
 <!ENTITY orderList.label2 "od najstarszych">
 <!ENTITY orderList.label_2 "od najnowszych">
-<!ENTITY max_backup.label "Ilość utrzymywanych kopii zapasowych uszkodzonych sesji:">
+<!ENTITY max_backup.label "Liczba utrzymywanych kopii zapasowych uszkodzonych sesji:">
 <!ENTITY max_backup.accesskey "u">
 <!ENTITY undoClose.caption "Odzyskiwanie">
 <!ENTITY windowsNtabs.caption "Zamykanie okien i kart">
-<!ENTITY max_closed.label "Ilość zapamiętanych zamkniętych okien:">
+<!ENTITY max_closed.label "Liczba zapamiętanych zamkniętych okien:">
 <!ENTITY max_closed.accesskey "o">
-<!ENTITY max_tabs.label "Ilość zapamiętanych zamkniętych kart ( w jednym oknie):">
+<!ENTITY max_tabs.label "Liczba zapamiętanych zamkniętych kart ( w jednym oknie):">
 <!ENTITY max_tabs.accesskey "r">
 <!ENTITY submenu.label "Wyświetlaj listę zamkniętych okien i kart w menu podręcznym">
 <!ENTITY submenu.accesskey "w">
@@ -45,7 +45,7 @@
 <!ENTITY name_format.accesskey "f">
 <!ENTITY name_format.desc "Użyj &#37;t dla nazw aktywnych kart, &#37;d dla dzisiejszej daty i &#37;m dla czasu. Można także ograniczyć długość nazwy do określonej ilości znaków: &#37;#t.">
 <!ENTITY sessionstore.caption "Przechowywanie">
-<!ENTITY service.caption "Przechowywanie sesji - ustawienia">
+<!ENTITY service.caption "Przechowywanie sesji – ustawienia">
 <!ENTITY service.description "Nie zmieniaj tych ustawień jeżeli nie masz o nich odpowiedniej wiedzy!">
 <!ENTITY interval.label "Minimalna przerwa pomiędzy kolejnymi zapisami (s):">
 <!ENTITY interval.accesskey "M">
@@ -55,7 +55,7 @@
 <!ENTITY privacy.accesskey "Z">
 <!ENTITY privacy.level0 "wszystkich witryn">
 <!ENTITY privacy.level1 "tylko witryn nieszyfrowanych">
-<!ENTITY privacy.level2 "- nie zapisuj -">
+<!ENTITY privacy.level2 "– nie zapisuj –">
 <!ENTITY sessiondir.caption "Lokalizacja zapisanych sesji">
 <!ENTITY sessiondir.desc "Tutaj można zmienić domyślną lokalizację zapisanych sesji">
 <!ENTITY encrypt.caption "Szyfrowanie">
@@ -78,7 +78,7 @@
 <!ENTITY selectSession.accesskey "W">
 <!ENTITY cookies.label "Zapisuj ciasteczka sesji">
 <!ENTITY cookies.accesskey "C">
-<!ENTITY sessionImport.caption "Importuj sesje z...">
+<!ENTITY sessionImport.caption "Importuj sesje z…">
 <!ENTITY importSS.label "SessionSavera">
 <!ENTITY importSS.accesskey "S">
 <!ENTITY importTMP.label "Tab Mix Plusa">
@@ -96,4 +96,4 @@
 <!ENTITY disable_cache_fixer.accesskey "F">
 <!ENTITY encrypted_only.label "Jeśli szyfrowanie uległo awarii, nie zapisuj niezaszyfrowanych danych">
 <!ENTITY encrypted_only.accesskey "N">
-<!ENTITY encrypt2.desc "Ostrzeżenie! Włączenie tej funkcji spowoduje, że jeśli sesja lub dane okna nie mogą być zaszyfrowane, wszystkie dane zostaną utracone bezpowrotnie. Szyfrowanie nie będzie działało jeżeli hasło główne jest wymagane a nie zostało wprowadzone. Proszę rozważnie i ostrożnie włączać tę funkcję.">
+<!ENTITY encrypt2.desc "Ostrzeżenie! Włączenie tej funkcji spowoduje, że jeśli sesja lub dane okna nie mogą być zaszyfrowane, wszystkie dane zostaną utracone bezpowrotnie. Szyfrowanie nie będzie działało, jeżeli hasło główne jest wymagane, a nie zostało wprowadzone. Proszę rozważnie i ostrożnie włączać tę funkcję.">

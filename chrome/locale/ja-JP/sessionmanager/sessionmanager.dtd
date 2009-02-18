@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "リストア">
 <!ENTITY winTabTree.listHeader "ウインドウとタブ">
 <!ENTITY winTabTree.windowLabel "ウインドウ &#37;S">
+<!ENTITY load.label "セッションの読み込み...">
+<!ENTITY load.accesskey "L">
+<!ENTITY prompt.append.label "セッションを追加する">
+<!ENTITY prompt.replace.label "セッションを取り替える">

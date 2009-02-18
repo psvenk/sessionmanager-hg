@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Обнови">
 <!ENTITY winTabTree.listHeader "Прозорци и Јазичиња">
 <!ENTITY winTabTree.windowLabel "Прозорец &#37;S">
+<!ENTITY load.label "Вчитај ја сесијата...">
+<!ENTITY load.accesskey "В">
+<!ENTITY prompt.append.label "Додади на сесијата">
+<!ENTITY prompt.replace.label "Замени ја сесијата">

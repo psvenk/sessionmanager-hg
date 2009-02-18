@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Återställ">
 <!ENTITY winTabTree.listHeader "Fönster och flikar">
 <!ENTITY winTabTree.windowLabel "Fönster &#37;S">
+<!ENTITY load.label "Ladda in session...">
+<!ENTITY load.accesskey "L">
+<!ENTITY prompt.append.label "Lägg till på session">
+<!ENTITY prompt.replace.label "Ersätt session">

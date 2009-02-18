@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Obnoviť">
 <!ENTITY winTabTree.listHeader "Okná a karty">
 <!ENTITY winTabTree.windowLabel "Okno č. &#37;S">
+<!ENTITY load.label "Načítať reláciu...">
+<!ENTITY load.accesskey "N">
+<!ENTITY prompt.append.label "Pripojiť k relácii">
+<!ENTITY prompt.replace.label "Nahradiť reláciu">

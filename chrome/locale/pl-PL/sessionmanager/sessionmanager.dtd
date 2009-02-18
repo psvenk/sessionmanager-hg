@@ -14,7 +14,7 @@
 <!ENTITY remove.accesskey "U">
 <!ENTITY openFolder.label "Otwórz folder sesji">
 <!ENTITY openFolder.accesskey "f">
-<!ENTITY options.label "Menedżer sesji - opcje">
+<!ENTITY options.label "Menedżer sesji – opcje">
 <!ENTITY options.accesskey "M">
 <!ENTITY resume.label "Podczas otwierania odtwórz ostatnią aktywną sesję">
 <!ENTITY resume.accesskey "k">
@@ -42,7 +42,7 @@
 <!ENTITY replace_all.accesskey "Z">
 <!ENTITY replace_window.label "Zamień sesję z aktywnym oknem">
 <!ENTITY replace_window.accesskey "O">
-<!ENTITY remove_one.label "Usuń sesję...">
+<!ENTITY remove_one.label "Usuń sesję…">
 <!ENTITY set_startup.label "Ustaw jako sesję startową">
 <!ENTITY set_startup.accesskey "U">
 <!ENTITY openSessionManagerSidebar.commandkey "B">
@@ -54,11 +54,11 @@
 <!ENTITY remove_item.label "Usuń element">
 <!ENTITY remove_item.accesskey "U">
 <!ENTITY session_group.label "Grupa">
-<!ENTITY rename_group.label "Zmiana nazwy grupy...">
-<!ENTITY remove_group.label "Usuń grupę...">
-<!ENTITY change_group.label "Zmień grupę...">
+<!ENTITY rename_group.label "Zmiana nazwy grupy…">
+<!ENTITY remove_group.label "Usuń grupę…">
+<!ENTITY change_group.label "Zmień grupę…">
 <!ENTITY change_group.accesskey "M">
-<!ENTITY group.label "Sesje grupy...">
+<!ENTITY group.label "Sesje grupy…">
 <!ENTITY group.accesskey "G">
 <!ENTITY toolbar.menu.tooltip "Otwiera menu zarządzania sesją">
 <!ENTITY toolbar.undo.menu.tooltip "Otwiera menu ostatnio zamkniętych okien i kart">
@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Odtwórz">
 <!ENTITY winTabTree.listHeader "Okna i karty">
 <!ENTITY winTabTree.windowLabel "Okno &#37;S">
+<!ENTITY load.label "Wczytaj sesję…">
+<!ENTITY load.accesskey "W">
+<!ENTITY prompt.append.label "Dołącz do sesji">
+<!ENTITY prompt.replace.label "Zamień sesję">

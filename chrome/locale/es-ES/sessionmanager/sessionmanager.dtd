@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Restaurar">
 <!ENTITY winTabTree.listHeader "Ventanas y pestañas">
 <!ENTITY winTabTree.windowLabel "Ventana &#37;S">
+<!ENTITY load.label "Cargar sesión...">
+<!ENTITY load.accesskey "C">
+<!ENTITY prompt.append.label "Añadir a la sesión">
+<!ENTITY prompt.replace.label "Reemplazar sesión">

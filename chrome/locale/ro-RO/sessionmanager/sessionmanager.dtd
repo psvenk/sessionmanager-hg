@@ -13,7 +13,7 @@
 <!ENTITY remove.label "Şterge sesiunea...">
 <!ENTITY remove.accesskey "t">
 <!ENTITY openFolder.label "Deschide dosarul de arhivare a sesiunilor">
-<!ENTITY openFolder.accesskey "d">
+<!ENTITY openFolder.accesskey "D">
 <!ENTITY options.label "Opţiuni &sessionManager;">
 <!ENTITY options.accesskey "O">
 <!ENTITY resume.label "Restaurează sesiunea la lansarea aplicaţiei">
@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Restaurare">
 <!ENTITY winTabTree.listHeader "Ferestre şi file">
 <!ENTITY winTabTree.windowLabel "Fereastra &#37;S">
+<!ENTITY load.label "Încarcă sesiunea...">
+<!ENTITY load.accesskey "n">
+<!ENTITY prompt.append.label "Adaugă la sesiune">
+<!ENTITY prompt.replace.label "Înlocuieşte sesiunea">
