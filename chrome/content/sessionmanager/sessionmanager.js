@@ -102,9 +102,18 @@ const SM_VERSION = "0.6.3";
 		
 		// Determine Mozilla version to see what is supported
 		this.mAppVersion = "0";
+		this.mAppID = "UNKNOWN";
 		try {
-			this.mAppVersion = Components.classes["@mozilla.org/xre/app-info;1"].
-			                   getService(Components.interfaces.nsIXULAppInfo).platformVersion;
+			var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
+			this.mAppVersion = appInfo.platformVersion;
+			switch (appInfo.ID) {
+				case "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+					this.mAppID = "FIREFOX";
+					break;
+				case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
+					this.mAppID = "SEAMONKEY";
+					break;
+			}
 		} catch (e) { dump(e + "\n"); }
 
 		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
@@ -1301,10 +1310,13 @@ const SM_VERSION = "0.6.3";
 			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
 			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
-			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
-			menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
+			// Removing closed tabs does not work in SeaMonkey so don't give option to do so.
+			if (this.mAppID != "SEAMONKEY") {
+				menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
+				menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
+			}
 			aPopup.insertBefore(menuitem, listEnd);
-		});
+		}, this);
 		separator.nextSibling.hidden = (mClosedTabs.length == 0);
 		separator.hidden = separator.nextSibling.hidden || label.hidden;
 		
@@ -1710,7 +1722,7 @@ const SM_VERSION = "0.6.3";
 
 	sanitize: function()
 	{
-		// If Sanitize GUI not used
+		// If Sanitize GUI not used (or not Firefox 3.1 and above)
 		if (this.mSanitizePreference == "privacy.item.extensions-sessionmanager") {
 			// Remove all saved sessions
 			this.getSessionDir().remove(true);
@@ -2802,11 +2814,8 @@ const SM_VERSION = "0.6.3";
 	
 	showHideToolsMenu: function()
 	{
-		// ignore option if not Firefox based because SeaMonkey won't be able to unhide the menu
-		if (document.getElementById("menu_ToolsPopup")) {
-			var sessionMenu = document.getElementById("sessionmanager-menu");
-			if (sessionMenu) sessionMenu.hidden = this.mPref_hide_tools_menu;
-		}
+		var sessionMenu = document.getElementById("sessionmanager-menu");
+		if (sessionMenu) sessionMenu.hidden = this.mPref_hide_tools_menu;
 	},
 
 	checkTimer: function()
@@ -2841,6 +2850,8 @@ const SM_VERSION = "0.6.3";
 	{
 		if (gSessionManager.mSessionStore().getClosedTabCount(window) == 0)	return;
 		gSessionManager.mSessionStore().undoCloseTab(window, aIndex || 0);
+		// Only need to check for empty close tab list if possibly re-opening last closed tabs
+		if (!aIndex) gSessionManager.updateToolbarButton();
 	},
 
 	// count windows and tabs
