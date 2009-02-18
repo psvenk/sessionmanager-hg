@@ -56,6 +56,10 @@ function initTreeView(aFileName) {
   if (aFileName == "*") {
     try {
       var file = gSessionManager.getProfileFile("sessionstore.js");
+	  // If file does not exist, try looking for SeaMonkey's sessionstore file
+	  if (!file.exists()) {
+		file = gSessionManager.getProfileFile("sessionstore.json");
+	  }
 	  if (file.exists()) {
         state = gSessionManager.readFile(file);
       }

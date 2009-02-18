@@ -22,6 +22,12 @@ gSessionManager.restorePrompt = function() {
 			
 	// Get count from crashed session and prepare to save it.  Don't save it yet or it will show up in selection list.
 	var file = this.getProfileFile("sessionstore.js");
+	
+	// If file does not exist, try looking for SeaMonkey's sessionstore file
+	if (!file.exists()) {
+		file = this.getProfileFile("sessionstore.json");
+	}
+	
 	if (file.exists())
 	{
 		try {
