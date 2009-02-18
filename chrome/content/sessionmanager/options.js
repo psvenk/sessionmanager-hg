@@ -15,10 +15,6 @@ gSessionManager.onLoad = function() {
 	// if no restore value, select previous browser session
 	resume_session.value = _("extensions.sessionmanager.resume_session").value || this.mBackupSessionName;
 	
-	// hide option to hide toolbar menu if not Firefox since SeaMonkey can't unhide it
-	if (!/(BonEcho|Minefield|Flock|Firefox|Netscape)/.test(navigator.userAgent))
-		document.getElementById("hide_tools_menu").setAttribute("hidden", "true");
-	
 	// current load session no longer there
 	if (resume_session.selectedIndex == -1) {
 		resume_session.value ="";
@@ -33,6 +29,12 @@ gSessionManager.onLoad = function() {
 	// Restore selected indexes and hide/show menus for startup options
 	_("generalPrefsTab").selectedIndex = _("extensions.sessionmanager.options_selected_tab").valueFromPreferences;
 	startupSelect(_("startupOption").selectedIndex = _("extensions.sessionmanager.startup").valueFromPreferences);
+	
+	// Hide close tab restoration preferences in SeaMonkey since it doesn't work
+	if (this.mAppID == "SEAMONKEY") {
+		_("max_tabs").parentNode.style.visibility = "collapse";
+		_("save_closed_tabs").parentNode.style.visibility = "collapse";
+	}
 	
 	// Hide mid-click preference if Tab Mix Plus or Tab Clicking Options is enabled
 	var browser = this.mWindowMediator.getMostRecentWindow("navigator:browser");
