@@ -2,33 +2,54 @@
   The following code originated from Tab Mix Plus - http://tmp.garyr.net/ 
   It will remove stored Session Manager saved files, when user selects to clear private data
   
-  Michael Kraft modified gSessionManager_preferencesOverlay to make it work in Firefox 3.0 and 
-  gSessionManager.addMenuItem to work in Firefox 3.1
+  Michael Kraft modified gSessionManager_preferencesOverlay to make it work in Firefox 3.0,
+  gSessionManager.addMenuItem to work in Firefox 3.1, and all functions (except 
+  gSessionManager.tryToSanitize) to work in SeaMonkey 2.0.
 */
 
 var gSessionManager_preferencesOverlay = {
 	init: function() {
-		var prefWindow = document.getElementById('BrowserPreferences');
+        window.removeEventListener("load", gSessionManager_preferencesOverlay.init, false);
+		// BrowserPreferences = Firefox, prefDialog = SeaMonkey
+		var prefWindow = document.getElementById('BrowserPreferences') || document.getElementById('prefDialog');
 		if (prefWindow)
 		{
-            window.removeEventListener("load", gSessionManager_preferencesOverlay.init, false);
 	    	gSessionManager_preferencesOverlay.onPaneLoad(prefWindow.lastSelected);
 
-    		prefWindow._selector.setAttribute("oncommand", prefWindow._selector.getAttribute("oncommand") + ";gSessionManager_preferencesOverlay.onPaneLoad(getElementsByAttribute('selected','true')[0].label)");
+			// Firefox
+			if (prefWindow == document.getElementById('BrowserPreferences')) {
+				var command = prefWindow._selector.getAttribute("oncommand");
+				prefWindow._selector.setAttribute("oncommand", (command ? (command + ";") : "") + "gSessionManager_preferencesOverlay.onPaneLoad(getElementsByAttribute('selected','true')[0].label);");
+			}
+			// SeaMonkey
+			else {
+				var prefsTree = document.getElementById('prefsTree');
+				if (prefsTree) {
+					var command = prefsTree.getAttribute("onselect");
+					prefsTree.setAttribute("onselect", (command ? (command + ";") : "") + "gSessionManager_preferencesOverlay.onPaneLoad(this.contentView.getItemAtIndex(this.currentIndex).prefpane.id);");
+				}
+			}
 	    }
 	},
 
 	onPaneLoad: function (aPaneID) {
-		if (aPaneID == "panePrivacy" || aPaneID == "Privacy") this.onPanePrivacyLoad();
+		// panePrivacy   - Firefox when Privacy pane isn't selected when option window opens
+		// Privacy       - Firefox when Privacy pane is selected when option window opens
+		// security_pane - SeaMonkey 2.0
+		if (aPaneID == "panePrivacy" || aPaneID == "Privacy" || aPaneID == "security_pane") this.onPanePrivacyLoad(aPaneID);
 	},
 
 /* ........ panePrivacy .............. */
 
-	onPanePrivacyLoad: function ()	{
+	onPanePrivacyLoad: function (aPaneID)	{
     	window.setTimeout(function() {
     	    var clearNowBn = document.getElementById("clearDataNow");
     	    if (clearNowBn && clearNowBn.getAttribute("oncommand").indexOf("gSessionManager") == -1) { 
     	        clearNowBn.setAttribute("oncommand", "gSessionManager.tryToSanitize(); " + clearNowBn.getAttribute("oncommand"));
+				// SeaMonkey needs to have Session Manager added directly to preferences window
+				if (aPaneID == "security_pane") {
+					gSessionManager.addMenuItem(aPaneID);
+				}
 	        }
 	    }, 200);
     }
@@ -43,10 +64,8 @@ gSessionManager.onUnload = function() {
 
 gSessionManager.addSanitizeItem = function () {
 	window.removeEventListener('load', gSessionManager.addSanitizeItem, true);
-	if (typeof Sanitizer != 'function')
-		return;
-	// Sanitizer will execute this
-	Sanitizer.prototype.items['extensions-sessionmanager'] = {
+	
+	var sessionManagerItem = {
 		clear : function() {
 			try {
 				gSessionManager.sanitize();
@@ -58,11 +77,27 @@ gSessionManager.addSanitizeItem = function () {
 			return true;
 		}
 	}
+		
+	// Firefox
+	if (typeof Sanitizer == 'function') {
+		// Sanitizer will execute this
+		Sanitizer.prototype.items['extensions-sessionmanager'] = sessionManagerItem;
+	}
+	// SeaMonkey
+	else if (typeof Sanitizer == 'object') {
+		// Sanitizer will execute this
+		Sanitizer.items['extensions-sessionmanager'] = sessionManagerItem;
+	}
+	
+	// don't leak
+	sessionManagerItem = null;
 }
 
-gSessionManager.addMenuItem = function () {
-	var prefs = document.getElementsByTagName('preferences')[0];
-	var firstCheckbox = document.getElementsByTagName('checkbox')[0];
+gSessionManager.addMenuItem = function (aPaneID) {
+	var isSeaMonkey = aPaneID == "security_pane";
+	var doc = isSeaMonkey ? document.getElementById(aPaneID) : document;
+	var prefs = doc.getElementsByTagName('preferences')[0];
+	var firstCheckbox = doc.getElementsByTagName('checkbox')[(isSeaMonkey ? 2 : 0)];
 	if (prefs && firstCheckbox) // if this isn't true we are lost :)
 	{
 
@@ -74,6 +109,7 @@ gSessionManager.addMenuItem = function () {
 		} catch (e) { dump(e + "\n"); }
 		
 		var pref = document.createElement('preference');
+		// Firefox 3.1 and above only
 		if ((appVersion >= "1.9.1") && (window.location == "chrome://browser/content/sanitize.xul")) {
 			this.mSanitizePreference = "privacy.cpd.extensions-sessionmanager";
 		}
@@ -88,11 +124,15 @@ gSessionManager.addMenuItem = function () {
 		check.setAttribute('preference', this.mSanitizePreference);
 		firstCheckbox.parentNode.insertBefore(check, firstCheckbox);
 
+		// Firefox only
 		if (typeof(gSanitizePromptDialog) == 'object')
 		{
 			if (appVersion < "1.9.1") pref.setAttribute('readonly', 'true');
 			check.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
 		}
+		
+		// SeaMonkey needs to sync preference when display pref window
+		if (isSeaMonkey) pref.updateElements();
 	}
 }
 
