@@ -1,6 +1,7 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
+const Cu = Components.utils;
 
 const report = Components.utils.reportError;
 
@@ -162,10 +163,12 @@ var SessionManagerHelperComponent = {
 	{
 		try {
 			// parse the session state into JS objects
-			var s = new Components.utils.Sandbox("about:blank");
-			var initialState = Components.utils.evalInSandbox(aStateDataString.QueryInterface(Ci.nsISupportsString).data, s);
+			var initialState = this.JSON_decode(aStateDataString.QueryInterface(Ci.nsISupportsString).data);
 		}
-		catch (ex) { debug("The session file is invalid: " + ex); } 
+		catch (ex) { 
+			report("The startup session file is invalid: " + ex); 
+			return;
+		} 
     
 		var lastSessionCrashed =
 			initialState && initialState.session && initialState.session.state &&
@@ -183,7 +186,7 @@ var SessionManagerHelperComponent = {
 	        	// don't prompt for tabs if checkbox not checked
 	        	delete(initialState.session.lastUpdate);
 	        	delete(initialState.session.recentCrashes);
-	        	aStateDataString.QueryInterface(Ci.nsISupportsString).data = uneval(initialState);
+	        	aStateDataString.QueryInterface(Ci.nsISupportsString).data = this.JSON_encode(initialState);
         	}
     	}
     	initialState = null;
@@ -237,6 +240,145 @@ var SessionManagerHelperComponent = {
 		output.writeByteArray(content, content.length);
 		output.flush();
 		output.close();
+	},
+	
+	/**
+	* Converts a JavaScript object into a JSON string
+	* (see http://www.json.org/ for the full grammar).  Only used in Firefox 2.0
+	*
+	* The inverse operation consists of eval("(" + JSON_string + ")");
+	* and should be provably safe.
+	*
+	* @param aJSObject is the object to be converted
+	* @return the object's JSON representation
+	*/
+	toJSONString: function toJSONString(aJSObject) {
+		// these characters have a special escape notation
+		const charMap = { "\b": "\\b", "\t": "\\t", "\n": "\\n", "\f": "\\f",
+		                  "\r": "\\r", '"': '\\"', "\\": "\\\\" };
+		// we use a single string builder for efficiency reasons
+		var parts = [];
+		
+		// this recursive function walks through all objects and appends their
+		// JSON representation to the string builder
+		function jsonIfy(aObj) {
+			if (typeof aObj == "boolean") {
+				parts.push(aObj ? "true" : "false");
+			}
+			else if (typeof aObj == "number" && isFinite(aObj)) {
+				// there is no representation for infinite numbers or for NaN!
+				parts.push(aObj.toString());
+			}
+			else if (typeof aObj == "string") {
+				aObj = aObj.replace(/[\\"\x00-\x1F\u0080-\uFFFF]/g, function($0) {
+				// use the special escape notation if one exists, otherwise
+				// produce a general unicode escape sequence
+				return charMap[$0] ||
+					"\\u" + ("0000" + $0.charCodeAt(0).toString(16)).slice(-4);
+				});
+				parts.push('"' + aObj + '"')
+			}
+			else if (aObj == null) {
+				parts.push("null");
+			}
+			// if it looks like an array, treat it as such -
+			// this is required for all arrays from a sandbox
+			else if (aObj instanceof Array ||
+					typeof aObj == "object" && "length" in aObj &&
+					(aObj.length === 0 || aObj[aObj.length - 1] !== undefined)) {
+				parts.push("[");
+				for (var i = 0; i < aObj.length; i++) {
+					jsonIfy(aObj[i]);
+					parts.push(",");
+				}
+				if (parts[parts.length - 1] == ",")
+					parts.pop(); // drop the trailing colon
+				parts.push("]");
+			}
+			else if (typeof aObj == "object") {
+				parts.push("{");
+				for (var key in aObj) {
+					if (key == "_tab")
+						continue; // XXXzeniko we might even want to drop all private members
+			
+					jsonIfy(key.toString());
+					parts.push(":");
+					jsonIfy(aObj[key]);
+					parts.push(",");
+				}
+				if (parts[parts.length - 1] == ",")
+					parts.pop(); // drop the trailing colon
+				parts.push("}");
+			}
+			else {
+				throw new Error("No JSON representation for this object!");
+			}
+		}
+		jsonIfy(aJSObject);
+		
+		var newJSONString = parts.join(" ");
+		// sanity check - so that API consumers can just eval this string
+		if (/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(
+			newJSONString.replace(/"(\\.|[^"\\])*"/g, "")
+		))
+		throw new Error("JSON conversion failed unexpectedly!");
+		
+		return newJSONString;
+	},
+	
+	// Decode JSON string to javascript object - use JSON if built-in.
+	JSON_decode: function(aStr) {
+		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }] };
+		try {
+			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
+			var needParens = typeof(JSON) == "undefined";
+		
+			if (needParens && !hasParens) {
+				aStr = '(' + aStr + ')';
+			}
+			if (!needParens && hasParens) {
+				aStr = aStr.substring(1, aStr.length - 1);
+			}
+		
+			if (!needParens) {
+				// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
+				try {
+					jsObject = JSON.parse(aStr);
+				}
+				catch (ex) {
+					jsObject = Cu.evalInSandbox("(" + aStr + ")", new Cu.Sandbox("about:blank"));
+				}
+			}
+			else {
+				jsObject = Cu.evalInSandbox(aStr, new Cu.Sandbox("about:blank"));
+			}
+		}
+		catch(ex) {
+			dump(ex + "\n");
+			this.sessionError(ex);
+		}
+		return jsObject;
+	},
+	
+	// Encode javascript object to JSON string - use JSON if built-in.
+	JSON_encode: function(aObj) {
+		var jsString = null;
+		try {
+			if (typeof(JSON) != "undefined") {
+				jsString = JSON.stringify(aObj);
+			}
+			else if (Cc["@mozilla.org/dom/json;1"]) {
+				var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+				jsString = "(" + nativeJSON.encode(aObj) + ")";
+			}
+			else {
+				jsString = this.toJSONString(aObj);
+			}
+		}
+		catch(ex) {
+			this.sessionError(ex);
+		}
+		return jsString;
 	},
 
 /* ........ QueryInterface .............. */
