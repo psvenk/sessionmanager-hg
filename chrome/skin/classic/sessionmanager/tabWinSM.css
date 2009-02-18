@@ -26,3 +26,11 @@ treechildren::-moz-tree-checkbox(checked) {
 treechildren::-moz-tree-checkbox(partial) {
   list-style-image: url("chrome://sessionmanager/skin/cbox-check-dis.gif");
 }
+
+treechildren::-moz-tree-row(alternate) {
+  background-color: -moz-oddtreerow;
+}
+
+treechildren::-moz-tree-row(alternate, selected) {
+  background-color: Highlight;
+}
