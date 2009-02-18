@@ -67,3 +67,7 @@
 <!ENTITY winTabTree.restoreHeader "Obnovit">
 <!ENTITY winTabTree.listHeader "Okna a panely">
 <!ENTITY winTabTree.windowLabel "Okno &#37;S">
+<!ENTITY load.label "Načíst relaci...">
+<!ENTITY load.accesskey "l">
+<!ENTITY prompt.append.label "Připojit k relaci">
+<!ENTITY prompt.replace.label "Nahradit relaci">
