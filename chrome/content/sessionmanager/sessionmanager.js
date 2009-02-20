@@ -3214,16 +3214,14 @@ const SM_VERSION = "0.6.3";
 		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }] };
 		try {
 			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
-			var needParens = typeof(JSON) == "undefined";
+			var builtInJSON = typeof(JSON) != "undefined";
 		
-			if (needParens && !hasParens) {
-				aStr = '(' + aStr + ')';
-			}
-			if (!needParens && hasParens) {
+			// JSON can't parse when string is wrapped in parenthesis
+			if (builtInJSON && hasParens) {
 				aStr = aStr.substring(1, aStr.length - 1);
 			}
 		
-			if (!needParens) {
+			if (builtInJSON) {
 				// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
 				try {
 					jsObject = JSON.parse(aStr);
@@ -3233,11 +3231,10 @@ const SM_VERSION = "0.6.3";
 				}
 			}
 			else {
-				jsObject = this.mComponents.utils.evalInSandbox(aStr, new this.mComponents.utils.Sandbox("about:blank"));
+				jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
 			}
 		}
 		catch(ex) {
-			dump(ex + "\n");
 			this.sessionError(ex);
 		}
 		return jsObject;
@@ -3252,7 +3249,7 @@ const SM_VERSION = "0.6.3";
 			}
 			else if (this.mComponents.classes["@mozilla.org/dom/json;1"]) {
 				var nativeJSON = this.mComponents.classes["@mozilla.org/dom/json;1"].createInstance(this.mComponents.interfaces.nsIJSON);
-				jsString = "(" + nativeJSON.encode(aObj) + ")";
+				jsString = nativeJSON.encode(aObj);
 			}
 			else {
 				jsString = this.toJSONString(aObj);
