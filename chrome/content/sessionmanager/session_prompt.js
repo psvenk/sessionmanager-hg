@@ -102,7 +102,7 @@ gSessionManager.onLoad = function() {
 	_("checkbox_autosave").hidden = !(gParams.GetInt(1) & 8);
 	_("save_every").hidden = _("checkbox_autosave").hidden || !_("checkbox_autosave").checked;
 	
-	// hide/show the append/replace checkboxes
+	// hide/show the append/replace radio buttons
 	_("radio_append_replace").hidden = !(gParams.GetInt(1) & 64);
 	_("radio_append_replace").selectedIndex = this.getPref("overwrite", false) ? 1 : 0;
 
@@ -357,12 +357,14 @@ function onSessionTreeSelect()
 		
 		var hideTabTree = gAcceptButton.disabled || (gParams.GetInt(1) & 2);
 		_("tree_splitter").hidden = _("tabTree").hidden = hideTabTree;
+		_("ctrl_click_note").hidden = hideTabTree || !(gParams.GetInt(1) & 64);
 		if (!hideTabTree) {
 			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
 			// Resize window first time tab selection is shown.
 			if (!gAlreadyResized) {
 				gAlreadyResized = true;
-				window.innerHeight += parseInt(window.getComputedStyle(_("tabTree"), null).height);
+				window.innerHeight += parseInt(window.getComputedStyle(_("tabTree"), null).height) + 
+				                      (_("ctrl_click_note").hidden ? 0 : parseInt(window.getComputedStyle(_("ctrl_click_note"), null).height));
 			}
 		}
 	}
