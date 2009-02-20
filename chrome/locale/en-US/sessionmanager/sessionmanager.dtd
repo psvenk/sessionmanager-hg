@@ -72,3 +72,4 @@
 <!ENTITY load.accesskey "L">
 <!ENTITY prompt.append.label "Append to Session">
 <!ENTITY prompt.replace.label "Replace Session">
+<!ENTITY ctrl_click_note.label "Note: clicking a tab entry while holding down the CTRL key, will open that tab in the existing window.">
