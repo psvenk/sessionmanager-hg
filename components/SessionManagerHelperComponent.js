@@ -2,7 +2,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 const Cu = Components.utils;
-
+const FIREFOX = "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
+const SEAMONKEY= "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}";
 const report = Components.utils.reportError;
 
 var SessionManagerHelperComponent = {
@@ -331,16 +332,14 @@ var SessionManagerHelperComponent = {
 		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }] };
 		try {
 			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
-			var needParens = typeof(JSON) == "undefined";
+			var builtInJSON = typeof(JSON) != "undefined";
 		
-			if (needParens && !hasParens) {
-				aStr = '(' + aStr + ')';
-			}
-			if (!needParens && hasParens) {
+			// JSON can't parse when string is wrapped in parenthesis
+			if (builtInJSON && hasParens) {
 				aStr = aStr.substring(1, aStr.length - 1);
 			}
 		
-			if (!needParens) {
+			if (builtInJSON) {
 				// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
 				try {
 					jsObject = JSON.parse(aStr);
@@ -350,12 +349,11 @@ var SessionManagerHelperComponent = {
 				}
 			}
 			else {
-				jsObject = Cu.evalInSandbox(aStr, new Cu.Sandbox("about:blank"));
+				jsObject = Cu.evalInSandbox("(" + aStr + ")", new Cu.Sandbox("about:blank"));
 			}
 		}
 		catch(ex) {
-			dump(ex + "\n");
-			this.sessionError(ex);
+			report("SessionManager: " + ex);
 		}
 		return jsObject;
 	},
@@ -369,14 +367,18 @@ var SessionManagerHelperComponent = {
 			}
 			else if (Cc["@mozilla.org/dom/json;1"]) {
 				var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-				jsString = "(" + nativeJSON.encode(aObj) + ")";
+				jsString = nativeJSON.encode(aObj);
 			}
 			else {
 				jsString = this.toJSONString(aObj);
 			}
 		}
 		catch(ex) {
-			this.sessionError(ex);
+			report("SessionManager: " + ex);
+		}
+		// If not SeaMonkey add parenthesis because Firefox needs them, but SeaMonkey won't work with them.  See Firefox bug 479627
+		if (Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).ID != SEAMONKEY) {
+			jsString = "(" + jsString + ")";
 		}
 		return jsString;
 	},
