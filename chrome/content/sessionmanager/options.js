@@ -32,7 +32,6 @@ gSessionManager.onLoad = function() {
 	
 	// Hide close tab restoration preferences in SeaMonkey since it doesn't work
 	if (this.mAppID == "SEAMONKEY") {
-		_("max_tabs").parentNode.style.visibility = "collapse";
 		_("save_closed_tabs").parentNode.style.visibility = "collapse";
 	}
 	
