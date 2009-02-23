@@ -1,6 +1,4 @@
-const SM_VERSION = "0.6.3";
-
-/*const*/ var gSessionManager = {
+var gSessionManager = {
 	_timer : null,
 	
 	mSessionStoreValue : null,
@@ -89,6 +87,8 @@ const SM_VERSION = "0.6.3";
 
 	onLoad: function(aDialog)
 	{
+		const SM_VERSION = "0.6.4";
+		
 		this.mBundle = document.getElementById("bundle_sessionmanager");
 		this.mTitle = this._string("sessionManager");
 		this.mEOL = this.getEOL();
