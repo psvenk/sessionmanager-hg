@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "L">
 <!ENTITY prompt.append.label "Oturuma Ekle">
 <!ENTITY prompt.replace.label "Oturum Değiştir">
+<!ENTITY ctrl_click_note.label "Not:Bir sekmeye tıklayıp CTRL tuşu basılı olduğu halde aşağı sürüklerseniz, o sekme hali hazırdaki pencerede açılır.">

@@ -67,3 +67,8 @@
 <!ENTITY winTabTree.restoreHeader "Visszaállítás">
 <!ENTITY winTabTree.listHeader "Ablakok és lapok">
 <!ENTITY winTabTree.windowLabel "Ablak &#37;S">
+<!ENTITY load.label "Munkamenet betöltése...">
+<!ENTITY load.accesskey "s">
+<!ENTITY prompt.append.label "Hozzáfűzés a jelenlegi munkamenethez">
+<!ENTITY prompt.replace.label "Jelenlegi munkamenet felülírása">
+<!ENTITY ctrl_click_note.label "Megjegyzés: az aktuális ablakban nyílik meg, ha a bejegyzésre kattintás közben a CTRL billentyű le van nyomva.">

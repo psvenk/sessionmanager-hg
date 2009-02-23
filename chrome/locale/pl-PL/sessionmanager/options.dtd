@@ -25,7 +25,7 @@
 <!ENTITY windowsNtabs.caption "Zamykanie okien i kart">
 <!ENTITY max_closed.label "Liczba zapamiętanych zamkniętych okien:">
 <!ENTITY max_closed.accesskey "o">
-<!ENTITY max_tabs.label "Liczba zapamiętanych zamkniętych kart ( w jednym oknie):">
+<!ENTITY max_tabs.label "Liczba zapamiętanych zamkniętych kart (w jednym oknie):">
 <!ENTITY max_tabs.accesskey "r">
 <!ENTITY submenu.label "Wyświetlaj listę zamkniętych okien i kart w menu podręcznym">
 <!ENTITY submenu.accesskey "w">
@@ -43,7 +43,7 @@
 <!ENTITY name_format.caption "Nazwy sesji">
 <!ENTITY name_format.label "Sugerowany format nazwy sesji:">
 <!ENTITY name_format.accesskey "f">
-<!ENTITY name_format.desc "Użyj &#37;t dla nazw aktywnych kart, &#37;d dla dzisiejszej daty i &#37;m dla czasu. Można także ograniczyć długość nazwy do określonej ilości znaków: &#37;#t.">
+<!ENTITY name_format.desc "Użyj &#37;t dla nazw aktywnych kart, &#37;d dla dzisiejszej daty i &#37;m dla czasu. Można także ograniczyć długość nazwy do określonej liczby znaków: &#37;#t.">
 <!ENTITY sessionstore.caption "Przechowywanie">
 <!ENTITY service.caption "Przechowywanie sesji – ustawienia">
 <!ENTITY service.description "Nie zmieniaj tych ustawień jeżeli nie masz o nich odpowiedniej wiedzy!">

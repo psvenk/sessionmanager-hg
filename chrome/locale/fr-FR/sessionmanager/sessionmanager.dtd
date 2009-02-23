@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "C">
 <!ENTITY prompt.append.label "Ajouter à la session">
 <!ENTITY prompt.replace.label "Remplacer la session">
+<!ENTITY ctrl_click_note.label "Remarque : En cliquant sur le nom d&apos;un onglet tout en maintenant la touche CTRL, vous ouvrirez cet onglet dans la fenêtre existante.">

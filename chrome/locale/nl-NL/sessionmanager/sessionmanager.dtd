@@ -53,3 +53,22 @@
 <!ENTITY backup_sessions.accesskey "B">
 <!ENTITY remove_item.label "Item verwijderen">
 <!ENTITY remove_item.accesskey "v">
+<!ENTITY session_group.label "Groep">
+<!ENTITY rename_group.label "Groep hernoemen...">
+<!ENTITY remove_group.label "Groep verwijderen...">
+<!ENTITY change_group.label "Groep veranderen...">
+<!ENTITY change_group.accesskey "v">
+<!ENTITY group.label "Sessie(s) groeperen...">
+<!ENTITY group.accesskey "g">
+<!ENTITY toolbar.menu.tooltip "Het menu voor sessiebeheer openen">
+<!ENTITY toolbar.undo.menu.tooltip "Het menu met de laatst gesloten vensters en tabs openen">
+<!ENTITY prompt.save_every1.label "Opslaan elke">
+<!ENTITY prompt.save_every2.label "minuten (uitgeschakeld indien blanco)">
+<!ENTITY winTabTree.restoreHeader "Herstellen">
+<!ENTITY winTabTree.listHeader "Vensters en Tabs">
+<!ENTITY winTabTree.windowLabel "Venster &#37;S">
+<!ENTITY load.label "Sessie laden...">
+<!ENTITY load.accesskey "l">
+<!ENTITY prompt.append.label "Aan sessie toevoegen">
+<!ENTITY prompt.replace.label "Sessie vervangen">
+<!ENTITY ctrl_click_note.label "Opmerking: als u de CTRL-knop ingedrukt houdt wanneer u op een tab-item klikt, zal die tab openen in het bestaande venster.">

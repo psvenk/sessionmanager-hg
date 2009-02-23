@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "L">
 <!ENTITY prompt.append.label "セッションを追加する">
 <!ENTITY prompt.replace.label "セッションを取り替える">
+<!ENTITY ctrl_click_note.label "注：Ctrlキーを押しながらタブのエントリをクリックすると、既存のウィンドウでそのタブを開きます">

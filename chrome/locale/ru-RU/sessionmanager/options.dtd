@@ -59,7 +59,7 @@
 <!ENTITY sessiondir.caption "Папка сохраняемых сессий">
 <!ENTITY sessiondir.desc "Папка по умолчанию для сохраняемых сессий может быть указана здесь.">
 <!ENTITY encrypt.caption "Шифрование">
-<!ENTITY encrypt.desc "Внимание: Зашифрованные данные сессий могут быть открыты только в профилях с одинаковыми файлами key3.db и cert8.db. Но если установлен мастер-пароль, данные не могут шифрованы или дешифрованы без его ввода.">
+<!ENTITY encrypt.desc "Внимание: Зашифрованные данные сессий могут быть открыты только в профилях с одинаковыми файлами key3.db и cert8.db. Но если установлен мастер-пароль, данные не могут быть зашифрованы или дешифрованы без его ввода.">
 <!ENTITY encrypt.label "Шифровать сохраненные сессии и закрытые окна.">
 <!ENTITY encrypt.accesskey "Ш">
 <!ENTITY change_dir.label "Изменить">
@@ -68,3 +68,32 @@
 <!ENTITY default_dir.accesskey "п">
 <!ENTITY sanitizer.label "Сохраненные сессии Session Manager">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Сохранение сессий">
+<!ENTITY lastpage.label "Показать последнюю загруженную страницу">
+<!ENTITY noSession.label "Новую">
+<!ENTITY noSession.accesskey "Н">
+<!ENTITY promptSession.label "Спрашивать">
+<!ENTITY promptSession.accesskey "С">
+<!ENTITY selectSession.label "Выбрать сессию">
+<!ENTITY selectSession.accesskey "В">
+<!ENTITY cookies.label "Сохранять сессию вместе с cookies">
+<!ENTITY cookies.accesskey "k">
+<!ENTITY sessionImport.caption "Импортировать сессии из...">
+<!ENTITY importSS.label "Session Saver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "Применить">
+<!ENTITY save_and_restore.caption "Сохранение/восстановление">
+<!ENTITY display.caption "Отображение">
+<!ENTITY middleclick.label "Средняя кнопка мыши возвращает последнюю закрытую вкладку">
+<!ENTITY middleclick.accesskey "М">
+<!ENTITY max_display.label "Предельное число сессий, показываемых в меню (-1 для показа полного списка)">
+<!ENTITY max_display.accesskey "ч">
+<!ENTITY hide_tools_menu.label "Не показывать меню менеджера сессий в меню «Инструменты»">
+<!ENTITY hide_tools_menu.accesskey "м">
+<!ENTITY disable_cache_fixer.label "Отключить сохранение данных кэша">
+<!ENTITY disable_cache_fixer.accesskey "О">
+<!ENTITY encrypted_only.label "Если процесс шифрования не был успешно завершён, НЕ сохранять незашифрованные данные.">
+<!ENTITY encrypted_only.accesskey "Н">
+<!ENTITY encrypt2.desc "Внимание: Если эта настройка включена, а данные сессии или окна не удастся зашифровать, они будут удалены без возможности восстановления. Шифрование не будет произведено, если мастер-пароль не будет введён по запросу, поэтому следует хорошо подумать, прежде чем включать эту настройку.">

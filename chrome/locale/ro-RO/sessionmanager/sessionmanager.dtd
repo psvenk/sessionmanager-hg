@@ -69,5 +69,6 @@
 <!ENTITY winTabTree.windowLabel "Fereastra &#37;S">
 <!ENTITY load.label "Încarcă sesiunea...">
 <!ENTITY load.accesskey "n">
-<!ENTITY prompt.append.label "Adaugă la sesiune">
-<!ENTITY prompt.replace.label "Înlocuieşte sesiunea">
+<!ENTITY prompt.append.label "Adaugă la sesiunea curentă">
+<!ENTITY prompt.replace.label "Înlocuieşte sesiunea curentă">
+<!ENTITY ctrl_click_note.label "Notă: Făcând Ctrl+Clic pe înregistrarea unei file, aceasta se va deschide în fereastra curentă.">

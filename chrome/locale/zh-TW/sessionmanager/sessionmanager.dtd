@@ -69,5 +69,6 @@
 <!ENTITY winTabTree.windowLabel "視窗 &#37;S">
 <!ENTITY load.label "載入「瀏覽頁組」或分頁...">
 <!ENTITY load.accesskey "L">
-<!ENTITY prompt.append.label "加入當前的「瀏覽頁組」(Ctrl-左鍵點選分頁加入當前視窗，否則以新視窗整組加入)">
+<!ENTITY prompt.append.label "加入當前的「瀏覽頁組」">
 <!ENTITY prompt.replace.label "取代當前的「瀏覽頁組」">
+<!ENTITY ctrl_click_note.label "備註: 若以Ctrl+左鍵點選分頁，可逐一加入當前視窗。">

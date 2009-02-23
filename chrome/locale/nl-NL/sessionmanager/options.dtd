@@ -94,3 +94,6 @@
 <!ENTITY hide_tools_menu.accesskey "n">
 <!ENTITY disable_cache_fixer.label "Cache-reparateur uitschakelen">
 <!ENTITY disable_cache_fixer.accesskey "C">
+<!ENTITY encrypted_only.label "Als de versleuteling faalt, de data NIET onversleuteld opslaan.">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Waarschuwing: als u dit aanduidt, en de sessie- of windowdata kan niet versleuteld worden, zal de data verloren zijn zonder mogelijkheid tot herstel. Versleuteling faalt wanneer u het hoofdwachtwoord niet opgeeft wanneer dit gevraagd wordt, denk goed na voordat u dit aanduidt.">

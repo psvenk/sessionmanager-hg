@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "W">
 <!ENTITY prompt.append.label "Dołącz do sesji">
 <!ENTITY prompt.replace.label "Zamień sesję">
+<!ENTITY ctrl_click_note.label "Informacja: Kliknięcie nazwy karty z wciśniętym klawiszem [Ctrl] spowoduje otwarcie tej karty w istniejącym oknie.">

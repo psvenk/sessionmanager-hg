@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "C">
 <!ENTITY prompt.append.label "Añadir a la sesión">
 <!ENTITY prompt.replace.label "Reemplazar sesión">
+<!ENTITY ctrl_click_note.label "Nota: si pulsa sobre una pestaña pulsando la tecla CTRL, se abrirá la pestaña en la ventana existente.">

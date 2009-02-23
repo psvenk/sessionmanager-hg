@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "l">
 <!ENTITY prompt.append.label "Připojit k relaci">
 <!ENTITY prompt.replace.label "Nahradit relaci">
+<!ENTITY ctrl_click_note.label "Poznámka: klepnutí na panel za současného držení klávesy CTRL otevře tento panel v existujícím okně.">

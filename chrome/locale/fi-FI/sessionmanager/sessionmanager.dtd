@@ -60,3 +60,15 @@
 <!ENTITY change_group.accesskey "V">
 <!ENTITY group.label "Istunnot-ryhmä...">
 <!ENTITY group.accesskey "I">
+<!ENTITY toolbar.menu.tooltip "Avaa istuntojenhallintavalikko">
+<!ENTITY toolbar.undo.menu.tooltip "Avaa hiljattain suljettujen ikkunoiden ja välilehtien valikko">
+<!ENTITY prompt.save_every1.label "Tallenna">
+<!ENTITY prompt.save_every2.label "minuutin välein (pois käytöstä jos tyhjä)">
+<!ENTITY winTabTree.restoreHeader "Palauta">
+<!ENTITY winTabTree.listHeader "Ikkunat ja välilehdet">
+<!ENTITY winTabTree.windowLabel "Ikkuna &#37;S">
+<!ENTITY load.label "Lataa istunto...">
+<!ENTITY load.accesskey "L">
+<!ENTITY prompt.append.label "Liitä istuntoon">
+<!ENTITY prompt.replace.label "Korvaa istunto">
+<!ENTITY ctrl_click_note.label "Huomaa: Kun välilehti-merkintää napautetaan hiirellä Ctrl-näppäin pohjassa, kyseinen välilehti avataan nykyisessä ikkunassa.">
