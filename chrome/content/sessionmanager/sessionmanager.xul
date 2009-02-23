@@ -87,6 +87,7 @@
 	</menupopup>
 	
 	<menupopup id="sessionmanager-menu-popup" onpopupshowing="gSessionManager.init(this);">
+		<menuitem label="&load.label;" accesskey="&load.accesskey;" oncommand="gSessionManager.load();"/>
 		<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 		<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
 		<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
