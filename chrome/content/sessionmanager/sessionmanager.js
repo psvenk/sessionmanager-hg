@@ -10,6 +10,7 @@ var gSessionManager = {
 	mProfileDirectory: Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile),
 	mIOService: Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService),
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
+	mNativeJSON: Components.classes["@mozilla.org/dom/json;1"],
 	mComponents: Components,
 
 	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager-list-update", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted", "private-browsing"],
@@ -78,6 +79,12 @@ var gSessionManager = {
 	onLoad_proxy: function()
 	{
 		this.removeEventListener("load", gSessionManager.onLoad_proxy, false);
+		
+		// Since other extensions can override the JSON variable, use the nsiJSON component
+		// In Firefox 3.1, this is the same as using JSON.
+		if (gSessionManager.mNativeJSON) {
+			gSessionManager.mNativeJSON = gSessionManager.mNativeJSON.createInstance(Components.interfaces.nsIJSON);
+		}
 		
 		if (gSessionManager.mSessionStore()) {
 			window.addEventListener("unload", gSessionManager.onUnload_proxy, false);			
@@ -3214,17 +3221,16 @@ var gSessionManager = {
 		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }] };
 		try {
 			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
-			var builtInJSON = typeof(JSON) != "undefined";
 		
 			// JSON can't parse when string is wrapped in parenthesis
-			if (builtInJSON && hasParens) {
+			if (this.mNativeJSON && hasParens) {
 				aStr = aStr.substring(1, aStr.length - 1);
 			}
 		
-			if (builtInJSON) {
+			if (this.mNativeJSON) {
 				// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
 				try {
-					jsObject = JSON.parse(aStr);
+					jsObject = this.mNativeJSON.decode(aStr);
 				}
 				catch (ex) {
 					jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
@@ -3244,12 +3250,8 @@ var gSessionManager = {
 	JSON_encode: function(aObj) {
 		var jsString = null;
 		try {
-			if (typeof(JSON) != "undefined") {
-				jsString = JSON.stringify(aObj);
-			}
-			else if (this.mComponents.classes["@mozilla.org/dom/json;1"]) {
-				var nativeJSON = this.mComponents.classes["@mozilla.org/dom/json;1"].createInstance(this.mComponents.interfaces.nsIJSON);
-				jsString = nativeJSON.encode(aObj);
+			if (this.mNativeJSON) {
+				jsString = this.mNativeJSON.encode(aObj);
 			}
 			else {
 				jsString = this.toJSONString(aObj);
