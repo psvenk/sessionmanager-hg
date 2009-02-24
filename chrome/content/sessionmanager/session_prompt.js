@@ -335,6 +335,9 @@ function onSessionTreeClick(aEvent)
 				var sortText = flag ? ((flag>0) ? "ascending" : "descending") : "natural";
 				aEvent.target.parentNode.childNodes[i].setAttribute("sortDirection", ((aEvent.target.parentNode.childNodes[i] == aEvent.target) ? sortText : "natural"))
 			}
+			
+			// Redraw the tree - Needed for OS X
+			gSessionTree.treeBoxObject.invalidate();
 		}
 	}
 }
