@@ -360,11 +360,10 @@ function onSessionTreeSelect()
 		_("ctrl_click_note").hidden = hideTabTree || !(gParams.GetInt(1) & 64);
 		if (!hideTabTree) {
 			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
-			// Resize window first time tab selection is shown.
+			// Resize window first time tab selection is shown. Subtract 1 since an extra pixel gets added for some reason.
 			if (!gAlreadyResized) {
 				gAlreadyResized = true;
-				window.innerHeight += parseInt(window.getComputedStyle(_("tabTree"), null).height) + 
-				                      (_("ctrl_click_note").hidden ? 0 : parseInt(window.getComputedStyle(_("ctrl_click_note"), null).height));
+				window.innerHeight += parseInt(window.getComputedStyle(_("tabTreeBox"), null).height) - 1;
 			}
 		}
 	}

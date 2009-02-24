@@ -43,10 +43,10 @@
 					</treecols>
 					<treechildren flex="1"/>
 				</tree>
-				<splitter id="tree_splitter" hidden="true" state="open" collapse="both">
-				    <grippy/>
-				</splitter>
 				<vbox id="tabTreeBox">
+					<splitter id="tree_splitter" hidden="true" state="open" collapse="both">
+						<grippy/>
+					</splitter>
 					<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="tabTree" rows="5" flex="1" hidden="true" flags="dont-build-content"
 						seltype="single" hidecolumnpicker="true" onclick="onTabTreeClick(event);" onkeydown="onTabTreeKeyDown(event);"
 						_window_label="&winTabTree.windowLabel;">
