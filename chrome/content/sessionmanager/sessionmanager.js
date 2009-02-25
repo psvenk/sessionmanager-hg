@@ -2087,7 +2087,7 @@ var gSessionManager = {
 				}
 			} catch(ex) { dump(ex); }
 		}
-		
+
 		if (backup == 2)
 		{
 			var dontPrompt = { value: false };
@@ -2367,10 +2367,11 @@ var gSessionManager = {
 	decrypt: function(aData, aNoError)
 	{
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
+		// The encryptString function cannot handle non-ASCII data so encode it first and decode the results
 		if (aData.indexOf(":") == -1)
 		{
 			try {
-				aData = this.mSecretDecoderRing.decryptString(aData);
+				aData = decodeURIComponent(this.mSecretDecoderRing.decryptString(aData));
 			}
 			catch (ex) { 
 				if (!aNoError) this.cryptError(ex); 
@@ -2389,15 +2390,16 @@ var gSessionManager = {
 	decryptEncryptByPreference: function(aData)
 	{
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
+		// The encryptString function cannot handle non-ASCII data so encode it first and decode the results
 		var encrypted = (aData.indexOf(":") == -1);
 		try {
 			if (this.mPref_encrypt_sessions && !encrypted)
 			{
-				aData = this.mSecretDecoderRing.encryptString(aData);
+				aData = this.mSecretDecoderRing.encryptString(encodeURIComponent(aData));
 			}
 			else if (!this.mPref_encrypt_sessions && encrypted)
 			{
-				aData = this.mSecretDecoderRing.decryptString(aData);
+				aData = decodeURIComponent(this.mSecretDecoderRing.decryptString(aData));
 			}
 		}
 		catch (ex) { 
@@ -2891,8 +2893,8 @@ var gSessionManager = {
 		var windows = 0, tabs = 0;
 		
 		try {
-			aState = this.JSON_decode(aState);
-			aState.windows.forEach(function(aWindow) {
+			var state = this.JSON_decode(aState);
+			state.windows.forEach(function(aWindow) {
 				windows = windows + 1;
 				tabs = tabs + aWindow.tabs.length;
 			});
