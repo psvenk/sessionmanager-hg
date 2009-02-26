@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "l">
 <!ENTITY prompt.append.label "Sitzung hinzufügen">
 <!ENTITY prompt.replace.label "Sitzung ersetzen">
+<!ENTITY ctrl_click_note.label "Hinweis: Mit gedrückt gehaltener Strg-Taste angeklickte Tab-Einträge werden im aktuellen Fenster geöffnet.">

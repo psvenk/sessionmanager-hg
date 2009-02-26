@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "C">
 <!ENTITY prompt.append.label "Anexar à Sessão">
 <!ENTITY prompt.replace.label "Substituir Sessão">
+<!ENTITY ctrl_click_note.label "Nota: clicando uma entrada de aba ao segurar a tecla Ctrl, essa aba será aberta numa janela existente.">
