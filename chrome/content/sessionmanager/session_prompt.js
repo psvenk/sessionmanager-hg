@@ -243,7 +243,7 @@ gSessionManager.onUnload = function() {
 		persist(document.documentElement, "screenX", window.screenX - window.opener.screenX);
 		persist(document.documentElement, "screenY", window.screenY - window.opener.screenY);
 	}
-	if (gSessionTree) persist(gSessionTree, "height", gSessionTree.treeBoxObject.height);
+	if (gSessionTree) persist(gSessionTree, "height", gSessionTree.treeBoxObject.height - 1);
 	
 	if (!gAllTabsChecked) storeSession();
 	
@@ -363,10 +363,11 @@ function onSessionTreeSelect()
 		_("ctrl_click_note").hidden = hideTabTree || !(gParams.GetInt(1) & 64);
 		if (!hideTabTree) {
 			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
-			// Resize window first time tab selection is shown. Subtract 1 since an extra pixel gets added for some reason.
+			// Resize window first time tab selection is shown. Add 4 since it's 4 below the actual height for some reason.
 			if (!gAlreadyResized) {
 				gAlreadyResized = true;
-				window.innerHeight += parseInt(window.getComputedStyle(_("tabTreeBox"), null).height) - 1;
+				window.innerHeight += parseInt(window.getComputedStyle(_("tree_splitter"), null).height) +
+				                      parseInt(window.getComputedStyle(_("tabTreeBox"), null).height) + 4;
 			}
 		}
 	}
