@@ -2207,45 +2207,28 @@ var gSessionManager = {
 			state = "[SessionManager v2]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
 			this.writeFile(aFile, state);
 		}
-		// if older session manager format
-		else if (/^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m.test(state))
-		{
-			// read entire file if only read header
-			if (headerOnly) state = this.readFile(aFile);
-			
-			// Re-encrypt the file is needed because we need to encode the session data
-			state = state.split("\n");
-			state[0] = "[SessionManager v2]";
-			var data = this.decrypt(state[4], false, true);
-			
-			var test_decode = this.JSON_decode(data, true);
-			if (!test_decode._JSON_decode_failed) {
-				//dump("Fixing Session " + RegExp.$1 + "\n");
-				state[4] = this.decryptEncryptByPreference(data)
-			}
-			state = state.join("\n");
-			this.writeFile(aFile, state);
-		}
 		// Not latest session format
-		else if ((/^\[SessionManager v2\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!this.mSessionRegExp.test(state)))
+		else if ((/^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!this.mSessionRegExp.test(state)))
 		{
 			// This should always match, but is required to get the RegExp values set correctly.
 			// RegExp.$1 - Entire 4 line header
 			// RegExp.$2 - Top 3 lines (includes name and timestamp)
-			// RegExp.$3 - Autosave string (if it exists)
-			// RegExp.$4 - Autosave value (not really used at the moment)
-			// RegExp.$5 - Count string (if it exists)
-			// RegExp.$6 - Group string and any invalid count string before (if either exists)
-			// RegExp.$7 - Invalid count string (if it exists)
-			// RegExp.$8 - Group string (if it exists)
-			if (/((^\[SessionManager v2\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=.+\n))?)/m.test(state))
+			// RegExp.$3 - " v2" (if it exists) - if missing file is in old format
+			// RegExp.$4 - Autosave string (if it exists)
+			// RegExp.$5 - Autosave value (not really used at the moment)
+			// RegExp.$6 - Count string (if it exists)
+			// RegExp.$7 - Group string and any invalid count string before (if either exists)
+			// RegExp.$8 - Invalid count string (if it exists)
+			// RegExp.$9 - Group string (if it exists)
+			if (/((^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=.+\n))?)/m.test(state))
 			{	
 				var header = RegExp.$1;
 				var nameTime = RegExp.$2;
-				var auto = RegExp.$3;
-				var autoValue = RegExp.$4;
-				var count = RegExp.$5;
-				var group = RegExp.$8 ? RegExp.$8 : "";
+				var oldFormat = (RegExp.$3 == "");
+				var auto = RegExp.$4;
+				var autoValue = RegExp.$5;
+				var count = RegExp.$6;
+				var group = RegExp.$9 ? RegExp.$9 : "";
 				var goodSession = true;
 
 				// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
@@ -2259,7 +2242,18 @@ var gSessionManager = {
 				if (goodSession)
 				{
 					var data = state.split("\n")[((auto) ? 4 : 3)];
-					data = this.decrypt(data, true);
+					var backup_data = data;
+					data = this.decrypt(data, true, oldFormat);
+					// If old format test JSON data
+					if (oldFormat) {
+						nameTime = nameTime.replace(/^\[SessionManager\]/, "[SessionManager v2]");
+						var test_decode = this.JSON_decode(data, true);
+						// if it failed to decode, try to decode again using new format
+						if (test_decode._JSON_decode_failed) {
+							data = this.decrypt(backup_data, true);
+						}
+					}
+					backup_data = null;
 					if (!data) {
 						// master password entered, but still could not be encrypted - either corrupt or saved under different profile
 						if (data == false) {
@@ -2294,7 +2288,7 @@ var gSessionManager = {
 				else {
 					var newstate = state.split("\n");
 					newstate.splice(3,newstate.length - (newstate[newstate.length-1].length ? 5 : 6));
-					if (RegExp.$5 == "\tcount=0/0") newstate.splice(3,1);
+					if (RegExp.$6 == "\tcount=0/0") newstate.splice(3,1);
 					state = newstate.join("\n");
 					this.writeFile(aFile, state);
 					state = this.readSessionFile(aFile,headerOnly);
