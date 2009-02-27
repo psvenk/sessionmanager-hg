@@ -2,6 +2,7 @@ var gParams = window.arguments[0].QueryInterface(Components.interfaces.nsIDialog
 var gSessionTree = null;
 var gTextBox = null;
 var ggMenuList = null;
+var gTabTree = null;
 var gAcceptButton = null;
 var gSessionNames = {};
 var gGroupNames = [];
@@ -69,10 +70,14 @@ gSessionManager.onLoad = function() {
 			try {
 				sessions = window.opener.gSessionManager.getSessionsOverride();
 			} catch (ex) { 
-				dump ("Session Manager: Override function error\n" + ex + "\n");
+				var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+				consoleService.logStringMessage("Session Manager: Override function error. " + ex);
 			}
 		}
-		else dump ("Session Manager: Passed override function parameter is not a function\n");
+		else {
+			var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+			consoleService.logStringMessage("Session Manager: Passed override function parameter is not a function.");
+		}
 		if (!sessions || !_isValidSessionList(sessions)) {
 			window.close();
 			return;
@@ -87,6 +92,7 @@ gSessionManager.onLoad = function() {
 		sessions.unshift({ name: this._string("current_session"), fileName: "*" });
 	}
 	
+	gTabTree = _("tabTree");
 	gSessionTree = _("session_tree");
 	gSessionTree.selType = (gParams.GetInt(1) & 2)?"multiple":"single";
 	
@@ -243,7 +249,21 @@ gSessionManager.onUnload = function() {
 		persist(document.documentElement, "screenX", window.screenX - window.opener.screenX);
 		persist(document.documentElement, "screenY", window.screenY - window.opener.screenY);
 	}
-	if (gSessionTree) persist(gSessionTree, "height", gSessionTree.treeBoxObject.height - 1);
+	
+	// only persist tree heights is neither is collapsed to prevent "giant" trees
+	if (_("tree_splitter").getAttribute("state") != "collapsed") {
+		// persist session tree height if it has a height
+		if (gSessionTree && gSessionTree.treeBoxObject.height > 0) {
+			persist(gSessionTree, "height", gSessionTree.treeBoxObject.height);
+		}
+		// persist tab tree height if it has a height, subtract 13 from the clicknoteHeight because it overcalculates by 13.
+		if (gTabTree && gTabTree.treeBoxObject.height > 0) {
+			persist(gTabTree, "height", gTabTree.treeBoxObject.height);
+			var clickNoteHeight = parseInt(window.getComputedStyle(_("ctrl_click_note"), null).height);
+			clickNoteHeight = isNaN(clickNoteHeight) ? 0 : clickNoteHeight - 13;
+			persist(gTabTree, "height", gTabTree.treeBoxObject.height + clickNoteHeight);
+		}
+	}
 	
 	if (!gAllTabsChecked) storeSession();
 	
@@ -358,16 +378,28 @@ function onSessionTreeSelect()
 	{
 		gAcceptButton.disabled = gSessionTree.view.selection.count == 0;
 		
+		// save current session tree height before doing any unhiding (subtract one since one gets added for some reason)
+		var currentSessionTreeHeight = gSessionTree.treeBoxObject.height - 1;
+		
+		// hide tab tree and splitter if nothing selected or multiple selection is enabled (deleting)
+		// hide the click note if append/replace buttons are displayed (manual load)
 		var hideTabTree = gAcceptButton.disabled || (gParams.GetInt(1) & 2);
-		_("tree_splitter").hidden = _("tabTree").hidden = hideTabTree;
+		_("tree_splitter").hidden = _("tabTreeBox").hidden = hideTabTree;
 		_("ctrl_click_note").hidden = hideTabTree || !(gParams.GetInt(1) & 64);
+		
+		// if displaying the tab tree, initialize it and then, if the tab tree was hidden, 
+		// resize the window based on the current persisted height of the tab tree and the
+		// current session tree height.
 		if (!hideTabTree) {
 			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
-			// Resize window first time tab selection is shown. Add 4 since it's 4 below the actual height for some reason.
 			if (!gAlreadyResized) {
+				if (gTabTree.hasAttribute("height"))
+				{
+					gTabTree.height = gTabTree.getAttribute("height");
+				}
+				gSessionTree.height = currentSessionTreeHeight;
 				gAlreadyResized = true;
-				window.innerHeight += parseInt(window.getComputedStyle(_("tree_splitter"), null).height) +
-				                      parseInt(window.getComputedStyle(_("tabTreeBox"), null).height) + 4;
+				window.sizeToContent();
 			}
 		}
 	}
@@ -491,7 +523,8 @@ function _isValidSessionList(aSessions)
 {
 	if (aSessions==null || typeof(aSessions)!="object" || typeof(aSessions.length)!="number" || 
 	    aSessions.length == 0 || !aSessions[0].name) {
-		dump("Session Manager: Override function returned an invalid session list.\n");
+		var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+		consoleService.logStringMessage("Session Manager: Override function returned an invalid session list.");
 		return false;
 	}
 	return true;
