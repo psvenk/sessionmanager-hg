@@ -106,6 +106,11 @@ function initTreeView(aFileName) {
     winState.tabs = aWinData.tabs.map(function(aTabData) {
       var entry = aTabData.entries[aTabData.index - 1] || { url: "about:blank" };
       var iconURL = aTabData.attributes && aTabData.attributes.image || null;
+      // if no iconURL, look in pre Firefox 3.1 storage location
+      if (!iconURL && aTabData.xultab) {
+        iconURL = /image=(\S*)(\s)?/i.exec(aTabData.xultab);
+		if (iconURL) iconURL = iconURL[1];
+      }
       return {
         label: entry.title || entry.url,
         checked: true,
