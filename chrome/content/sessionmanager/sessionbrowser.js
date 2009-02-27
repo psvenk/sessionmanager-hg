@@ -106,9 +106,6 @@ function initTreeView(aFileName) {
     winState.tabs = aWinData.tabs.map(function(aTabData) {
       var entry = aTabData.entries[aTabData.index - 1] || { url: "about:blank" };
       var iconURL = aTabData.attributes && aTabData.attributes.image || null;
-      // don't initiate a connection just to fetch a favicon (see bug 462863)
-      if (/^https?:/.test(iconURL))
-        iconURL = "moz-anno:favicon:" + iconURL;
       return {
         label: entry.title || entry.url,
         checked: true,
