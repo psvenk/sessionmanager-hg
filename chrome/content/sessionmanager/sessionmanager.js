@@ -1716,8 +1716,8 @@ var gSessionManager = {
 	//		autosave	- Will cause item to be bold (optional)
 	//      group       - Group that session is associated with (optional)
 	//
-	// If the session list is not formatted correctly an error will be dump to the console using the "dump"
-	// function and the session select window will not be displayed.
+	// If the session list is not formatted correctly a message will be displayed in the Error console
+	// and the session select window will not be displayed.
 	//
 	selectSession: function(aSessionLabel, aAcceptLabel, aValues, aOverride)
 	{
