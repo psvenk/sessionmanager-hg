@@ -18,6 +18,11 @@ var gWidth = 0;
 var gInvalidTime = false;
 var gAlreadyResized = false;
 
+// Used to keep track of the accept button position change
+var gLastAcceptPosition = 0;
+var gLastGoodHeight = 0;
+var gTimerId = null;
+
 var sortedBy = 0;
 
 // GetInt 1 bit values
@@ -235,6 +240,8 @@ gSessionManager.onLoad = function() {
 		document.documentElement.removeAttribute("screenY");
 	}
 	window.sizeToContent();
+	
+	window.onresize = resize;
 };
 
 gSessionManager.onUnload = function() {
@@ -252,9 +259,10 @@ gSessionManager.onUnload = function() {
 	
 	// only persist tree heights is neither is collapsed to prevent "giant" trees
 	if (_("tree_splitter").getAttribute("state") != "collapsed") {
-		// persist session tree height if it has a height
+		// persist session tree height if it has a height, subtract one if tab Tree is hidden because one is added if it is
 		if (gSessionTree && gSessionTree.treeBoxObject.height > 0) {
-			persist(gSessionTree, "height", gSessionTree.treeBoxObject.height);
+			var tweak = _("tabTreeBox").hidden ? 1 : 0;
+			persist(gSessionTree, "height", gSessionTree.treeBoxObject.height - tweak);
 		}
 		// persist tab tree height if it has a height, subtract 13 from the clicknoteHeight because it overcalculates by 13.
 		if (gTabTree && gTabTree.treeBoxObject.height > 0) {
@@ -264,6 +272,7 @@ gSessionManager.onUnload = function() {
 			persist(gTabTree, "height", gTabTree.treeBoxObject.height + clickNoteHeight);
 		}
 	}
+	//dump(gSessionTree.getAttribute("height") + " " + gTabTree.getAttribute("height") + "\n");
 	
 	if (!gAllTabsChecked) storeSession();
 	
@@ -389,16 +398,19 @@ function onSessionTreeSelect()
 		
 		// if displaying the tab tree, initialize it and then, if the tab tree was hidden, 
 		// resize the window based on the current persisted height of the tab tree and the
-		// current session tree height.
+		// current session tree height.  
 		if (!hideTabTree) {
 			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
 			if (!gAlreadyResized) {
+				gAlreadyResized = true;
 				if (gTabTree.hasAttribute("height"))
 				{
 					gTabTree.height = gTabTree.getAttribute("height");
 				}
 				gSessionTree.height = currentSessionTreeHeight;
-				gAlreadyResized = true;
+				
+				// The following line keeps the window width from increasing when sizeToContent is called.
+				_("sessionmanagerPrompt").width = window.innerWidth - 1;
 				window.sizeToContent();
 			}
 		}
@@ -553,6 +565,23 @@ function isNumber(aTextBox)
 	aTextBox.setAttribute("badname", gInvalidTime ? "true" : "false");
 	
 	isAcceptable();
+}
+
+// if the accept button is no longer moving when resizing, the window is too small so make it bigger.
+function resize()
+{
+	var currentAcceptPosition = gAcceptButton.boxObject.y + gAcceptButton.boxObject.height;
+	if (currentAcceptPosition == gLastAcceptPosition) {
+		if (gTimerId) {
+			clearTimeout(gTimerId);
+			delete gTimerId;
+		}
+		gTimerId = setTimeout(function() {window.resizeTo(window.outerWidth,gLastGoodHeight);}, 100);
+	}
+	else {
+		gLastGoodHeight = window.outerHeight;
+	}
+	gLastAcceptPosition = currentAcceptPosition;
 }
 
 // Tree controller
