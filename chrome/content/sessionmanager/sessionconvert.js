@@ -207,7 +207,7 @@ var gSessionSaverConverter = {
 					var date = new Date();
 					var aName = this.gSessionManager.getFormattedName("[ SessionSaver ] " + aSession, date);
 					var file = this.gSessionManager.getSessionDir(this.gSessionManager.makeFileName(aName), true);
-					var state = "[SessionManager]\nname=" + aName + "\ntimestamp=" + Date.now() + "\nautosave=false\tcount=" + 
+					var state = "[SessionManager v2]\nname=" + aName + "\ntimestamp=" + Date.now() + "\nautosave=false\tcount=" + 
 					             session[0].windows + "/" + session[0].tabs + "\tgroup=[SessionSaver]\n" + 
 								 this.gSessionManager.decryptEncryptByPreference(this.gSessionManager.JSON_encode(this.sessions[aSession]));
 					this.gSessionManager.writeFile(file, state);
@@ -683,7 +683,7 @@ var gConvertTMPSession = {
 
 		if (!aSession.session)
 			aSession.session = { state:"stop" };
-		var oState = "[SessionManager]\nname=" + aName + "\ntimestamp=" + aTimestamp + "\nautosave=false\tcount=" +
+		var oState = "[SessionManager v2]\nname=" + aName + "\ntimestamp=" + aTimestamp + "\nautosave=false\tcount=" +
 		             winCount + "/" + tabCount + "\tgroup=[Tabmix]\n" + 
 					 this.gSessionManager.decryptEncryptByPreference(this.gSessionManager.JSON_encode(aSession));
 		var file = this.gSessionManager.getSessionDir(gSessionManager.makeFileName(aName));

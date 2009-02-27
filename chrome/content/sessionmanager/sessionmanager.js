@@ -24,7 +24,7 @@ var gSessionManager = {
 	mAutoSaveSessionName: "autosave.session",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
-	mSessionRegExp: /^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
+	mSessionRegExp: /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
 
 	mLastState: null,
 	mCleanBrowser: null,
@@ -89,7 +89,7 @@ var gSessionManager = {
 
 	onLoad: function(aDialog)
 	{
-		const SM_VERSION = "0.6.4";
+		const SM_VERSION = "0.6.4.2";
 		
 		this.mBundle = document.getElementById("bundle_sessionmanager");
 		this.mTitle = this._string("sessionManager");
@@ -284,6 +284,26 @@ var gSessionManager = {
 		var oldVersion = this.getPref("version", "")
 		if (oldVersion != SM_VERSION)
 		{
+			// Fix the closed window data if it's encrypted
+			if (oldVersion < "0.6.4.2") {
+				var encrypt_okay = false;
+				while (!encrypt_okay) {
+					try {
+						// force a master password prompt so we don't waste time if user cancels it
+						this.mSecretDecoderRing.encryptString("");
+						encrypt_okay = true;
+					}
+					catch(ex) {};
+				}
+
+				var windows = this.getClosedWindows();
+				windows.forEach(function(aWindow) {
+					aWindow.state = this.decrypt(aWindow.state, true, true);
+					aWindow.state = this.decryptEncryptByPreference(aWindow.state);
+				}, this);
+				this.storeClosedWindows(windows);
+			}
+
 			// this isn't used anymore
 			if (oldVersion < "0.6.2.5") this.delPref("_no_reload");
 
@@ -1127,7 +1147,7 @@ var gSessionManager = {
 			var state = this.readSessionFile(file);
 			var oldname = null;
 			// Get original name
-			if (/^(\[SessionManager\])(?:\nname=(.*))?/m.test(state)) oldname = RegExp.$2;
+			if (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(state)) oldname = RegExp.$2;
 			// if window session file update _sm_window_session_name data
 			if (/\nautosave=window\t/m.test(state)) {
 				state = state.split("\n")
@@ -2184,11 +2204,30 @@ var gSessionManager = {
 			state = this.JSON_encode(this.decodeOldFormat(state, true));
 			state = state.substring(1,state.length-1);
 			var countString = getCountString(this.getCount(state));
-			state = "[SessionManager]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
+			state = "[SessionManager v2]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
+			this.writeFile(aFile, state);
+		}
+		// if older session manager format
+		else if (/^\[SessionManager\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m.test(state))
+		{
+			// read entire file if only read header
+			if (headerOnly) state = this.readFile(aFile);
+			
+			// Re-encrypt the file is needed because we need to encode the session data
+			state = state.split("\n");
+			state[0] = "[SessionManager v2]";
+			var data = this.decrypt(state[4], false, true);
+			
+			var test_decode = this.JSON_decode(data, true);
+			if (!test_decode._JSON_decode_failed) {
+				//dump("Fixing Session " + RegExp.$1 + "\n");
+				state[4] = this.decryptEncryptByPreference(data)
+			}
+			state = state.join("\n");
 			this.writeFile(aFile, state);
 		}
 		// Not latest session format
-		else if ((/^\[SessionManager\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!this.mSessionRegExp.test(state)))
+		else if ((/^\[SessionManager v2\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!this.mSessionRegExp.test(state)))
 		{
 			// This should always match, but is required to get the RegExp values set correctly.
 			// RegExp.$1 - Entire 4 line header
@@ -2199,7 +2238,7 @@ var gSessionManager = {
 			// RegExp.$6 - Group string and any invalid count string before (if either exists)
 			// RegExp.$7 - Invalid count string (if it exists)
 			// RegExp.$8 - Group string (if it exists)
-			if (/((^\[SessionManager\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=.+\n))?)/m.test(state))
+			if (/((^\[SessionManager v2\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=.+\n))?)/m.test(state))
 			{	
 				var header = RegExp.$1;
 				var nameTime = RegExp.$2;
@@ -2364,14 +2403,15 @@ var gSessionManager = {
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, text);
 	},
 
-	decrypt: function(aData, aNoError)
+	decrypt: function(aData, aNoError, doNotDecode)
 	{
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
 		// The encryptString function cannot handle non-ASCII data so encode it first and decode the results
 		if (aData.indexOf(":") == -1)
 		{
 			try {
-				aData = decodeURIComponent(this.mSecretDecoderRing.decryptString(aData));
+				aData = this.mSecretDecoderRing.decryptString(aData);
+				if (!doNotDecode) aData = decodeURIComponent(aData);
 			}
 			catch (ex) { 
 				if (!aNoError) this.cryptError(ex); 
@@ -2969,7 +3009,7 @@ var gSessionManager = {
 			if (!state) return null;
 		}
 		
-		return (aName != null)?this.nameState(("[SessionManager]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
+		return (aName != null)?this.nameState(("[SessionManager v2]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
 				"\nautosave=" + ((aAutoSave)?("session/" + aAutoSaveTime):"false") + "\tcount=" + count.windows + "/" + count.tabs + 
 				(aGroup? ("\tgroup=" + aGroup) : "") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
@@ -3013,11 +3053,11 @@ var gSessionManager = {
 
 	nameState: function(aState, aName)
 	{
-		if (!/^\[SessionManager\]/m.test(aState))
+		if (!/^\[SessionManager v2\]/m.test(aState))
 		{
-			return "[SessionManager]\nname=" + aName + "\n" + aState;
+			return "[SessionManager v2]\nname=" + aName + "\n" + aState;
 		}
-		return aState.replace(/^(\[SessionManager\])(?:\nname=.*)?/m, function($0, $1) { return $1 + "\nname=" + aName; });
+		return aState.replace(/^(\[SessionManager v2\])(?:\nname=.*)?/m, function($0, $1) { return $1 + "\nname=" + aName; });
 	},
 	
 	makeOneWindow: function(aState)
@@ -3243,8 +3283,8 @@ var gSessionManager = {
 	},
 	
 	// Decode JSON string to javascript object - use JSON if built-in.
-	JSON_decode: function(aStr) {
-		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }] };
+	JSON_decode: function(aStr, noError) {
+		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
 		try {
 			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
 		
@@ -3267,7 +3307,7 @@ var gSessionManager = {
 			}
 		}
 		catch(ex) {
-			this.sessionError(ex);
+			if (!noError) this.sessionError(ex);
 		}
 		return jsObject;
 	},
