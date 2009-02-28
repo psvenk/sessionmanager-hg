@@ -286,22 +286,29 @@ var gSessionManager = {
 		{
 			// Fix the closed window data if it's encrypted
 			if (oldVersion < "0.6.4.2") {
-				var encrypt_okay = false;
-				while (!encrypt_okay) {
-					try {
-						// force a master password prompt so we don't waste time if user cancels it
-						this.mSecretDecoderRing.encryptString("");
-						encrypt_okay = true;
-					}
-					catch(ex) {};
-				}
+				// if encryption enabled
+				if (this.mPref_encrypt_sessions) {
+					var windows = this.getClosedWindows();
+					
+					// if any closed windows
+					if (windows.length) {
+						var encrypt_okay = false;
+						while (!encrypt_okay) {
+							try {
+								// force a master password prompt so we don't waste time if user cancels it
+								this.mSecretDecoderRing.encryptString("");
+								encrypt_okay = true;
+							}
+							catch(ex) {};
+						}
 
-				var windows = this.getClosedWindows();
-				windows.forEach(function(aWindow) {
-					aWindow.state = this.decrypt(aWindow.state, true, true);
-					aWindow.state = this.decryptEncryptByPreference(aWindow.state);
-				}, this);
-				this.storeClosedWindows(windows);
+						windows.forEach(function(aWindow) {
+							aWindow.state = this.decrypt(aWindow.state, true, true);
+							aWindow.state = this.decryptEncryptByPreference(aWindow.state);
+						}, this);
+						this.storeClosedWindows(windows);
+					}
+				}
 			}
 
 			// this isn't used anymore
