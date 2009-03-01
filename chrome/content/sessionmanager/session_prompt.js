@@ -17,6 +17,7 @@ var gNeedSelection = false;
 var gWidth = 0;
 var gInvalidTime = false;
 var gAlreadyResized = false;
+var gFinishedLoading = false;
 
 // Used to keep track of the accept button position change
 var gLastAcceptPosition = 0;
@@ -241,7 +242,10 @@ gSessionManager.onLoad = function() {
 	}
 	window.sizeToContent();
 	
+	// watch for resize to prevent user from shrinking window so small it hides dialog buttons.
 	window.onresize = resize;
+	
+	gFinishedLoading = true;
 };
 
 gSessionManager.onUnload = function() {
@@ -401,7 +405,7 @@ function onSessionTreeSelect()
 		// current session tree height.  
 		if (!hideTabTree) {
 			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
-			if (!gAlreadyResized) {
+			if (!gAlreadyResized && gFinishedLoading) {
 				gAlreadyResized = true;
 				if (gTabTree.hasAttribute("height"))
 				{
