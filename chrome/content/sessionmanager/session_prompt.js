@@ -25,6 +25,7 @@ var gFinishedLoading = false;
 // Used to keep track of the accept button position change
 var gLastAcceptPosition = 0;
 var gLastGoodHeight = 0;
+var gOldLastGoodHeight = 0;
 var gHeightBeforeCollapse = 0;
 var gTimerId = null;
 
@@ -583,24 +584,26 @@ function resize(aEvent, aString)
 {
 	// when collapsing a tree save old good height (if not already saved) and then restore it when opening a tree
 	if (aString == "collapsed") {
-		if (!gHeightBeforeCollapse) gHeightBeforeCollapse = gLastGoodHeight;
+		if (!gHeightBeforeCollapse) gHeightBeforeCollapse = gOldLastGoodHeight;
 		return;
 	}
 	else if (aString == "open") {
-		gLastGoodHeight = gHeightBeforeCollapse;
+		gOldLastGoodHeight = gHeightBeforeCollapse;
 		gHeightBeforeCollapse = 0;
 	}
 
 	var currentAcceptPosition = gAcceptButton.boxObject.y + gAcceptButton.boxObject.height;
 	// only restore window height if accept button didn't move and window was shrunk or tree splitter was opened
-	if (((currentAcceptPosition == gLastAcceptPosition) || (aString == "open")) && (window.outerHeight < gLastGoodHeight)) {
+	if (((currentAcceptPosition == gLastAcceptPosition) || (aString == "open")) && (window.outerHeight < gOldLastGoodHeight)) {
 		if (gTimerId) {
 			clearTimeout(gTimerId);
 			delete gTimerId;
 		}
-		gTimerId = setTimeout(function() {window.resizeTo(window.outerWidth,gLastGoodHeight);}, 100);
+		gTimerId = setTimeout(function() {window.resizeTo(window.outerWidth,gOldLastGoodHeight);}, 100);
 	}
 	else {
+		// Save last good height and use that in case current accept position is the smallest
+		gOldLastGoodHeight = gLastGoodHeight;
 		gLastGoodHeight = window.outerHeight;
 	}
 	gLastAcceptPosition = currentAcceptPosition;
