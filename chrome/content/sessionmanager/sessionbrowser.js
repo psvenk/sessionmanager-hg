@@ -163,7 +163,7 @@ function onTabTreeClick(aEvent) {
   if (col.value) {
     // restore this specific tab in the same window for middle-clicking
     // or Ctrl+clicking on a tab's title
-    if ((aEvent.button == 1 || aEvent.ctrlKey) && col.value.id == "title" &&
+    if ((aEvent.button == 1 || aEvent.ctrlKey || event.metaKey) && col.value.id == "title" &&
         !treeView.isContainer(row.value))
       restoreSingleTab(row.value, aEvent.shiftKey);
     else if (col.value.id == "restore")
