@@ -3,6 +3,9 @@ var gSessionTree = null;
 var gTextBox = null;
 var ggMenuList = null;
 var gTabTree = null;
+var gTabTreeBox = null;
+var gTreeSplitter = null;
+var gCtrlClickNote = null;
 var gAcceptButton = null;
 var gSessionNames = {};
 var gGroupNames = [];
@@ -22,6 +25,7 @@ var gFinishedLoading = false;
 // Used to keep track of the accept button position change
 var gLastAcceptPosition = 0;
 var gLastGoodHeight = 0;
+var gHeightBeforeCollapse = 0;
 var gTimerId = null;
 
 var sortedBy = 0;
@@ -99,6 +103,9 @@ gSessionManager.onLoad = function() {
 	}
 	
 	gTabTree = _("tabTree");
+	gTabTreeBox = _("tabTreeBox");
+	gTreeSplitter = _("tree_splitter");
+	gCtrlClickNote = _("ctrl_click_note");
 	gSessionTree = _("session_tree");
 	gSessionTree.selType = (gParams.GetInt(1) & 2)?"multiple":"single";
 	
@@ -262,16 +269,16 @@ gSessionManager.onUnload = function() {
 	}
 	
 	// only persist tree heights is neither is collapsed to prevent "giant" trees
-	if (_("tree_splitter").getAttribute("state") != "collapsed") {
+	if (gTreeSplitter.getAttribute("state") != "collapsed") {
 		// persist session tree height if it has a height, subtract one if tab Tree is hidden because one is added if it is
 		if (gSessionTree && gSessionTree.treeBoxObject.height > 0) {
-			var tweak = _("tabTreeBox").hidden ? 1 : 0;
+			var tweak = gTabTreeBox.hidden ? 1 : 0;
 			persist(gSessionTree, "height", gSessionTree.treeBoxObject.height - tweak);
 		}
 		// persist tab tree height if it has a height, subtract 13 from the clicknoteHeight because it overcalculates by 13.
 		if (gTabTree && gTabTree.treeBoxObject.height > 0) {
 			persist(gTabTree, "height", gTabTree.treeBoxObject.height);
-			var clickNoteHeight = parseInt(window.getComputedStyle(_("ctrl_click_note"), null).height);
+			var clickNoteHeight = parseInt(window.getComputedStyle(gCtrlClickNote, null).height);
 			clickNoteHeight = isNaN(clickNoteHeight) ? 0 : clickNoteHeight - 13;
 			persist(gTabTree, "height", gTabTree.treeBoxObject.height + clickNoteHeight);
 		}
@@ -397,8 +404,8 @@ function onSessionTreeSelect()
 		// hide tab tree and splitter if nothing selected or multiple selection is enabled (deleting)
 		// hide the click note if append/replace buttons are displayed (manual load)
 		var hideTabTree = gAcceptButton.disabled || (gParams.GetInt(1) & 2);
-		_("tree_splitter").hidden = _("tabTreeBox").hidden = hideTabTree;
-		_("ctrl_click_note").hidden = hideTabTree || !(gParams.GetInt(1) & 64);
+		gTreeSplitter.hidden = gTabTreeBox.hidden = hideTabTree;
+		gCtrlClickNote.hidden = hideTabTree || !(gParams.GetInt(1) & 64);
 		
 		// if displaying the tab tree, initialize it and then, if the tab tree was hidden, 
 		// resize the window based on the current persisted height of the tab tree and the
@@ -572,10 +579,21 @@ function isNumber(aTextBox)
 }
 
 // if the accept button is no longer moving when resizing, the window is too small so make it bigger.
-function resize()
+function resize(aEvent, aString)
 {
+	// when collapsing a tree save old good height (if not already saved) and then restore it when opening a tree
+	if (aString == "collapsed") {
+		if (!gHeightBeforeCollapse) gHeightBeforeCollapse = gLastGoodHeight;
+		return;
+	}
+	else if (aString == "open") {
+		gLastGoodHeight = gHeightBeforeCollapse;
+		gHeightBeforeCollapse = 0;
+	}
+
 	var currentAcceptPosition = gAcceptButton.boxObject.y + gAcceptButton.boxObject.height;
-	if (currentAcceptPosition == gLastAcceptPosition) {
+	// only restore window height if accept button didn't move and window was shrunk or tree splitter was opened
+	if (((currentAcceptPosition == gLastAcceptPosition) || (aString == "open")) && (window.outerHeight < gLastGoodHeight)) {
 		if (gTimerId) {
 			clearTimeout(gTimerId);
 			delete gTimerId;

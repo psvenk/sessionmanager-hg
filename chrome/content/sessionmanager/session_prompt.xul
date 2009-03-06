@@ -43,7 +43,7 @@
 					</treecols>
 					<treechildren flex="1"/>
 				</tree>
-				<splitter id="tree_splitter" hidden="true" state="open" collapse="both">
+				<splitter id="tree_splitter" hidden="true" state="open" collapse="both" oncommand="resize(event, this.getAttribute('state'));">
 					<grippy/>
 				</splitter>
 				<vbox id="tabTreeBox" hidden="true" flex="1">
