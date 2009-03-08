@@ -71,3 +71,4 @@
 <!ENTITY load.accesskey "L">
 <!ENTITY prompt.append.label "Lägg till på session">
 <!ENTITY prompt.replace.label "Ersätt session">
+<!ENTITY ctrl_click_note.label "Observera: att klicka på en flikpost medan Ctrl-knappen hålls in öppnar fliken i det nuvarande fönstret.">
