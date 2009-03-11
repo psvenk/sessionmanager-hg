@@ -162,8 +162,8 @@ function onTabTreeClick(aEvent) {
   treeView.treeBox.getCellAt(aEvent.clientX, aEvent.clientY, row, col, {});
   if (col.value) {
     // restore this specific tab in the same window for middle-clicking
-    // or Ctrl+clicking on a tab's title
-    if ((aEvent.button == 1 || aEvent.ctrlKey || event.metaKey) && col.value.id == "title" &&
+    // or Ctrl+clicking or Meta+clicking on a tab's title
+    if ((aEvent.button == 1 || aEvent.ctrlKey || aEvent.metaKey) && col.value.id == "title" &&
         !treeView.isContainer(row.value))
       restoreSingleTab(row.value, aEvent.shiftKey);
     else if (col.value.id == "restore")
