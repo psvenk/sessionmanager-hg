@@ -2031,11 +2031,6 @@ var gSessionManager = {
 
 	shutDown: function()
 	{
-		// Make sure to pull in fresh state data at shut down
-		this.mLastState = null;
-		this.mCleanBrowser = null;
-		this.mClosedWindowName = null;
-		
 		// Handle sanitizing if sanitize on shutdown without prompting
 		if ((this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true)) &&
 			(!this.getPref("privacy.sanitize.promptOnSanitize", true, true)) &&
@@ -2069,6 +2064,9 @@ var gSessionManager = {
 		this.delPref("_encrypt_file");
 		this.delPref("_recovering");
 		this.mPref__running = false;
+		this.mLastState = null;
+		this.mCleanBrowser = null;
+		this.mClosedWindowName = null;
 
 		// Cleanup left over files from Crash Recovery
 		if (this.getPref("extensions.crashrecovery.resume_session_once", false, true))
@@ -2101,11 +2099,27 @@ var gSessionManager = {
 		var temp_backup = (this.mPref_startup > 0) && (this.mPref_resume_session == this.mBackupSessionName);
 		
 		// Don't save if just a blank window, if there's an error parsing data, just save
-		var state = null;
+		var state = null, lastState = null;
 		if ((backup > 0) || temp_backup) {
+			// if Last window state saved retrieve it in case the current state has been wiped and we need to use it
+			// The current state should only be wiped if the browser is set to clear the "Visited Pages" on shutdown.
+			if (this.mLastState) {
+				lastState = this.mLastState;
+				this.mLastState = null;
+			}
 			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")), true);
 			try {
 				var aState = this.JSON_decode(state.split("\n")[4]);
+				// if window data has been cleared ("Visited Pages" cleared on shutdown), use lastState, if it exists.
+				if (aState.windows.length == 0 && lastState) {
+					//dump("Using saved Last State\n");
+					var count = this.getCount(lastState);
+					state = state.split("\n");
+					state[3] = state[3].replace(/count=0\/0/,"count=" + count.windows + "/" + count.tabs);
+					state[4] = lastState;
+					state = state.join("\n");
+					aState = this.JSON_decode(lastState);
+				}
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
 		    		(aState.windows[0].tabs[0].entries.length > 1) || 
 		    		((aState.windows[0].tabs[0].entries.length == 1 && aState.windows[0].tabs[0].entries[0].url != "about:blank")))) {
