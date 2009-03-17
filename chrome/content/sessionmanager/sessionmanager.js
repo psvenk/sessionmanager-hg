@@ -1056,15 +1056,10 @@ var gSessionManager = {
 		var stripClosedTabs = !this.mPref_save_closed_tabs || (this.mPref_save_closed_tabs == 1 && (aMode != "startup"));
 
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
-		var TMP_SingleWindowMode = false;
+		var TMP_SingleWindowMode = typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode;
 	
-		try
-		{
-			TMP_SingleWindowMode = gSingleWindowMode;
-			if (TMP_SingleWindowMode && (aMode != "startup") && (aMode != "overwrite") && !this.mPref_overwrite)
-				aMode = "append";
-		}
-		catch (ex) {}
+		if (TMP_SingleWindowMode && (aMode == "newwindow" || ((aMode != "startup") && (aMode != "overwrite") && !this.mPref_overwrite)))
+			aMode = "append";
 		
 		aMode = aMode || "default";
 		if (aMode == "startup")
@@ -1400,11 +1395,7 @@ var gSessionManager = {
 			var state = closedWindows.splice(aIx || 0, 1)[0].state;
 			
 			// gSingleWindowMode is set if Tab Mix Plus's single window mode is active
-			try
-			{
-				if (gSingleWindowMode) aMode = "append";
-			}
-			catch (ex) {}
+			if (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode) aMode = "append";
 
 			if (aMode == "overwrite")
 			{
