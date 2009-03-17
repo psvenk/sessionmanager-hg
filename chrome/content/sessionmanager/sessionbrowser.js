@@ -163,9 +163,12 @@ function onTabTreeClick(aEvent) {
   if (col.value) {
     // restore this specific tab in the same window for middle-clicking
     // or Ctrl+clicking or Meta+clicking on a tab's title
-    if ((aEvent.button == 1 || aEvent.ctrlKey || aEvent.metaKey) && col.value.id == "title" &&
-        !treeView.isContainer(row.value))
-      restoreSingleTab(row.value, aEvent.shiftKey);
+    if ((aEvent.button == 1 || aEvent.ctrlKey || aEvent.metaKey) && col.value.id == "title") {
+	  if (treeView.isContainer(row.value))
+        restoreSingleWindow(row.value);
+      else
+        restoreSingleTab(row.value, aEvent.shiftKey);
+    }
     else if (col.value.id == "restore")
       toggleRowChecked(row.value);
   }
@@ -179,8 +182,12 @@ function onTabTreeKeyDown(aEvent) {
     break;
   case KeyEvent.DOM_VK_RETURN:
     var ix = document.getElementById("tabTree").currentIndex;
-    if (aEvent.ctrlKey && !treeView.isContainer(ix))
-      restoreSingleTab(ix, aEvent.shiftKey);
+    if (aEvent.ctrlKey) {
+      if (treeView.isContainer(ix))
+        restoreSingleWindow(ix);
+      else
+        restoreSingleTab(ix, aEvent.shiftKey);
+    }
     break;
   case KeyEvent.DOM_VK_UP:
   case KeyEvent.DOM_VK_DOWN:
@@ -227,6 +234,26 @@ function toggleRowChecked(aIx) {
   
   gAllTabsChecked = gTreeData.every(isChecked);
   gAcceptButton.disabled = gNoTabsChecked = !gTreeData.some(isChecked);
+}
+
+function restoreSingleWindow(aIx) {
+  // only allow this is there is an existing window open.  Basically if it's not a prompt at browser startup.
+  var win = getBrowserWindow();
+  if (!win) return;
+
+  // gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
+  var TMP_SingleWindowMode = typeof(win.gSingleWindowMode) != "undefined" && win.gSingleWindowMode;
+
+  var item = gTreeData[aIx];
+  var winState = { windows : new Array(1) };
+  winState.windows[0] = gStateObject.windows[item.ix];
+  
+  // if Tab Mix Plus's single window mode is enabled and there is an existing window restores all tabs in that window
+  gSessionManager.restoreSession(TMP_SingleWindowMode && win, gSessionManager.JSON_encode(winState), !TMP_SingleWindowMode, 
+                                 gSessionManager.mPref_save_closed_tabs < 2, false, TMP_SingleWindowMode, true);
+								 
+  // bring current window back into focus
+  setTimeout(function() { window.focus(); }, 1000);
 }
 
 function restoreSingleTab(aIx, aShifted) {
