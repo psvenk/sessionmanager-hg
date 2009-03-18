@@ -56,11 +56,11 @@ function initTreeView(aFileName) {
   if (aFileName == "*") {
     try {
       var file = gSessionManager.getProfileFile("sessionstore.js");
-	  // If file does not exist, try looking for SeaMonkey's sessionstore file
-	  if (!file.exists()) {
-		file = gSessionManager.getProfileFile("sessionstore.json");
-	  }
-	  if (file.exists()) {
+      // If file does not exist, try looking for SeaMonkey's sessionstore file
+      if (!file.exists()) {
+        file = gSessionManager.getProfileFile("sessionstore.json");
+      }
+      if (file.exists()) {
         state = gSessionManager.readFile(file);
       }
     }
@@ -109,7 +109,7 @@ function initTreeView(aFileName) {
       // if no iconURL, look in pre Firefox 3.1 storage location
       if (!iconURL && aTabData.xultab) {
         iconURL = /image=(\S*)(\s)?/i.exec(aTabData.xultab);
-		if (iconURL) iconURL = iconURL[1];
+        if (iconURL) iconURL = iconURL[1];
       }
       return {
         label: entry.title || entry.url,
@@ -164,7 +164,7 @@ function onTabTreeClick(aEvent) {
     // restore this specific tab in the same window for middle-clicking
     // or Ctrl+clicking or Meta+clicking on a tab's title
     if ((aEvent.button == 1 || aEvent.ctrlKey || aEvent.metaKey) && col.value.id == "title") {
-	  if (treeView.isContainer(row.value))
+      if (treeView.isContainer(row.value))
         restoreSingleWindow(row.value);
       else
         restoreSingleTab(row.value, aEvent.shiftKey);
@@ -236,6 +236,33 @@ function toggleRowChecked(aIx) {
   gAcceptButton.disabled = gNoTabsChecked = !gTreeData.some(isChecked);
 }
 
+function tabTreeSelect(aType) {
+  var index = 0;
+  var containersOnly = (aType == "ALL" || aType == "NONE");
+
+  do {
+    if (treeView.isContainer(index) == containersOnly) {
+      var item = gTreeData[index];
+      if (containersOnly) {
+        item.checked = (aType == "ALL");
+        treeView.treeBox.invalidateRow(index);
+        // (un)check all tabs of this window as well
+        for each (var tab in item.tabs) {
+          tab.checked = item.checked;
+          treeView.treeBox.invalidateRow(gTreeData.indexOf(tab));
+        }
+      }
+      else {
+        this.toggleRowChecked(index);
+      }
+    }
+    index++;
+  }
+  while (index < treeView.rowCount);
+
+  if (aType != "INVERT") gAcceptButton.disabled = (aType == "NONE")
+}
+
 function restoreSingleWindow(aIx) {
   // only allow this is there is an existing window open.  Basically if it's not a prompt at browser startup.
   var win = getBrowserWindow();
@@ -251,7 +278,7 @@ function restoreSingleWindow(aIx) {
   // if Tab Mix Plus's single window mode is enabled and there is an existing window restores all tabs in that window
   gSessionManager.restoreSession(TMP_SingleWindowMode && win, gSessionManager.JSON_encode(winState), !TMP_SingleWindowMode, 
                                  gSessionManager.mPref_save_closed_tabs < 2, false, TMP_SingleWindowMode, true);
-								 
+                                 
   // bring current window back into focus
   setTimeout(function() { window.focus(); }, 1000);
 }
@@ -315,10 +342,10 @@ var treeView = {
 
   hasNextSibling: function(idx, after) {
     var thisLevel = this.getLevel(idx);
-	for (var t = after + 1; t < gTreeData.length; t++)
+    for (var t = after + 1; t < gTreeData.length; t++)
     if (this.getLevel(t) <= thisLevel)
       return this.getLevel(t) == thisLevel;
-	return false;
+    return false;
   },
 
   toggleOpenState: function(idx) {
@@ -341,7 +368,7 @@ var treeView = {
       this.treeBox.rowCountChanged(idx + 1, toinsert.length);
     }
     item.open = !item.open;
-	this.treeBox.invalidateRow(idx);
+    this.treeBox.invalidateRow(idx);
   },
 
   getCellProperties: function(idx, column, prop) {
@@ -365,10 +392,10 @@ var treeView = {
   
   initialize: function() {
     var count;
-	if (gTreeData) count = this.rowCount;
+    if (gTreeData) count = this.rowCount;
     gTreeData = [];
     if (this.treeBox && count)
-	  this.treeBox.rowCountChanged(0, -count);
+      this.treeBox.rowCountChanged(0, -count);
   },
 
   getProgressMode : function(idx, column) { },
