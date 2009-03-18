@@ -60,7 +60,7 @@
 					<hbox>
 						<button label="Select All" onclick="tabTreeSelect('ALL');"/>
 						<button label="Select None" onclick="tabTreeSelect('NONE');"/>
-						<button label="Invert Selection" onclick="tabTreeSelect('INVERT');"/>
+						<button label="Toggle Selections" onclick="tabTreeSelect('TOGGLE');"/>
 					</hbox>
 					<description id="ctrl_click_note" class="header" hidden="true">&ctrl_click_note.label;</description>
 				</vbox>

@@ -260,7 +260,7 @@ function tabTreeSelect(aType) {
   }
   while (index < treeView.rowCount);
 
-  if (aType != "INVERT") gAcceptButton.disabled = (aType == "NONE")
+  if (aType != "TOGGLE") gAcceptButton.disabled = (aType == "NONE")
 }
 
 function restoreSingleWindow(aIx) {
