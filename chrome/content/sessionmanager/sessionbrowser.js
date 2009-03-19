@@ -237,30 +237,25 @@ function toggleRowChecked(aIx) {
 }
 
 function tabTreeSelect(aType) {
-  var index = 0;
-  var containersOnly = (aType == "ALL" || aType == "NONE");
 
-  do {
-    if (treeView.isContainer(index) == containersOnly) {
-      var item = gTreeData[index];
-      if (containersOnly) {
-        item.checked = (aType == "ALL");
-        treeView.treeBox.invalidateRow(index);
-        // (un)check all tabs of this window as well
-        for each (var tab in item.tabs) {
-          tab.checked = item.checked;
-          treeView.treeBox.invalidateRow(gTreeData.indexOf(tab));
-        }
-      }
-      else {
-        this.toggleRowChecked(index);
+  function isChecked(aItem) { return aItem.checked; }
+
+  for each (var item in gTreeData) {
+    // only act on window items
+    if (item.tabs) {
+	  // if toggling and 0 ("partially checked") remain 0, otherwise toggle.  If not toggling just set/clear.
+      var check = (aType == "TOGGLE") ? ((item.checked === 0) ? 0 : !item.checked) : (aType == "ALL");
+      item.checked = check;
+      for each (var tab in item.tabs) {
+        tab.checked = (aType == "TOGGLE") ? !tab.checked : check;
       }
     }
-    index++;
   }
-  while (index < treeView.rowCount);
-
-  if (aType != "TOGGLE") gAcceptButton.disabled = (aType == "NONE")
+  gAllTabsChecked = gTreeData.every(isChecked);
+  gAcceptButton.disabled = gNoTabsChecked = !gTreeData.some(isChecked);
+  
+  // update the whole tree view
+  treeView.treeBox.invalidate();
 }
 
 function restoreSingleWindow(aIx) {
