@@ -1842,7 +1842,13 @@ var gSessionManager = {
 		}
 		if (!dir.exists())
 		{
-			dir.create(this.mComponents.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+			try {
+				dir.create(this.mComponents.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+			}
+			catch (ex) {
+				this.ioError(ex);
+				return null;
+			}
 		}
 		if (aFileName)
 		{
@@ -1971,15 +1977,27 @@ var gSessionManager = {
 			var data = aList.map(function(aEntry) {
 				return aEntry.name + "\n" + aEntry.state
 			}).join("\n\n");
-			this.writeFile(file, data);
-			this.mClosedWindowsCache.data = data;
-			this.mClosedWindowsCache.timestamp = file.lastModifiedTime;
+			try {
+				this.writeFile(file, data);
+				this.mClosedWindowsCache.data = data;
+				this.mClosedWindowsCache.timestamp = file.lastModifiedTime;
+			}
+			catch(ex) {
+				this.ioError(ex);
+				return;
+			}
 		}
 		else
 		{
-			this.delFile(file);
-			this.mClosedWindowsCache.data = null;
-			this.mClosedWindowsCache.timestamp = 0;
+			try {
+				this.delFile(file);
+				this.mClosedWindowsCache.data = null;
+				this.mClosedWindowsCache.timestamp = 0;
+			}
+			catch(ex) {
+				this.ioError(ex);
+				return;
+			}
 		}
 		
 		// Firefox 2.0 will throw an exception if getClosedTabCount is called for a closed window so just fake it
