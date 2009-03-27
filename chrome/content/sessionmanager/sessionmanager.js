@@ -1460,40 +1460,58 @@ var gSessionManager = {
 		}
 		// removing tab item
 		else if (indexAttribute.indexOf("tab") != -1) {
-			// Work around issue with Minefield 3.6a1pre where an exception occurs with the code below
-			var workAround = false;
-		
-			// get index
-			aIx = indexAttribute.substring(3);
+			// Minefield 3.6a1pre throws an exception with the code below so use different method
+			if (this.mAppVersion < "1.9.2") {
+				// get index
+				aIx = indexAttribute.substring(3);
 			
-			// This code is based off of code in Tab Mix Plus
-			var state = { windows: [], _firstTabs: true };
-			state.windows[0] = { _closedTabs: [] };
+				// This code is based off of code in Tab Mix Plus
+				var state = { windows: [], _firstTabs: true };
+				state.windows[0] = { _closedTabs: [] };
 
-			// Minefield 3.6a1pre throws an exception with the above so just replace the whole window
-			if (this.mAppVersion >= "1.9.2") {
-				workAround = true;
-				state = this.JSON_decode(this.mSessionStore.getWindowState(window));
-			}	
-			
-			if (aIx >= 0) {
 				// get closed-tabs from nsSessionStore
-				var closedTabs = workAround ? state.windows[0]._closedTabs : this.JSON_decode(this.mSessionStore.getClosedTabData(window));
+				var closedTabs = this.JSON_decode(this.mSessionStore.getClosedTabData(window));
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
 				if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 				// purge closed tab at aIndex
 				closedTabs.splice(aIx, 1);
 				state.windows[0]._closedTabs = closedTabs;
-			}
 
-			// replace existing _closedTabs
-			this.mSessionStore.setWindowState(window, this.JSON_encode(state), workAround);
+				// replace existing _closedTabs
+				this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
+			}
+			else {
+				this.forgetClosedTab(aIx);
+			}
 			
 			// update the remaining entries
-			this.updateClosedList(aTarget, aIx, state.windows[0]._closedTabs.length, "tab");
+			this.updateClosedList(aTarget, aIx, this.mSessionStore.getClosedTabCount(window), "tab");
 		}
 	},
 	
+	forgetClosedTab: function (aIndex) 
+	{
+		var selectedTab = getBrowser().selectedTab;
+
+		// reopen the tab to forget
+		var tab = undoCloseTab(aIndex) || gBrowser.selectedTab
+		var browser = gBrowser.getBrowserForTab(tab);
+
+		// load a blank document and clear its history
+		browser.contentDocument.location = "about:blank";
+		with (browser.webNavigation.sessionHistory) PurgeHistory(count);
+
+		// don't wait for the tab to complete loading
+		// (this clears data associated with partially loaded tabs)
+		var event = document.createEvent("Events");
+		event.initEvent("load", true, false);
+		browser.dispatchEvent(event);
+
+		// close the tab for good (blank tabs can't be reopened)
+		gBrowser.removeTab(tab);
+		gBrowser.selectedTab = selectedTab;
+	},
+
 	updateClosedList: function(aMenuItem, aIx, aClosedListLength, aType) 
 	{
 		// Get menu popup
