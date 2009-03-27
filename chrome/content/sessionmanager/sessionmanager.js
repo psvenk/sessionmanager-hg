@@ -74,6 +74,41 @@ var gSessionManager = {
 		var nativeJSON = Components.classes["@mozilla.org/dom/json;1"]
 		if (nativeJSON)
 			this.mNativeJSON = nativeJSON.createInstance(Components.interfaces.nsIJSON);
+
+		// Determine Mozilla version to see what is supported
+		this.mAppVersion = "0";
+		this.mAppID = "UNKNOWN";
+		try {
+			var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
+			this.mAppVersion = appInfo.platformVersion;
+			switch (appInfo.ID) {
+				case "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
+					this.mAppID = "FIREFOX";
+					break;
+				case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
+					this.mAppID = "SEAMONKEY";
+					break;
+			}
+		} catch (e) { dump(e + "\n"); }
+			
+		//+ Jonas Raoni Soares Silva
+		//@ http://jsfromhell.com/geral/utf-8 [v1.0]
+		this.UTF8 = {
+			encode: function(s){
+				for(var c, i = -1, l = (s = s.split("")).length, o = String.fromCharCode; ++i < l;
+					s[i] = (c = s[i].charCodeAt(0)) >= 127 ? o(0xc0 | (c >>> 6)) + o(0x80 | (c & 0x3f)) : s[i]
+				);
+				return s.join("");
+			},
+			decode: function(s){
+				for(var a, b, i = -1, l = (s = s.split("")).length, o = String.fromCharCode, c = "charCodeAt"; ++i < l;
+					((a = s[i][c](0)) & 0x80) &&
+					(s[i] = (a & 0xfc) == 0xc0 && ((b = s[i + 1][c](0)) & 0xc0) == 0x80 ?
+					o(((a & 0x03) << 6) + (b & 0x3f)) : o(128), s[++i] = "")
+				);
+				return s.join("");
+			}
+		}
 			
 		return true;
 	},
@@ -102,22 +137,6 @@ var gSessionManager = {
 				buttons[i].boxObject.firstChild.tooltipText = buttons[i].getAttribute("buttontooltiptext");
 		}
 		
-		// Determine Mozilla version to see what is supported
-		this.mAppVersion = "0";
-		this.mAppID = "UNKNOWN";
-		try {
-			var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
-			this.mAppVersion = appInfo.platformVersion;
-			switch (appInfo.ID) {
-				case "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-					this.mAppID = "FIREFOX";
-					break;
-				case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
-					this.mAppID = "SEAMONKEY";
-					break;
-			}
-		} catch (e) { dump(e + "\n"); }
-
 		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
 		// enabled and presumably anyone installing Session Manager actually wants to use it. 
 		// This preference no longer exists as of Firefox 3.1 so don't set it, if there is no default value
@@ -1441,6 +1460,9 @@ var gSessionManager = {
 		}
 		// removing tab item
 		else if (indexAttribute.indexOf("tab") != -1) {
+			// Work around issue with Minefield 3.6a1pre where an exception occurs with the code below
+			var workAround = false;
+		
 			// get index
 			aIx = indexAttribute.substring(3);
 			
@@ -1448,9 +1470,15 @@ var gSessionManager = {
 			var state = { windows: [], _firstTabs: true };
 			state.windows[0] = { _closedTabs: [] };
 
+			// Minefield 3.6a1pre throws an exception with the above so just replace the whole window
+			if (this.mAppVersion >= "1.9.2") {
+				workAround = true;
+				state = this.JSON_decode(this.mSessionStore.getWindowState(window));
+			}	
+			
 			if (aIx >= 0) {
 				// get closed-tabs from nsSessionStore
-				var closedTabs = this.JSON_decode(this.mSessionStore.getClosedTabData(window));
+				var closedTabs = workAround ? state.windows[0]._closedTabs : this.JSON_decode(this.mSessionStore.getClosedTabData(window));
 				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
 				if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 				// purge closed tab at aIndex
@@ -1459,7 +1487,7 @@ var gSessionManager = {
 			}
 
 			// replace existing _closedTabs
-			this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
+			this.mSessionStore.setWindowState(window, this.JSON_encode(state), workAround);
 			
 			// update the remaining entries
 			this.updateClosedList(aTarget, aIx, state.windows[0]._closedTabs.length, "tab");
@@ -3341,7 +3369,8 @@ var gSessionManager = {
 		var jsString = null;
 		try {
 			if (this.mNativeJSON) {
-				jsString = this.mNativeJSON.encode(aObj);
+				// UTF8 encode to work around Firefox bug 485563 when using native JSON
+				jsString = this.UTF8.encode(this.mNativeJSON.encode(aObj));
 			}
 			else {
 				jsString = this.toJSONString(aObj);
