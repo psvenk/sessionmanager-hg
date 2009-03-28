@@ -58,9 +58,9 @@
 						<treechildren flex="1"/>
 					</tree>
 					<hbox>
-						<button label="Select All" onclick="tabTreeSelect('ALL');"/>
-						<button label="Select None" onclick="tabTreeSelect('NONE');"/>
-						<button label="Toggle Selections" onclick="tabTreeSelect('TOGGLE');"/>
+						<button label="&select_all.label;" onclick="tabTreeSelect('ALL');"/>
+						<button label="&select_none.label;" onclick="tabTreeSelect('NONE');"/>
+						<button label="&toggle_selection.label;" onclick="tabTreeSelect('TOGGLE');"/>
 					</hbox>
 					<description id="ctrl_click_note" class="header" hidden="true">&ctrl_click_note.label;</description>
 				</vbox>
