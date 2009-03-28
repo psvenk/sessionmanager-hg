@@ -91,25 +91,6 @@ var gSessionManager = {
 			}
 		} catch (e) { dump(e + "\n"); }
 			
-		//+ Jonas Raoni Soares Silva
-		//@ http://jsfromhell.com/geral/utf-8 [v1.0]
-		this.UTF8 = {
-			encode: function(s){
-				for(var c, i = -1, l = (s = s.split("")).length, o = String.fromCharCode; ++i < l;
-					s[i] = (c = s[i].charCodeAt(0)) >= 127 ? o(0xc0 | (c >>> 6)) + o(0x80 | (c & 0x3f)) : s[i]
-				);
-				return s.join("");
-			},
-			decode: function(s){
-				for(var a, b, i = -1, l = (s = s.split("")).length, o = String.fromCharCode, c = "charCodeAt"; ++i < l;
-					((a = s[i][c](0)) & 0x80) &&
-					(s[i] = (a & 0xfc) == 0xc0 && ((b = s[i + 1][c](0)) & 0xc0) == 0x80 ?
-					o(((a & 0x03) << 6) + (b & 0x3f)) : o(128), s[++i] = "")
-				);
-				return s.join("");
-			}
-		}
-			
 		return true;
 	},
 
@@ -3387,8 +3368,9 @@ var gSessionManager = {
 		var jsString = null;
 		try {
 			if (this.mNativeJSON) {
-				// UTF8 encode to work around Firefox bug 485563 when using native JSON
-				jsString = this.UTF8.encode(this.mNativeJSON.encode(aObj));
+				jsString = this.mNativeJSON.encode(aObj);
+				// Workaround for Firefox bug 485563
+				jsString = jsString.replace(/[\u2028\u2029]/g, function($0) "\\u" + $0.charCodeAt(0).toString(16));
 			}
 			else {
 				jsString = this.toJSONString(aObj);
