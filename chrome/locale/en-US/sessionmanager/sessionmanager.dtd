@@ -73,3 +73,6 @@
 <!ENTITY prompt.append.label "Append to Session">
 <!ENTITY prompt.replace.label "Replace Session">
 <!ENTITY ctrl_click_note.label "Note: clicking a tab entry while holding down the CTRL key, will open that tab in the existing window.">
+<!ENTITY select_all.label "Select All">
+<!ENTITY select_none.label "Select None">
+<!ENTITY toggle_selection.label "Toggle Selection">
