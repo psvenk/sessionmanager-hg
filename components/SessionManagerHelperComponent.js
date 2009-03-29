@@ -364,10 +364,14 @@ var SessionManagerHelperComponent = {
 		try {
 			if (typeof(JSON) != "undefined") {
 				jsString = JSON.stringify(aObj);
+				// Workaround for Firefox bug 485563
+				jsString = jsString.replace(/[\u2028\u2029]/g, function($0) "\\u" + $0.charCodeAt(0).toString(16));
 			}
 			else if (Cc["@mozilla.org/dom/json;1"]) {
 				var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
 				jsString = nativeJSON.encode(aObj);
+				// Workaround for Firefox bug 485563
+				jsString = jsString.replace(/[\u2028\u2029]/g, function($0) "\\u" + $0.charCodeAt(0).toString(16));
 			}
 			else {
 				jsString = this.toJSONString(aObj);
