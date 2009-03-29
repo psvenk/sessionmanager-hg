@@ -72,3 +72,6 @@
 <!ENTITY prompt.append.label "Ajouter à la session">
 <!ENTITY prompt.replace.label "Remplacer la session">
 <!ENTITY ctrl_click_note.label "Remarque : En cliquant sur le nom d&apos;un onglet tout en maintenant la touche CTRL, vous ouvrirez cet onglet dans la fenêtre existante.">
+<!ENTITY select_all.label "Tout sélectionner">
+<!ENTITY select_none.label "Ne rien sélectionner">
+<!ENTITY toggle_selection.label "Intervertir la sélection">

@@ -72,3 +72,6 @@
 <!ENTITY prompt.append.label "Додади на сесијата">
 <!ENTITY prompt.replace.label "Замени ја сесијата">
 <!ENTITY ctrl_click_note.label "Забелешка: кликањето на запис на јазичето додека го држите притиснато CTRL копчето, ќе го отвори тоа јазиче во постоечкиот прозорец.">
+<!ENTITY select_all.label "Избери ги сите">
+<!ENTITY select_none.label "Избери ниедно">
+<!ENTITY toggle_selection.label "Смени го изборот">

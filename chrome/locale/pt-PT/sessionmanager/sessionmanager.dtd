@@ -72,3 +72,6 @@
 <!ENTITY prompt.append.label "Anexar à sessão">
 <!ENTITY prompt.replace.label "Substituir sessão">
 <!ENTITY ctrl_click_note.label "Nota: clicar numa entrada de separador enquanto carrega na tecla CTRL, abre esse separador na janela existente.">
+<!ENTITY select_all.label "Seleccionar tudo">
+<!ENTITY select_none.label "Não seleccionar nada">
+<!ENTITY toggle_selection.label "Trocar selecção">

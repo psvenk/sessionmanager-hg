@@ -3,7 +3,7 @@
 <!ENTITY startNend.caption "Запуск/Выход">
 <!ENTITY resume_sess.label "При запуске всегда загружать эту сессию:">
 <!ENTITY resume_sess.accesskey "з">
-<!ENTITY backup_sess.label "При выходе">
+<!ENTITY backup_sess.label "При выходе:">
 <!ENTITY backup_sess.accesskey "в">
 <!ENTITY backup_session.label0 "не учитывать текущую сессию">
 <!ENTITY backup_session.label1 "сохранить текущую сессию">
@@ -14,7 +14,7 @@
 <!ENTITY autosave_session.accesskey "А">
 <!ENTITY restoring.caption "Восстановление сессий">
 <!ENTITY sessionList.caption "Список сессий">
-<!ENTITY orderList.label "Упорядочивать список сессий по">
+<!ENTITY orderList.label "Упорядочивать список сессий по:">
 <!ENTITY orderList.accesskey "У">
 <!ENTITY orderList.label1 "алфавиту">
 <!ENTITY orderList.label2 "дате, по возрастанию">
@@ -49,7 +49,7 @@
 <!ENTITY service.description "Изменяйте эти настройки, только если вы полностью уверены в своих действиях:">
 <!ENTITY interval.label "Минимальный интервал между двумя сохранениями (в секундах):">
 <!ENTITY interval.accesskey "и">
-<!ENTITY postdata.label "Максимальное количество POSTDATA для сохранения (в байтах, -1 для всех)">
+<!ENTITY postdata.label "Максимальное количество POSTDATA для сохранения (в байтах, -1 для всех):">
 <!ENTITY postdata.accesskey "P">
 <!ENTITY privacy.label "Сохранять чувствительные данные (данные форм, POSTDATA и cookies):">
 <!ENTITY privacy.accesskey "у">
@@ -57,10 +57,10 @@
 <!ENTITY privacy.level1 "только для незашифрованных сайтов">
 <!ENTITY privacy.level2 "не сохранять">
 <!ENTITY sessiondir.caption "Папка сохраняемых сессий">
-<!ENTITY sessiondir.desc "Папка по умолчанию для сохраняемых сессий может быть указана здесь.">
+<!ENTITY sessiondir.desc "Папка по умолчанию для сохраняемых сессий может быть указана здесь:">
 <!ENTITY encrypt.caption "Шифрование">
 <!ENTITY encrypt.desc "Внимание: Зашифрованные данные сессий могут быть открыты только в профилях с одинаковыми файлами key3.db и cert8.db. Но если установлен мастер-пароль, данные не могут быть зашифрованы или дешифрованы без его ввода.">
-<!ENTITY encrypt.label "Шифровать сохраненные сессии и закрытые окна.">
+<!ENTITY encrypt.label "Шифровать сохраненные сессии и закрытые окна">
 <!ENTITY encrypt.accesskey "Ш">
 <!ENTITY change_dir.label "Изменить">
 <!ENTITY change_dir.accesskey "И">
@@ -88,7 +88,7 @@
 <!ENTITY display.caption "Отображение">
 <!ENTITY middleclick.label "Средняя кнопка мыши возвращает последнюю закрытую вкладку">
 <!ENTITY middleclick.accesskey "М">
-<!ENTITY max_display.label "Предельное число сессий, показываемых в меню (-1 для показа полного списка)">
+<!ENTITY max_display.label "Предельное число сессий, показываемых в меню (-1 для показа полного списка):">
 <!ENTITY max_display.accesskey "ч">
 <!ENTITY hide_tools_menu.label "Не показывать меню менеджера сессий в меню «Инструменты»">
 <!ENTITY hide_tools_menu.accesskey "м">

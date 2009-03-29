@@ -40,7 +40,7 @@
 <!ENTITY load_append.accesskey "д">
 <!ENTITY replace_all.label "Заменить сессию текущей">
 <!ENTITY replace_all.accesskey "З">
-<!ENTITY replace_window.label "Заменить сессию текущим окном (??)">
+<!ENTITY replace_window.label "Заменить сессию содержимым текущего окна">
 <!ENTITY replace_window.accesskey "О">
 <!ENTITY remove_one.label "Удалить сессию">
 <!ENTITY set_startup.label "открывать при запуске">
@@ -71,4 +71,7 @@
 <!ENTITY load.accesskey "З">
 <!ENTITY prompt.append.label "Добавить к сессии">
 <!ENTITY prompt.replace.label "Заменить сессию">
-<!ENTITY ctrl_click_note.label "Внимание: щелчок по (tab entry ???) с нажатой клавишей &lt;Ctrl&gt; откроет вкладку в существующем окне.">
+<!ENTITY ctrl_click_note.label "Внимание: щелчок по вкладке с нажатой клавишей &lt;Ctrl&gt; добавит вкладку к содержимому существующего окна.">
+<!ENTITY select_all.label "Выбрать все">
+<!ENTITY select_none.label "Ничего не выбирать">
+<!ENTITY toggle_selection.label "Переключить выбор">

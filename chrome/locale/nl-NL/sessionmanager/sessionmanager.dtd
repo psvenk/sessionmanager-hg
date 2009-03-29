@@ -72,3 +72,6 @@
 <!ENTITY prompt.append.label "Aan sessie toevoegen">
 <!ENTITY prompt.replace.label "Sessie vervangen">
 <!ENTITY ctrl_click_note.label "Opmerking: als u de CTRL-knop ingedrukt houdt wanneer u op een tab-item klikt, zal die tab openen in het bestaande venster.">
+<!ENTITY select_all.label "Alles selecteren">
+<!ENTITY select_none.label "Niets selecteren">
+<!ENTITY toggle_selection.label "Selectie omdraaien">

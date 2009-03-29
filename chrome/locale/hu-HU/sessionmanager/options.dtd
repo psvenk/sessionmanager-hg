@@ -72,7 +72,7 @@
 <!ENTITY lastpage.label "Az utolsó betöltött oldal megjelenítése">
 <!ENTITY noSession.label "Nincs">
 <!ENTITY noSession.accesskey "N">
-<!ENTITY promptSession.label "Rákérdez a munkamenetre">
+<!ENTITY promptSession.label "Rákérdezés a munkamenetre">
 <!ENTITY promptSession.accesskey "R">
 <!ENTITY selectSession.label "Munkamenet kiválasztása">
 <!ENTITY selectSession.accesskey "k">

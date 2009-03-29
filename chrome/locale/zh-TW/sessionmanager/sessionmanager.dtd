@@ -64,11 +64,14 @@
 <!ENTITY toolbar.undo.menu.tooltip "開啟「最近關閉視窗及分頁」選單">
 <!ENTITY prompt.save_every1.label "自動存檔間隔">
 <!ENTITY prompt.save_every2.label "分鐘(空白表示停用)">
-<!ENTITY winTabTree.restoreHeader "還原">
+<!ENTITY winTabTree.restoreHeader "選取">
 <!ENTITY winTabTree.listHeader "視窗與分頁">
 <!ENTITY winTabTree.windowLabel "視窗 &#37;S">
 <!ENTITY load.label "載入「瀏覽頁組」或分頁...">
 <!ENTITY load.accesskey "L">
 <!ENTITY prompt.append.label "加入當前的「瀏覽頁組」">
 <!ENTITY prompt.replace.label "取代當前的「瀏覽頁組」">
-<!ENTITY ctrl_click_note.label "備註: 若以Ctrl+左鍵點選分頁，可逐一加入當前視窗。">
+<!ENTITY ctrl_click_note.label "備註: Ctrl+左鍵-- 點選分頁，可添加到當前視窗；點選視窗，可添加到當前頁組。">
+<!ENTITY select_all.label "全選">
+<!ENTITY select_none.label "取消選取">
+<!ENTITY toggle_selection.label "切換選取">

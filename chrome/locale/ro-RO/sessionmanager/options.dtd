@@ -9,7 +9,7 @@
 <!ENTITY backup_session.label1 "arhivează sesiunea curentă">
 <!ENTITY backup_session.label2 "întreabă dacă se arhivează sesiunea curentă">
 <!ENTITY crashrecovery.label "Activează recuperarea după o eşuare">
-<!ENTITY crashrecovery.accesskey "f">
+<!ENTITY crashrecovery.accesskey "r">
 <!ENTITY autosave_session.label "Salvează automat sesiunea înlocuită">
 <!ENTITY autosave_session.accesskey "S">
 <!ENTITY restoring.caption "Restaurare sesiune">

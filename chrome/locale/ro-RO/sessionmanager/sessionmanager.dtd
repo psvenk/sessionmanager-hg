@@ -72,3 +72,6 @@
 <!ENTITY prompt.append.label "Adaugă la sesiunea curentă">
 <!ENTITY prompt.replace.label "Înlocuieşte sesiunea curentă">
 <!ENTITY ctrl_click_note.label "Notă: Făcând Ctrl+Clic pe înregistrarea unei file, aceasta se va deschide în fereastra curentă.">
+<!ENTITY select_all.label "Selectează tot">
+<!ENTITY select_none.label "Nu selecta nimic">
+<!ENTITY toggle_selection.label "Comută selecţia">

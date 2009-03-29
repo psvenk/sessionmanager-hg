@@ -72,3 +72,6 @@
 <!ENTITY prompt.append.label "セッションを追加する">
 <!ENTITY prompt.replace.label "セッションを取り替える">
 <!ENTITY ctrl_click_note.label "注：Ctrlキーを押しながらタブのエントリをクリックすると、既存のウィンドウでそのタブを開きます">
+<!ENTITY select_all.label "すべて選択">
+<!ENTITY select_none.label "選択しない">
+<!ENTITY toggle_selection.label "選択の切り替え">

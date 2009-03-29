@@ -72,3 +72,6 @@
 <!ENTITY prompt.append.label "Pripojiť k relácii">
 <!ENTITY prompt.replace.label "Nahradiť reláciu">
 <!ENTITY ctrl_click_note.label "Poznámka: ak kliknete na položku karty a budete pritom držať kláves CTRL, daná karta sa otvorí v existujúcom okne.">
+<!ENTITY select_all.label "Vybrať všetko">
+<!ENTITY select_none.label "Nevybrať nič">
+<!ENTITY toggle_selection.label "Prepnúť výber">
