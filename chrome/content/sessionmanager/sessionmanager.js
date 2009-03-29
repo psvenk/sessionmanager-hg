@@ -1441,11 +1441,11 @@ var gSessionManager = {
 		}
 		// removing tab item
 		else if (indexAttribute.indexOf("tab") != -1) {
+			// get index
+			aIx = indexAttribute.substring(3);
+			
 			// Minefield 3.6a1pre throws an exception with the code below so use different method
 			if (this.mAppVersion < "1.9.2") {
-				// get index
-				aIx = indexAttribute.substring(3);
-			
 				// This code is based off of code in Tab Mix Plus
 				var state = { windows: [], _firstTabs: true };
 				state.windows[0] = { _closedTabs: [] };
@@ -1462,7 +1462,13 @@ var gSessionManager = {
 				this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
 			}
 			else {
-				this.forgetClosedTab(aIx);
+				// If Firefox bug 461634 not fixed yet use our removal method.
+				if (typeof(this.mSessionStore.forgetClosedTab) == "undefined") {
+					this.forgetClosedTab(aIx);
+				}
+				else {
+					this.mSessionStore.forgetClosedTab(window, aIx);
+				}
 			}
 			
 			// update the remaining entries
