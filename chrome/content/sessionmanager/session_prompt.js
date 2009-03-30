@@ -247,6 +247,17 @@ gSessionManager.onLoad = function() {
 		document.title += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 		document.documentElement.removeAttribute("screenX");
 		document.documentElement.removeAttribute("screenY");
+
+		// Move window so that the bottom part can be displayed when prompting for a session that
+		// does not select the session by default
+		if (!gParams.GetString(3)) {
+			setTimeout( function() {
+				var tabHeight = gTabTree.getAttribute("height");
+				var adjustHeight = window.screen.availHeight - tabHeight - window.outerHeight - window.screenY - 54;
+				if ((window.screenY + adjustHeight) < 0) adjustHeight = -window.screenY;
+				if (adjustHeight < 0) window.moveBy(0, adjustHeight);
+			},0);
+		}
 	}
 	window.sizeToContent();
 	
