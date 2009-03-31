@@ -97,8 +97,9 @@ gSessionManager.addMenuItem = function (aPaneID) {
 	var isSeaMonkey = aPaneID == "security_pane";
 	var doc = isSeaMonkey ? document.getElementById(aPaneID) : document;
 	var prefs = doc.getElementsByTagName('preferences')[0];
-	var firstCheckbox = doc.getElementsByTagName('checkbox')[(isSeaMonkey ? 2 : 0)];
-	if (prefs && firstCheckbox) // if this isn't true we are lost :)
+	var checkboxes = doc.getElementsByTagName('checkbox')
+	var lastCheckbox = checkboxes[checkboxes.length -1];
+	if (prefs && lastCheckbox) // if this isn't true we are lost :)
 	{
 
 		// Determine Mozilla version to see what is supported
@@ -122,7 +123,7 @@ gSessionManager.addMenuItem = function (aPaneID) {
 		check.setAttribute('label', this.sanitizeLabel.label);
 		check.setAttribute('accesskey', this.sanitizeLabel.accesskey);
 		check.setAttribute('preference', this.mSanitizePreference);
-		firstCheckbox.parentNode.insertBefore(check, firstCheckbox);
+		lastCheckbox.parentNode.appendChild(check);
 
 		// Firefox only
 		if (typeof(gSanitizePromptDialog) == 'object')
