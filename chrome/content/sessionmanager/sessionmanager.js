@@ -3356,10 +3356,16 @@ var gSessionManager = {
 					jsObject = this.mNativeJSON.decode(aStr);
 				}
 				catch (ex) {
+					if (/[\u2028\u2029]/.test(aStr)) {
+						aStr = aStr.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
+					}
 					jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
 				}
 			}
 			else {
+				if (/[\u2028\u2029]/.test(aStr)) {
+					aStr = aStr.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
+				}
 				jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
 			}
 		}
@@ -3377,7 +3383,7 @@ var gSessionManager = {
 				jsString = this.mNativeJSON.encode(aObj);
 				// Workaround for Firefox bug 485563
 				if (/[\u2028\u2029]/.test(jsString)) {
-					jsString = jsString.replace(/[\u2028\u2029]/g, function($0) "\\u" + $0.charCodeAt(0).toString(16));
+					jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 				}
 			}
 			else {
