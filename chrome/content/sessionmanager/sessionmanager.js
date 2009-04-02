@@ -1444,30 +1444,30 @@ var gSessionManager = {
 			// get index
 			aIx = indexAttribute.substring(3);
 			
-			// Minefield 3.6a1pre throws an exception with the code below so use different method
-			if (this.mAppVersion < "1.9.2") {
-				// This code is based off of code in Tab Mix Plus
-				var state = { windows: [], _firstTabs: true };
-				state.windows[0] = { _closedTabs: [] };
-
-				// get closed-tabs from nsSessionStore
-				var closedTabs = this.JSON_decode(this.mSessionStore.getClosedTabData(window));
-				// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
-				if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
-				// purge closed tab at aIndex
-				closedTabs.splice(aIx, 1);
-				state.windows[0]._closedTabs = closedTabs;
-
-				// replace existing _closedTabs
-				this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
+			// If Firefox bug 461634 is fixed use SessionStore method.
+			if (typeof(this.mSessionStore.forgetClosedTab) != "undefined") {
+				this.mSessionStore.forgetClosedTab(window, aIx);
 			}
 			else {
-				// If Firefox bug 461634 not fixed yet use our removal method.
-				if (typeof(this.mSessionStore.forgetClosedTab) == "undefined") {
-					this.forgetClosedTab(aIx);
+				// Firefox 3.1b4 and later throws an exception with the code below so use different method
+				if (this.mAppVersion < "1.9.1b4") {
+					// This code is based off of code in Tab Mix Plus
+					var state = { windows: [], _firstTabs: true };
+					state.windows[0] = { _closedTabs: [] };
+
+					// get closed-tabs from nsSessionStore
+					var closedTabs = this.JSON_decode(this.mSessionStore.getClosedTabData(window));
+					// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
+					if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
+					// purge closed tab at aIndex
+					closedTabs.splice(aIx, 1);
+					state.windows[0]._closedTabs = closedTabs;
+
+					// replace existing _closedTabs
+					this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
 				}
 				else {
-					this.mSessionStore.forgetClosedTab(window, aIx);
+					this.forgetClosedTab(aIx);
 				}
 			}
 			
