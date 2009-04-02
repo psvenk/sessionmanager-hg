@@ -72,3 +72,6 @@
 <!ENTITY prompt.append.label "Oturuma Ekle">
 <!ENTITY prompt.replace.label "Oturum Değiştir">
 <!ENTITY ctrl_click_note.label "Not:Bir sekmeye tıklayıp CTRL tuşu basılı olduğu halde aşağı sürüklerseniz, o sekme hali hazırdaki pencerede açılır.">
+<!ENTITY select_all.label "Tümünü Seç">
+<!ENTITY select_none.label "Seçim Yok">
+<!ENTITY toggle_selection.label "Seçimi değiştir">
