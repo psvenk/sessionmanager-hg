@@ -811,6 +811,7 @@ var gSessionManager = {
 			menuitem.setAttribute("accesskey", key);
 			menuitem.setAttribute("autosave", /^window|session/.exec(aSession.autosave));
 			menuitem.setAttribute("disabled", windowSessions[aSession.name.trim().toLowerCase()] || false);
+			menuitem.setAttribute("crop", "center");
 			// only display one latest (even if two have the same timestamp)
 			if (!(aSession.backup?backup_latest:user_latest) &&
 			    ((aSession.backup?sessions.latestBackUpTime:sessions.latestTime) == aSession.timestamp)) {
