@@ -596,6 +596,11 @@ var gSessionManager = {
 			{
 				this.shutDown();
 			}
+			else
+			{
+				// Save any active auto-save session, but leave it open.
+				this.closeSession(false, false, true);
+			}
 			break;
 		case "quit-application-granted":
 			// quit granted so stop listening for closed windows
@@ -2850,6 +2855,16 @@ var gSessionManager = {
 		                    ?(this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
 		                    :this.getPref("browser.sessionstore.resume_session_once", false, true);
 		var recoverOnly = this.mPref__running || sessionstart;
+		
+		// handle case where user restarted browser and an auto-save session is active, but the session was not restored
+		// for whatever reason - see Firefox bug 487219 
+		if (this.mPref__autosave_name && !sessionstart && !recovering && (this.mAppVersion >= "1.9.1") && (this.getBrowserWindows().length == 1)) {
+			//Components.utils.reportError("Loading saved auto-save session " + this.mPref__autosave_name);
+			recoverOnly = true;
+			var session = this.makeFileName(this.mPref__autosave_name);
+			this.load(session, "startup");
+		}
+		
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
