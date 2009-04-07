@@ -366,7 +366,7 @@ var SessionManagerHelperComponent = {
 				jsString = JSON.stringify(aObj);
 				// Workaround for Firefox bug 485563
 				if (/[\u2028\u2029]/.test(jsString)) {
-					jsString = jsString.replace(/[\u2028\u2029]/g, function($0) "\\u" + $0.charCodeAt(0).toString(16));
+					jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 				}
 			}
 			else if (Cc["@mozilla.org/dom/json;1"]) {
@@ -374,7 +374,7 @@ var SessionManagerHelperComponent = {
 				jsString = nativeJSON.encode(aObj);
 				// Workaround for Firefox bug 485563
 				if (/[\u2028\u2029]/.test(jsString)) {
-					jsString = jsString.replace(/[\u2028\u2029]/g, function($0) "\\u" + $0.charCodeAt(0).toString(16));
+					jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 				}
 			}
 			else {
