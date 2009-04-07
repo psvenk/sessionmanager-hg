@@ -113,6 +113,7 @@ function initTreeView(aFileName) {
       }
       return {
         label: entry.title || entry.url,
+		url: entry.url,
         checked: true,
         src: iconURL,
         parent: winState
@@ -317,7 +318,12 @@ var treeView = {
 
   get rowCount()                     { return gTreeData.length; },
   setTree: function(treeBox)         { this.treeBox = treeBox; },
-  getCellText: function(idx, column) { return gTreeData[idx].label; },
+  getCellText: function(idx, column) { 
+    if (column.id == "location") {
+      return gTreeData[idx].url ? gTreeData[idx].url : "";
+    }
+    else return gTreeData[idx].label; 
+  },
   isContainer: function(idx)         { return (gTreeData[idx] ? "open" in gTreeData[idx] : false); }, // changed to work in Firefox 2.0
   getCellValue: function(idx, column){ return gTreeData[idx].checked; },
   isContainerOpen: function(idx)     { return gTreeData[idx].open; },

@@ -76,3 +76,4 @@
 <!ENTITY select_all.label "Select All">
 <!ENTITY select_none.label "Select None">
 <!ENTITY toggle_selection.label "Toggle Selection">
+<!ENTITY winTabTree.urlHeader "Location">
