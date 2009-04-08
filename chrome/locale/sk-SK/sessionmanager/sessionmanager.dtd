@@ -75,3 +75,4 @@
 <!ENTITY select_all.label "Vybrať všetko">
 <!ENTITY select_none.label "Nevybrať nič">
 <!ENTITY toggle_selection.label "Prepnúť výber">
+<!ENTITY winTabTree.urlHeader "Umiestnenie">

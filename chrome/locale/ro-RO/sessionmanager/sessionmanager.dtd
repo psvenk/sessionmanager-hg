@@ -75,3 +75,4 @@
 <!ENTITY select_all.label "Selectează tot">
 <!ENTITY select_none.label "Nu selecta nimic">
 <!ENTITY toggle_selection.label "Comută selecţia">
+<!ENTITY winTabTree.urlHeader "Locaţie">

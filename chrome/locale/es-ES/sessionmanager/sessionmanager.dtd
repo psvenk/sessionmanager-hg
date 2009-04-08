@@ -75,3 +75,4 @@
 <!ENTITY select_all.label "Seleccionar todas">
 <!ENTITY select_none.label "No seleccionar ninguna">
 <!ENTITY toggle_selection.label "Invertir selección">
+<!ENTITY winTabTree.urlHeader "Ubicación">

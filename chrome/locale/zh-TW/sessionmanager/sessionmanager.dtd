@@ -75,3 +75,4 @@
 <!ENTITY select_all.label "全選">
 <!ENTITY select_none.label "取消選取">
 <!ENTITY toggle_selection.label "切換選取">
+<!ENTITY winTabTree.urlHeader "網址">

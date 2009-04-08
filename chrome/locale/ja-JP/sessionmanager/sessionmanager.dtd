@@ -75,3 +75,4 @@
 <!ENTITY select_all.label "すべて選択">
 <!ENTITY select_none.label "選択しない">
 <!ENTITY toggle_selection.label "選択の切り替え">
+<!ENTITY winTabTree.urlHeader "場所">
