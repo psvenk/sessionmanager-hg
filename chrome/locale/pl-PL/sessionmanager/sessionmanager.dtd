@@ -75,4 +75,4 @@
 <!ENTITY select_all.label "Zaznacz wszystko">
 <!ENTITY select_none.label "Odznacz wszystko">
 <!ENTITY toggle_selection.label "Zmień zaznaczenia">
-<!ENTITY winTabTree.urlHeader "Lokalizacja">
+<!ENTITY winTabTree.urlHeader "Adres">

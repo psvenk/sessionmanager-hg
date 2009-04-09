@@ -75,3 +75,4 @@
 <!ENTITY select_all.label "Mindent kijelöl">
 <!ENTITY select_none.label "Kijelölés megszüntetése">
 <!ENTITY toggle_selection.label "Kijelölés megfordítása">
+<!ENTITY winTabTree.urlHeader "Hely">

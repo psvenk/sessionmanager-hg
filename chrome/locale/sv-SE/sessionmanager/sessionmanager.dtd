@@ -72,3 +72,7 @@
 <!ENTITY prompt.append.label "Lägg till på session">
 <!ENTITY prompt.replace.label "Ersätt session">
 <!ENTITY ctrl_click_note.label "Observera: att klicka på en flikpost medan Ctrl-knappen hålls in öppnar fliken i det nuvarande fönstret.">
+<!ENTITY select_all.label "Markera alla">
+<!ENTITY select_none.label "Markera inga">
+<!ENTITY toggle_selection.label "Växla markering">
+<!ENTITY winTabTree.urlHeader "Plats">

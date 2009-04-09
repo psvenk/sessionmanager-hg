@@ -75,3 +75,4 @@
 <!ENTITY select_all.label "Seleccionar tudo">
 <!ENTITY select_none.label "Não seleccionar nada">
 <!ENTITY toggle_selection.label "Trocar selecção">
+<!ENTITY winTabTree.urlHeader "Localização">

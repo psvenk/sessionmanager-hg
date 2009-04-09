@@ -66,6 +66,7 @@
 <!ENTITY prompt.save_every2.label "Minuten sichern (deaktiviert wenn leer)">
 <!ENTITY winTabTree.restoreHeader "Wiederherstellen">
 <!ENTITY winTabTree.listHeader "Fenster und Tabs">
+<!--   LOCALIZATION NOTE: &#37;S will be replaced with a number.   -->
 <!ENTITY winTabTree.windowLabel "Fenster &#37;S">
 <!ENTITY load.label "Sitzung laden...">
 <!ENTITY load.accesskey "l">
@@ -75,3 +76,4 @@
 <!ENTITY select_all.label "Alle auswählen">
 <!ENTITY select_none.label "Keine auswählen">
 <!ENTITY toggle_selection.label "Auswahl umkehren">
+<!ENTITY winTabTree.urlHeader "Adresse">

@@ -75,3 +75,4 @@
 <!ENTITY select_all.label "Выбрать все">
 <!ENTITY select_none.label "Ничего не выбирать">
 <!ENTITY toggle_selection.label "Переключить выбор">
+<!ENTITY winTabTree.urlHeader "Адрес">
