@@ -1121,7 +1121,7 @@ var gSessionManager = {
 		
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode);
+			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, stripClosedTabs, (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode || (aMode == "append"));
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
@@ -3116,7 +3116,7 @@ var gSessionManager = {
 		}
 		else
 		{
-			if (!aReplaceTabs || aOneWindow) aState = this.makeOneWindow(aState);
+			if (aOneWindow) aState = this.makeOneWindow(aState);
 			this.mSessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
 		}
 		//this.__window_session_name = unescape(this.mSessionStore.getWindowValue(window,"_sm_window_session_name"));
