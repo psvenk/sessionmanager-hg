@@ -152,6 +152,7 @@ var gSessionManager = {
 		// The following is needed to handle extensions who issue bad restarts in Firefox 2.0
 		if (this.mAppVersion < "1.9") this.mObserverService.addObserver(this, "quit-application-requested", false);
 		
+		this.mPref_append_by_default = this.getPref("append_by_default", false);
 		this.mPref_autosave_session = this.getPref("autosave_session", true);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
 		this.mPref_click_restore_tab = this.getPref("click_restore_tab", true);
@@ -1085,7 +1086,8 @@ var gSessionManager = {
 		if (TMP_SingleWindowMode && (aMode == "newwindow" || ((aMode != "startup") && (aMode != "overwrite") && !this.mPref_overwrite)))
 			aMode = "append";
 		
-		aMode = aMode || "default";
+		// Use specified mode or default.  If append_by_default and overwrite preferences are both set, use "append" instead of "overwrite"
+		aMode = aMode || ((this.mPref_append_by_default && this.mPref_overwrite) ? "append" : "default");
 		if (aMode == "startup")
 		{
 			overwriteTabs = this.isCmdLineEmpty();
