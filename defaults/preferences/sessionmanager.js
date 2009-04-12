@@ -2,6 +2,7 @@ pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.description", "chrome://
 
 pref("browser.sessionstore.restore_prompt_uri", "chrome://sessionmanager/content/restore_prompt.xul");
 
+pref("extensions.sessionmanager.append_by_default", false);
 pref("extensions.sessionmanager.autosave_session", true);
 pref("extensions.sessionmanager.backup_session", 1);
 pref("extensions.sessionmanager.backup_temporary", false);
