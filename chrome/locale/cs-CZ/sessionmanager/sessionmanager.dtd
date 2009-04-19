@@ -66,6 +66,7 @@
 <!ENTITY prompt.save_every2.label "minut (prázdné pole vypne funkci)">
 <!ENTITY winTabTree.restoreHeader "Obnovit">
 <!ENTITY winTabTree.listHeader "Okna a panely">
+<!--  LOCALIZATION NOTE: &#37;S will be replaced with a number.  -->
 <!ENTITY winTabTree.windowLabel "Okno &#37;S">
 <!ENTITY load.label "Načíst relaci...">
 <!ENTITY load.accesskey "l">
