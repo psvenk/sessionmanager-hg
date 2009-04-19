@@ -4,9 +4,9 @@
 <!ENTITY save.accesskey "S">
 <!ENTITY saveOne.label "保存当前窗口...">
 <!ENTITY saveOne.accesskey "W">
-<!ENTITY closeSession.label "Save and Close Current Session">
+<!ENTITY closeSession.label "保存并关闭当前会话">
 <!ENTITY closeSession.accesskey "C">
-<!ENTITY abandonSession.label "Abandon Current Session">
+<!ENTITY abandonSession.label "放弃当期会话">
 <!ENTITY abandonSession.accesskey "A">
 <!ENTITY rename.label "重命名会话...">
 <!ENTITY rename.accesskey "R">
@@ -32,3 +32,46 @@
 <!ENTITY toolbar.undo.label "撤销关闭">
 <!ENTITY toolbar.undo.tooltip "重新打开最近一次关闭的标签页">
 <!ENTITY prompt.ignore.label "不要再次显示此对话框">
+<!ENTITY prompt.autosave.label "此会话自动保存">
+<!ENTITY prompt.tabprompt.label "列出标签页以供还原">
+<!ENTITY load_replace.label "载入 (覆盖当前会话)">
+<!ENTITY load_replace.accesskey "L">
+<!ENTITY load_append.label "载入（追加到当前会话）">
+<!ENTITY load_append.accesskey "A">
+<!ENTITY replace_all.label "用当前会话覆盖此会话">
+<!ENTITY replace_all.accesskey "R">
+<!ENTITY replace_window.label "用当前窗口覆盖此会话">
+<!ENTITY replace_window.accesskey "W">
+<!ENTITY remove_one.label "删除会话...">
+<!ENTITY set_startup.label "设置为启动会话">
+<!ENTITY set_startup.accesskey "S">
+<!ENTITY openSessionManagerSidebar.commandkey "S">
+<!ENTITY session_name.label "名称">
+<!ENTITY session_windows.label "窗口">
+<!ENTITY session_tabs.label "标签页">
+<!ENTITY backup_sessions.label "备份会话">
+<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY remove_item.label "删除项目">
+<!ENTITY remove_item.accesskey "D">
+<!ENTITY session_group.label "Group">
+<!ENTITY rename_group.label "重命名组...">
+<!ENTITY remove_group.label "删除组...">
+<!ENTITY change_group.label "更改组...">
+<!ENTITY change_group.accesskey "C">
+<!ENTITY group.label "组会话(s)...">
+<!ENTITY group.accesskey "G">
+<!ENTITY toolbar.menu.tooltip "打开会话管理器菜单">
+<!ENTITY toolbar.undo.menu.tooltip "打开最近关闭的窗口和标签页菜单">
+<!ENTITY prompt.save_every1.label "自动保存">
+<!ENTITY prompt.save_every2.label "分钟 (空白表示禁用)">
+<!ENTITY winTabTree.restoreHeader "恢复">
+<!ENTITY winTabTree.listHeader "窗口和标签页">
+<!ENTITY winTabTree.windowLabel "窗口 &#37;S">
+<!ENTITY load.label "载入会话...">
+<!ENTITY load.accesskey "L">
+<!ENTITY prompt.append.label "追加到会话">
+<!ENTITY prompt.replace.label "覆盖会话">
+<!ENTITY ctrl_click_note.label "备注：Ctrl + 左键点选标签页，可添加到当前窗口；点选窗口，可添加到当前标签页。">
+<!ENTITY select_all.label "全选">
+<!ENTITY select_none.label "全不选">
+<!ENTITY toggle_selection.label "切换选择">

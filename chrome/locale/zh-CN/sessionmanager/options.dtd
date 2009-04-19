@@ -10,7 +10,7 @@
 <!ENTITY backup_session.label2 "询问是否备份当前会话">
 <!ENTITY crashrecovery.label "启用崩溃恢复">
 <!ENTITY crashrecovery.accesskey "e">
-<!ENTITY autosave_session.label "Automatically save replaced session">
+<!ENTITY autosave_session.label "自动保存已覆盖会话">
 <!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "会话恢复">
 <!ENTITY sessionList.caption "会话列表">
@@ -44,8 +44,8 @@
 <!ENTITY name_format.label "按照会话名称建议规范化为：">
 <!ENTITY name_format.accesskey "F">
 <!ENTITY name_format.desc "&#37;t 表示活动的标签标题， &#37;d 表示今天的日期， &#37;m表示时间， &#37;#t表示标题长度被限制为 # 个字符。">
-<!ENTITY sessionstore.caption "SessionStore">
-<!ENTITY service.caption "&quot;SessionStore&quot; Settings">
+<!ENTITY sessionstore.caption "会话储存器">
+<!ENTITY service.caption "&quot;会话储存器&quot; 设置">
 <!ENTITY service.description "不要修改下列选项，除非您知道自己在做什么">
 <!ENTITY interval.label "两次状态保存之间的最小时间间隔 (单位：秒)：">
 <!ENTITY interval.accesskey "i">
@@ -58,3 +58,42 @@
 <!ENTITY privacy.level2 "全都不保存">
 <!ENTITY sessiondir.caption "已保存会话位置">
 <!ENTITY sessiondir.desc "在此已保存会话的默认位置可以被覆盖">
+<!ENTITY encrypt.caption "加密">
+<!ENTITY encrypt.desc "警告：加密的会话数据只能从 profiles 中打开与 key3.db 和 cert8.db 相符的文件。另外，如果有设主密码，未输入主密码就无法对会话数据加密或解密。">
+<!ENTITY encrypt.label "加密已保存会话和已关闭的窗口数据">
+<!ENTITY encrypt.accesskey "e">
+<!ENTITY change_dir.label "更改">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "默认">
+<!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "会话管理器保存的会话">
+<!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "会话保存">
+<!ENTITY lastpage.label "显示我最后加载的页面">
+<!ENTITY noSession.label "无(浏览器设置)">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "提示会话">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "选定的会话">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "保存会话 Cookies">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "从...导入会话">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "I">
+<!ENTITY apply.label "应用">
+<!ENTITY save_and_restore.caption "保存 &amp; 恢复">
+<!ENTITY display.caption "Display">
+<!ENTITY middleclick.label "中键重新打开最后关闭的标签页">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "显示在菜单的会话最大数 （-1 表示全部）">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "不在工具菜单显示会话管理器菜单">
+<!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "禁用修正缓存功能">
+<!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "如果加密失败，不保存未加密数据。">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "警告：如果标签页和窗口数据加密失败，该数据将会丢失无法恢复。如果要求主密码时您并未输入，加密就会失败，所以勾选此项时必须慎重考虑 ">
