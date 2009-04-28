@@ -72,3 +72,7 @@
 <!ENTITY prompt.append.label "Liitä istuntoon">
 <!ENTITY prompt.replace.label "Korvaa istunto">
 <!ENTITY ctrl_click_note.label "Huomaa: Kun välilehti-merkintää napautetaan hiirellä Ctrl-näppäin pohjassa, kyseinen välilehti avataan nykyisessä ikkunassa.">
+<!ENTITY select_all.label "Valitse kaikki">
+<!ENTITY select_none.label "Poista valinnat">
+<!ENTITY toggle_selection.label "Vaihda valinnat">
+<!ENTITY winTabTree.urlHeader "Sijainti">

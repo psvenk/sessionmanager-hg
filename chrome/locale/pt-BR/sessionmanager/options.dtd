@@ -43,7 +43,7 @@
 <!ENTITY name_format.caption "Nomes das Sessões">
 <!ENTITY name_format.label "Formato sugerido para nomes de sessões:">
 <!ENTITY name_format.accesskey "F">
-<!ENTITY name_format.desc "Use &#37;t para o título da aba ativa, &#37;d para a data de hoje e &#37;m para a hora; além disso o tamanho do título pode ser limitado com caracteres # : &#37;#t.">
+<!ENTITY name_format.desc "Use &#37;t para o título da aba ativa, &#37;d para a data de hoje e &#37;m para a hora; além disso o tamanho do título pode ser limitado com caracteres:&#37;t.">
 <!ENTITY sessionstore.caption "Armazenamento de Sessões">
 <!ENTITY service.caption "Opções do &quot;Armazenamento de Sessões&quot;">
 <!ENTITY service.description "Não mexa nisso, a menos que saiba o que está fazendo:">

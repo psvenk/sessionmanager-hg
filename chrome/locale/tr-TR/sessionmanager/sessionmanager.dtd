@@ -66,7 +66,6 @@
 <!ENTITY prompt.save_every2.label "dakika (boş ise devre dışıdır)">
 <!ENTITY winTabTree.restoreHeader "Geri yükle">
 <!ENTITY winTabTree.listHeader "Pencereler ve Sekmeler">
-<!--  LOCALIZATION NOTE: &#37;S will be replaced with a number.  -->
 <!ENTITY winTabTree.windowLabel "Pencere &#37;S">
 <!ENTITY load.label "Oturum Yükle...">
 <!ENTITY load.accesskey "L">

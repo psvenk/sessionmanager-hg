@@ -72,3 +72,7 @@
 <!ENTITY prompt.append.label "Anexar à Sessão">
 <!ENTITY prompt.replace.label "Substituir Sessão">
 <!ENTITY ctrl_click_note.label "Nota: clicando uma entrada de aba ao segurar a tecla Ctrl, essa aba será aberta numa janela existente.">
+<!ENTITY select_all.label "Selecionar Todos">
+<!ENTITY select_none.label "Desmarcar todos">
+<!ENTITY toggle_selection.label "Inverter seleção">
+<!ENTITY winTabTree.urlHeader "Localização">

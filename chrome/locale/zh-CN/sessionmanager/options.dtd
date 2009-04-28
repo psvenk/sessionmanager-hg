@@ -85,7 +85,7 @@
 <!ENTITY importTMP.accesskey "I">
 <!ENTITY apply.label "应用">
 <!ENTITY save_and_restore.caption "保存 &amp; 恢复">
-<!ENTITY display.caption "Display">
+<!ENTITY display.caption "显示">
 <!ENTITY middleclick.label "中键重新打开最后关闭的标签页">
 <!ENTITY middleclick.accesskey "M">
 <!ENTITY max_display.label "显示在菜单的会话最大数 （-1 表示全部）">
@@ -96,4 +96,4 @@
 <!ENTITY disable_cache_fixer.accesskey "D">
 <!ENTITY encrypted_only.label "如果加密失败，不保存未加密数据。">
 <!ENTITY encrypted_only.accesskey "N">
-<!ENTITY encrypt2.desc "警告：如果标签页和窗口数据加密失败，该数据将会丢失无法恢复。如果要求主密码时您并未输入，加密就会失败，所以勾选此项时必须慎重考虑 ">
+<!ENTITY encrypt2.desc "警告：如果标签页和窗口数据加密失败，该数据将会丢失无法恢复。如果要求主密码时您并未输入，加密就会失败，所以勾选此项时必须慎重考虑">
