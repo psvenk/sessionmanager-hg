@@ -3437,7 +3437,7 @@ var gSessionManager = {
 		try {
 			if (this.mNativeJSON) {
 				jsString = this.mNativeJSON.encode(aObj);
-				// Workaround for Firefox bug 485563
+				// Needed until Firefox bug 387859 is fixed or else Firefox won't except JSON strings with \u2028 or \u2029 characters
 				if (/[\u2028\u2029]/.test(jsString)) {
 					jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 				}
