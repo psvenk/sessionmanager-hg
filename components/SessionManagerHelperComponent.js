@@ -384,10 +384,6 @@ var SessionManagerHelperComponent = {
 		catch(ex) {
 			report("SessionManager: " + ex);
 		}
-		// If not SeaMonkey add parenthesis because Firefox needs them, but SeaMonkey won't work with them.  See Firefox bug 479627
-		if (Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).ID != SEAMONKEY) {
-			jsString = "(" + jsString + ")";
-		}
 		return jsString;
 	},
 
