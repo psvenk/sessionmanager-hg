@@ -98,8 +98,10 @@ gSessionManager.addMenuItem = function (aPaneID) {
 	var doc = isSeaMonkey ? document.getElementById(aPaneID) : document;
 	var prefs = doc.getElementsByTagName('preferences')[0];
 	var checkboxes = doc.getElementsByTagName('checkbox')
-	var lastCheckbox = checkboxes[checkboxes.length -1];
-	if (prefs && lastCheckbox) // if this isn't true we are lost :)
+	var listboxes = doc.getElementsByTagName('listitem');
+	var lastCheckbox = (checkboxes.length) ? checkboxes[checkboxes.length -1] : null;
+	var lastListbox = (listboxes.length) ? listboxes[listboxes.length -1] : null;
+	if (prefs && (lastCheckbox || lastListbox)) // if this isn't true we are lost :)
 	{
 
 		// Determine Mozilla version to see what is supported
@@ -110,7 +112,7 @@ gSessionManager.addMenuItem = function (aPaneID) {
 		} catch (e) { dump(e + "\n"); }
 		
 		var pref = document.createElement('preference');
-		// Firefox 3.1 and above only
+		// Firefox 3.5 and above only
 		if ((appVersion >= "1.9.1") && (window.location == "chrome://browser/content/sanitize.xul")) {
 			this.mSanitizePreference = "privacy.cpd.extensions-sessionmanager";
 		}
@@ -119,11 +121,21 @@ gSessionManager.addMenuItem = function (aPaneID) {
 		pref.setAttribute('type', 'bool');
 		prefs.appendChild(pref);
 
-		var check = document.createElement('checkbox');
-		check.setAttribute('label', this.sanitizeLabel.label);
-		check.setAttribute('accesskey', this.sanitizeLabel.accesskey);
-		check.setAttribute('preference', this.mSanitizePreference);
-		lastCheckbox.parentNode.appendChild(check);
+		if (lastListbox) {
+			var listitem = document.createElement('listitem');
+			listitem.setAttribute('label', this.sanitizeLabel.label);
+			listitem.setAttribute('type', 'checkbox');
+			listitem.setAttribute('accesskey', this.sanitizeLabel.accesskey);
+			listitem.setAttribute('preference', this.mSanitizePreference);
+			lastListbox.parentNode.appendChild(listitem);
+		}
+		else if (lastCheckbox) {
+			var check = document.createElement('checkbox');
+			check.setAttribute('label', this.sanitizeLabel.label);
+			check.setAttribute('accesskey', this.sanitizeLabel.accesskey);
+			check.setAttribute('preference', this.mSanitizePreference);
+			lastCheckbox.parentNode.appendChild(check);
+		}
 
 		// Firefox only
 		if (typeof(gSanitizePromptDialog) == 'object')
