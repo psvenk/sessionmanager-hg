@@ -35,6 +35,12 @@ gSessionManager.onLoad = function() {
 		_("save_closed_tabs").parentNode.style.visibility = "collapse";
 	}
 	
+	// Hide option to use built in SessionStore closed window list if not supported
+	if (typeof(this.mSessionStore.getClosedWindowCount) != "function") {
+		_("closed_window_list").style.visibility = "collapse";
+	}
+	checkClosedWindowList();
+	
 	// Hide mid-click preference if Tab Mix Plus or Tab Clicking Options is enabled
 	var browser = this.mWindowMediator.getMostRecentWindow("navigator:browser");
 	if (browser) {
@@ -45,15 +51,10 @@ gSessionManager.onLoad = function() {
 		if (browser.gSingleWindowMode) _("overwrite").label = gSessionManager._string("overwrite_tabs");
 	}
 
-	// Disable default help window for Firefox 2.0 and below
-	if (this.mAppVersion < "1.9") _("sessionmanagerOptions").openHelp = function () {}
-
 	// Disable Apply Button by default
 	_("sessionmanagerOptions").getButton("extra1").disabled = true;
 
-	// Delay for Firefox 2.0.0.20 because it doesn't set window.innerHeight until after we run.
-	if (this.mAppVersion < "1.9") setTimeout(adjustContentHeight,0);
-	else adjustContentHeight();
+	adjustContentHeight();
 };
 
 gSessionManager.onUnload = function() {
@@ -157,6 +158,17 @@ function checkEncryptOnly(aState) {
 	}
 	
 	return aState;
+}
+
+function checkClosedWindowList(aChecked) {
+	// Hide the option to not clear the list of closed windows on shutdown if we are using the built in closed windows
+	var builtin = (_("closed_window_list").style.visibility != "collapse") &&
+	              ((typeof(aChecked) == "undefined") ? _("extensions.sessionmanager.use_SS_closed_window_list").valueFromPreferences : aChecked);
+	
+	_("save_window_list").style.visibility = builtin ? "collapse" : "visible";
+	_("max_closed").style.visibility = builtin ? "collapse" : "visible";
+	_("max_closed_SS").style.visibility = builtin ? "visible" : "collapse";
+	_("closed_windows_menu").style.visibility = builtin ? "visible" : "collapse";
 }
 
 function startupSelect(index) {
@@ -285,16 +297,14 @@ function adjustContentHeight() {
 	// When animating the window needs to be resized to take into account the changes to the description height and
 	// then shrunk since the opening pane is sized to the largest pane height which is wrong.
 	else {
-		var FF2 = gSessionManager.mAppVersion < "1.9";
 		// Hide/show the encrypt only check box here when opening the largest pane to prevent window looking to large.
 		if (currentPane == biggestPane) {
-			FF2 |= _("encrypted_only").hidden = !_("encrypt_sessions").checked;
+			_("encrypted_only").hidden = !_("encrypt_sessions").checked;
 		}
 	
 		window.sizeToContent();
-		// FF 2 needs to use largestCurrentPaneHeight - (largestNewPaneHeight - largestCurrentPaneHeight) size correctly
-		// as does FF 3 and above when the encrypt only checkbox was hidden above
-		var adjuster = (FF2) ? (2 * largestCurrentPaneHeight - largestNewPaneHeight) : largestCurrentPaneHeight;
+		// If encrypted only checkbox is hidden need to tweak the height
+		var adjuster = (_("encrypted_only").hidden) ? (2 * largestCurrentPaneHeight - largestNewPaneHeight) : largestCurrentPaneHeight;
 		window.innerHeight -= adjuster - currentPane.contentHeight;
 	}
 	

@@ -162,11 +162,14 @@
 		<prefpane id="undoclosePrefPane" label="&undoClose.caption;" helpURI="" helpTopic="prefs-undo">
 		<preferences>
 			<preference id="browser.sessionstore.max_tabs_undo" name="browser.sessionstore.max_tabs_undo" type="int"/>
+			<preference id="browser.sessionstore.max_windows_undo" name="browser.sessionstore.max_windows_undo" type="int"/>
 			<preference id="extensions.sessionmanager.click_restore_tab" name="extensions.sessionmanager.click_restore_tab" type="bool"/>
 			<preference id="extensions.sessionmanager.max_closed_undo" name="extensions.sessionmanager.max_closed_undo" type="int"/>
 			<preference id="extensions.sessionmanager.save_closed_tabs" name="extensions.sessionmanager.save_closed_tabs" type="int"/>
+			<preference id="extensions.sessionmanager.save_closed_windows" name="extensions.sessionmanager.save_closed_windows" type="int"/>
 			<preference id="extensions.sessionmanager.save_window_list" name="extensions.sessionmanager.save_window_list" type="bool"/>
 			<preference id="extensions.sessionmanager.submenus" name="extensions.sessionmanager.submenus" type="bool"/>
+			<preference id="extensions.sessionmanager.use_SS_closed_window_list" name="extensions.sessionmanager.use_SS_closed_window_list" type="bool"/>
 		</preferences>
 
 		<groupbox>
@@ -179,7 +182,10 @@
 				<rows>
 					<row align="center">
 						<label value="&max_closed.label;" accesskey="&max_closed.accesskey;" control="max_closed"/>
-						<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo();"/>
+						<hbox>
+							<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo();"/>
+							<textbox id="max_closed_SS" preference="browser.sessionstore.max_windows_undo" size="1" maxlength="5"/>
+						</hbox>
 					</row>
 					<row align="center">
 						<label value="&max_tabs.label;" accesskey="&max_tabs.accesskey;" control="max_tabs"/>
@@ -189,19 +195,39 @@
 			</grid>
 			<checkbox label="&submenu.label;" accesskey="&submenu.accesskey;" preference="extensions.sessionmanager.submenus"/>
 			<checkbox id="midClickPref" label="&middleclick.label;" accesskey="&middleclick.accesskey;" preference="extensions.sessionmanager.click_restore_tab"/>
+			<checkbox id="closed_window_list" label="&closed_window_list.label;" accesskey="&closed_window_list.accesskey;" 
+			          preference="extensions.sessionmanager.use_SS_closed_window_list" oncommand="checkClosedWindowList(this.checked)"/>
 		</groupbox>
 		<groupbox>
 			<caption label="&persistence.caption;"/>
-			<hbox align="center">
-				<label value="&closed_tabs.label;" accesskey="&closed_tabs.accesskey;" control="save_closed_tabs"/>
-				<menulist id="save_closed_tabs" preference="extensions.sessionmanager.save_closed_tabs">
-					<menupopup>
-						<menuitem value="1" label="&closed_tabs.label1;"/>
-						<menuitem value="2" label="&closed_tabs.label2;"/>
-						<menuitem value="0" label="&closed_tabs.label0;"/>
-					</menupopup>
-				</menulist>
-			</hbox>
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+				</columns>
+				<rows>
+					<row align="center">
+						<label value="&closed_tabs.label;" accesskey="&closed_tabs.accesskey;" control="save_closed_tabs"/>
+						<menulist id="save_closed_tabs" preference="extensions.sessionmanager.save_closed_tabs">
+							<menupopup>
+								<menuitem value="1" label="&closed_tabs.label1;"/>
+								<menuitem value="2" label="&closed_tabs.label2;"/>
+								<menuitem value="0" label="&closed_tabs.label0;"/>
+							</menupopup>
+						</menulist>
+					</row>
+					<row id="closed_windows_menu" align="center">
+						<label value="&closed_windows.label;" accesskey="&closed_windows.accesskey;" control="save_closed_windows"/>
+						<menulist id="save_closed_windows" preference="extensions.sessionmanager.save_closed_windows">
+							<menupopup>
+								<menuitem value="1" label="&closed_tabs.label1;"/>
+								<menuitem value="2" label="&closed_tabs.label2;"/>
+								<menuitem value="0" label="&closed_tabs.label0;"/>
+							</menupopup>
+						</menulist>
+					</row>
+				</rows>
+			</grid>
 			<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="extensions.sessionmanager.save_window_list"/>
 		</groupbox>
 		<hbox pack="end">
