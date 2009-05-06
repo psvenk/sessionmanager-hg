@@ -9,11 +9,11 @@ var gSessionManager = {
 	mProfileDirectory: Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile),
 	mIOService: Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService),
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
+	mNativeJSON: Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON),
 	mComponents: Components,
 	
 	// conditional Browser Components (may or may not exist)
 	mPrivateBrowsing: null,
-	mNativeJSON: null,
 	mSessionStore : null,
 	mSessionStartup : null,
 
@@ -69,12 +69,6 @@ var gSessionManager = {
 		if (privateBrowsing)
 			this.mPrivateBrowsing = privateBrowsing.getService(Components.interfaces.nsIPrivateBrowsingService);
 			
-		// Since other extensions can override the JSON variable, use the nsiJSON component
-		// In Firefox 3.1, this is the same as using JSON.
-		var nativeJSON = Components.classes["@mozilla.org/dom/json;1"]
-		if (nativeJSON)
-			this.mNativeJSON = nativeJSON.createInstance(Components.interfaces.nsIJSON);
-
 		// Determine Mozilla version to see what is supported
 		this.mAppVersion = "0";
 		this.mAppID = "UNKNOWN";
@@ -117,19 +111,14 @@ var gSessionManager = {
 			if (buttons[i] && buttons[i].boxObject && buttons[i].boxObject.firstChild)
 				buttons[i].boxObject.firstChild.tooltipText = buttons[i].getAttribute("buttontooltiptext");
 		}
-		
-		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
-		// enabled and presumably anyone installing Session Manager actually wants to use it. 
-		// This preference no longer exists as of Firefox 3.1 so don't set it, if there is no default value
-		if (this.mAppVersion < "1.9.1") {
-			if (!this.getPref("browser.sessionstore.enabled", true, true)) {
-				this.setPref("browser.sessionstore.enabled", true, true);
-			}
-		}
-		
+
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		
+		// Flag to determine whether or not to use SessionStore Closed Window List (only avaiable in Firefox 3.5 and later)
+		this.mUseSSClosedWindowList = (this.getPref("use_SS_closed_window_list", true)) && 
+		                              (typeof(this.mSessionStore.getClosedWindowCount) == "function");
+									  
 		if (!window.SessionManager) // if Tab Mix Plus isn't installed
 		{
 			window.SessionManager = gSessionManager;
@@ -149,8 +138,6 @@ var gSessionManager = {
 		}, this);
 		this.mObserverService.addObserver(this, "quit-application", false);
 		this.mObserverService.addObserver(this, "sessionmanager:process-closed-window", false);
-		// The following is needed to handle extensions who issue bad restarts in Firefox 2.0
-		if (this.mAppVersion < "1.9") this.mObserverService.addObserver(this, "quit-application-requested", false);
 		
 		this.mPref_append_by_default = this.getPref("append_by_default", false);
 		this.mPref_autosave_session = this.getPref("autosave_session", true);
@@ -166,7 +153,8 @@ var gSessionManager = {
 		this.mPref_reload = this.getPref("reload", false);
 		this.mPref_restore_temporary = this.getPref("restore_temporary", false);
 		this.mPref_resume_session = this.getPref("resume_session", this.mBackupSessionName);
-		this.mPref_save_closed_tabs = this.getPref("save_closed_tabs", 0);
+		this.mPref_save_closed_tabs = this.getPref("save_closed_tabs", 2);
+		this.mPref_save_closed_windows = this.getPref("save_closed_windows", 2);
 		this.mPref_save_cookies = this.getPref("save_cookies", false);
 		this.mPref_save_window_list = this.getPref("save_window_list", false);
 		this.mPref_session_list_order = this.getPref("session_list_order", 1);
@@ -208,6 +196,11 @@ var gSessionManager = {
 		this.recoverSession();
 		this.updateToolbarButton();
 		
+		// Update other browsers toolbars in case this was a restored window
+		if (this.mUseSSClosedWindowList) {
+			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+		}
+		
 		if (!this.mPref__running)
 		{
 			// If backup file is temporary, then delete it
@@ -242,23 +235,6 @@ var gSessionManager = {
 		// so make the image tag persistant so it can be read later from the xultab variable.
 		this.mSessionStore.persistTabAttribute("image");
 		
-		// Workaround for bug 360408 in Firefox 2.0.  Wrap closeWindow function so our function gets called when window closes.
-		if (this.mAppVersion < "1.9") {
-			this.mOrigCloseWindow = closeWindow;
-			closeWindow = function() { 
-				var result = gSessionManager.mOrigCloseWindow.apply(this, arguments);
-				if (result) {
-					try {
-						gSessionManager.onWindowClose();
-					}
-					catch (ex) {
-						dump(ex + "\n");
-					}
-				}
-				return result;
-			}
-		}
-		
 		// SeaMonkey doesn't have an undoCloseTab function so create one
 		if (typeof(undoCloseTab) == "undefined") {
 			undoCloseTab = function (aIndex) { gSessionManager.undoCloseTabSM(aIndex); }
@@ -287,10 +263,10 @@ var gSessionManager = {
 		if (oldVersion != SM_VERSION)
 		{
 			// Fix the closed window data if it's encrypted
-			if (oldVersion < "0.6.4.2") {
+			if (oldVersion < "0.6.4.2" && !this.mUseSSClosedWindowList) {
 				// if encryption enabled
 				if (this.mPref_encrypt_sessions) {
-					var windows = this.getClosedWindows();
+					var windows = this.getClosedWindows_SM();
 					
 					// if any closed windows
 					if (windows.length) {
@@ -308,7 +284,7 @@ var gSessionManager = {
 							aWindow.state = this.decrypt(aWindow.state, true, true);
 							aWindow.state = this.decryptEncryptByPreference(aWindow.state);
 						}, this);
-						this.storeClosedWindows(windows);
+						this.storeClosedWindows_SM(windows);
 					}
 				}
 			}
@@ -438,8 +414,7 @@ var gSessionManager = {
 			if (numWindows != 0) allWindows[0].gSessionManager.checkTimer();
 		}
 
-		// Only do the following in Firefox 3.0 and above where bug 360408 is fixed.
-		if (this.mAppVersion >= "1.9") this.onWindowClose();
+		this.onWindowClose();
 				
 		if (this.mPref__running && numWindows == 0)
 		{
@@ -540,16 +515,18 @@ var gSessionManager = {
 				this.encryptionChange();
 				break;
 			case "max_closed_undo":
-				if (this.mPref_max_closed_undo == 0)
-				{
-					this.clearUndoData("window", true);
-				}
-				else
-				{
-					var closedWindows = this.getClosedWindows();
-					if (closedWindows.length > this.mPref_max_closed_undo)
+				if (!this.mUseSSClosedWindowList) {
+					if (this.mPref_max_closed_undo == 0)
 					{
-						this.storeClosedWindows(closedWindows.slice(0, this.mPref_max_closed_undo));
+						this.clearUndoData("window", true);
+					}
+					else
+					{
+						var closedWindows = this.getClosedWindows_SM();
+						if (closedWindows.length > this.mPref_max_closed_undo)
+						{
+							this.storeClosedWindows_SM(closedWindows.slice(0, this.mPref_max_closed_undo));
+						}
 					}
 				}
 				break;
@@ -578,16 +555,12 @@ var gSessionManager = {
 					gBrowser.removeEventListener("SSTabRestored", this.onTabRestored_proxy, false);
 				}
 				break;
-			}
-			break;
-		case "quit-application-requested":
-			// this is only registered for Firefox 2.0 to handle when extension issue a restart since most do not send a 
-			// quit-application-granted notification causing SessionStore to drop all but one window
-			this.mObserverService.removeObserver(this, "quit-application-requested");
-			if (aData == "restart") {
-				var os = Components.classes["@mozilla.org/observer-service;1"]
-   		                  .getService(Components.interfaces.nsIObserverService);
-   		        os.notifyObservers(null, "quit-application-granted", null);
+			case "use_SS_closed_window_list":
+				// Flag to determine whether or not to use SessionStore Closed Window List
+				this.mUseSSClosedWindowList = (this.mPref_use_SS_closed_window_list && 
+				                               typeof(this.mSessionStore.getClosedWindowCount) == "function");
+				this.updateToolbarButton();
+				break;
 			}
 			break;
 		case "quit-application":
@@ -679,15 +652,9 @@ var gSessionManager = {
 		if (aEvent.button == 1)
 		{
 			// simulate shift left clicking toolbar button when middle click is used
-			if (this.mAppVersion < "1.9") {
-				// The dispatch event method won't work for "command" in Firefox 2.0, so we need to use eval()
-				eval("var event = { shiftKey: true }; " + aButton.getAttribute("oncommand"));
-			}
-			else {
-				var event = document.createEvent("XULCommandEvents");
-				event.initCommandEvent("command", false, true, window, 0, false, false, true, false, null);
-				aButton.dispatchEvent(event);
-			}
+			var event = document.createEvent("XULCommandEvents");
+			event.initCommandEvent("command", false, true, window, 0, false, false, true, false, null);
+			aButton.dispatchEvent(event);
 		}
 		else if (aEvent.button == 2 && aButton.getAttribute("disabled") != "true")
 		{
@@ -706,15 +673,16 @@ var gSessionManager = {
 		// only save closed window if running and not shutting down 
 		if (this.mPref__running && !this.mPref__stopping)
 		{
-			// Get number of windows open after closing this one.  Firefox 2.0 counts the closing window as open so decrement by one.
+			// Get number of windows open after closing this one.
 			var numWindows = this.getBrowserWindows().length;
-			if (!this.mLastState && (this.mAppVersion < "1.9")) numWindows--;
 			
 			// save window in closed window list if not last window, otherwise store the last window state for use later
 			if (numWindows > 0)
 			{
-				var state = this.getSessionState(null, true, null, null, null, true);
-				this.appendClosedWindow(state);
+				if (!this.mUseSSClosedWindowList) {
+					var state = this.getSessionState(null, true, null, null, null, true);
+					this.appendClosedWindow(state);
+				}
 				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 			}
 			else
@@ -724,7 +692,7 @@ var gSessionManager = {
 				if (!this.mPref_shutdown_on_last_window_close) {
 					var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : null;
 					this.mLastState = (name) ? 
-		    	               this.getSessionState(name, null, this.mPref_save_closed_tabs < 2, true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
+		    	               this.getSessionState(name, null, this.getNoUndoData(), true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
 		        	           this.getSessionState(null, true, null, null, null, true); 
 					this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
 					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
@@ -783,8 +751,7 @@ var gSessionManager = {
 			aPopup.removeChild(item);
 		}
 		
-		// Firefox 2.0 does not have a menupopup element
-		var backupPopup = backupMenu.menupopup || backupMenu.lastChild; 
+		var backupPopup = backupMenu.menupopup; 
 		while (backupPopup.childNodes.length) backupPopup.removeChild(backupPopup.childNodes[0]);
 		
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
@@ -927,7 +894,7 @@ var gSessionManager = {
 			var file = this.getSessionDir(aFileName || this.makeFileName(aName), !aFileName);
 			try
 			{
-				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.mPref_save_closed_tabs < 2, values.autoSave, aGroup, null, values.autoSaveTime));
+				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.getNoUndoData(), values.autoSave, aGroup, null, values.autoSaveTime));
 			}
 			catch (ex)
 			{
@@ -973,7 +940,7 @@ var gSessionManager = {
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
 			{
-				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.mPref_save_closed_tabs < 2, true, group, null, time));
+				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.getNoUndoData(), true, group, null, time));
 			}
 			catch (ex)
 			{
@@ -1078,7 +1045,7 @@ var gSessionManager = {
 		var newWindow = false;
 		var overwriteTabs = true;
 		var tabsToMove = null;
-		var stripClosedTabs = !this.mPref_save_closed_tabs || (this.mPref_save_closed_tabs == 1 && (aMode != "startup"));
+		var noUndoData = this.getNoUndoData(true, aMode);
 
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
 		var TMP_SingleWindowMode = typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode;
@@ -1113,8 +1080,6 @@ var gSessionManager = {
 			this.getBrowserWindows().forEach(function(aWindow) {
 				if (aWindow != window) { 
 					aWindow.gSessionManager.mPref__stopping = true; 
-					// If not Firefox 3 call onWindowClose to save current window session since it isn't done in FF2
-					if (this.mAppVersion < "1.9") aWindow.gSessionManager.onWindowClose();
 				}
 			});
 		}
@@ -1141,7 +1106,7 @@ var gSessionManager = {
 		
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, stripClosedTabs, 
+			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, noUndoData, 
 			                                          (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode || (aMode == "append"), startup);
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
@@ -1334,16 +1299,43 @@ var gSessionManager = {
 			aPopup.removeChild(item);
 		}
 		
+		var defaultIcon = (this.mAppID == "SEAMONKEY") ? "chrome://sessionmanager/skin/bookmark-item.png" :
+		                                                 "chrome://sessionmanager/skin/defaultFavicon.png";
+		
 		var closedWindows = this.getClosedWindows();
 		closedWindows.forEach(function(aWindow, aIx) {
+			var state = this.JSON_decode(aWindow.state);
+			// Get favicon
+			var image = defaultIcon;
+			if (state.windows[0].tabs[0].xultab)
+			{
+				var xultabData = state.windows[0].tabs[0].xultab.split(" ");
+				xultabData.forEach(function(bValue, bIndex) {
+					var data = bValue.split("=");
+					if (data[0] == "image") {
+						image = data[1];
+					}
+				}, this);
+			}
+			// Firefox 3.5 uses attributes instead of xultab
+			if (state.windows[0].tabs[0].attributes && state.windows[0].tabs[0].attributes.image)
+			{
+				image = state.windows[0].tabs[0].attributes.image;
+			}
+			
+			// Get tab count
+			var count = state.windows[0].tabs.length;
+		
 			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("label", aWindow.name);
+			menuitem.setAttribute("class", "menuitem-iconic sessionmanager-closedtab-item");
+			menuitem.setAttribute("label", aWindow.name + " (" + count + ")");
 			menuitem.setAttribute("index", "window" + aIx);
+			menuitem.setAttribute("image", image);
 			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
 			menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
 			aPopup.insertBefore(menuitem, separator);
-		});
+		}, this);
 		label.hidden = (closedWindows.length == 0);
 		
 		var listEnd = get_("end-separator");
@@ -1355,10 +1347,11 @@ var gSessionManager = {
 		var closedTabs = this.mSessionStore.getClosedTabData(window);
 		var mClosedTabs = [];
 		closedTabs = this.JSON_decode(closedTabs);
-		if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 		closedTabs.forEach(function(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
 								url:aValue.state.entries[aValue.state.entries.length - 1].url }
+			// Get favicon
+			mClosedTabs[aIndex].image = defaultIcon;
 			if (aValue.state.xultab)
 			{
 				var xultabData = aValue.state.xultab.split(" ");
@@ -1369,7 +1362,7 @@ var gSessionManager = {
 					}
 				}, this);
 			}
-			// Firefox 3.1 uses attributes instead of xultab
+			// Firefox 3.5 uses attributes instead of xultab
 			if (aValue.state.attributes && aValue.state.attributes.image)
 			{
 				mClosedTabs[aIndex].image = aValue.state.attributes.image;
@@ -1431,7 +1424,7 @@ var gSessionManager = {
 			
 			var okay = this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append");
 			if (okay) {
-				this.storeClosedWindows(closedWindows);
+				this.storeClosedWindows(closedWindows, aIx);
 				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 			}
 		}
@@ -1459,8 +1452,8 @@ var gSessionManager = {
 			
 			// remove window from closed window list and tell other open windows
 			var closedWindows = this.getClosedWindows();
-			closedWindows.splice(aIx, 1)[0].state;
-			this.storeClosedWindows(closedWindows);
+			closedWindows.splice(aIx, 1);
+			this.storeClosedWindows(closedWindows, aIx);
 			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
 			// update the remaining entries
@@ -1476,16 +1469,14 @@ var gSessionManager = {
 				this.mSessionStore.forgetClosedTab(window, aIx);
 			}
 			else {
-				// Firefox 3.1b4 and later throws an exception with the code below so use different method
-				if (this.mAppVersion < "1.9.1b4") {
+				// Firefox 3.5b4 throws an exception with the code below so use different method (bug 488930 fixed in 3.5b5)
+				if (this.mAppVersion != "1.9.1b4") {
 					// This code is based off of code in Tab Mix Plus
 					var state = { windows: [], _firstTabs: true };
 					state.windows[0] = { _closedTabs: [] };
 
 					// get closed-tabs from nsSessionStore
 					var closedTabs = this.JSON_decode(this.mSessionStore.getClosedTabData(window));
-					// Work around for bug 350558 which sometimes mangles the _closedTabs.state.entries array data
-					if (this.mAppVersion < "1.9") this.fixBug350558(closedTabs);
 					// purge closed tab at aIndex
 					closedTabs.splice(aIx, 1);
 					state.windows[0]._closedTabs = closedTabs;
@@ -1570,14 +1561,22 @@ var gSessionManager = {
 			this.setPref("browser.sessionstore.max_tabs_undo", max_tabs_undo, true);
 		}
 
-		this.clearUndoData("window");
+		if (this.mUseSSClosedWindowList) {
+			var max_windows_undo = this.getPref("browser.sessionstore.max_windows_undo", 3, true);
+		
+			this.setPref("browser.sessionstore.max_windows_undo", 0, true);
+			this.setPref("browser.sessionstore.max_windows_undo", max_windows_undo, true);
 
-		gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+			// Session Store always keeps one closed window around even if preference is set to 0 so following is needed.
+			gSessionManager.storeClosedWindows(null, 0);
+		}
+		else {
+			this.clearUndoData("window");
+		}
+		this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 	},
 	
 /* ........ Right click menu handlers .............. */
-// Firefox 2.0 does not close parent menu when context menu closes so force it closed
-
 	group_popupInit: function(aPopup) {
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
@@ -1586,7 +1585,6 @@ var gSessionManager = {
 	},
 	
 	group_rename: function() {
-		if (this.mAppVersion < "1.9") this.hidePopup();
 		var filename = document.popupNode.getAttribute("filename");
 		var parentMenu = document.popupNode.parentNode.parentNode;
 		var group = filename ? ((parentMenu.id != "sessionmanager-toolbar") ? parentMenu.label : "")
@@ -1615,7 +1613,6 @@ var gSessionManager = {
 	group_remove: function() {
 		var group = document.popupNode.getAttribute("label");
 		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm_group"))) {
-			if (this.mAppVersion < "1.9") this.hidePopup();
 			
 			var sessions = this.getSessions();
 			sessions.forEach(function(aSession) {
@@ -1653,7 +1650,6 @@ var gSessionManager = {
 	},
 
 	session_load: function(aReplace) {
-		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		var oldOverwrite = this.mPref_overwrite;
 		if (aReplace) {
@@ -1670,7 +1666,6 @@ var gSessionManager = {
 	},
 	
 	session_replace: function(aWindow) {
-		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		var parent = document.popupNode.parentNode.parentNode;
 		var group = null;
@@ -1686,7 +1681,6 @@ var gSessionManager = {
 	},
 	
 	session_rename: function() {
-		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.rename(session);
 	},
@@ -1695,7 +1689,6 @@ var gSessionManager = {
 		var dontPrompt = { value: false };
 		var session = document.popupNode.getAttribute("filename");
 		if (this.getPref("no_delete_prompt") || this.mPromptService.confirmEx(window, this.mTitle, this._string("delete_confirm"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0) {
-			if (this.mAppVersion < "1.9") this.hidePopup();
 			// if currently loaded autosave session clear autosave name
 			if (document.popupNode.getAttribute("disabled") == "true") {
 				if (document.popupNode.getAttribute("autosave") == "session") {
@@ -1715,7 +1708,6 @@ var gSessionManager = {
 	},
 	
 	session_setStartup: function() {
-		if (this.mAppVersion < "1.9") this.hidePopup();
 		var session = document.popupNode.getAttribute("filename");
 		this.setPref("resume_session", session);
 		this.setPref("startup", 2);
@@ -1839,7 +1831,7 @@ var gSessionManager = {
 
 	sanitize: function()
 	{
-		// If Sanitize GUI not used (or not Firefox 3.1 and above)
+		// If Sanitize GUI not used (or not Firefox 3.5 and above)
 		if (this.mSanitizePreference == "privacy.item.extensions-sessionmanager") {
 			// Remove all saved sessions
 			this.getSessionDir().remove(true);
@@ -2019,7 +2011,23 @@ var gSessionManager = {
 		return (this.mPref_session_list_order < 0)?sessions.reverse():sessions;
 	},
 
+	// Get SessionStore's or Session Manager's Closed window List depending on preference.
 	getClosedWindows: function()
+	{
+		if (this.mUseSSClosedWindowList) {
+			var closedWindows = this.JSON_decode(this.mSessionStore.getClosedWindowData());
+			var parts = new Array(closedWindows.length);
+			closedWindows.forEach(function(aWindow, aIx) {
+				parts[aIx] = { name: aWindow.title, state: this.JSON_encode({windows:[aWindow]}) };
+			}, this);
+			return parts;
+		}
+		else {
+			return this.getClosedWindows_SM();
+		}
+	},
+
+	getClosedWindows_SM: function()
 	{
 		// Use cached data unless file has changed or was deleted
 		var data = this.mClosedWindowsCache.data;
@@ -2036,7 +2044,28 @@ var gSessionManager = {
 		}):[];
 	},
 
-	storeClosedWindows: function(aList)
+	// Stored closed windows into Session Store or Session Manager controller list.
+	storeClosedWindows: function(aList, aIx)
+	{
+		if (this.mUseSSClosedWindowList) {
+			// This works to remove the window from the closed window list for whatever reason
+			var win = this.mSessionStore.undoCloseWindow(aIx);
+			win.close();
+			
+			// The following also works, but causes all the windows to reload
+			//
+			//var state = this.mSessionStore.getBrowserState();
+			//state = this.JSON_decode(state);
+			//state._closedWindows.splice(aIx || 0, 1);
+			//this.mSessionStore.setBrowserState(this.JSON_encode(state));
+		}
+		else {
+			this.storeClosedWindows_SM(aList);
+		}
+	},
+
+	// Store closed windows into Session Manager controlled list
+	storeClosedWindows_SM: function(aList)
 	{
 		var file = this.getProfileFile(this.mClosedWindowFile);
 		if (aList.length > 0)
@@ -2067,10 +2096,7 @@ var gSessionManager = {
 			}
 		}
 		
-		// Firefox 2.0 will throw an exception if getClosedTabCount is called for a closed window so just fake it
-		// if mLastState is set, because parameter will always be true in that case.
-		if (this.mLastState) this.updateToolbarButton(true);
-		else this.updateToolbarButton(aList.length + this.mSessionStore.getClosedTabCount(window)  > 0);
+		this.updateToolbarButton(aList.length + this.mSessionStore.getClosedTabCount(window)  > 0);
 	},
 
 	appendClosedWindow: function(aState)
@@ -2083,7 +2109,7 @@ var gSessionManager = {
 		
 		var name = this.mClosedWindowName ? this.mClosedWindowName :
 		           content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
-		var windows = this.getClosedWindows();
+		var windows = this.getClosedWindows_SM();
 		
 		// encrypt state if encryption preference set
 		if (this.mPref_encrypt_sessions) {
@@ -2093,7 +2119,7 @@ var gSessionManager = {
 				
 		aState = aState.replace(/^\n+|\n+$/g, "").replace(/\n{2,}/g, "\n");
 		windows.unshift({ name: name, state: aState });
-		this.storeClosedWindows(windows.slice(0, this.mPref_max_closed_undo));
+		this.storeClosedWindows_SM(windows.slice(0, this.mPref_max_closed_undo));
 	},
 
 	clearUndoData: function(aType, aSilent, aShuttingDown)
@@ -2118,7 +2144,8 @@ var gSessionManager = {
 		// otherwise
 		else
 		{
-			if (!this.mPref_save_window_list)
+			// If preference to clear save windows or using SessionStore closed windows, delete our closed window list
+			if (!this.mPref_save_window_list || this.mUseSSClosedWindowList)
 			{
 				this.clearUndoData("window", true, true);
 			}
@@ -2185,7 +2212,7 @@ var gSessionManager = {
 				lastState = this.mLastState;
 				this.mLastState = null;
 			}
-			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")), true);
+			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, this.getNoUndoData(), null, (this._string_backup_sessions || this._string("backup_sessions")), true);
 			try {
 				var aState = this.JSON_decode(state.split("\n")[4]);
 				// if window data has been cleared ("Visited Pages" cleared on shutdown), use lastState, if it exists.
@@ -2567,11 +2594,13 @@ var gSessionManager = {
 				}
 			}, this);
 		
-			var windows = this.getClosedWindows();
-			windows.forEach(function(aWindow) {
-				aWindow.state = this.decryptEncryptByPreference(aWindow.state);
-			}, this);
-			this.storeClosedWindows(windows);
+			if (!this.mUseSSClosedWindowList) {
+				var windows = this.getClosedWindows_SM();
+				windows.forEach(function(aWindow) {
+					aWindow.state = this.decryptEncryptByPreference(aWindow.state);
+				}, this);
+				this.storeClosedWindows_SM(windows);
+			}
 		}
 		// failed to encrypt/decrypt so revert setting
 		catch (ex) {
@@ -2888,9 +2917,7 @@ var gSessionManager = {
 	{
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called, in FF2 SessionStart doesn't set this value
-		var sessionstart = (this.mAppVersion >= "1.9")
-		                    ?(this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
-		                    :this.getPref("browser.sessionstore.resume_session_once", false, true);
+		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
 		var recoverOnly = this.mPref__running || sessionstart;
 		
 		// handle case where user restarted browser and an auto-save session is active, but the session was not restored
@@ -2913,7 +2940,7 @@ var gSessionManager = {
 		}
 		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
-			// allow prompting for tabs in Firefox 3.1
+			// allow prompting for tabs in Firefox 3.5
 			var values = { ignorable: true };
 			
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
@@ -2968,12 +2995,24 @@ var gSessionManager = {
 
 	isCmdLineEmpty: function()
 	{
-		return (!window.arguments || window.arguments.length <= 1);
+		if (this.mAppID == "FIREFOX") {
+			var defaultArgs = Components.classes["@mozilla.org/browser/clh;1"].getService(Components.interfaces.nsIBrowserHandler).defaultArgs;
+			if (window.arguments && window.arguments[0] && window.arguments[0] == defaultArgs) {
+				window.arguments[0] = null;
+			}
+
+			return !window.arguments || !window.arguments[0];
+		}
+		else if (this.mAppID = "SEAMONKEY") {
+			// Seamonkey will always display the home page if the option is set to do so.
+			return "arguments" in window && window.arguments.length && (window.arguments[0] == "about:blank");
+		}
+		else return false;
 	},
 	
 	isPrivateBrowserMode: function()
 	{
-		// Private Browsing Mode is only available in Firefox 3.1 and above
+		// Private Browsing Mode is only available in Firefox 3.5 and above
 		if (this.mPrivateBrowsing) {
 			return this.mPrivateBrowsing.privateBrowsingEnabled;
 		}
@@ -2988,10 +3027,12 @@ var gSessionManager = {
 		if (button)
 		{
 			var tabcount = 0;
+			var wincount = 0;
 			try {
+				wincount = this.mUseSSClosedWindowList ? this.mSessionStore.getClosedWindowCount() : this.getClosedWindows().length;
 				tabcount = this.mSessionStore.getClosedTabCount(window);
-			} catch (ex) {}
-			this.setDisabled(button, (aEnable != undefined)?!aEnable:tabcount == 0 && this.getClosedWindows().length == 0);
+			} catch (ex) { dump(ex + "\n") }
+			this.setDisabled(button, (aEnable != undefined)?!aEnable:tabcount == 0 && wincount == 0);
 		}
 	},
 	
@@ -3036,6 +3077,13 @@ var gSessionManager = {
 		// Only need to check for empty close tab list if possibly re-opening last closed tabs
 		if (!aIndex) gSessionManager.updateToolbarButton();
 	},
+	
+	getNoUndoData: function(aLoad, aMode)
+	{
+		return aLoad ? { tabs: (!this.mPref_save_closed_tabs || (this.mPref_save_closed_tabs == 1 && (aMode != "startup"))),
+		                 windows: (!this.mPref_save_closed_windows || (this.mPref_save_closed_windows == 1 && (aMode != "startup"))) }
+		             : { tabs: (this.mPref_save_closed_tabs < 2), windows: (this.mPref_save_closed_windows < 2) };
+	},
 
 	// count windows and tabs
 	getCount: function (aState)
@@ -3054,38 +3102,6 @@ var gSessionManager = {
 		return { windows: windows, tabs: tabs };
 	},
 	
-	// Work around for bug 350558 which mangles the _closedTabs.state.entries 
-	// and tabs.entries array data in Firefox 2.0.x
-	fixBug350558: function (aTabs)
-	{
-		aTabs.forEach(function(bValue, bIndex) {
-			// Closed Tabs
-			if (bValue.state) {
-				// If "fake" array exists, make it a real one
-				if (!(bValue.state.entries instanceof Array))
-				{
-					var oldEntries = bValue.state.entries;
-					bValue.state.entries = [];
-					for (var i = 0; oldEntries[i]; i++) {
-						bValue.state.entries[i] = oldEntries[i];
-					}
-				}
-			}
-			// Open Tabs
-			else {
-				// If "fake" array exists, make it a real one
-				if (!(bValue.entries instanceof Array))
-				{
-					var oldEntries = bValue.entries;
-					bValue.entries = [];
-					for (var i = 0; oldEntries[i]; i++) {
-						bValue.entries[i] = oldEntries[i];
-					}
-				}
-			}
-		});
-	},
-
 	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt, aAutoSaveTime)
 	{
 		// Return last closed window state if it is stored.
@@ -3110,7 +3126,7 @@ var gSessionManager = {
 		
 		var state = (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
 		
-		state = this.modifySessionData(state, aNoUndoData, true, (this.mAppVersion < "1.9"));
+		state = this.modifySessionData(state, aNoUndoData, true);
 		var count = this.getCount(state);
 		
 		// encrypt state if encryption preference set and flag not set
@@ -3126,7 +3142,7 @@ var gSessionManager = {
 				(aGroup? ("\tgroup=" + aGroup) : "") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aStripClosedTabs, aEntireSession, aOneWindow, aStartup)
+	restoreSession: function(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup)
 	{
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
@@ -3137,15 +3153,14 @@ var gSessionManager = {
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
 			aWindow.__SM_restore = function() {
 				this.removeEventListener("load", this.__SM_restore, true);
-				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aStripClosedTabs);
+				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aNoUndoData);
 				delete this.__SM_restore;
 			};
 			aWindow.addEventListener("load", aWindow.__SM_restore, true);
 			return true;
 		}
 
-		//Try and fix bug35058 even in newer versions of Firefox, because session might have been saved under FF 2.0
-		aState = this.modifySessionData(aState, aStripClosedTabs, false, true, aEntireSession, aStartup);  
+		aState = this.modifySessionData(aState, aNoUndoData, false, aEntireSession, aStartup);  
 
 		if (aEntireSession)
 		{
@@ -3194,23 +3209,42 @@ var gSessionManager = {
 		return this.JSON_encode(aState);
 	},
 	
-	modifySessionData: function(aState, aStrip, aSaving, afixBug350558, aReplacingWindow, aStartup)
+	modifySessionData: function(aState, aNoUndoData, aSaving, aReplacingWindow, aStartup)
 	{
+		// Don't do anything if not modifying session data
+		if (!(aNoUndoData || aSaving || aReplacingWindow || aStartup)) {
+			return aState;
+		}
 		aState = this.JSON_decode(aState);
+		
 		// set _firsttabs to true on startup to prevent closed tabs list from clearing when not overwriting tabs.
 		if (aStartup) aState._firstTabs = true;
+		
+		// process opened windows
 		aState.windows.forEach(function(aWindow) {
 			// Strip out cookies if user doesn't want to save them
 			if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
 
-			// Either remove or fix closed tabs			
-			if (aStrip) aWindow._closedTabs = [];
-			else if (afixBug350558) this.fixBug350558(aWindow._closedTabs);
-
-			// Work around for bug 350558 which mangles the _closedTabs.state.entries 
-			// and tabs.entries array data in Firefox 2.0.x
-			if (afixBug350558) this.fixBug350558(aWindow.tabs);
+			// remove closed tabs			
+			if (aNoUndoData && aNoUndoData.tabs) aWindow._closedTabs = [];
 		}, this);
+		
+		// process closed windows (for sessions only)
+		if (aState._closedWindows) {
+			if (this.mUseSSClosedWindowList && aNoUndoData && aNoUndoData.windows) {
+				aState._closedWindows = [];
+			}
+			else  {
+				aState._closedWindows.forEach(function(aWindow) {
+					// Strip out cookies if user doesn't want to save them
+					if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
+
+					// remove closed tabs			
+					if (aNoUndoData && aNoUndoData.tabs) aWindow._closedTabs = [];
+				}, this);
+			}
+		}
+
 		// if only one window, don't allow toolbars to be hidden
 		if (aReplacingWindow && (aState.windows.length == 1) && aState.windows[0].hidden) {
 			delete (aState.windows[0].hidden);
@@ -3311,90 +3345,6 @@ var gSessionManager = {
 		return this.mBundle.getString(aName);
 	},
 
-	/**
-	* Converts a JavaScript object into a JSON string
-	* (see http://www.json.org/ for the full grammar).  Only used in Firefox 2.0
-	*
-	* The inverse operation consists of eval("(" + JSON_string + ")");
-	* and should be provably safe.
-	*
-	* @param aJSObject is the object to be converted
-	* @return the object's JSON representation
-	*/
-	toJSONString: function toJSONString(aJSObject) {
-		// these characters have a special escape notation
-		const charMap = { "\b": "\\b", "\t": "\\t", "\n": "\\n", "\f": "\\f",
-		                  "\r": "\\r", '"': '\\"', "\\": "\\\\" };
-		// we use a single string builder for efficiency reasons
-		var parts = [];
-		
-		// this recursive function walks through all objects and appends their
-		// JSON representation to the string builder
-		function jsonIfy(aObj) {
-			if (typeof aObj == "boolean") {
-				parts.push(aObj ? "true" : "false");
-			}
-			else if (typeof aObj == "number" && isFinite(aObj)) {
-				// there is no representation for infinite numbers or for NaN!
-				parts.push(aObj.toString());
-			}
-			else if (typeof aObj == "string") {
-				aObj = aObj.replace(/[\\"\x00-\x1F\u0080-\uFFFF]/g, function($0) {
-				// use the special escape notation if one exists, otherwise
-				// produce a general unicode escape sequence
-				return charMap[$0] ||
-					"\\u" + ("0000" + $0.charCodeAt(0).toString(16)).slice(-4);
-				});
-				parts.push('"' + aObj + '"')
-			}
-			else if (aObj == null) {
-				parts.push("null");
-			}
-			// if it looks like an array, treat it as such -
-			// this is required for all arrays from a sandbox
-			else if (aObj instanceof Array ||
-					typeof aObj == "object" && "length" in aObj &&
-					(aObj.length === 0 || aObj[aObj.length - 1] !== undefined)) {
-				parts.push("[");
-				for (var i = 0; i < aObj.length; i++) {
-					jsonIfy(aObj[i]);
-					parts.push(",");
-				}
-				if (parts[parts.length - 1] == ",")
-					parts.pop(); // drop the trailing colon
-				parts.push("]");
-			}
-			else if (typeof aObj == "object") {
-				parts.push("{");
-				for (var key in aObj) {
-					if (key == "_tab")
-						continue; // XXXzeniko we might even want to drop all private members
-			
-					jsonIfy(key.toString());
-					parts.push(":");
-					jsonIfy(aObj[key]);
-					parts.push(",");
-				}
-				if (parts[parts.length - 1] == ",")
-					parts.pop(); // drop the trailing colon
-				parts.push("}");
-			}
-			else {
-				throw new Error("No JSON representation for this object!");
-			}
-		}
-		jsonIfy(aJSObject);
-		
-		var newJSONString = parts.join(" ");
-		// sanity check - so that API consumers can just eval this string
-		if (/[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/.test(
-			newJSONString.replace(/"(\\.|[^"\\])*"/g, "")
-		))
-		throw new Error("JSON conversion failed unexpectedly!");
-		
-		return newJSONString;
-	},
-	
 	// Decode JSON string to javascript object - use JSON if built-in.
 	JSON_decode: function(aStr, noError) {
 		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
@@ -3402,23 +3352,15 @@ var gSessionManager = {
 			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
 		
 			// JSON can't parse when string is wrapped in parenthesis
-			if (this.mNativeJSON && hasParens) {
+			if (hasParens) {
 				aStr = aStr.substring(1, aStr.length - 1);
 			}
 		
-			if (this.mNativeJSON) {
-				// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
-				try {
-					jsObject = this.mNativeJSON.decode(aStr);
-				}
-				catch (ex) {
-					if (/[\u2028\u2029]/.test(aStr)) {
-						aStr = aStr.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
-					}
-					jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
-				}
+			// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
+			try {
+				jsObject = this.mNativeJSON.decode(aStr);
 			}
-			else {
+			catch (ex) {
 				if (/[\u2028\u2029]/.test(aStr)) {
 					aStr = aStr.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 				}
@@ -3435,15 +3377,10 @@ var gSessionManager = {
 	JSON_encode: function(aObj) {
 		var jsString = null;
 		try {
-			if (this.mNativeJSON) {
-				jsString = this.mNativeJSON.encode(aObj);
-				// Needed until Firefox bug 387859 is fixed or else Firefox won't except JSON strings with \u2028 or \u2029 characters
-				if (/[\u2028\u2029]/.test(jsString)) {
-					jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
-				}
-			}
-			else {
-				jsString = this.toJSONString(aObj);
+			jsString = this.mNativeJSON.encode(aObj);
+			// Needed until Firefox bug 387859 is fixed or else Firefox won't except JSON strings with \u2028 or \u2029 characters
+			if (/[\u2028\u2029]/.test(jsString)) {
+				jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 			}
 		}
 		catch(ex) {
