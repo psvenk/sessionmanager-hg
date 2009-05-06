@@ -141,7 +141,7 @@ function storeSession() {
       if (gTreeData[t].checked === 0)
         // this window will be restored partially
         gStateObject.windows[ix].tabs =
-          gStateObject.windows[ix].tabs.filter(function(aTabData, aIx) { return gTreeData[t].tabs[aIx].checked });  // changed to work in Firefox 2.0
+          gStateObject.windows[ix].tabs.filter(function(aTabData, aIx) gTreeData[t].tabs[aIx].checked);
       else if (!gTreeData[t].checked)
         // this window won't be restored at all
         gStateObject.windows.splice(ix, 1);
@@ -217,7 +217,7 @@ function toggleRowChecked(aIx) {
   item.checked = !item.checked;
   treeView.treeBox.invalidateRow(aIx);
   
-  function isChecked(aItem) { return aItem.checked; }  // changed to work in Firefox 2.0
+  function isChecked(aItem) aItem.checked;
   
   if (treeView.isContainer(aIx)) {
     // (un)check all tabs of this window as well
@@ -280,9 +280,6 @@ function restoreSingleWindow(aIx) {
 }
 
 function restoreSingleTab(aIx, aShifted) {
-  // This won't work in Firefox 2.0 so return
-  if (this.mAppVersion < "1.9") return;
-
   var win = getBrowserWindow();
   if (!win) return;
   var tabbrowser = win.gBrowser;
@@ -324,7 +321,7 @@ var treeView = {
     }
     else return gTreeData[idx].label; 
   },
-  isContainer: function(idx)         { return (gTreeData[idx] ? "open" in gTreeData[idx] : false); }, // changed to work in Firefox 2.0
+  isContainer: function(idx)         { return "open" in gTreeData[idx]; },
   getCellValue: function(idx, column){ return gTreeData[idx].checked; },
   isContainerOpen: function(idx)     { return gTreeData[idx].open; },
   isContainerEmpty: function(idx)    { return false; },

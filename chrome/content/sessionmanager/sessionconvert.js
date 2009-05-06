@@ -278,8 +278,7 @@ var gSessionSaverConverter = {
 					
 				// postdata
 				if (postData) {
-					entry.postdata = postData;             // Firefox 2 version
-					//entry.postdata_b64 = btoa(postData);   // Firefox 3 version - FF3 can read FF2 version
+					entry.postdata_b64 = btoa(postData);
 				}
 			}
 			
@@ -471,7 +470,6 @@ var gSessionSaverConverter = {
 var gConvertTMPSession = {
 	
 	sessionList: null,
-	isFirefox3: false,
 
 	init: function() {
 		this.RDFService = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
@@ -492,13 +490,6 @@ var gConvertTMPSession = {
 			this.gSessionManager = null;
 			return;
 		}
-		
-		// Determine Mozilla version to see what is supported
-		try {
-			var mAppVersion = Components.classes["@mozilla.org/xre/app-info;1"].
-			                  getService(Components.interfaces.nsIXULAppInfo).platformVersion;
-			this.isFirefox3 = (mAppVersion >= "1.9");
-		} catch (ex) { dump(ex + "\n"); }
 		
 		if (!chromeWin.TMP_SessionStore) {
 			this._prompt.alert(null, this.gSessionManager._string("sessionManager"), this.gSessionManager._string("tmp_no_install"));
