@@ -1048,13 +1048,14 @@ var gSessionManager = {
 		var noUndoData = this.getNoUndoData(true, aMode);
 
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
-		var TMP_SingleWindowMode = typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode;
+		var TMP_SingleWindowMode = this.mPref_append_by_default || (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
 	
 		if (TMP_SingleWindowMode && (aMode == "newwindow" || ((aMode != "startup") && (aMode != "overwrite") && !this.mPref_overwrite)))
 			aMode = "append";
 		
-		// Use specified mode or default.  If append_by_default and overwrite preferences are both set, use "append" instead of "overwrite"
-		aMode = aMode || ((this.mPref_append_by_default && this.mPref_overwrite) ? "append" : "default");
+		// Use specified mode or default.
+		aMode = aMode || "default";
+		
 		if (aMode == "startup")
 		{
 			overwriteTabs = this.isCmdLineEmpty();
