@@ -1334,6 +1334,7 @@ var gSessionManager = {
 			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
 			menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
+			menuitem.setAttribute("crop", "center");
 			aPopup.insertBefore(menuitem, separator);
 		}, this);
 		label.hidden = (closedWindows.length == 0);
@@ -1379,6 +1380,7 @@ var gSessionManager = {
 			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
 			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
+			menuitem.setAttribute("crop", "center");
 			// Removing closed tabs does not work in SeaMonkey so don't give option to do so.
 			if (this.mAppID != "SEAMONKEY") {
 				menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
