@@ -1424,10 +1424,16 @@ var gSessionManager = {
 				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 			}
 			
-			var okay = this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append");
-			if (okay) {
-				this.storeClosedWindows(closedWindows, aIx);
-				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+			// If using SessionStore closed windows list and doing a normal restore, just use SessionStore API
+			if (this.mUseSSClosedWindowList && (aMode != "append") && (aMode != "overwrite")) {
+				this.mSessionStore.undoCloseWindow(aIx);
+			}
+			else {
+				var okay = this.restoreSession((aMode == "overwrite" || aMode == "append")?window:null, state, aMode != "append");
+				if (okay) {
+					this.storeClosedWindows(closedWindows, aIx);
+					this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
+				}
 			}
 		}
 	},
@@ -2050,16 +2056,17 @@ var gSessionManager = {
 	storeClosedWindows: function(aList, aIx)
 	{
 		if (this.mUseSSClosedWindowList) {
-			// This works to remove the window from the closed window list for whatever reason
-			var win = this.mSessionStore.undoCloseWindow(aIx);
-			win.close();
+			// The following works in that the closed window appears to be removed from the list, but 
+			// when Firefox is restarted, the window magically returns and sometimes the closed window becomes the open window
+			// and the open window becomes the closed.  In other words weird things happen so don't use it.
+			//var win = this.mSessionStore.undoCloseWindow(aIx);
+			//win.close();
 			
-			// The following also works, but causes all the windows to reload
-			//
-			//var state = this.mSessionStore.getBrowserState();
-			//state = this.JSON_decode(state);
-			//state._closedWindows.splice(aIx || 0, 1);
-			//this.mSessionStore.setBrowserState(this.JSON_encode(state));
+			// The following works, but causes all the windows to reload.  Unfortunately this is the best we can do for now.
+			var state = this.mSessionStore.getBrowserState();
+			state = this.JSON_decode(state);
+			state._closedWindows.splice(aIx || 0, 1);
+			this.mSessionStore.setBrowserState(this.JSON_encode(state));
 		}
 		else {
 			this.storeClosedWindows_SM(aList);
