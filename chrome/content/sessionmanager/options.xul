@@ -26,6 +26,7 @@
 		<prefpane id="mainPrefPane" label="&general.caption;" helpURI="" helpTopic="prefs-main">
 		<preferences>
 			<preference id="browser.startup.page" name="browser.startup.page" type="int"/>
+			<preference id="extensions.sessionmanager.append_by_default" name="extensions.sessionmanager.append_by_default" type="bool"/>
 			<preference id="extensions.sessionmanager.autosave_session" name="extensions.sessionmanager.autosave_session" type="bool"/>
 			<preference id="extensions.sessionmanager.backup_session" name="extensions.sessionmanager.backup_session" type="int"/>
 			<preference id="extensions.sessionmanager.hide_tools_menu" name="extensions.sessionmanager.hide_tools_menu" type="bool"/>
@@ -37,6 +38,7 @@
 			<preference id="extensions.sessionmanager.resume_session" name="extensions.sessionmanager.resume_session" type="string"/>
 			<preference id="extensions.sessionmanager.save_cookies" name="extensions.sessionmanager.save_cookies" type="bool"/>
 			<preference id="extensions.sessionmanager.session_list_order" name="extensions.sessionmanager.session_list_order" type="int"/>
+			<preference id="extensions.sessionmanager.shutdown_on_last_window_close" name="extensions.sessionmanager.shutdown_on_last_window_close" type="bool"/>
 		</preferences>
 
 		<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionconvert.js"/>	
@@ -49,7 +51,7 @@
 			</tabs>
 			<tabpanels>
 				<tabpanel orient="vertical">
-					<groupbox>
+					<groupbox id="startEndGroupbox">
 						<caption label="&startNend.caption;"/>
 						<label value="&resume_sess.label;"/>
 						<radiogroup id="startupOption" oncommand="enableApply(); startupSelect(this.selectedIndex);" orient="horizontal">
@@ -84,6 +86,9 @@
 								</menupopup>
 							</menulist>
 						</hbox>
+						<separator style="height: 0.5em;" orient="vertical"/>
+						<checkbox label="&last_window_shutdown.label;" accesskey="&last_window_shutdown.accesskey;" 
+						          preference="extensions.sessionmanager.shutdown_on_last_window_close"/>
 					</groupbox>
 				</tabpanel>
 				<tabpanel orient="vertical">
@@ -107,9 +112,11 @@
 							<rows>
 								<row>
 									<checkbox id="overwrite" label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="extensions.sessionmanager.overwrite"/>
-									<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload"/>
+									<checkbox id="open_as_tabs" label="&open_as_tabs.label;" accesskey="&open_as_tabs.accesskey;" 
+									          preference="extensions.sessionmanager.append_by_default" oncommand="changeOverwriteLabel(this.checked);"/>
 								</row>
 								<row>
+									<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload"/>
 									<checkbox label="&autosave_session.label;" accesskey="&autosave_session.accesskey;" preference="extensions.sessionmanager.autosave_session"/>
 								</row>
 							</rows>

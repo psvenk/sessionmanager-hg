@@ -1,3 +1,5 @@
+var originalOverwriteLabel = null;
+
 gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
 	this._onLoad(true);
@@ -6,10 +8,13 @@ gSessionManager.onLoad = function() {
 	var resume_session = _("resume_session");
 	var sessions = this.getSessions();
 	resume_session.appendItem(this._string("startup_resume"), this.mBackupSessionName, "");
+	var maxWidth = window.getComputedStyle(_("startEndGroupbox"), null).width;
 	sessions.forEach(function(aSession) {
 		if ((aSession.fileName != this.mAutoSaveSessionName) && (aSession.fileName != this.mBackupSessionName))
 		{
-			resume_session.appendItem(aSession.name, aSession.fileName, "");
+			var elem = resume_session.appendItem(aSession.name, aSession.fileName, "");
+			elem.setAttribute("maxwidth", maxWidth);
+			elem.setAttribute("crop", "center");
 		}
 	}, this);
 	// if no restore value, select previous browser session
@@ -39,7 +44,11 @@ gSessionManager.onLoad = function() {
 	if (typeof(this.mSessionStore.getClosedWindowCount) != "function") {
 		_("closed_window_list").style.visibility = "collapse";
 	}
-	checkClosedWindowList();
+	checkClosedWindowList(_("extensions.sessionmanager.use_SS_closed_window_list").valueFromPreferences);
+	
+	// Change overwrite label to tabs if append to window as tab preference set
+	originalOverwriteLabel = _("overwrite").label;
+	changeOverwriteLabel(_("extensions.sessionmanager.append_by_default").valueFromPreferences);
 	
 	// Hide mid-click preference if Tab Mix Plus or Tab Clicking Options is enabled
 	var browser = this.mWindowMediator.getMostRecentWindow("navigator:browser");
@@ -48,7 +57,10 @@ gSessionManager.onLoad = function() {
 			_("midClickPref").style.visibility = "collapse";
 		}
 		
-		if (browser.gSingleWindowMode) _("overwrite").label = gSessionManager._string("overwrite_tabs");
+		if (browser.gSingleWindowMode) {
+			_("overwrite").label = gSessionManager._string("overwrite_tabs");
+			_("open_as_tabs").style.visibility = "collapse";
+		}
 	}
 
 	// Disable Apply Button by default
@@ -160,10 +172,13 @@ function checkEncryptOnly(aState) {
 	return aState;
 }
 
+function changeOverwriteLabel(aChecked) {
+	_("overwrite").label = aChecked ? gSessionManager._string("overwrite_tabs") : originalOverwriteLabel;
+}
+
 function checkClosedWindowList(aChecked) {
 	// Hide the option to not clear the list of closed windows on shutdown if we are using the built in closed windows
-	var builtin = (_("closed_window_list").style.visibility != "collapse") &&
-	              ((typeof(aChecked) == "undefined") ? _("extensions.sessionmanager.use_SS_closed_window_list").valueFromPreferences : aChecked);
+	var builtin = aChecked && (_("closed_window_list").style.visibility != "collapse");
 	
 	_("save_window_list").style.visibility = builtin ? "collapse" : "visible";
 	_("max_closed").style.visibility = builtin ? "collapse" : "visible";
@@ -291,6 +306,8 @@ function adjustContentHeight() {
 	// When not animating, the largest pane's content height is not correct when it is opened first so update it.
 	// Also the window needs to be resized to take into account the changes to the description height.
 	if (!animate) {
+		// For some reason if opening the largest (Advanced) pane first and the encrypt only box is checked, the size is wrong so tweak it.
+		if ((currentPane == biggestPane) && !_("encrypted_only").hidden) largestNewPaneHeight += 12;
 		biggestPane._content.height = largestNewPaneHeight;
 		window.sizeToContent();
 	}
