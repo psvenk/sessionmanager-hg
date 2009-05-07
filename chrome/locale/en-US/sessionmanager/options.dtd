@@ -101,3 +101,7 @@
 <!ENTITY closed_window_list.accesskey "U">
 <!ENTITY closed_windows.label "Restore the list of reopenable closed windows:">
 <!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Open as tabs in current window">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "Treat closing last open browser window as shutting down">
+<!ENTITY last_window_shutdown.accesskey "T">
