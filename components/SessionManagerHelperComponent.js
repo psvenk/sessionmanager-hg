@@ -34,9 +34,10 @@
  * ***** END LICENSE BLOCK ***** */
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const Cu = Components.utils;
 const report = Components.utils.reportError;
 
-Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function SessionManagerHelperComponent() {}
 
@@ -246,7 +247,7 @@ SessionManagerHelperComponent.prototype = {
 				if (/[\u2028\u2029]/.test(aStr)) {
 					aStr = aStr.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 				}
-				jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
+				jsObject = Cu.evalInSandbox("(" + aStr + ")", new Cu.Sandbox("about:blank"));
 			}
 		}
 		catch(ex) {
