@@ -1482,13 +1482,12 @@ var gSessionManager = {
 				if (this.mAppVersion != "1.9.1b4") {
 					// This code is based off of code in Tab Mix Plus
 					var state = { windows: [], _firstTabs: true };
-					state.windows[0] = { _closedTabs: [] };
 
 					// get closed-tabs from nsSessionStore
 					var closedTabs = this.JSON_decode(this.mSessionStore.getClosedTabData(window));
 					// purge closed tab at aIndex
 					closedTabs.splice(aIx, 1);
-					state.windows[0]._closedTabs = closedTabs;
+					state.windows[0] = { _closedTabs : closedTabs };
 
 					// replace existing _closedTabs
 					this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
@@ -1497,6 +1496,10 @@ var gSessionManager = {
 					this.forgetClosedTab(aIx);
 				}
 			}
+
+			// the following forces SessionStore to save the state to disk which the above doesn't do for some reason.
+			this.mSessionStore.setWindowValue(window, "SM_dummy_value","1");
+			this.mSessionStore.deleteWindowValue(window, "SM_dummy_value");
 			
 			// update the remaining entries
 			this.updateClosedList(aTarget, aIx, this.mSessionStore.getClosedTabCount(window), "tab");
@@ -1571,17 +1574,17 @@ var gSessionManager = {
 		}
 
 		if (this.mUseSSClosedWindowList) {
-			var max_windows_undo = this.getPref("browser.sessionstore.max_windows_undo", 3, true);
-		
-			this.setPref("browser.sessionstore.max_windows_undo", 0, true);
-			this.setPref("browser.sessionstore.max_windows_undo", max_windows_undo, true);
-
-			// Session Store always keeps one closed window around even if preference is set to 0 so following is needed.
-			gSessionManager.storeClosedWindows(null, 0);
+			var state = { windows: [ {} ], _closedWindows: [] };
+			this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
 		}
 		else {
 			this.clearUndoData("window");
 		}
+		
+		// the following forces SessionStore to save the state to disk which isn't done for some reason.
+		this.mSessionStore.setWindowValue(window, "SM_dummy_value","1");
+		this.mSessionStore.deleteWindowValue(window, "SM_dummy_value");
+		
 		this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 	},
 	
@@ -2057,17 +2060,14 @@ var gSessionManager = {
 	storeClosedWindows: function(aList, aIx)
 	{
 		if (this.mUseSSClosedWindowList) {
-			// The following works in that the closed window appears to be removed from the list, but 
-			// when Firefox is restarted, the window magically returns and sometimes the closed window becomes the open window
-			// and the open window becomes the closed.  In other words weird things happen so don't use it.
-			//var win = this.mSessionStore.undoCloseWindow(aIx);
-			//win.close();
-			
-			// The following works, but causes all the windows to reload.  Unfortunately this is the best we can do for now.
-			var state = this.mSessionStore.getBrowserState();
-			state = this.JSON_decode(state);
-			state._closedWindows.splice(aIx || 0, 1);
-			this.mSessionStore.setBrowserState(this.JSON_encode(state));
+			// The following works in that the closed window appears to be removed from the list with no side effects
+			var closedWindows = this.JSON_decode(this.mSessionStore.getClosedWindowData());
+			closedWindows.splice(aIx || 0, 1);
+			var state = { windows: [ {} ], _closedWindows: closedWindows };
+			this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
+			// the following forces SessionStore to save the state to disk which the above doesn't do for some reason.
+			this.mSessionStore.setWindowValue(window, "SM_dummy_value","1");
+			this.mSessionStore.deleteWindowValue(window, "SM_dummy_value");
 		}
 		else {
 			this.storeClosedWindows_SM(aList);
