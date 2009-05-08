@@ -1,73 +1,56 @@
+/* ***** BEGIN LICENSE BLOCK *****
+ * Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ *
+ * The contents of this file are subject to the Mozilla Public License Version
+ * 1.1 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ * http://www.mozilla.org/MPL/
+ *
+ * Software distributed under the License is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ * for the specific language governing rights and limitations under the
+ * License.
+ *
+ * The Original Code is Michael Kraft.
+ *
+ * The Initial Developer of the Original Code is Mozilla.
+ * Portions created by the Initial Developer are Copyright (C) 2009
+ * the Initial Developer. All Rights Reserved.
+ *
+ * Contributor(s):
+ *
+ * Alternatively, the contents of this file may be used under the terms of
+ * either the GNU General Public License Version 2 or later (the "GPL"), or
+ * the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ * in which case the provisions of the GPL or the LGPL are applicable instead
+ * of those above. If you wish to allow use of your version of this file only
+ * under the terms of either the GPL or the LGPL, and not to allow others to
+ * use your version of this file under the terms of the MPL, indicate your
+ * decision by deleting the provisions above and replace them with the notice
+ * and other provisions required by the GPL or the LGPL. If you do not delete
+ * the provisions above, a recipient may use your version of this file under
+ * the terms of any one of the MPL, the GPL or the LGPL.
+ *
+ * ***** END LICENSE BLOCK ***** */
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const Cr = Components.results;
-const Cu = Components.utils;
-const FIREFOX = "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}";
-const SEAMONKEY= "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}";
 const report = Components.utils.reportError;
 
-var SessionManagerHelperComponent = {
-	mCID: Components.ID("{5714d620-47ce-11db-b0de-0800200c9a66}"),
-	mContractID: "@morac/sessionmanager-helper;1",
-	mClassName: "Session Manager Helper Component",
-	mCategory: "a-sessionmanagerhelpher",
-	mTimer: null,
-	mPrefService: null,
-	mSessionData: null,
+Components.utils.import("resource://gre/modules/XPCOMUtils.jsm");
 
-/* ........ nsIModule .............. */
+function SessionManagerHelperComponent() {}
 
-	getClassObject: function(aCompMgr, aCID, aIID)
-	{
-		if (!aCID.equals(this.mCID))
-		{
-			Components.returnCode = Cr.NS_ERROR_NOT_REGISTERED;
-			return null;
-		}
-		
-		return this.QueryInterface(aIID);
-	},
+SessionManagerHelperComponent.prototype = {
+	// registration details
+	classDescription: "Session Manager Helper Component",
+	classID:          Components.ID("{5714d620-47ce-11db-b0de-0800200c9a66}"),
+	contractID:       "@morac/sessionmanager-helper;1",
+	_xpcom_categories: [{ category: "app-startup", service: true }],
+	
+	// interfaces supported
+	QueryInterface: XPCOMUtils.generateQI([Ci.nsISessionManangerHelperComponent, Ci.nsIObserver]),
 
-	registerSelf: function(aCompMgr, aFileSpec, aLocation, aType)
-	{
-		aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
-		aCompMgr.registerFactoryLocation(this.mCID, this.mCategory, this.mContractID, aFileSpec, aLocation, aType);
-		
-		var catMan = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
-		catMan.addCategoryEntry("app-startup", this.mClassName, "service," + this.mContractID, true, true);
-	},
-
-	unregisterSelf: function(aCompMgr, aLocation, aType)
-	{
-		aCompMgr.QueryInterface(Ci.nsIComponentRegistrar);
-		aCompMgr.unregisterFactoryLocation(this.mCID, aLocation);
-		
-		var catMan = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICategoryManager);
-		catMan.deleteCategoryEntry("app-startup", "service," + this.mContractID, true);
-	},
-
-	canUnload: function(aCompMgr)
-	{
-		return true;
-	},
-
-/* ........ nsIFactory .............. */
-
-	createInstance: function(aOuter, aIID)
-	{
-		if (aOuter != null)
-		{
-			Components.returnCode = Cr.NS_ERROR_NO_AGGREGATION;
-			return null;
-		}
-		
-		return this.QueryInterface(aIID);
-	},
-
-	lockFactory: function(aLock) { },
-
-/* ........ nsIObserver .............. */
-
+	// observer
 	observe: function(aSubject, aTopic, aData)
 	{
 		var os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
@@ -97,7 +80,6 @@ var SessionManagerHelperComponent = {
 			
 			// stuff to handle preference file saving
 			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-			this.mPrefService = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService);
 			os.addObserver(this, "quit-application-granted", false);
 			os.addObserver(this, "sessionmanager-preference-save", false);
 			break;
@@ -112,7 +94,9 @@ var SessionManagerHelperComponent = {
 		case "sessionmanager-preference-save":
 			// Save preference file after one 1/4 second to delay in case another preference changes at same time as first
 			this.mTimer.cancel();
-			this.mTimer.initWithCallback({notify:function (aTimer) {SessionManagerHelperComponent.mPrefService.savePrefFile(null);}}, 250, Ci.nsITimer.TYPE_ONE_SHOT);
+			this.mTimer.initWithCallback({
+				notify:function (aTimer) { Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).savePrefFile(null); }
+			}, 250, Ci.nsITimer.TYPE_ONE_SHOT);
 			break;
 		case "quit-application-granted":
 			os.removeObserver(this, "sessionmanager-preference-save");
@@ -121,7 +105,7 @@ var SessionManagerHelperComponent = {
 		}
 	},
 
-/* ........ public methods ............... */
+	/* ........ public methods ............... */
 
 	// this will save the passed in session data into the mSessionData variable
 	setSessionData: function(aState) 
@@ -129,7 +113,7 @@ var SessionManagerHelperComponent = {
 		this.mSessionData = aState;
 	},
 
-/* ........ private methods .............. */
+	/* ........ private methods .............. */
 
 	// this will handle the case where user turned off crash recovery and browser crashed and
 	// preference indicates there is an active session, but there really isn't
@@ -286,23 +270,9 @@ var SessionManagerHelperComponent = {
 		}
 		return jsString;
 	},
-
-/* ........ QueryInterface .............. */
-
-	QueryInterface: function(aIID)
-	{
-		if (!aIID.equals(Ci.nsISupports) && !aIID.equals(Ci.nsIModule) && !aIID.equals(Ci.nsIFactory) && 
-		    !aIID.equals(Ci.nsIObserver) && !aIID.equals(Ci.nsISessionManangerHelperComponent))
-		{
-			Components.returnCode = Cr.NS_ERROR_NO_INTERFACE;
-			return null;
-		}
-		
-		return this;
-	}
 };
 
-function NSGetModule(aComMgr, aFileSpec)
-{
-	return SessionManagerHelperComponent;
+// Register Component
+function NSGetModule(compMgr, fileSpec) {
+  return XPCOMUtils.generateModule([SessionManagerHelperComponent]);
 }
