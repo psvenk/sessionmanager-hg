@@ -26,6 +26,7 @@
 		<prefpane id="mainPrefPane" label="&general.caption;" helpURI="" helpTopic="prefs-main">
 		<preferences>
 			<preference id="browser.startup.page" name="browser.startup.page" type="int"/>
+			<preference id="extensions.sessionmanager.append_by_default" name="extensions.sessionmanager.append_by_default" type="bool"/>
 			<preference id="extensions.sessionmanager.autosave_session" name="extensions.sessionmanager.autosave_session" type="bool"/>
 			<preference id="extensions.sessionmanager.backup_session" name="extensions.sessionmanager.backup_session" type="int"/>
 			<preference id="extensions.sessionmanager.hide_tools_menu" name="extensions.sessionmanager.hide_tools_menu" type="bool"/>
@@ -37,6 +38,7 @@
 			<preference id="extensions.sessionmanager.resume_session" name="extensions.sessionmanager.resume_session" type="string"/>
 			<preference id="extensions.sessionmanager.save_cookies" name="extensions.sessionmanager.save_cookies" type="bool"/>
 			<preference id="extensions.sessionmanager.session_list_order" name="extensions.sessionmanager.session_list_order" type="int"/>
+			<preference id="extensions.sessionmanager.shutdown_on_last_window_close" name="extensions.sessionmanager.shutdown_on_last_window_close" type="bool"/>
 		</preferences>
 
 		<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionconvert.js"/>	
@@ -49,7 +51,7 @@
 			</tabs>
 			<tabpanels>
 				<tabpanel orient="vertical">
-					<groupbox>
+					<groupbox id="startEndGroupbox">
 						<caption label="&startNend.caption;"/>
 						<label value="&resume_sess.label;"/>
 						<radiogroup id="startupOption" oncommand="enableApply(); startupSelect(this.selectedIndex);" orient="horizontal">
@@ -84,6 +86,9 @@
 								</menupopup>
 							</menulist>
 						</hbox>
+						<separator style="height: 0.5em;" orient="vertical"/>
+						<checkbox label="&last_window_shutdown.label;" accesskey="&last_window_shutdown.accesskey;" 
+						          preference="extensions.sessionmanager.shutdown_on_last_window_close"/>
 					</groupbox>
 				</tabpanel>
 				<tabpanel orient="vertical">
@@ -107,9 +112,11 @@
 							<rows>
 								<row>
 									<checkbox id="overwrite" label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="extensions.sessionmanager.overwrite"/>
-									<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload"/>
+									<checkbox id="open_as_tabs" label="&open_as_tabs.label;" accesskey="&open_as_tabs.accesskey;" 
+									          preference="extensions.sessionmanager.append_by_default" oncommand="changeOverwriteLabel(this.checked);"/>
 								</row>
 								<row>
+									<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload"/>
 									<checkbox label="&autosave_session.label;" accesskey="&autosave_session.accesskey;" preference="extensions.sessionmanager.autosave_session"/>
 								</row>
 							</rows>
@@ -162,11 +169,14 @@
 		<prefpane id="undoclosePrefPane" label="&undoClose.caption;" helpURI="" helpTopic="prefs-undo">
 		<preferences>
 			<preference id="browser.sessionstore.max_tabs_undo" name="browser.sessionstore.max_tabs_undo" type="int"/>
+			<preference id="browser.sessionstore.max_windows_undo" name="browser.sessionstore.max_windows_undo" type="int"/>
 			<preference id="extensions.sessionmanager.click_restore_tab" name="extensions.sessionmanager.click_restore_tab" type="bool"/>
 			<preference id="extensions.sessionmanager.max_closed_undo" name="extensions.sessionmanager.max_closed_undo" type="int"/>
 			<preference id="extensions.sessionmanager.save_closed_tabs" name="extensions.sessionmanager.save_closed_tabs" type="int"/>
+			<preference id="extensions.sessionmanager.save_closed_windows" name="extensions.sessionmanager.save_closed_windows" type="int"/>
 			<preference id="extensions.sessionmanager.save_window_list" name="extensions.sessionmanager.save_window_list" type="bool"/>
 			<preference id="extensions.sessionmanager.submenus" name="extensions.sessionmanager.submenus" type="bool"/>
+			<preference id="extensions.sessionmanager.use_SS_closed_window_list" name="extensions.sessionmanager.use_SS_closed_window_list" type="bool"/>
 		</preferences>
 
 		<groupbox>
@@ -179,7 +189,10 @@
 				<rows>
 					<row align="center">
 						<label value="&max_closed.label;" accesskey="&max_closed.accesskey;" control="max_closed"/>
+						<hbox>
 						<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo();"/>
+							<textbox id="max_closed_SS" preference="browser.sessionstore.max_windows_undo" size="1" maxlength="5"/>
+						</hbox>
 					</row>
 					<row align="center">
 						<label value="&max_tabs.label;" accesskey="&max_tabs.accesskey;" control="max_tabs"/>
@@ -189,10 +202,18 @@
 			</grid>
 			<checkbox label="&submenu.label;" accesskey="&submenu.accesskey;" preference="extensions.sessionmanager.submenus"/>
 			<checkbox id="midClickPref" label="&middleclick.label;" accesskey="&middleclick.accesskey;" preference="extensions.sessionmanager.click_restore_tab"/>
+			<checkbox id="closed_window_list" label="&closed_window_list.label;" accesskey="&closed_window_list.accesskey;" 
+			          preference="extensions.sessionmanager.use_SS_closed_window_list" oncommand="checkClosedWindowList(this.checked)"/>
 		</groupbox>
 		<groupbox>
 			<caption label="&persistence.caption;"/>
-			<hbox align="center">
+			<grid>
+				<columns>
+					<column/>
+					<column/>
+				</columns>
+				<rows>
+					<row align="center">
 				<label value="&closed_tabs.label;" accesskey="&closed_tabs.accesskey;" control="save_closed_tabs"/>
 				<menulist id="save_closed_tabs" preference="extensions.sessionmanager.save_closed_tabs">
 					<menupopup>
@@ -201,7 +222,19 @@
 						<menuitem value="0" label="&closed_tabs.label0;"/>
 					</menupopup>
 				</menulist>
-			</hbox>
+					</row>
+					<row id="closed_windows_menu" align="center">
+						<label value="&closed_windows.label;" accesskey="&closed_windows.accesskey;" control="save_closed_windows"/>
+						<menulist id="save_closed_windows" preference="extensions.sessionmanager.save_closed_windows">
+							<menupopup>
+								<menuitem value="1" label="&closed_tabs.label1;"/>
+								<menuitem value="2" label="&closed_tabs.label2;"/>
+								<menuitem value="0" label="&closed_tabs.label0;"/>
+							</menupopup>
+						</menulist>
+					</row>
+				</rows>
+			</grid>
 			<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="extensions.sessionmanager.save_window_list"/>
 		</groupbox>
 		<hbox pack="end">
