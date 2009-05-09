@@ -77,3 +77,4 @@
 <!ENTITY select_none.label "Select None">
 <!ENTITY toggle_selection.label "Toggle Selection">
 <!ENTITY winTabTree.urlHeader "Location">
+<!ENTITY prompt.append_window.label "Append to Current Window">
