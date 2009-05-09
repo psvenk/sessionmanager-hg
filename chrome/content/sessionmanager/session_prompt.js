@@ -58,7 +58,8 @@ var sortedBy = 0;
 // 4  = ignore               - ignore checkbox checked
 // 8  = autosave             - autosave checkbox checked
 // 16 = tabprompt            - tabprompt checbox checked
-// 32 = append flag          - true if append session, false if replace
+// 32 = append flag          - true if append session, false if not
+// 64 = append window flag   - true if append to window, false if not
 
 // SetString values
 // 3 = Session Filename
@@ -124,7 +125,11 @@ gSessionManager.onLoad = function() {
 	
 	// hide/show the append/replace radio buttons
 	_("radio_append_replace").hidden = !(gParams.GetInt(1) & 64);
-	_("radio_append_replace").selectedIndex = this.getPref("overwrite", false) ? 1 : 0;
+	_("radio_append_replace").selectedIndex = this.getPref("overwrite", false) ? 1 : (this.getPref("append_by_default", false) ? 2 : 0);
+	if (window.opener && typeof(window.opener.gSingleWindowMode) != "undefined" && window.opener.gSingleWindowMode) {
+		if (!_("radio_append_replace").selectedIndex) _("radio_append_replace").selectedIndex = 2;
+		_("radio_append").hidden = true;
+	}
 
 	gBackupGroupName = this._string("backup_sessions");
 	gBackupNames[this._string("backup_session").trim().toLowerCase()] = true;
@@ -300,7 +305,8 @@ gSessionManager.onUnload = function() {
 	if (!gAllTabsChecked) storeSession();
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
-	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected)?32:0));
+	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected)?32:0) | 
+					  ((_("radio_append_window").selected)?64:0));
 	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
 };
 

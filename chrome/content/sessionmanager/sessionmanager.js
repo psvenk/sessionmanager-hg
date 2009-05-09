@@ -972,12 +972,14 @@ var gSessionManager = {
 	load: function(aFileName, aMode, aChoseTabs)
 	{
 		var state, chosenState;
+		var ignore_append_by_default_pref = false;
 		if (!aFileName) {
 			var values = { append_replace: true };
 			aFileName = this.selectSession(this._string("load_session"), this._string("load_session_ok"), values);
 			if (!aFileName || !this.getSessionDir(aFileName).exists()) return;
 			aChoseTabs = values.choseTabs;
-			aMode = values.append ? "newwindow" : "overwrite";
+			aMode = values.append ? "newwindow" : (values.append_window ? "append" : "overwrite");
+			ignore_append_by_default_pref = true;
 		}
 		if (aChoseTabs) {
 			// Get windows and tabs chosen by user
@@ -1048,7 +1050,8 @@ var gSessionManager = {
 		var noUndoData = this.getNoUndoData(true, aMode);
 
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
-		var TMP_SingleWindowMode = this.mPref_append_by_default || (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
+		var TMP_SingleWindowMode = (this.mPref_append_by_default && !ignore_append_by_default_pref) || 
+		                           (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
 	
 		if (TMP_SingleWindowMode && (aMode == "newwindow" || ((aMode != "startup") && (aMode != "overwrite") && !this.mPref_overwrite)))
 			aMode = "append";
@@ -1771,6 +1774,7 @@ var gSessionManager = {
 		aValues.autoSave = (params.GetInt(1) & 8)?1:0;
 		aValues.choseTabs = (params.GetInt(1) & 16)?1:0;
 		aValues.append = (params.GetInt(1) & 32)?1:0;
+		aValues.append_window = (params.GetInt(1) & 64)?1:0;
 		aValues.autoSaveTime = params.GetInt(2) | null;
 		return params.GetInt(0);
 	},
