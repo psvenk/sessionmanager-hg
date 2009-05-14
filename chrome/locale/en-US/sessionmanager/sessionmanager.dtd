@@ -78,3 +78,5 @@
 <!ENTITY toggle_selection.label "Toggle Selection">
 <!ENTITY winTabTree.urlHeader "Location">
 <!ENTITY prompt.append_window.label "Append to Current Window">
+<!ENTITY session_explorer.label "Session Explorer">
+<!ENTITY session_explorer.accesskey "E">
