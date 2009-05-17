@@ -111,6 +111,11 @@ function initTreeView(aFileName) {
         iconURL = /image=(\S*)(\s)?/i.exec(aTabData.xultab);
         if (iconURL) iconURL = iconURL[1];
       }
+      // Trying to display a favicon for an https with an invalid certificate will throw up an exception box, so don't do that
+      // Firefox's about:sessionrestore also fails with authentication requests, but Session Manager seems okay with that so just
+      // use the work around for https.
+      if (/^https:/.test(iconURL))
+        iconURL = "moz-anno:favicon:" + iconURL;
       return {
         label: entry.title || entry.url,
 		url: entry.url,

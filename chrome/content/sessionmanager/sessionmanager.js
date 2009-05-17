@@ -252,12 +252,6 @@ var gSessionManager = {
 //		this.getAutoSaveValues(this.mSessionStore.getWindowValue(window,"_sm_window_session_values"), true);
 //		dump("restore new window done " + this.__window_session_name + "\n");
 		
-		// Remove change made in 0.6 (only do this once)
-		if (this.getPref("version", "") == "0.6")
-		{
-			this.delPref("browser.warnOnQuit", true);
-		}
-		
 		// Perform any needed update processing
 		var oldVersion = this.getPref("version", "")
 		if (oldVersion != SM_VERSION)
@@ -1324,6 +1318,12 @@ var gSessionManager = {
 			{
 				image = state.windows[0].tabs[0].attributes.image;
 			}
+			// Trying to display a favicon for an https with an invalid certificate will throw up an exception box, so don't do that
+			// Firefox's about:sessionrestore also fails with authentication requests, but Session Manager seems okay with that so just
+			// use the work around for https.
+			if (/^https:/.test(image)) {
+				image = "moz-anno:favicon:" + image;
+			}
 			
 			// Get tab count
 			var count = state.windows[0].tabs.length;
@@ -1369,6 +1369,12 @@ var gSessionManager = {
 			if (aValue.state.attributes && aValue.state.attributes.image)
 			{
 				mClosedTabs[aIndex].image = aValue.state.attributes.image;
+			}
+			// Trying to display a favicon for an https with an invalid certificate will throw up an exception box, so don't do that
+			// Firefox's about:sessionrestore also fails with authentication requests, but Session Manager seems okay with that so just
+			// use the work around for https.
+			if (/^https:/.test(mClosedTabs[aIndex].image)) {
+				mClosedTabs[aIndex].image = "moz-anno:favicon:" + mClosedTabs[aIndex].image;
 			}
 		}, this);
 
