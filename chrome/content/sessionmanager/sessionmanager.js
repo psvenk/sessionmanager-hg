@@ -189,9 +189,6 @@ var gSessionManager = {
 		// or Tab Mix Plus are not installed.
 		this.watchForMiddleMouseClicks();
 		
-		// Make sure Session Store is initialzed - It doesn't seem to initialize in all O/S builds of Firefox.
-		this.mSessionStore.init(window);
-		
 		this.synchStartup("page");   // Let Firefox's preference override ours if it changed when browser not running
 		this.recoverSession();
 		this.updateToolbarButton();
@@ -1848,6 +1845,130 @@ var gSessionManager = {
 	},
 	
 /* ........ File Handling .............. */
+	convertToSQL: function() {
+		// Open SQL file and connect to it
+		var file = Components.classes["@mozilla.org/file/directory_service;1"]
+		           .getService(Components.interfaces.nsIProperties)
+		           .get("ProfD", Components.interfaces.nsIFile);
+		file.append("sessionmanager.sqlite");
+		this.delFile(file, true);
+
+		// delete this after testing
+		var date = new Date();
+		var begin = date.getTime();
+		
+		var storageService = Components.classes["@mozilla.org/storage/service;1"]
+		                     .getService(Components.interfaces.mozIStorageService);
+		var mDBConn = storageService.openDatabase(file); 
+
+		mDBConn.createTable("sessions", "filename TEXT PRIMARY KEY, name TEXT, groupname TEXT, timestamp INTEGER," +
+		                     "autosave TEXT, windows INTEGER, tabs INTEGER, backup INTEGER, state BLOB");
+
+		mDBConn.createTable("closed_windows", "id INTEGER PRIMARY KEY, name TEXT, state BLOB");
+		
+		var sessions = this.getSessions();
+
+		var everythingOkay = true;
+		mDBConn.beginTransaction();
+		
+		sessions.forEach(function(aSession) {
+			
+			if (everythingOkay) {
+				var file = this.getSessionDir(aSession.fileName);
+				var state = this.readSessionFile(file);
+				if (state) 
+				{
+					if (this.mSessionRegExp.test(state))
+					{
+						state = state.split("\n")
+					}
+				}
+				
+				if (state[4]) {
+					// Just replace whatever's there since the filename is unique
+					var statement = mDBConn.createStatement(
+						"INSERT INTO sessions (filename, name, groupname, timestamp, autosave, windows, tabs, backup, state) " +
+						"VALUES ( :filename, :name, :groupname, :timestamp, :autosave, :windows, :tabs, :backup, :state )"
+					);
+					// need to wrap in older versions of Firefox
+					if (this.mAppVersion < "1.9.1") {
+						var wrapper = Components.classes["@mozilla.org/storage/statement-wrapper;1"]
+						              .createInstance(Components.interfaces.mozIStorageStatementWrapper);
+						wrapper.initialize(statement);
+						statement = wrapper;
+					}
+					statement.params.filename = aSession.fileName;
+					statement.params.name = aSession.name;
+					statement.params.groupname = aSession.group;
+					statement.params.timestamp = aSession.timestamp;
+					statement.params.autosave = aSession.autosave;
+					statement.params.windows = aSession.windows;
+					statement.params.tabs = aSession.tabs;
+					statement.params.backup = aSession.backup ? 1 : 0;
+					statement.params.state = state[4];
+					try {
+						statement.execute();
+					}
+					catch(ex) { 
+						everythingOkay = false;
+						dump(aSession.fileName + " - " + ex + "\n");
+					}
+					finally {
+						if (this.mAppVersion < "1.9.1") {
+							statement.statement.finalize();
+						}
+						else {
+							statement.finalize();
+						}
+					}
+				}
+			}
+		}, this);
+
+		var closedWindows = this.getClosedWindows_SM();
+		closedWindows.forEach(function(aWindow) {
+			var statement = mDBConn.createStatement("INSERT INTO closed_windows (name, state) VALUES (:name, :state)");
+			// need to wrap in older versions of Firefox
+			if (this.mAppVersion < "1.9.1") {
+				var wrapper = Components.classes["@mozilla.org/storage/statement-wrapper;1"]
+				              .createInstance(Components.interfaces.mozIStorageStatementWrapper);
+				statement = wrapper.initialize(statement);
+			}
+			statement.params.name = aWindow.name;
+			statement.params.state = aWindow.state;
+			try {
+				statement.execute();
+			}
+			catch(ex) { 
+				everythingOkay = false;
+				dump(aWindow.name + " - " + ex + "\n");
+			}
+			finally {
+				if (this.mAppVersion < "1.9.1") {
+					statement.statement.finalize();
+				}
+				else {
+					statement.finalize();
+				}
+			}
+		});
+		
+		// if everything's good save everything, otherwise undo it
+		if (everythingOkay) {
+			mDBConn.commitTransaction();
+			// delete this after testing
+			var date = new Date();
+			var end = date.getTime();
+			Components.utils.reportError("Session Manager: Converted to SQL in " + (end - begin) + " ms");
+		}
+		else {
+			mDBConn.rollbackTransaction();
+			// delete this after testing
+			Components.utils.reportError("Session Manager: Error converting to SQL");
+		}
+		mDBConn.close();
+		this.delFile(file, true);
+	},
 
 	sanitize: function()
 	{
