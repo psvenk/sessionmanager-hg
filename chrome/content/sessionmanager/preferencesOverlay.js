@@ -134,7 +134,15 @@ gSessionManager.addMenuItem = function (aPaneID) {
 			check.setAttribute('label', this.sanitizeLabel.label);
 			check.setAttribute('accesskey', this.sanitizeLabel.accesskey);
 			check.setAttribute('preference', this.mSanitizePreference);
-			lastCheckbox.parentNode.appendChild(check);
+			
+			if (lastCheckbox.parentNode.localName == "row") {
+				var newRow = document.createElement('row');
+				newRow.appendChild(check);
+				lastCheckbox.parentNode.parentNode.appendChild(newRow);
+			}
+			else {
+				lastCheckbox.parentNode.appendChild(check);
+			}
 		}
 
 		// Firefox only
