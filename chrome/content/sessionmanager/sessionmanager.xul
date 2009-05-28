@@ -15,6 +15,8 @@
 		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" buttontooltiptext="&toolbar.tooltip;"
 		               oncommand="gSessionManager.save(null, null, null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.menu.tooltip;" contextmenu="">
 			<menupopup onpopupshowing="gSessionManager.init(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
+				<menuitem label="SQL Conversion Test" oncommand="gSessionManager.convertToSQL();"/>
+				<menuitem label="&session_explorer.label;" accesskey="&session_explorer.accesskey;" oncommand="gSessionManager.openSessionExplorer();"/>
 				<menuitem label="&load.label;" accesskey="&load.accesskey;" oncommand="gSessionManager.load();"/>
 				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
@@ -61,32 +63,23 @@
 	
 	<!-- Menu in Tools Menu -->
 	<menupopup id="menu_ToolsPopup"> <!-- Firefox -->
-		<!--menuitem
-			id="sessionexplorer-item"
-			label="Session Explorer"
-			accesskey="E"
-			oncommand="gSessionManager.openSessionExplorer()"
-			insertbefore="devToolsSeparator"
-		/-->
+		<menuitem id="sessionexplorer-item" label="&session_explorer.label;" accesskey="&session_explorer.accesskey;"
+		          oncommand="gSessionManager.openSessionExplorer()" insertbefore="devToolsSeparator"/>
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="devToolsSeparator">
 				<menupopup id="sessionmanager-menu-popup"/>
 		</menu>
 	</menupopup>
 	
 	<menupopup id="taskPopup"> <!-- SeaMonkey -->
-		<!--menuitem
-			id="sessionexplorer-item"
-			label="Session Explorer"
-			accesskey="E"
-			oncommand="gSessionManager.openSessionExplorer()"
-			insertbefore="devToolsSeparator"
-		/-->
+		<menuitem id="sessionexplorer-item" label="&session_explorer.label;" accesskey="&session_explorer.accesskey;"
+		          oncommand="gSessionManager.openSessionExplorer()" insertbefore="navBeginGlobalItems"/>
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="navBeginGlobalItems">
 				<menupopup id="sessionmanager-menu-popup"/>
 		</menu>
 	</menupopup>
 	
 	<menupopup id="sessionmanager-menu-popup" onpopupshowing="gSessionManager.init(this);">
+		<menuitem label="SQL Conversion Test" oncommand="gSessionManager.convertToSQL();"/>
 		<menuitem label="&load.label;" accesskey="&load.accesskey;" oncommand="gSessionManager.load();"/>
 		<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 		<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
