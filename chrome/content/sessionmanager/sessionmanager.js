@@ -38,6 +38,27 @@ var gSessionManager = {
 	
 	mSanitizePreference: "privacy.item.extensions-sessionmanager",
 	
+	// Class used to store current application version and name as well as comparison functions
+	mApp: new function sm_app_data_class() {
+		this.version = 0;
+		this.id = "UNKNOWN";
+		
+		this.idEquals = function(aID) {
+			return this.id == aID;
+		}
+		
+		this.compareVersion = function(aVersion) {
+			if (typeof(aVersion) == "undefined") {
+				return 1;
+			}
+			else {
+				return Components.classes["@mozilla.org/xpcom/version-comparator;1"]
+				       .getService(Components.interfaces.nsIVersionComparator)
+				       .compare(this.version,aVersion);
+			}
+		}
+	},
+
 	getSessionStoreComponent : function() {
 		// Firefox
 		if (Components.classes["@mozilla.org/browser/sessionstore;1"]) {
@@ -70,17 +91,15 @@ var gSessionManager = {
 			this.mPrivateBrowsing = privateBrowsing.getService(Components.interfaces.nsIPrivateBrowsingService);
 			
 		// Determine Mozilla version to see what is supported
-		this.mAppVersion = "0";
-		this.mAppID = "UNKNOWN";
 		try {
 			var appInfo = Components.classes["@mozilla.org/xre/app-info;1"].getService(Components.interfaces.nsIXULAppInfo);
-			this.mAppVersion = appInfo.platformVersion;
+			this.mApp.version = appInfo.platformVersion;
 			switch (appInfo.ID) {
 				case "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}":
-					this.mAppID = "FIREFOX";
+					this.mApp.id = "FIREFOX";
 					break;
 				case "{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}":
-					this.mAppID = "SEAMONKEY";
+					this.mApp.id = "SEAMONKEY";
 					break;
 			}
 		} catch (e) { dump(e + "\n"); }
@@ -112,6 +131,15 @@ var gSessionManager = {
 				buttons[i].boxObject.firstChild.tooltipText = buttons[i].getAttribute("buttontooltiptext");
 		}
 
+		// This will force SessionStore to be enabled since Session Manager cannot work without SessionStore being 
+		// enabled and presumably anyone installing Session Manager actually wants to use it. 
+		// This preference no longer exists as of Firefox 3.5 so don't set it.
+		if (this.mApp.compareVersion("1.9.1a1pre") < 0) {
+			if (!this.getPref("browser.sessionstore.enabled", true, true)) {
+				this.setPref("browser.sessionstore.enabled", true, true);
+			}
+		}
+		
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		
@@ -253,8 +281,10 @@ var gSessionManager = {
 		var oldVersion = this.getPref("version", "")
 		if (oldVersion != SM_VERSION)
 		{
+			var vc = Components.classes["@mozilla.org/xpcom/version-comparator;1"].getService(Components.interfaces.nsIVersionComparator);
+		
 			// Fix the closed window data if it's encrypted
-			if (oldVersion < "0.6.4.2" && !this.mUseSSClosedWindowList) {
+			if ((vc.compare(oldVersion, "0.6.4.2") < 0) && !this.mUseSSClosedWindowList) {
 				// if encryption enabled
 				if (this.mPref_encrypt_sessions) {
 					var windows = this.getClosedWindows_SM();
@@ -281,10 +311,10 @@ var gSessionManager = {
 			}
 
 			// this isn't used anymore
-			if (oldVersion < "0.6.2.5") this.delPref("_no_reload");
+			if (vc.compare(oldVersion, "0.6.2.5") < 0) this.delPref("_no_reload");
 
 			// Clean out screenX and screenY persist values from localstore.rdf since we don't persist anymore.
-			if (oldVersion < "0.6.2.1") {
+			if (vc.compare(oldVersion, "0.6.2.1") < 0) {
 				var RDF = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
 				var ls = Components.classes["@mozilla.org/rdf/datasource;1?name=local-store"].getService(Components.interfaces.nsIRDFDataSource);
 				var rdfNode = RDF.GetResource("chrome://sessionmanager/content/options.xul#sessionmanagerOptions");
@@ -300,7 +330,7 @@ var gSessionManager = {
 			}
 						
 			// Add backup sessions to backup group
-			if (oldVersion < "0.6.2.8") {
+			if (vc.compare(oldVersion, "0.6.2.8") < 0) {
 				var sessions = this.getSessions();
 				sessions.forEach(function(aSession) {
 					if (aSession.backup) {
@@ -312,10 +342,12 @@ var gSessionManager = {
 			this.setPref("version", SM_VERSION);
 			
 			// One time message on update
-			setTimeout(function() {
-				var tBrowser = getBrowser();
-				tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
-			},100);
+			if (this.getPref("update_message", true)) {
+				setTimeout(function() {
+					var tBrowser = getBrowser();
+					tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
+				},100);
+			}
 			
 		}
 	},
@@ -1292,8 +1324,8 @@ var gSessionManager = {
 			aPopup.removeChild(item);
 		}
 		
-		var defaultIcon = (this.mAppID == "SEAMONKEY") ? "chrome://sessionmanager/skin/bookmark-item.png" :
-		                                                 "chrome://sessionmanager/skin/defaultFavicon.png";
+		var defaultIcon = (this.mApp.idEquals("SEAMONKEY")) ? "chrome://sessionmanager/skin/bookmark-item.png" :
+		                                                      "chrome://sessionmanager/skin/defaultFavicon.png";
 		
 		var closedWindows = this.getClosedWindows();
 		closedWindows.forEach(function(aWindow, aIx) {
@@ -1387,7 +1419,7 @@ var gSessionManager = {
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
 			menuitem.setAttribute("crop", "center");
 			// Removing closed tabs does not work in SeaMonkey so don't give option to do so.
-			if (this.mAppID != "SEAMONKEY") {
+			if (!this.mApp.idEquals("SEAMONKEY")) {
 				menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
 				menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
 			}
@@ -1482,23 +1514,17 @@ var gSessionManager = {
 				this.mSessionStore.forgetClosedTab(window, aIx);
 			}
 			else {
-				// Firefox 3.5b4 throws an exception with the code below so use different method (bug 488930 fixed in 3.5b5)
-				if (this.mAppVersion != "1.9.1b4") {
-					// This code is based off of code in Tab Mix Plus
-					var state = { windows: [], _firstTabs: true };
+				// This code is based off of code in Tab Mix Plus
+				var state = { windows: [], _firstTabs: true };
 
-					// get closed-tabs from nsSessionStore
-					var closedTabs = this.JSON_decode(this.mSessionStore.getClosedTabData(window));
-					// purge closed tab at aIndex
-					closedTabs.splice(aIx, 1);
-					state.windows[0] = { _closedTabs : closedTabs };
+				// get closed-tabs from nsSessionStore
+				var closedTabs = this.JSON_decode(this.mSessionStore.getClosedTabData(window));
+				// purge closed tab at aIndex
+				closedTabs.splice(aIx, 1);
+				state.windows[0] = { _closedTabs : closedTabs };
 
-					// replace existing _closedTabs
-					this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
-				}
-				else {
-					this.forgetClosedTab(aIx);
-				}
+				// replace existing _closedTabs
+				this.mSessionStore.setWindowState(window, this.JSON_encode(state), false);
 			}
 
 			// the following forces SessionStore to save the state to disk which the above doesn't do for some reason.
@@ -1510,29 +1536,6 @@ var gSessionManager = {
 		}
 	},
 	
-	forgetClosedTab: function (aIndex) 
-	{
-		var selectedTab = getBrowser().selectedTab;
-
-		// reopen the tab to forget
-		var tab = undoCloseTab(aIndex) || gBrowser.selectedTab
-		var browser = gBrowser.getBrowserForTab(tab);
-
-		// load a blank document and clear its history
-		browser.contentDocument.location = "about:blank";
-		with (browser.webNavigation.sessionHistory) PurgeHistory(count);
-
-		// don't wait for the tab to complete loading
-		// (this clears data associated with partially loaded tabs)
-		var event = document.createEvent("Events");
-		event.initEvent("load", true, false);
-		browser.dispatchEvent(event);
-
-		// close the tab for good (blank tabs can't be reopened)
-		gBrowser.removeTab(tab);
-		gBrowser.selectedTab = selectedTab;
-	},
-
 	updateClosedList: function(aMenuItem, aIx, aClosedListLength, aType) 
 	{
 		// Get menu popup
@@ -1742,8 +1745,9 @@ var gSessionManager = {
 
 	openSessionExplorer: function() {
 		this.openWindow(
-			"chrome://sessionmanager/content/sessionexplorer.xul",
-			"chrome,titlebar,centerscreen,modal,resizable,dialog=yes",
+//			"chrome://sessionmanager/content/sessionexplorer.xul",
+			"chrome://sessionmanager/content/places/places.xul",
+			"chrome,titlebar,resizable,dialog=yes",
 			{},
 			(this.mFullyLoaded)?window:null
 		);
@@ -1891,7 +1895,7 @@ var gSessionManager = {
 						"VALUES ( :filename, :name, :groupname, :timestamp, :autosave, :windows, :tabs, :backup, :state )"
 					);
 					// need to wrap in older versions of Firefox
-					if (this.mAppVersion < "1.9.1") {
+					if (this.mApp.compareVersion("1.9.1a1pre") < 0) {
 						var wrapper = Components.classes["@mozilla.org/storage/statement-wrapper;1"]
 						              .createInstance(Components.interfaces.mozIStorageStatementWrapper);
 						wrapper.initialize(statement);
@@ -1914,7 +1918,7 @@ var gSessionManager = {
 						dump(aSession.fileName + " - " + ex + "\n");
 					}
 					finally {
-						if (this.mAppVersion < "1.9.1") {
+						if (this.mApp.compareVersion("1.9.1a1pre") < 0) {
 							statement.statement.finalize();
 						}
 						else {
@@ -1929,7 +1933,7 @@ var gSessionManager = {
 		closedWindows.forEach(function(aWindow) {
 			var statement = mDBConn.createStatement("INSERT INTO closed_windows (name, state) VALUES (:name, :state)");
 			// need to wrap in older versions of Firefox
-			if (this.mAppVersion < "1.9.1") {
+			if (this.mApp.compareVersion("1.9.1a1pre") < 0) {
 				var wrapper = Components.classes["@mozilla.org/storage/statement-wrapper;1"]
 				              .createInstance(Components.interfaces.mozIStorageStatementWrapper);
 				statement = wrapper.initialize(statement);
@@ -1944,7 +1948,7 @@ var gSessionManager = {
 				dump(aWindow.name + " - " + ex + "\n");
 			}
 			finally {
-				if (this.mAppVersion < "1.9.1") {
+				if (this.mApp.compareVersion("1.9.1a1pre") < 0) {
 					statement.statement.finalize();
 				}
 				else {
@@ -1967,7 +1971,6 @@ var gSessionManager = {
 			Components.utils.reportError("Session Manager: Error converting to SQL");
 		}
 		mDBConn.close();
-		this.delFile(file, true);
 	},
 
 	sanitize: function()
@@ -3059,15 +3062,6 @@ var gSessionManager = {
 		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
 		var recoverOnly = this.mPref__running || sessionstart;
 		
-		// handle case where user restarted browser and an auto-save session is active, but the session was not restored
-		// for whatever reason - see Firefox bug 487219 
-		if (this.mPref__autosave_name && !sessionstart && !recovering && (this.mAppVersion >= "1.9.1") && (this.getBrowserWindows().length == 1)) {
-			//Components.utils.reportError("Loading saved auto-save session " + this.mPref__autosave_name);
-			recoverOnly = true;
-			var session = this.makeFileName(this.mPref__autosave_name);
-			this.load(session, "startup");
-		}
-		
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
@@ -3134,7 +3128,7 @@ var gSessionManager = {
 
 	isCmdLineEmpty: function()
 	{
-		if (this.mAppID == "FIREFOX") {
+		if (this.mApp.idEquals("FIREFOX")) {
 			var defaultArgs = Components.classes["@mozilla.org/browser/clh;1"].getService(Components.interfaces.nsIBrowserHandler).defaultArgs;
 			if (window.arguments && window.arguments[0] && window.arguments[0] == defaultArgs) {
 				window.arguments[0] = null;
@@ -3142,7 +3136,7 @@ var gSessionManager = {
 
 			return !window.arguments || !window.arguments[0];
 		}
-		else if (this.mAppID = "SEAMONKEY") {
+		else if (this.mApp.idEquals("SEAMONKEY")) {
 			// Seamonkey will always display the home page if the option is set to do so.
 			return "arguments" in window && window.arguments.length && (window.arguments[0] == "about:blank");
 		}
