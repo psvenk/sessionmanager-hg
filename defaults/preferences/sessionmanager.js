@@ -29,4 +29,5 @@ pref("extensions.sessionmanager.session_list_order", 1);
 pref("extensions.sessionmanager.shutdown_on_last_window_close", false);
 pref("extensions.sessionmanager.startup", 0);
 pref("extensions.sessionmanager.submenus", false);
+pref("extensions.sessionmanager.update_message", true);
 pref("extensions.sessionmanager.use_SS_closed_window_list", true);
