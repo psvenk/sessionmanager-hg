@@ -39,6 +39,7 @@ var sortedBy = 0;
 // 16  = remove              - true if deleting session(s)
 // 32  = grouping            - true if changing grouping
 // 64  = append/replace      - true if displaying the append/replace radio group, false otherwise
+// 128 = preselect           - true if preselecting last backup session
 // 256 = allow name replace  - true if double clicking a session name on save will replace existing session, but use default session name.
 //                                  (This is currently only settable via a userChrome.js script).
 
@@ -138,6 +139,7 @@ gSessionManager.onLoad = function() {
 	var deleting = (gParams.GetInt(1) & 16);
 	var saving = (gParams.GetInt(1) & 8);
 	var grouping = (gParams.GetInt(1) & 32);
+	var preselect = (gParams.GetInt(1) & 128);
 	var groupCount = 0;
 	var selected;
 	sessions.forEach(function(aSession) {
@@ -168,6 +170,11 @@ gSessionManager.onLoad = function() {
 			// Flag latest session
 			if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) {
 				aSession.latest = true;
+			}
+			
+			// Select previous session if requested to do so and no session name passed
+			if (preselect && aSession.backup && !gParams.GetString(3) && (sessions.latestBackUpTime == aSession.timestamp)) {
+				selected = gSessionTreeData.length;
 			}
 
 			// select passed in item (if any)

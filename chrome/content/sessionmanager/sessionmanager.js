@@ -1769,7 +1769,7 @@ var gSessionManager = {
 		params.SetString(7, aValues.count || "");
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
 						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) |
-						  ((aValues.append_replace)?64:0) | ((aValues.allowNamedReplace)?256:0));
+						  ((aValues.append_replace)?64:0) | ((aValues.preselect)?128:0) | ((aValues.allowNamedReplace)?256:0));
 		
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, (this.mFullyLoaded)?window:null);
 		
@@ -3075,12 +3075,7 @@ var gSessionManager = {
 		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
 			// allow prompting for tabs in Firefox 3.5
-			var values = { ignorable: true };
-			
-			// Select previous session if preference set
-			if (this.mPref_preselect_previous_session) {
-				values.name = this.mBackupSessionName;
-			}
+			var values = { ignorable: true, preselect: this.mPref_preselect_previous_session };
 			
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
 			if (session && this.getSessionDir(session).exists())
