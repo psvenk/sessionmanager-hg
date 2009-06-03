@@ -105,3 +105,5 @@
 <!ENTITY open_as_tabs.accesskey "p">
 <!ENTITY last_window_shutdown.label "Treat closing last open browser window as shutting down">
 <!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "Pre-select previous session">
+<!ENTITY preselect_previous_session.accesskey "R">
