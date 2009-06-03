@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>{1280606b-2510-4fe0-97ef-9b5a22eafe30}</em:id>
-    <em:version>0.6.5</em:version>
+    <em:version>0.6.5.2pre</em:version>
     
     <!-- Firefox -->
     <em:targetApplication>
@@ -45,7 +45,7 @@
     <em:translator >SerdarSahin (Turkish)</em:translator >
     <em:translator >Wladow (Slovak)</em:translator >
     <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-    <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+    <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
     <em:translator >Kape123 (Serbian)</em:translator >
     <em:translator >lloco (Portuguese)</em:translator >
     <em:translator >PetrTwo (Czech)</em:translator >
@@ -87,7 +87,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -125,7 +125,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -163,7 +163,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -201,7 +201,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -239,7 +239,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -277,7 +277,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -315,7 +315,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -353,7 +353,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -391,7 +391,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -429,7 +429,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -467,7 +467,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -505,7 +505,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -543,7 +543,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -581,7 +581,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -619,7 +619,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -657,7 +657,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -695,7 +695,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -733,7 +733,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -771,7 +771,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -809,7 +809,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -847,7 +847,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -885,7 +885,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -923,7 +923,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
@@ -961,7 +961,7 @@
         <em:translator >SerdarSahin (Turkish)</em:translator >
         <em:translator >Wladow (Slovak)</em:translator >
         <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes KaszmÃ¡n IstvÃ¡n (Cashman) (Hungarian)</em:translator >
+        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
         <em:translator >Kape123 (Serbian)</em:translator >
         <em:translator >lloco (Portuguese)</em:translator >
         <em:translator >PetrTwo (Czech)</em:translator >
