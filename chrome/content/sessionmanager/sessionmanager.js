@@ -178,6 +178,7 @@ var gSessionManager = {
 		this.mPref_max_display = this.getPref("max_display", 20);
 		this.mPref_name_format = this.getPref("name_format", "%40t-%d");
 		this.mPref_overwrite = this.getPref("overwrite", false);
+		this.mPref_preselect_previous_session = this.getPref("preselect_previous_session", false);
 		this.mPref_reload = this.getPref("reload", false);
 		this.mPref_restore_temporary = this.getPref("restore_temporary", false);
 		this.mPref_resume_session = this.getPref("resume_session", this.mBackupSessionName);
@@ -3075,6 +3076,11 @@ var gSessionManager = {
 		{
 			// allow prompting for tabs in Firefox 3.5
 			var values = { ignorable: true };
+			
+			// Select previous session if preference set
+			if (this.mPref_preselect_previous_session) {
+				values.name = this.mBackupSessionName;
+			}
 			
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
 			if (session && this.getSessionDir(session).exists())

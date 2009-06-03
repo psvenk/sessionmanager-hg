@@ -189,8 +189,9 @@ function checkClosedWindowList(aChecked) {
 function startupSelect(index) {
 	// hide/display corresponding menus	
 	_("browserStartupPage").style.visibility = (index != 0)?"collapse":"visible";
+	_("preselect").style.visibility = (index != 1)?"collapse":"visible";
 	_("resume_session").style.visibility = (index != 2)?"collapse":"visible";
-	if (index == 1) _("resume_session").style.visibility = "hidden";
+	//if (index == 1) _("resume_session").style.visibility = "hidden";
 }
 
 function setStartValue() {

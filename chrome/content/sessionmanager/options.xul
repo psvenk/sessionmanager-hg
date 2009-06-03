@@ -34,6 +34,7 @@
 			<preference id="extensions.sessionmanager.max_display" name="extensions.sessionmanager.max_display" type="int"/>
 			<preference id="extensions.sessionmanager.name_format" name="extensions.sessionmanager.name_format" type="string"/>
 			<preference id="extensions.sessionmanager.overwrite" name="extensions.sessionmanager.overwrite" type="bool"/>
+			<preference id="extensions.sessionmanager.preselect_previous_session" name="extensions.sessionmanager.preselect_previous_session" type="bool"/>
 			<preference id="extensions.sessionmanager.reload" name="extensions.sessionmanager.reload" type="bool"/>
 			<preference id="extensions.sessionmanager.resume_session" name="extensions.sessionmanager.resume_session" type="string"/>
 			<preference id="extensions.sessionmanager.save_cookies" name="extensions.sessionmanager.save_cookies" type="bool"/>
@@ -68,6 +69,10 @@
 									<menuitem label="&startupLastSession.label;" value="3"/>
 								</menupopup>
 							</menulist>
+						</hbox>
+						<hbox>
+							<checkbox id="preselect" label="&preselect_previous_session.label;" accesskey="&preselect_previous_session.accesskey;" 
+							          preference="extensions.sessionmanager.preselect_previous_session"/>
 						</hbox>
 						<hbox pack="end">
 							<menulist id="resume_session" preference="extensions.sessionmanager.resume_session">
