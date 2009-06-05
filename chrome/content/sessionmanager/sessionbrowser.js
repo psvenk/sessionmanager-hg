@@ -381,11 +381,7 @@ var treeView = {
       prop.AppendElement(this._getAtom(this.getImageSrc(idx, column) ? "icon" : "noicon"));
   },
 
-  getRowProperties: function(idx, prop) {
-    var winState = gTreeData[idx].parent || gTreeData[idx];
-    if (winState.ix % 2 != 0)
-      prop.AppendElement(this._getAtom("alternate"));
-  },
+  getRowProperties: function(idx, prop) {},
 
   getImageSrc: function(idx, column) {
     if (column.id == "title")
