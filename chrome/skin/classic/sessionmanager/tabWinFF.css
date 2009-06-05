@@ -1,4 +1,4 @@
-/* Window and Tab tree */
+/* Window and Tab tree - Firefox and SeaMonkey */
 treechildren::-moz-tree-image(icon),
 treechildren::-moz-tree-image(noicon) {
   padding-right: 2px;
@@ -7,17 +7,13 @@ treechildren::-moz-tree-image(noicon) {
   height: 16px;
 }
 
+/* SeaMonkey style overrides the following rule */
 treechildren::-moz-tree-image(noicon) {
   list-style-image: url("chrome://sessionmanager/skin/defaultFavicon.png");
 }
 
 treechildren::-moz-tree-image(container, noicon) {
-  list-style-image: url("chrome://sessionmanager/skin/folder-item.png");
-  -moz-image-region: rect(0px, 32px, 16px, 16px);
-}
-
-treechildren::-moz-tree-image(container, noicon, open) {
-  -moz-image-region: rect(16px, 32px, 32px, 16px);
+  list-style-image: url("chrome://sessionmanager/skin/aboutSessionRestore-window-icon.png");
 }
 
 treechildren::-moz-tree-checkbox(checked) {
@@ -26,12 +22,4 @@ treechildren::-moz-tree-checkbox(checked) {
 
 treechildren::-moz-tree-checkbox(partial) {
   list-style-image: url("chrome://sessionmanager/skin/cbox-check-dis.gif");
-}
-
-treechildren::-moz-tree-row(alternate) {
-  background-color: -moz-oddtreerow;
-}
-
-treechildren::-moz-tree-row(alternate, selected) {
-  background-color: Highlight;
 }
