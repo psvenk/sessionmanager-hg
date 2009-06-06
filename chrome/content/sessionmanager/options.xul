@@ -1,5 +1,4 @@
 <?xml version="1.0"?>
-<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css" type="text/css"?>
 <?xml-stylesheet href="chrome://sessionmanager/skin/options.css" type="text/css" ?>
 
 <!DOCTYPE prefwindow [
@@ -9,8 +8,6 @@
 	%optionsDTD;
 	<!ENTITY % tabBrowserDTD SYSTEM "chrome://global/locale/tabbrowser.dtd" >
 	%tabBrowserDTD;
-	<!ENTITY % mainDTD SYSTEM "chrome://browser/locale/preferences/main.dtd" >
-	%mainDTD;
 ]>
 
 <prefwindow id="sessionmanagerOptions" title="&options.title;" type="prefwindow"
@@ -62,12 +59,7 @@
 						</radiogroup>
 						<hbox>
 							<menulist id="browserStartupPage" preference="browser.startup.page">
-								<menupopup>
-									<menuitem label="&startupHomePage.label;" value="1"/>
-									<menuitem label="&startupBlankPage.label;" value="0"/>
-									<menuitem label="&lastpage.label;" value="2"/>
-									<menuitem label="&startupLastSession.label;" value="3"/>
-								</menupopup>
+								<menupopup id="browserStartupPage_menu"/>
 							</menulist>
 						</hbox>
 						<hbox>
