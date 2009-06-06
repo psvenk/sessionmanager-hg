@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css" type="text/css"?>
+
+<!-- Firefox Specific Elements that overlay options.xul -->
+<!DOCTYPE overlay [
+	<!ENTITY % flockPrefDTD SYSTEM "chrome://flock/locale/preferences/flockprefs.dtd">
+	%flockPrefDTD;
+]>
+
+<overlay id="FlockStartupPageOverlay" xmlns:html="http://www.w3.org/1999/xhtml"
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<menupopup id="browserStartupPage_menu">
+        <menuitem label="&flock.pref.startup.welcome;" value="-1" position="1"/>
+	</menupopup>
+</overlay>
