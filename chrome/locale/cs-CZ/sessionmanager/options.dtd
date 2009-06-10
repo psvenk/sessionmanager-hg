@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Pokud šifrování selže, NEUKLÁDEJTE data nezašifrovaná.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Varování: Pokud je tato volba zaškrtnutá a dala relace nebo okna nemohou být zašifrována, data budou navždy ztracena bez možnosti jejich obnovy. Šifrování selže, pokud bude vyžádáno hlavní heslo a nebude zadáno. Zaškrtnutí této volby si tedy pečlivě promyslete.">
+<!ENTITY closed_window_list.label "Použít seznam zavřených oken zabudovaný v prohlížeči">
+<!ENTITY closed_window_list.accesskey "P">
+<!ENTITY closed_windows.label "Obnovit seznam znovu otevřitelných zavřených oken:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Otevřít jako panely v aktuálním okně">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "Považovat zavření posledního otevřeného okna prohlížeče za ukončení aplikace">
+<!ENTITY last_window_shutdown.accesskey "u">
+<!ENTITY preselect_previous_session.label "Předvybrat předchozí relaci">
+<!ENTITY preselect_previous_session.accesskey "r">

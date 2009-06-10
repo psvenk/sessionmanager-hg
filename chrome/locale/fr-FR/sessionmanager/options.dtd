@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Si le chiffrement a échoué, NE PAS enregistrer les données non chiffrées.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Avertissement : si cette option est cochée et que les données de session ou de fenêtre ne peuvent pas être chiffrées, les données seront perdues sans aucun moyen de les récupérer. Le chiffrement échoue lorsque le mot de passe principal est demandé et n&apos;est pas indiqué, veuillez donc bien y réfléchir à deux fois avant de cocher cette case.">
+<!ENTITY closed_window_list.label "Utiliser la liste de fenêtres fermées proposée par le navigateur">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Rétablir la liste des fenêtres réouvrables :">
+<!ENTITY closed_windows.accesskey "S">
+<!ENTITY open_as_tabs.label "Ouvrir dans des onglets dans la fenêtre courante">
+<!ENTITY open_as_tabs.accesskey "V">
+<!ENTITY last_window_shutdown.label "Quitter le navigateur lors de la fermeture de la dernière fenêtre">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "Présélectionner la session précédente">
+<!ENTITY preselect_previous_session.accesskey "R">

@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Nevybrať nič">
 <!ENTITY toggle_selection.label "Prepnúť výber">
 <!ENTITY winTabTree.urlHeader "Umiestnenie">
+<!ENTITY prompt.append_window.label "Pripojiť do aktuálneho okna">
+<!ENTITY session_explorer.label "Prieskumník relácií">
+<!ENTITY session_explorer.accesskey "P">

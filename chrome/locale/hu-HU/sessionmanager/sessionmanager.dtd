@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Kijelölés megszüntetése">
 <!ENTITY toggle_selection.label "Kijelölés megfordítása">
 <!ENTITY winTabTree.urlHeader "Hely">
+<!ENTITY prompt.append_window.label "Hozzácsatolás a jelenlegi ablakhoz">
+<!ENTITY session_explorer.label "Munkamenet intéző">
+<!ENTITY session_explorer.accesskey "z">

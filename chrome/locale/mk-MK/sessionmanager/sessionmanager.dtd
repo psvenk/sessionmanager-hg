@@ -66,7 +66,7 @@
 <!ENTITY prompt.save_every2.label "минути (оневозможено ако е празно)">
 <!ENTITY winTabTree.restoreHeader "Обнови">
 <!ENTITY winTabTree.listHeader "Прозорци и Јазичиња">
-<!--  LOCALIZATION NOTE: &#37;S will be replaced with a number.  -->
+<!--   LOCALIZATION NOTE: &#37;S will be replaced with a number.   -->
 <!ENTITY winTabTree.windowLabel "Прозорец &#37;S">
 <!ENTITY load.label "Вчитај ја сесијата...">
 <!ENTITY load.accesskey "В">
@@ -77,3 +77,6 @@
 <!ENTITY select_none.label "Избери ниедно">
 <!ENTITY toggle_selection.label "Смени го изборот">
 <!ENTITY winTabTree.urlHeader "Локација">
+<!ENTITY prompt.append_window.label "Додај во тековниот прозорец">
+<!ENTITY session_explorer.label "Истражувач на Сесијата">
+<!ENTITY session_explorer.accesskey "С">

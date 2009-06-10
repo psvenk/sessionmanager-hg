@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Zrušit výběr">
 <!ENTITY toggle_selection.label "Invertovat výběr">
 <!ENTITY winTabTree.urlHeader "Umístění">
+<!ENTITY prompt.append_window.label "Přiřadit k aktuálnímu oknu">
+<!ENTITY session_explorer.label "Průzkumník relací">
+<!ENTITY session_explorer.accesskey "P">

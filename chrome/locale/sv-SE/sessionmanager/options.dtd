@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Om kryptering misslyckas, spara INTE data okrypterad.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Varning: Om detta är markerat och sessions- elelr fönsterdatan inte kan krypteras så kommer datan att förloras utan någon möjlighet att återställa den. Kryptering kommer att misslyckas om huvudlösenordet krävs men inte skrivs in, så tänk efter noggrant innan du kryssar i den här rutan.">
+<!ENTITY closed_window_list.label "Använd webbläsarens lista över stängda fönster">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Återställ listan över återöppningsbara fönster:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Öppna flikar i nuvarande fönster">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "Tolka stängning av sista öppna webbläsarfönstret som nerstängning">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "Förmarkera föregående session">
+<!ENTITY preselect_previous_session.accesskey "R">

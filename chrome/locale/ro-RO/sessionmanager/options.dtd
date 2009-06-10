@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Dacă criptarea eşuează, NU salva datele necriptat.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Avertisment: Dacă opţiunea este activă şi sesiunea sau fereastra nu poate fi criptată, datele se vor pierde fără posibilitatea de a fi recuperate. Criptarea va eşua dacă parola principală va fi cerută şi nu va fi furnizată, aşa că gândiţi-vă bine înainte de a activa această opţiune!">
+<!ENTITY closed_window_list.label "Foloseşte lista de ferestre închise implicită a navigatorului">
+<!ENTITY closed_window_list.accesskey "i">
+<!ENTITY closed_windows.label "Restaurează lista ferestrelor închise:">
+<!ENTITY closed_windows.accesskey "R">
+<!ENTITY open_as_tabs.label "Deschide ca file în fereastra curentă">
+<!ENTITY open_as_tabs.accesskey "f">
+<!ENTITY last_window_shutdown.label "Consideră închiderea ultimei ferestre ca şi închiderea computerului">
+<!ENTITY last_window_shutdown.accesskey "u">
+<!ENTITY preselect_previous_session.label "Preselectează sesiunea precedentă">
+<!ENTITY preselect_previous_session.accesskey "P">

@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Markera inga">
 <!ENTITY toggle_selection.label "Växla markering">
 <!ENTITY winTabTree.urlHeader "Plats">
+<!ENTITY prompt.append_window.label "Öppna i nuvarande fönster">
+<!ENTITY session_explorer.label "Sessionsbläddrare">
+<!ENTITY session_explorer.accesskey "E">

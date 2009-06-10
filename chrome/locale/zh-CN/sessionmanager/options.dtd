@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "如果加密失败，不保存未加密数据。">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "警告：如果标签页和窗口数据加密失败，该数据将会丢失无法恢复。如果要求主密码时您并未输入，加密就会失败，所以勾选此项时必须慎重考虑">
+<!ENTITY closed_window_list.label "用 browser&apos;s 内置的已关闭的窗口列表">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "保存能再打开的已关闭窗口列表：">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "在当前窗口以标签页打开">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "关掉上次浏览时候最后打开的窗口">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "预先选定前一个会话">
+<!ENTITY preselect_previous_session.accesskey "R">

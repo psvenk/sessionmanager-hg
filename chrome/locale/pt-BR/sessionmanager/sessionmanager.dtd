@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Desmarcar todos">
 <!ENTITY toggle_selection.label "Inverter seleção">
 <!ENTITY winTabTree.urlHeader "Localização">
+<!ENTITY prompt.append_window.label "Anexar a janela atual">
+<!ENTITY session_explorer.label "Explorador de Sessão">
+<!ENTITY session_explorer.accesskey "E">

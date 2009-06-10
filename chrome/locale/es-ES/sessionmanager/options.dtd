@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Si el cifrado falla, NO guardar los datos sin cifrar.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Aviso: Si marca esta opción y los datos de la sesión o la ventana no pueden cifrarse, los datos se perderán sin tener opción a recuperarlos. El cifrado fallará si se le pide la contraseña maestra y no la introduce, así que téngalo en cuenta antes de marcar esta casilla.">
+<!ENTITY closed_window_list.label "Usar la lista de ventanas cerradas propia del navegador">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Restaurar la lista de las ventanas cerradas:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Abrir como pestañas en la ventana actual">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "Tratar la última ventana abierta como un apagado">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "Preseleccionar la sesión previa">
+<!ENTITY preselect_previous_session.accesskey "R">

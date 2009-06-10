@@ -1,0 +1,7 @@
+<!ENTITY backup_session.label0 "suprimeix la sessió actual">
+<!ENTITY backup_session.label1 "fes una còpia de seguretat de la sessió actual">
+<!ENTITY backup_session.label2 "demana si s&apos;ha de fer una còpia de seguretat de la sessió actual">
+<!ENTITY crashrecovery.label "Habilita la recuperació de fallades">
+<!ENTITY restoring.caption "Restauració de la sessió">
+<!ENTITY sessionList.caption "Llista de sessions">
+<!ENTITY orderList.label "Ordena la llista de sessions">

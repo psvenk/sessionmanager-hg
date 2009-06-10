@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Nu selecta nimic">
 <!ENTITY toggle_selection.label "Comută selecţia">
 <!ENTITY winTabTree.urlHeader "Locaţie">
+<!ENTITY prompt.append_window.label "Adaugă la fereastra curentă">
+<!ENTITY session_explorer.label "Explorator de sesiuni">
+<!ENTITY session_explorer.accesskey "E">

@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Als de versleuteling faalt, de data NIET onversleuteld opslaan.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Waarschuwing: als u dit aanduidt, en de sessie- of windowdata kan niet versleuteld worden, zal de data verloren zijn zonder mogelijkheid tot herstel. Versleuteling faalt wanneer u het hoofdwachtwoord niet opgeeft wanneer dit gevraagd wordt, denk goed na voordat u dit aanduidt.">
+<!ENTITY closed_window_list.label "De lijst van gesloten vensters die ingebouwd werd in de browser gebruiken">
+<!ENTITY closed_window_list.accesskey "u">
+<!ENTITY closed_windows.label "De lijst van heropenbare gesloten vensters herstellen:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Openen als tabs in het huidige venster">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "Het sluiten van het laatste openstaande venster beschouwen als afsluiten">
+<!ENTITY last_window_shutdown.accesskey "t">
+<!ENTITY preselect_previous_session.label "De vorige sessie pre-selecteren">
+<!ENTITY preselect_previous_session.accesskey "r">

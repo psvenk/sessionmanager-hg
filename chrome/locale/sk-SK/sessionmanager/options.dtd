@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Ak zašifrovanie zlyhá, neukladať údaje nezašifrované">
 <!ENTITY encrypted_only.accesskey "z">
 <!ENTITY encrypt2.desc "Upozornenie: Ak je táto voľba označená a údaje o relácii alebo okne nemohli byť zašifrované, tieto sa stratia bez možnosti ich obnovy. Zašifrovanie zlyhá, ak je nastavené Hlavné heslo a nie je zadané, takže buďte pri nastavení tejto voľby opatrný.">
+<!ENTITY closed_window_list.label "Použiť v prehliadači zabudovaný zoznam zatvorených okien">
+<!ENTITY closed_window_list.accesskey "u">
+<!ENTITY closed_windows.label "Obnoviť zoznam otvoriteľných naposledy zatvorených okien">
+<!ENTITY closed_windows.accesskey "b">
+<!ENTITY open_as_tabs.label "Otvoriť ako karty v aktuálnom okne">
+<!ENTITY open_as_tabs.accesskey "a">
+<!ENTITY last_window_shutdown.label "Považovať zatvorenie posledného otvoreného okna prehliadača za ukončenie">
+<!ENTITY last_window_shutdown.accesskey "z">
+<!ENTITY preselect_previous_session.label "Predvybrať predchádzajúcu reláciu">
+<!ENTITY preselect_previous_session.accesskey "d">

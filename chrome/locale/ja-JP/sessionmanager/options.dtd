@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "暗号化が失敗するならば、暗号化されていないデータを保存しない。">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "警告:これをチェックして、セッションかウインドウのデータを暗号化できないとデータを失った場合回復する方法がありません。マスターパスワードが要求されて入れられないと暗号化が失敗するので、この項目をチェックする前に慎重に考えてください。">
+<!ENTITY closed_window_list.label "ブラウザの内蔵の閉じたウインドウリストを使用する">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "再開可能な閉じたウインドウのリストを元に戻す：">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "現在のウインドウのタブとして開く">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "シャットダウンするとして閉じる最後の開いたブラウザウィンドウを扱う。">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "あらかじめ前のセッションを選択する">
+<!ENTITY preselect_previous_session.accesskey "R">

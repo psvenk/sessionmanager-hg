@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Ha a titkosítás nem sikeres, NE mentse az adatokat titkosítás nélkül.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Figyelmeztetés: Ha bekapcsolva és a munkamenet/ablak adatait nem lehet titkosítani, az adatok elvesznek (nem lehet őket visszaállítani). A titkosítás nem lesz sikeres, ha a kért mesterjelszó nincs megadva. Legyen tehát körültekintő az opció bekapcsolásakor.">
+<!ENTITY closed_window_list.label "Használja a böngésző beépített bezárt ablakok listáját">
+<!ENTITY closed_window_list.accesskey "b">
+<!ENTITY closed_windows.label "Újranyitható bezárt ablakok listájának visszaállítása:">
+<!ENTITY closed_windows.accesskey "v">
+<!ENTITY open_as_tabs.label "Megnyitás a jelenlegi ablakban lapokként">
+<!ENTITY open_as_tabs.accesskey "l">
+<!ENTITY last_window_shutdown.label "Az utoljára megnyitott böngésző ablak bezárása bezárja a böngészőt">
+<!ENTITY last_window_shutdown.accesskey "u">
+<!ENTITY preselect_previous_session.label "Előző munkamenet automatikus kiválasztása">
+<!ENTITY preselect_previous_session.accesskey "a">

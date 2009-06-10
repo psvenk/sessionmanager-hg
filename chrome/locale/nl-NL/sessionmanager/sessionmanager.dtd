@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Niets selecteren">
 <!ENTITY toggle_selection.label "Selectie omdraaien">
 <!ENTITY winTabTree.urlHeader "Locatie">
+<!ENTITY prompt.append_window.label "Aan het huidige venster toevoegen">
+<!ENTITY session_explorer.label "Sessie-verkenner">
+<!ENTITY session_explorer.accesskey "v">

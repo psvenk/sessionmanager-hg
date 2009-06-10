@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Se a cifra falhar, NÃO guarde dados não cifrados.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Aviso: Se isto estiver seleccionado e a sessão ou dados da janela não forem cifrados, os dados serão perdidos sem hipótese de os recuperar. A cifra irá falhar se a senha mestra for pedida e não for introduzida, por isso pense cuidadosamente antes de seleccionar esta caixa.">
+<!ENTITY closed_window_list.label "Usar a lista de janelas encerradas do navegador">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Restaurar lista de janelas encerradas que podem ser re-abertas:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Abrir separadores na janela actual">
+<!ENTITY open_as_tabs.accesskey "b">
+<!ENTITY last_window_shutdown.label "Tratar o fecho da última janela aberta como desligar">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "Pré-seleccionar a última sessão">
+<!ENTITY preselect_previous_session.accesskey "l">

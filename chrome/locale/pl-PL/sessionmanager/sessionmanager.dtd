@@ -14,7 +14,7 @@
 <!ENTITY remove.accesskey "U">
 <!ENTITY openFolder.label "Otwórz folder sesji">
 <!ENTITY openFolder.accesskey "f">
-<!ENTITY options.label "Menedżer sesji – opcje">
+<!ENTITY options.label "Menedżer sesji – ustawienia">
 <!ENTITY options.accesskey "M">
 <!ENTITY resume.label "Podczas otwierania odtwórz ostatnią aktywną sesję">
 <!ENTITY resume.accesskey "k">
@@ -66,6 +66,7 @@
 <!ENTITY prompt.save_every2.label "min (puste pole powoduje wyłączenie funkcji)">
 <!ENTITY winTabTree.restoreHeader "Odtwórz">
 <!ENTITY winTabTree.listHeader "Okna i karty">
+<!--    -->
 <!ENTITY winTabTree.windowLabel "Okno &#37;S">
 <!ENTITY load.label "Wczytaj sesję…">
 <!ENTITY load.accesskey "W">
@@ -76,3 +77,6 @@
 <!ENTITY select_none.label "Odznacz wszystko">
 <!ENTITY toggle_selection.label "Zmień zaznaczenia">
 <!ENTITY winTabTree.urlHeader "Adres">
+<!ENTITY prompt.append_window.label "Dołącz do bieżącej sesji">
+<!ENTITY session_explorer.label "Eksplorator sesji">
+<!ENTITY session_explorer.accesskey "E">

@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "選択しない">
 <!ENTITY toggle_selection.label "選択の切り替え">
 <!ENTITY winTabTree.urlHeader "場所">
+<!ENTITY prompt.append_window.label "現在のウィンドウを追加する">
+<!ENTITY session_explorer.label "セッションエクスプローラ">
+<!ENTITY session_explorer.accesskey "E">

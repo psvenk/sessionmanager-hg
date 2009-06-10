@@ -66,6 +66,7 @@
 <!ENTITY prompt.save_every2.label "分钟 (空白表示禁用)">
 <!ENTITY winTabTree.restoreHeader "恢复">
 <!ENTITY winTabTree.listHeader "窗口和标签页">
+<!--   LOCALIZATION NOTE: &#37;S will be replaced with a number.   -->
 <!ENTITY winTabTree.windowLabel "窗口&#37;S">
 <!ENTITY load.label "载入会话...">
 <!ENTITY load.accesskey "L">
@@ -76,3 +77,6 @@
 <!ENTITY select_none.label "全不选">
 <!ENTITY toggle_selection.label "切换选择">
 <!ENTITY winTabTree.urlHeader "位置">
+<!ENTITY prompt.append_window.label "添加到当前窗口">
+<!ENTITY session_explorer.label "会话资源管理器">
+<!ENTITY session_explorer.accesskey "E">

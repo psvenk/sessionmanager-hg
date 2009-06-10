@@ -49,8 +49,8 @@
 <!ENTITY service.description "Nie zmieniaj tych ustawień jeżeli nie masz o nich odpowiedniej wiedzy!">
 <!ENTITY interval.label "Minimalna przerwa pomiędzy kolejnymi zapisami (s):">
 <!ENTITY interval.accesskey "M">
-<!ENTITY postdata.label "Ilość przetrzymywanych danych POSTDATA (w bajtach; -1 = wszystko):">
-<!ENTITY postdata.accesskey "p">
+<!ENTITY postdata.label "Liczba przetrzymywanych danych POSTDATA (w bajtach; -1 = wszystko):">
+<!ENTITY postdata.accesskey "L">
 <!ENTITY privacy.label "Zapisuj prywatne dane (dane formularzy, POSTDATA i ciasteczka) dla:">
 <!ENTITY privacy.accesskey "Z">
 <!ENTITY privacy.level0 "wszystkich witryn">
@@ -73,9 +73,9 @@
 <!ENTITY noSession.label "brak">
 <!ENTITY noSession.accesskey "B">
 <!ENTITY promptSession.label "pytaj o sesję">
-<!ENTITY promptSession.accesskey "P">
+<!ENTITY promptSession.accesskey "a">
 <!ENTITY selectSession.label "wybierz sesję">
-<!ENTITY selectSession.accesskey "W">
+<!ENTITY selectSession.accesskey "e">
 <!ENTITY cookies.label "Zapisuj ciasteczka sesji">
 <!ENTITY cookies.accesskey "C">
 <!ENTITY sessionImport.caption "Importuj sesje z…">
@@ -87,7 +87,7 @@
 <!ENTITY save_and_restore.caption "Zapis/Odtwarzanie">
 <!ENTITY display.caption "Wyświetlanie">
 <!ENTITY middleclick.label "Kliknięcie ś.p.m. otwiera ponownie ostatnio zamkniętą kartę">
-<!ENTITY middleclick.accesskey "N">
+<!ENTITY middleclick.accesskey "K">
 <!ENTITY max_display.label "Maksymalna liczba sesji wyświetlanych w menu (-1 wszystkie)">
 <!ENTITY max_display.accesskey "M">
 <!ENTITY hide_tools_menu.label "Nie wyświetlaj menu Session Managera w menu Narzędzia">
@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Jeśli szyfrowanie uległo awarii, nie zapisuj niezaszyfrowanych danych">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Ostrzeżenie! Włączenie tej funkcji spowoduje, że jeśli sesja lub dane okna nie mogą być zaszyfrowane, wszystkie dane zostaną utracone bezpowrotnie. Szyfrowanie nie będzie działało, jeżeli hasło główne jest wymagane, a nie zostało wprowadzone. Proszę rozważnie i ostrożnie włączać tę funkcję.">
+<!ENTITY closed_window_list.label "Użyj listy zamkniętych okien przeglądarki">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Odtwarzaj listę ponownie otwieranych okien:">
+<!ENTITY closed_windows.accesskey "D">
+<!ENTITY open_as_tabs.label "Otwórz jako karty w aktywnym oknie">
+<!ENTITY open_as_tabs.accesskey "W">
+<!ENTITY last_window_shutdown.label "Odzyskuj ostatnio otwarte okno w momencie zamknięcia przeglądarki">
+<!ENTITY last_window_shutdown.accesskey "D">
+<!ENTITY preselect_previous_session.label "Zaznacz wstępnie poprzednią sesję">
+<!ENTITY preselect_previous_session.accesskey "W">

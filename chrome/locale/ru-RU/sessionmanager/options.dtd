@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Если процесс шифрования не был успешно завершён, НЕ сохранять незашифрованные данные.">
 <!ENTITY encrypted_only.accesskey "Н">
 <!ENTITY encrypt2.desc "Внимание: Если эта настройка включена, а данные сессии или окна не удастся зашифровать, они будут удалены без возможности восстановления. Шифрование не будет произведено, если мастер-пароль не будет введён по запросу, поэтому следует хорошо подумать, прежде чем включать эту настройку.">
+<!ENTITY closed_window_list.label "Использовать список закрытых окон браузера">
+<!ENTITY closed_window_list.accesskey "о">
+<!ENTITY closed_windows.label "Восстановить список закрытых окон:">
+<!ENTITY closed_windows.accesskey "с">
+<!ENTITY open_as_tabs.label "Открыть как вкладки в текущем окне">
+<!ENTITY open_as_tabs.accesskey "в">
+<!ENTITY last_window_shutdown.label "Считать закрытие последнего открытого окна браузера выходом из него">
+<!ENTITY last_window_shutdown.accesskey "з">
+<!ENTITY preselect_previous_session.label "Выбрать предыдущую сессию">
+<!ENTITY preselect_previous_session.accesskey "п">

@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Ничего не выбирать">
 <!ENTITY toggle_selection.label "Переключить выбор">
 <!ENTITY winTabTree.urlHeader "Адрес">
+<!ENTITY prompt.append_window.label "Добавить в данное окно">
+<!ENTITY session_explorer.label "Обзор сессий">
+<!ENTITY session_explorer.accesskey "О">

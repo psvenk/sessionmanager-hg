@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Se a encriptação falhar, NÃO salvará dados sem encriptação.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Alerta: Se estiver marcado os dados de uma sessão ou janela não poderão ser encriptados, os dados serão perdidos sem a possibilidade de recuperação. A encriptação vai falhar se a senha mestra for requerida, mas não for digitada, portanto pense com cuidado antes de marcar essa caixa">
+<!ENTITY closed_window_list.label "Usar lista de janelas fechadas do navegador">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Restaurar a lista de janelas que podem ser reabertas:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Abrir como abas na janela atual">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "Tratar o fechamento da última janela aberta do browser como um desligamento">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "Pré-selecionar">
+<!ENTITY preselect_previous_session.accesskey "R">
