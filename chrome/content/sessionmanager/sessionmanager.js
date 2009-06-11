@@ -17,7 +17,7 @@ var gSessionManager = {
 	mSessionStore : null,
 	mSessionStartup : null,
 
-	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager-list-update", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted", "private-browsing"],
+	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager-list-update", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted", "private-browsing-change-granted"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
 	mBackupSessionRegEx: /^backup(-[1-9](\d)*)?\.session$/,
@@ -498,7 +498,7 @@ var gSessionManager = {
 		case "browser:purge-session-history":
 			this.clearUndoData("all");
 			break;
-		case "private-browsing":
+		case "private-browsing-change-granted":
 			if (aData == "enter") {
 				// Prevent this window from triggering shutdown processing when it is closed on entering private browsing mode
 				this.doNotShutdown = true;
