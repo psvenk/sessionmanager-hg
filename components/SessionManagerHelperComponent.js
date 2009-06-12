@@ -47,6 +47,8 @@ SessionManagerHelperComponent.prototype = {
 	classID:          Components.ID("{5714d620-47ce-11db-b0de-0800200c9a66}"),
 	contractID:       "@morac/sessionmanager-helper;1",
 	_xpcom_categories: [{ category: "app-startup", service: true }],
+	mBackupState: null,
+	mSessionData: null,
 	
 	// interfaces supported
 	QueryInterface: XPCOMUtils.generateQI([Ci.nsISessionManangerHelperComponent, Ci.nsIObserver]),
@@ -54,14 +56,30 @@ SessionManagerHelperComponent.prototype = {
 	// observer
 	observe: function(aSubject, aTopic, aData)
 	{
-		var os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+		let os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 		
 		switch (aTopic)
 		{
 		case "app-startup":
+			os.addObserver(this, "private-browsing-change-granted", false);
 			os.addObserver(this, "profile-after-change", false);
 			os.addObserver(this, "final-ui-startup", false);
 			os.addObserver(this, "sessionstore-state-read", false);
+			break;
+		case "private-browsing-change-granted":
+			switch(aData) {
+			case "enter":
+				let ss = Cc["@mozilla.org/browser/sessionstore;1"] || Cc["@mozilla.org/suite/sessionstore;1"];
+				this.mBackupState = ss.getService(Ci.nsISessionStore).getBrowserState();
+				break;
+			case "exit":
+				aSubject.QueryInterface(Ci.nsISupportsPRBool);
+				// If browser not shutting down, clear the backup state otherwise leave it to be read by sessionmanager.js
+				if (!aSubject.data) {
+					this.mBackupState = null;
+				}
+				break;
+			}
 			break;
 		case "profile-after-change":
 			os.removeObserver(this, aTopic);
@@ -120,15 +138,14 @@ SessionManagerHelperComponent.prototype = {
 	// preference indicates there is an active session, but there really isn't
 	_handle_crash: function()
 	{
-		var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-		var sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"];
-		if (!sessionStartup) sessionStartup = Cc["@mozilla.org/suite/sessionstartup;1"];
+		let prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+		let sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"] || Cc["@mozilla.org/suite/sessionstartup;1"];
 		if (sessionStartup) sessionStartup = sessionStartup.getService(Ci.nsISessionStartup);
-		var resuming = (sessionStartup && sessionStartup.sessionType && (sessionStartup.sessionType != Ci.nsISessionStartup.NO_SESSION)) ||
+		let resuming = (sessionStartup && sessionStartup.sessionType && (sessionStartup.sessionType != Ci.nsISessionStartup.NO_SESSION)) ||
 		               prefroot.getBoolPref("browser.sessionstore.resume_session_once") || 
 		               prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
 
-		var sm_running = (prefroot.getPrefType("extensions.sessionmanager._running") == prefroot.PREF_BOOL) && 
+		let sm_running = (prefroot.getPrefType("extensions.sessionmanager._running") == prefroot.PREF_BOOL) && 
 		                 prefroot.getBoolPref("extensions.sessionmanager._running");
 		
 		//dump("running = " + sm_running + "\nresuming = " + resuming + "\n");
@@ -147,22 +164,23 @@ SessionManagerHelperComponent.prototype = {
 	// to allow the user to choose a session to restore.  This is only called for Firefox 3.5 and up and SeaMonkey 2.0 and up
 	_check_for_crash: function(aStateDataString)
 	{
+		let initialState;
 		try {
 			// parse the session state into JS objects
-			var initialState = this.JSON_decode(aStateDataString.QueryInterface(Ci.nsISupportsString).data);
+			initialState = this.JSON_decode(aStateDataString.QueryInterface(Ci.nsISupportsString).data);
 		}
 		catch (ex) { 
 			report("The startup session file is invalid: " + ex); 
 			return;
 		} 
     
-		var lastSessionCrashed =
+		let lastSessionCrashed =
 			initialState && initialState.session && initialState.session.state &&
 			initialState.session.state == "running";
 		
 		//report("Last Crashed = " + lastSessionCrashed);
 		if (lastSessionCrashed) {
-        	var params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
+        	let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
         	// default to recovering
         	params.SetInt(0, 0);
         	Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher).
@@ -181,18 +199,18 @@ SessionManagerHelperComponent.prototype = {
 	// code adapted from Danil Ivanov's "Cache Fixer" extension
 	_restoreCache: function()
 	{
-    	var cache = null;
+    	let cache = null;
 		try 
 		{
-			var prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-			var disabled = prefroot.getBoolPref("extensions.sessionmanager.disable_cache_fixer");
+			let prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+			let disabled = prefroot.getBoolPref("extensions.sessionmanager.disable_cache_fixer");
 			if (disabled)
 			{
-				var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+				let consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
   				consoleService.logStringMessage("SessionManager: Cache Fixer disabled");
 				return;
 			}
-			var pd_path = prefroot.getComplexValue("browser.cache.disk.parent_directory",Ci.nsISupportsString).data;
+			let pd_path = prefroot.getComplexValue("browser.cache.disk.parent_directory",Ci.nsISupportsString).data;
 			cache = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
 			cache.initWithPath(pd_path);
 		}
@@ -206,11 +224,11 @@ SessionManagerHelperComponent.prototype = {
 			return;
 		}
 		
-		var stream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
+		let stream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
 		stream.init(cache, 0x01, 0, 0); // PR_RDONLY
-		var input = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
+		let input = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
 		input.setInputStream(stream);
-		var content = input.readByteArray(input.available());
+		let content = input.readByteArray(input.available());
 		input.close();
 		
 		if (content[15] != 1)
@@ -221,7 +239,7 @@ SessionManagerHelperComponent.prototype = {
 		
 		stream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
 		stream.init(cache, 0x02 | 0x20, 0600, 0); // PR_WRONLY | PR_TRUNCATE
-		var output = Cc["@mozilla.org/binaryoutputstream;1"].createInstance(Ci.nsIBinaryOutputStream);
+		let output = Cc["@mozilla.org/binaryoutputstream;1"].createInstance(Ci.nsIBinaryOutputStream);
 		output.setOutputStream(stream);
 		output.writeByteArray(content, content.length);
 		output.flush();
@@ -230,9 +248,9 @@ SessionManagerHelperComponent.prototype = {
 	
 	// Decode JSON string to javascript object
 	JSON_decode: function(aStr) {
-		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
+		let jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
 		try {
-			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
+			let hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
 		
 			// JSON can't parse when string is wrapped in parenthesis
 			if (hasParens) {
@@ -258,7 +276,7 @@ SessionManagerHelperComponent.prototype = {
 	
 	// Encode javascript object to JSON string - use JSON if built-in.
 	JSON_encode: function(aObj) {
-		var jsString = null;
+		let jsString = null;
 		try {
 			jsString = JSON.stringify(aObj);
 			// Workaround for Firefox bug 485563
