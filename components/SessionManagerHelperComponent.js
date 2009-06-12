@@ -47,6 +47,7 @@ SessionManagerHelperComponent.prototype = {
 	classID:          Components.ID("{5714d620-47ce-11db-b0de-0800200c9a66}"),
 	contractID:       "@morac/sessionmanager-helper;1",
 	_xpcom_categories: [{ category: "app-startup", service: true }],
+	mAutoPrivacy: false,
 	mBackupState: null,
 	mSessionData: null,
 	
@@ -71,6 +72,7 @@ SessionManagerHelperComponent.prototype = {
 			case "enter":
 				let ss = Cc["@mozilla.org/browser/sessionstore;1"] || Cc["@mozilla.org/suite/sessionstore;1"];
 				this.mBackupState = ss.getService(Ci.nsISessionStore).getBrowserState();
+				this.mAutoPrivacy = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).autoStarted;
 				break;
 			case "exit":
 				aSubject.QueryInterface(Ci.nsISupportsPRBool);
