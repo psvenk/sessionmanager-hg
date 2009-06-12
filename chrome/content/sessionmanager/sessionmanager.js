@@ -65,7 +65,7 @@ var gSessionManager = {
 	getSessionStoreComponent : function() {
 		// Firefox or SeaMonkey
 		var sessionStore = Components.classes["@mozilla.org/browser/sessionstore;1"] || Components.classes["@mozilla.org/suite/sessionstore;1"];
-		var sessionStart = Components.classes["@mozilla.org/browser/sessionstartup;1"] || Components.classes["@mozilla.org/suite/sessionstore;1"];
+		var sessionStart = Components.classes["@mozilla.org/browser/sessionstartup;1"] || Components.classes["@mozilla.org/suite/sessionstartup;1"];
 		
 		if (sessionStore && sessionStart) {
 			this.mSessionStore = sessionStore.getService(Components.interfaces.nsISessionStore);
