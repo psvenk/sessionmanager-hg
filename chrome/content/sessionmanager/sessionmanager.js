@@ -2299,11 +2299,13 @@ var gSessionManager = {
 			{
 				this.clearUndoData("window", true, true);
 			}
+			
+			// Don't back up if in private browsing mode automatically via privacy preference
+			var nobackup = this.mSMHelper.mAutoPrivacy && (this.mShutDownInPrivateBrowsingMode || this.isPrivateBrowserMode());
 		
-			// save the currently opened session (if there is one)
-			if (!this.closeSession(false))
+			// save the currently opened session (if there is one) otherwise backup if auto-private browsing mode not enabled
+			if (!this.closeSession(false) && !nobackup)
 			{
-				// By the time this is called, if Private Browsing Mode was enabled, it no longer is so don't bother checking for it.
 				this.backupCurrentSession();
 			}
 			else
@@ -2355,7 +2357,7 @@ var gSessionManager = {
 		var temp_backup = (this.mPref_startup > 0) && (this.mPref_resume_session == this.mBackupSessionName);
 		// If shut down in private browsing mode, use the pre-private sesssion, otherwise get the current one
 		var helper_state = (this.mShutDownInPrivateBrowsingMode || this.isPrivateBrowserMode()) ? this.mSMHelper.mBackupState : null;
-		dump(helper_state + "\n");
+
 		// Don't save if just a blank window, if there's an error parsing data, just save
 		var state = null, lastState = null;
 		if ((backup > 0) || temp_backup) {
