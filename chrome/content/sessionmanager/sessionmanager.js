@@ -502,9 +502,15 @@ var gSessionManager = {
 			case "enter":
 				// Only do the following once
 				if (!this.doNotDoPrivateProcessing) {
-					// Close current autosave session or make an autosave backup (if not autostart or disabling history via options).
-					if (!this.closeSession(false,true) && (this.mPref_autosave_session) && !this.isAutoStartPrivateBrowserMode()) {
-						this.autoSaveCurrentSession(true); 
+					// Close current autosave session or make an autosave backup (if not already in private browsing mode)
+					if (!this.closeSession(false,true) && this.mPref_autosave_session) {
+					    // If autostart or disabling history via options, make a real backup, otherwise make a temporary backup
+						if (this.isAutoStartPrivateBrowserMode()) {
+							this.backupCurrentSession();
+						}
+						else {
+							this.autoSaveCurrentSession(true); 
+						}
 					}
 
 					// Prevent other windows from doing the saving processing
