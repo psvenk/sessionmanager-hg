@@ -1,57 +1,76 @@
-/*
-  The following code originated from Tab Mix Plus - http://tmp.garyr.net/ 
-  It will remove stored Session Manager saved files, when user selects to clear private data
-  
-  Michael Kraft modified gSessionManager_preferencesOverlay to make it work in Firefox 3.0,
-  gSessionManager.addMenuItem to work in Firefox 3.1, and all functions (except 
-  gSessionManager.tryToSanitize) to work in SeaMonkey 2.0.
-*/
-
 var gSessionManager_preferencesOverlay = {
 	init: function() {
-        window.removeEventListener("load", gSessionManager_preferencesOverlay.init, false);
+        window.removeEventListener("load", arguments.callee, false);
+		
 		// BrowserPreferences = Firefox, prefDialog = SeaMonkey
 		var prefWindow = document.getElementById('BrowserPreferences') || document.getElementById('prefDialog');
 		if (prefWindow)
 		{
-	    	gSessionManager_preferencesOverlay.onPaneLoad(prefWindow.lastSelected);
+			// Add event handlers for when panes load in Firefox
+			var paneMain = document.getElementById('paneMain');
+			if (paneMain) paneMain.addEventListener("paneload", gSessionManager_preferencesOverlay.onPaneLoad_proxy, false);
 
-			// Firefox
-			if (prefWindow == document.getElementById('BrowserPreferences')) {
-				var command = prefWindow._selector.getAttribute("oncommand");
-				prefWindow._selector.setAttribute("oncommand", (command ? (command + ";") : "") + "gSessionManager_preferencesOverlay.onPaneLoad(getElementsByAttribute('selected','true')[0].label);");
-			}
-			// SeaMonkey
-			else {
-				var prefsTree = document.getElementById('prefsTree');
-				if (prefsTree) {
-					var command = prefsTree.getAttribute("onselect");
-					prefsTree.setAttribute("onselect", (command ? (command + ";") : "") + "gSessionManager_preferencesOverlay.onPaneLoad(this.contentView.getItemAtIndex(this.currentIndex).prefpane.id);");
-				}
-			}
+			var panePrivacy = document.getElementById('panePrivacy');
+			if (panePrivacy) panePrivacy.addEventListener("paneload", gSessionManager_preferencesOverlay.onPaneLoad_proxy, false);
+			
+			// Add event handlers for SeaMonkey
+			var browserPane = document.getElementById('navigator_pane');
+	    	if (browserPane) browserPane.addEventListener("paneload", gSessionManager_preferencesOverlay.onPaneLoad_proxy, false);
+			
+			var securityPane = document.getElementById('security_pane');
+	    	if (securityPane) securityPane.addEventListener("paneload", gSessionManager_preferencesOverlay.onPaneLoad_proxy, false);
+			
+			// Handle case if pane is already loaded when option window opens.
+	    	gSessionManager_preferencesOverlay.onPaneLoad(prefWindow.lastSelected);
 	    }
 	},
-
-	onPaneLoad: function (aPaneID) {
-		// panePrivacy   - Firefox when Privacy pane isn't selected when option window opens
-		// Privacy       - Firefox when Privacy pane is selected when option window opens
-		// security_pane - SeaMonkey 2.0
-		if (aPaneID == "panePrivacy" || aPaneID == "Privacy" || aPaneID == "security_pane") this.onPanePrivacyLoad(aPaneID);
+	
+	onPaneLoad_proxy: function (aEvent) {
+		gSessionManager_preferencesOverlay.onPaneLoad(aEvent.target.id);
+		//aEvent.target.removeEventListener("paneload", arguments.callee, false);
 	},
+	
+	onPaneLoad: function (aPaneID) {
+		var elem = document.getElementById(aPaneID);
+		elem.removeEventListener("paneload", gSessionManager_preferencesOverlay.onPaneLoad_proxy, false);
+		switch (aPaneID) {
+			case "paneMain":
+			case "navigator_pane":
+				this.onPaneMainLoad();
+				break;
+			case "panePrivacy":
+			case "security_pane":
+				this.onPanePrivacyLoad(aPaneID);
+				break;
+		}
+	},
+
+/* ........ paneMain .............. */
+	onPaneMainLoad: function (aPaneID) {
+		var stringBundle = Components.classes["@mozilla.org/intl/stringbundle;1"]
+		                   .getService(Components.interfaces.nsIStringBundleService)
+		                   .createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+		var label = stringBundle.GetStringFromName("sessionManager");
+		
+		// Firefox = browserStartupPage, SeaMonkey = startupPage
+		var startMenu = document.getElementById("browserStartupPage") || document.getElementById("startupPage");
+		if (startMenu) {
+			var menuitem = startMenu.appendItem(label, SM_STARTUP_VALUE);
+			if (startMenu.value == SM_STARTUP_VALUE) startMenu.selectedItem = menuitem;
+		}
+   },
 
 /* ........ panePrivacy .............. */
 
 	onPanePrivacyLoad: function (aPaneID)	{
-    	window.setTimeout(function() {
-    	    var clearNowBn = document.getElementById("clearDataNow");
-    	    if (clearNowBn && clearNowBn.getAttribute("oncommand").indexOf("gSessionManager") == -1) { 
-    	        clearNowBn.setAttribute("oncommand", "gSessionManager.tryToSanitize(); " + clearNowBn.getAttribute("oncommand"));
-				// SeaMonkey needs to have Session Manager added directly to preferences window
-				if (aPaneID == "security_pane") {
-					gSessionManager.addMenuItem(aPaneID);
-				}
-	        }
-	    }, 200);
+   	    var clearNowBn = document.getElementById("clearDataNow");
+   	    if (clearNowBn && clearNowBn.getAttribute("oncommand").indexOf("gSessionManager") == -1) { 
+   	        clearNowBn.setAttribute("oncommand", "gSessionManager.tryToSanitize(); " + clearNowBn.getAttribute("oncommand"));
+			// SeaMonkey needs to have Session Manager added directly to preferences window
+			if (aPaneID == "security_pane") {
+				gSessionManager.addMenuItem(aPaneID);
+			}
+        }
     }
 }
 
