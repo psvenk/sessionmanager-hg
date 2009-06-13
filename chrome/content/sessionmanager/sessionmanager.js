@@ -1,3 +1,6 @@
+// Value used for Startup Menu item.
+const SM_STARTUP_VALUE = -11;
+
 var gSessionManager = {
 	_timer : null,
 	
@@ -569,7 +572,6 @@ var gSessionManager = {
 				break;
 			case "page":
 			case "startup":
-			case "resume_session":
 				this.synchStartup(aData);
 				break;
 			case "_autosave_values":
@@ -2410,7 +2412,8 @@ var gSessionManager = {
 				if (dontPrompt.value) {
 					this.setPref("resume_session", this.mBackupSessionName);
 					this.setPref("startup", 2);
-					this.synchStartup();
+					// call manually since observers have been stoppped
+					this.synchStartup("startup");
 				}
 				else this.setPref("restore_temporary", true);
 			}
@@ -3065,13 +3068,31 @@ var gSessionManager = {
 	{
 		var browser_startup = this.getPref("browser.startup.page", 1, true);
 		var sm_startup = this.getPref("startup", 0);
+		dump(aData + ", " + browser_startup + ", " + sm_startup + "\n");
 
-		// browser currently sent to resume browser session and Session Manager thinks it's handling sessions
-		if (browser_startup >= 2 && sm_startup) {
-			if (aData == "page") this.setPref("startup",0);
-			else this.setPref("browser.startup.page",  this.getPref("old_startup_page",1), true);
+		switch(aData) {
+			// if browser startup preference changed and Session Manager is handling sessions, turn off Session Manager's handling
+			// else turn it on to prompting.
+			case "page":
+				if (sm_startup && (browser_startup != SM_STARTUP_VALUE)) {
+					this.setPref("startup", 0);
+				}
+				else if (!sm_startup && (browser_startup == SM_STARTUP_VALUE)) {
+					this.setPref("startup", 1);
+				}
+				break;
+			// if user changing session manager's options, use them.
+			case "startup":
+			case "resume_session":
+				if (sm_startup && (browser_startup != SM_STARTUP_VALUE)) {
+					this.setPref("old_startup_page", browser_startup);
+					this.setPref("browser.startup.page",  SM_STARTUP_VALUE, true);
+				}
+				else if (!sm_startup && (browser_startup == SM_STARTUP_VALUE)) {
+					this.setPref("browser.startup.page",  this.getPref("old_startup_page",1), true);
+				}
+				break;
 		}
-		else if (browser_startup < 2) this.setPref("old_startup_page", browser_startup);
 	},
 
 	recoverSession: function()
