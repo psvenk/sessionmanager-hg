@@ -70,9 +70,14 @@ SessionManagerHelperComponent.prototype = {
 		case "private-browsing-change-granted":
 			switch(aData) {
 			case "enter":
-				let ss = Cc["@mozilla.org/browser/sessionstore;1"] || Cc["@mozilla.org/suite/sessionstore;1"];
-				this.mBackupState = ss.getService(Ci.nsISessionStore).getBrowserState();
-				this.mAutoPrivacy = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).autoStarted;
+				try {
+					let ss = Cc["@mozilla.org/browser/sessionstore;1"] || Cc["@mozilla.org/suite/sessionstore;1"];
+					this.mBackupState = ss.getService(Ci.nsISessionStore).getBrowserState();
+					this.mAutoPrivacy = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).autoStarted;
+				}
+				catch(ex) { 
+					report(ex); 
+				}
 				break;
 			case "exit":
 				aSubject.QueryInterface(Ci.nsISupportsPRBool);
