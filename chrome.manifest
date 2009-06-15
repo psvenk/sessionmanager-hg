@@ -26,6 +26,8 @@ locale	sessionmanager	hu-HU	jar:chrome/sessionmanager.jar!/locale/hu-HU/sessionm
 locale	sessionmanager	ko-KR	jar:chrome/sessionmanager.jar!/locale/ko-KR/sessionmanager/
 locale	sessionmanager	sv-SE	jar:chrome/sessionmanager.jar!/locale/sv-SE/sessionmanager/
 locale	sessionmanager	ro-RO	jar:chrome/sessionmanager.jar!/locale/ro-RO/sessionmanager/
+locale	sessionmanager	ca		jar:chrome/sessionmanager.jar!/locale/ca/sessionmanager/
+locale	sessionmanager	uk-UA	jar:chrome/sessionmanager.jar!/locale/uk-UA/sessionmanager/
 
 # Firefox
 overlay	chrome://browser/content/preferences/preferences.xul	chrome://sessionmanager/content/preferencesOverlay.xul	application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
