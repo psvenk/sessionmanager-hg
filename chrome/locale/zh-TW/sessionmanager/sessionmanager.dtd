@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "取消選取">
 <!ENTITY toggle_selection.label "切換選取">
 <!ENTITY winTabTree.urlHeader "網址">
+<!ENTITY prompt.append_window.label "附加到當前視窗">
+<!ENTITY session_explorer.label "「瀏覽頁組」調查員">
+<!ENTITY session_explorer.accesskey "E">

@@ -76,3 +76,6 @@
 <!ENTITY select_none.label "Seçim Yok">
 <!ENTITY toggle_selection.label "Seçimi değiştir">
 <!ENTITY winTabTree.urlHeader "Lokasyon">
+<!ENTITY prompt.append_window.label "Şimdiki pencereye ekle">
+<!ENTITY session_explorer.label "Oturum Gezgini">
+<!ENTITY session_explorer.accesskey "E">

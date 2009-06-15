@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "如果加密失敗，就不要將未加密資料存檔。">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "警告：如果勾選本項，一旦瀏覽頁組/視窗資料加密失敗，該資料會就此喪失、救不回來。只要先前要求「輸入主密碼」時您並未輸入，就一定會加密失敗，所以勾選此項前務必考慮清楚。">
+<!ENTITY closed_window_list.label "使用瀏覽器內建的「最近關閉視窗」清單">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "還原可重新開啟的「已關閉視窗」清單:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "以分頁的方式開啟於當前視窗">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "關閉最後開啟的瀏覽器視窗時，視同關閉瀏覽器">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "預選先前的瀏覽頁組">
+<!ENTITY preselect_previous_session.accesskey "R">

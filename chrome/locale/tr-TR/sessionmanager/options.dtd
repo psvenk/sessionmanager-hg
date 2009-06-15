@@ -97,3 +97,13 @@
 <!ENTITY encrypted_only.label "Şifreleme başarısız olmuşsa, şifrelenmeyen bilgi kaydedilmez">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Dikkat: Eğer işaretlenmiş ise ve, oturum yada pencere bilgisi şifrelenmemiş ise, bu bilgi kurtarılmayacak şekilde kaybedilebilir. Ana şifre istendiğinde şifre girilmez ise şifreleme başarılı olmaz. Bu kutuyu işaretlerken iyice düşünüp öyle karar vermelisiniz.">
+<!ENTITY closed_window_list.label "Tarayıcının &quot;kendi kapatılmış pencereler listesini&quot; kullan">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Yeniden açılabilecek kapatılmış pencere listesini yükle:">
+<!ENTITY closed_windows.accesskey "S">
+<!ENTITY open_as_tabs.label "Şimdiki görünüme sekmeler olarak aç">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "son açılan tarayıcı penceresine kapatıldığı gibi davran€">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "önceki oturumu seç">
+<!ENTITY preselect_previous_session.accesskey "R">
