@@ -75,6 +75,16 @@ gSessionManager.onUnload = function() {
 
 var _disable = gSessionManager.setDisabled;
 
+function readStartupPage()
+{
+	var page = _("browser.startup.page").value;
+	// If using Sesssion Manager select old startup page value in case user wants to use it
+	if (page <= gSessionManager.STARTUP_PROMPT()) {
+		page = _("extensions.sessionmanager.old_startup_page").value;
+	}
+	return page;
+}
+
 function readMaxClosedUndo()
 {
 	var value = _("extensions.sessionmanager.max_closed_undo").value;

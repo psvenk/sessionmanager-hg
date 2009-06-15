@@ -1,6 +1,3 @@
-// Value used for Startup Menu item.
-const SM_STARTUP_VALUE = -11;
-
 var gSessionManager = {
 	_timer : null,
 	
@@ -84,6 +81,16 @@ var gSessionManager = {
 
 	initialize: function()
 	{
+		// Define Constants using closure functions
+		const STARTUP_PROMPT = -11;
+		const STARTUP_LOAD = -12;
+		const VERSION = "0.6.4.2";
+	
+		this.STARTUP_PROMPT = function() { return STARTUP_PROMPT; }
+		this.STARTUP_LOAD = function() { return STARTUP_LOAD; }
+		this.VERSION = function() { return VERSION; }
+	
+		// Get SessionStore service component 
 		if (!this.getSessionStoreComponent()) return false;
 		
 		var privateBrowsing = Components.classes["@mozilla.org/privatebrowsing;1"];
@@ -118,8 +125,6 @@ var gSessionManager = {
 
 	onLoad: function(aDialog)
 	{
-		const SM_VERSION = "0.6.4.2";
-		
 		this.mBundle = document.getElementById("bundle_sessionmanager");
 		this.mTitle = this._string("sessionManager");
 		this.mEOL = this.getEOL();
@@ -281,7 +286,7 @@ var gSessionManager = {
 		
 		// Perform any needed update processing
 		var oldVersion = this.getPref("version", "")
-		if (oldVersion != SM_VERSION)
+		if (oldVersion != this.VERSION())
 		{
 			var vc = Components.classes["@mozilla.org/xpcom/version-comparator;1"].getService(Components.interfaces.nsIVersionComparator);
 		
@@ -341,7 +346,7 @@ var gSessionManager = {
 				}, this);
 			}
 			
-			this.setPref("version", SM_VERSION);
+			this.setPref("version", this.VERSION());
 			
 			// One time message on update
 			if (this.getPref("update_message", true)) {
@@ -3068,28 +3073,55 @@ var gSessionManager = {
 	{
 		var browser_startup = this.getPref("browser.startup.page", 1, true);
 		var sm_startup = this.getPref("startup", 0);
-		dump(aData + ", " + browser_startup + ", " + sm_startup + "\n");
+		//dump(aData + ", " + browser_startup + ", " + sm_startup + "\n");
 
 		switch(aData) {
-			// if browser startup preference changed and Session Manager is handling sessions, turn off Session Manager's handling
-			// else turn it on to prompting.
+			// if browser startup preference changed
 			case "page":
-				if (sm_startup && (browser_startup != SM_STARTUP_VALUE)) {
+				// If Session Manager handling startup and browser should now do so
+				if (sm_startup && (browser_startup > this.STARTUP_PROMPT())) {
 					this.setPref("startup", 0);
 				}
-				else if (!sm_startup && (browser_startup == SM_STARTUP_VALUE)) {
-					this.setPref("startup", 1);
+				// If browser preference changed to use Session Manager
+				else if (browser_startup <= this.STARTUP_PROMPT()) {
+					// and Session Manager already being used, simply update startup preference, otherwise read in old startup preference.
+					var new_startup = (browser_startup == this.STARTUP_PROMPT()) ? 1 : 2;
+					if (sm_startup != new_startup) {
+						this.setPref("startup", new_startup);
+					}
+				}
+				
+				// Backup new browser startup preference if using browser startup
+				if (browser_startup > this.STARTUP_PROMPT()) {
+					this.setPref("old_startup_page", browser_startup);
 				}
 				break;
-			// if user changing session manager's options, use them.
+			// if session manager's startup preference changed
 			case "startup":
-			case "resume_session":
-				if (sm_startup && (browser_startup != SM_STARTUP_VALUE)) {
-					this.setPref("old_startup_page", browser_startup);
-					this.setPref("browser.startup.page",  SM_STARTUP_VALUE, true);
+				// If Session Manager should now handle startup
+				if (sm_startup) {
+					// New browser startup is new Session Manager startup if using Session Manager or old browser startup if not
+					var new_startup = sm_startup ? ((sm_startup == 1) ? this.STARTUP_PROMPT() : this.STARTUP_LOAD()) : this.getPref("old_startup_page",1);
+					
+					// If browser handling startup, save current settings and set to list Session Manager
+					if (browser_startup > this.STARTUP_PROMPT()) {
+						this.setPref("old_startup_page", browser_startup);
+						this.setPref("browser.startup.page", new_startup, true);
+					}
+					// otherwise just update
+					else  {
+						if (browser_startup != new_startup) {
+							this.setPref("browser.startup.page", new_startup, true);
+						}
+					}
 				}
-				else if (!sm_startup && (browser_startup == SM_STARTUP_VALUE)) {
-					this.setPref("browser.startup.page",  this.getPref("old_startup_page",1), true);
+				// Since the "page" preference updates first, this will only hit If "startup" 
+				// is turned off without updating the "page" preference, update it to the old value here.
+				// This will happen any time setPref("startup", 0) is called or when the Session Manager is currently handling
+				// startup and the user selects "None" in the options without changing the browser preference.
+				else if (browser_startup <= this.STARTUP_PROMPT()) {
+					//dump("Updating page to old page\n");
+					this.setPref("browser.startup.page", this.getPref("old_startup_page",1), true);
 				}
 				break;
 		}

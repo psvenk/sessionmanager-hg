@@ -30,6 +30,7 @@
 			<preference id="extensions.sessionmanager.max_backup_keep" name="extensions.sessionmanager.max_backup_keep" type="int"/>
 			<preference id="extensions.sessionmanager.max_display" name="extensions.sessionmanager.max_display" type="int"/>
 			<preference id="extensions.sessionmanager.name_format" name="extensions.sessionmanager.name_format" type="string"/>
+			<preference id="extensions.sessionmanager.old_startup_page" name="extensions.sessionmanager.old_startup_page" type="int"/>
 			<preference id="extensions.sessionmanager.overwrite" name="extensions.sessionmanager.overwrite" type="bool"/>
 			<preference id="extensions.sessionmanager.preselect_previous_session" name="extensions.sessionmanager.preselect_previous_session" type="bool"/>
 			<preference id="extensions.sessionmanager.reload" name="extensions.sessionmanager.reload" type="bool"/>
@@ -58,7 +59,7 @@
 							<radio label="&selectSession.label;" accesskey="&selectSession.accesskey;"/>
 						</radiogroup>
 						<hbox>
-							<menulist id="browserStartupPage" preference="browser.startup.page">
+							<menulist id="browserStartupPage" preference="browser.startup.page" onsyncfrompreference="return readStartupPage();">
 								<menupopup id="browserStartupPage_menu"/>
 							</menulist>
 						</hbox>

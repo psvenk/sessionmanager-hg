@@ -50,13 +50,22 @@ var gSessionManager_preferencesOverlay = {
 		var stringBundle = Components.classes["@mozilla.org/intl/stringbundle;1"]
 		                   .getService(Components.interfaces.nsIStringBundleService)
 		                   .createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
-		var label = stringBundle.GetStringFromName("sessionManager");
 		
 		// Firefox = browserStartupPage, SeaMonkey = startupPage
 		var startMenu = document.getElementById("browserStartupPage") || document.getElementById("startupPage");
+		var height = 0;
 		if (startMenu) {
-			var menuitem = startMenu.appendItem(label, SM_STARTUP_VALUE);
-			if (startMenu.value == SM_STARTUP_VALUE) startMenu.selectedItem = menuitem;
+			var menuitem = startMenu.appendItem(stringBundle.GetStringFromName("startup_load"), gSessionManager.STARTUP_LOAD());
+			height = height + parseInt(window.getComputedStyle(menuitem, null).height);
+			if (startMenu.value == gSessionManager.STARTUP_LOAD()) startMenu.selectedItem = menuitem;
+			menuitem = startMenu.appendItem(stringBundle.GetStringFromName("startup_prompt"), gSessionManager.STARTUP_PROMPT());
+			height = height + parseInt(window.getComputedStyle(menuitem, null).height);
+			if (startMenu.value == gSessionManager.STARTUP_PROMPT()) startMenu.selectedItem = menuitem;
+		}
+		
+		// SeaMonkey needs window size to be fixed since the radio buttons take up space
+		if (document.getElementById("startupPage")) {
+			if (!isNaN(height)) window.innerHeight = window.innerHeight + height;
 		}
    },
 
