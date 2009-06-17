@@ -3,31 +3,32 @@ content	sessionmanager	jar:chrome/sessionmanager.jar!/content/sessionmanager/
 skin	sessionmanager	classic/1.0	jar:chrome/sessionmanager.jar!/skin/classic/sessionmanager/
 
 locale	sessionmanager	en-US	jar:chrome/sessionmanager.jar!/locale/en-US/sessionmanager/
+locale	sessionmanager	ca		jar:chrome/sessionmanager.jar!/locale/ca/sessionmanager/
 locale	sessionmanager	cs-CZ	jar:chrome/sessionmanager.jar!/locale/cs-CZ/sessionmanager/
 locale	sessionmanager	da-DK	jar:chrome/sessionmanager.jar!/locale/da-DK/sessionmanager/
 locale	sessionmanager	de-DE	jar:chrome/sessionmanager.jar!/locale/de-DE/sessionmanager/
+locale	sessionmanager	es-ES	jar:chrome/sessionmanager.jar!/locale/es-ES/sessionmanager/
 locale	sessionmanager	fi-FI	jar:chrome/sessionmanager.jar!/locale/fi-FI/sessionmanager/
+locale	sessionmanager	fr-FR	jar:chrome/sessionmanager.jar!/locale/fr-FR/sessionmanager/
+locale	sessionmanager	hu-HU	jar:chrome/sessionmanager.jar!/locale/hu-HU/sessionmanager/
 locale	sessionmanager	it-IT	jar:chrome/sessionmanager.jar!/locale/it-IT/sessionmanager/
-locale	sessionmanager	zh-CN	jar:chrome/sessionmanager.jar!/locale/zh-CN/sessionmanager/
-locale	sessionmanager	zh-TW	jar:chrome/sessionmanager.jar!/locale/zh-TW/sessionmanager/
+locale	sessionmanager	ja-JP	jar:chrome/sessionmanager.jar!/locale/ja-JP/sessionmanager/
+locale	sessionmanager	ko-KR	jar:chrome/sessionmanager.jar!/locale/ko-KR/sessionmanager/
+locale	sessionmanager	lt-LT	jar:chrome/sessionmanager.jar!/locale/lt-LT/sessionmanager/
+locale	sessionmanager	mk-MK	jar:chrome/sessionmanager.jar!/locale/mk-MK/sessionmanager/
+locale	sessionmanager	nl-NL	jar:chrome/sessionmanager.jar!/locale/nl-NL/sessionmanager/
 locale	sessionmanager	pt-PT	jar:chrome/sessionmanager.jar!/locale/pt-PT/sessionmanager/
 locale	sessionmanager	pt-BR	jar:chrome/sessionmanager.jar!/locale/pt-BR/sessionmanager/
-locale	sessionmanager	fr-FR	jar:chrome/sessionmanager.jar!/locale/fr-FR/sessionmanager/
-locale	sessionmanager	lt-LT	jar:chrome/sessionmanager.jar!/locale/lt-LT/sessionmanager/
-locale	sessionmanager	es-ES	jar:chrome/sessionmanager.jar!/locale/es-ES/sessionmanager/
-locale	sessionmanager	mk-MK	jar:chrome/sessionmanager.jar!/locale/mk-MK/sessionmanager/
 locale	sessionmanager	pl-PL	jar:chrome/sessionmanager.jar!/locale/pl-PL/sessionmanager/
-locale	sessionmanager	ja-JP	jar:chrome/sessionmanager.jar!/locale/ja-JP/sessionmanager/
-locale	sessionmanager	ru-RU	jar:chrome/sessionmanager.jar!/locale/ru-RU/sessionmanager/
-locale	sessionmanager	nl-NL	jar:chrome/sessionmanager.jar!/locale/nl-NL/sessionmanager/
-locale	sessionmanager	tr-TR	jar:chrome/sessionmanager.jar!/locale/tr-TR/sessionmanager/
-locale	sessionmanager	sk-SK	jar:chrome/sessionmanager.jar!/locale/sk-SK/sessionmanager/
-locale	sessionmanager	hu-HU	jar:chrome/sessionmanager.jar!/locale/hu-HU/sessionmanager/
-locale	sessionmanager	ko-KR	jar:chrome/sessionmanager.jar!/locale/ko-KR/sessionmanager/
-locale	sessionmanager	sv-SE	jar:chrome/sessionmanager.jar!/locale/sv-SE/sessionmanager/
 locale	sessionmanager	ro-RO	jar:chrome/sessionmanager.jar!/locale/ro-RO/sessionmanager/
-locale	sessionmanager	ca		jar:chrome/sessionmanager.jar!/locale/ca/sessionmanager/
+locale	sessionmanager	ru-RU	jar:chrome/sessionmanager.jar!/locale/ru-RU/sessionmanager/
+locale	sessionmanager	sk-SK	jar:chrome/sessionmanager.jar!/locale/sk-SK/sessionmanager/
+locale	sessionmanager	sr-RS	jar:chrome/sessionmanager.jar!/locale/sr-RS/sessionmanager/
+locale	sessionmanager	sv-SE	jar:chrome/sessionmanager.jar!/locale/sv-SE/sessionmanager/
+locale	sessionmanager	tr-TR	jar:chrome/sessionmanager.jar!/locale/tr-TR/sessionmanager/
 locale	sessionmanager	uk-UA	jar:chrome/sessionmanager.jar!/locale/uk-UA/sessionmanager/
+locale	sessionmanager	zh-CN	jar:chrome/sessionmanager.jar!/locale/zh-CN/sessionmanager/
+locale	sessionmanager	zh-TW	jar:chrome/sessionmanager.jar!/locale/zh-TW/sessionmanager/
 
 # Firefox
 overlay	chrome://browser/content/preferences/preferences.xul	chrome://sessionmanager/content/preferencesOverlay.xul	application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
