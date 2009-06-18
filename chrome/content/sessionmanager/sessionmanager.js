@@ -84,7 +84,7 @@ var gSessionManager = {
 		// Define Constants using closure functions
 		const STARTUP_PROMPT = -11;
 		const STARTUP_LOAD = -12;
-		const VERSION = "0.6.4.2";
+		const VERSION = "0.6.6";
 	
 		this.STARTUP_PROMPT = function() { return STARTUP_PROMPT; }
 		this.STARTUP_LOAD = function() { return STARTUP_LOAD; }
