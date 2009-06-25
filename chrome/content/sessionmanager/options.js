@@ -85,13 +85,23 @@ function readStartupPage()
 	return page;
 }
 
-function readMaxClosedUndo()
+function readMaxClosedUndo(aID)
 {
-	var value = _("extensions.sessionmanager.max_closed_undo").value;
+	switch (aID) {
+		case "max_closed":
+			var value = _("extensions.sessionmanager.max_closed_undo").value;
+			_disable(_("save_window_list"), value == 0);
+			return value;
+			break;
+		case "max_closed_SS":
+			var value = _("browser.sessionstore.max_windows_undo").value;
+			_disable(_("save_closed_windows"), value == 0);
+			_disable(document.getElementsByAttribute("control", "save_closed_windows")[0], value == 0);
+			return value;
+			break;
+	}
 	
-	_disable(_("save_window_list"), value == 0);
-	
-	return value;
+	return 0;
 }
 
 function readMaxTabsUndo()

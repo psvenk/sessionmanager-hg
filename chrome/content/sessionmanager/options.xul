@@ -188,8 +188,8 @@
 					<row align="center">
 						<label value="&max_closed.label;" accesskey="&max_closed.accesskey;" control="max_closed"/>
 						<hbox>
-							<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo();"/>
-							<textbox id="max_closed_SS" preference="browser.sessionstore.max_windows_undo" size="1" maxlength="5"/>
+							<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo(this.id);"/>
+							<textbox id="max_closed_SS" preference="browser.sessionstore.max_windows_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo(this.id);"/>
 						</hbox>
 					</row>
 					<row align="center">
