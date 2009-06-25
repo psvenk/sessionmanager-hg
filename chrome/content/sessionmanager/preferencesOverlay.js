@@ -117,6 +117,13 @@ gSessionManager.addSanitizeItem = function () {
 		Sanitizer.items['extensions-sessionmanager'] = sessionManagerItem;
 	}
 	
+	var smlb = document.getElementById("sessionmanager_listbox");
+	if (smlb) {
+		var height = window.getComputedStyle(smlb, null).height;
+		dump(height + "\n");
+	}
+	else dump("hi\n");
+		
 	// don't leak
 	sessionManagerItem = null;
 }
@@ -141,8 +148,13 @@ gSessionManager.addMenuItem = function (aPaneID) {
 		
 		var pref = document.createElement('preference');
 		// Firefox 3.5 and above only
-		if ((appVersion >= "1.9.1") && (window.location == "chrome://browser/content/sanitize.xul")) {
-			this.mSanitizePreference = "privacy.cpd.extensions-sessionmanager";
+		if (!isSeaMonkey && this.mApp.compareVersion("1.9.1a1pre") >= 0) {
+			if (window.location == "chrome://browser/content/sanitize.xul") {
+				this.mSanitizePreference = "privacy.cpd.extensions-sessionmanager";
+			}
+			else {
+				this.mSanitizePreference = "privacy.clearOnShutdown.extensions-sessionmanager";
+			}
 		}
 		pref.setAttribute('id', this.mSanitizePreference);
 		pref.setAttribute('name', this.mSanitizePreference);
@@ -155,6 +167,9 @@ gSessionManager.addMenuItem = function (aPaneID) {
 			listitem.setAttribute('type', 'checkbox');
 			listitem.setAttribute('accesskey', this.sanitizeLabel.accesskey);
 			listitem.setAttribute('preference', this.mSanitizePreference);
+			if (typeof(gSanitizePromptDialog) == 'object') {
+				listitem.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
+			}
 			lastListbox.parentNode.appendChild(listitem);
 		}
 		else if (lastCheckbox) {
@@ -162,6 +177,9 @@ gSessionManager.addMenuItem = function (aPaneID) {
 			check.setAttribute('label', this.sanitizeLabel.label);
 			check.setAttribute('accesskey', this.sanitizeLabel.accesskey);
 			check.setAttribute('preference', this.mSanitizePreference);
+			if (typeof(gSanitizePromptDialog) == 'object') {
+				check.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
+			}
 			
 			if (lastCheckbox.parentNode.localName == "row") {
 				var newRow = document.createElement('row');
@@ -173,11 +191,10 @@ gSessionManager.addMenuItem = function (aPaneID) {
 			}
 		}
 
-		// Firefox only
-		if (typeof(gSanitizePromptDialog) == 'object')
+		// Firefox 3 only
+		if ((typeof(gSanitizePromptDialog) == 'object') && (this.mApp.compareVersion("1.9.1a1pre") < 0))
 		{
-			if (appVersion < "1.9.1") pref.setAttribute('readonly', 'true');
-			check.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
+			pref.setAttribute('readonly', 'true');
 		}
 		
 		// SeaMonkey needs to sync preference when display pref window
