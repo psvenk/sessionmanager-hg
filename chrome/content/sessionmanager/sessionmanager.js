@@ -797,6 +797,7 @@ var gSessionManager = {
 		}
 		
 		var backupPopup = backupMenu.menupopup; 
+		dump(backupMenu + "\n");
 		while (backupPopup.childNodes.length) backupPopup.removeChild(backupPopup.childNodes[0]);
 		
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
@@ -887,7 +888,9 @@ var gSessionManager = {
 			aPopup.removeChild(aPopup.lastChild);
 		}
 		
-		var undoDisabled = (this.mPref_max_closed_undo == 0 && this.getPref("browser.sessionstore.max_tabs_undo", 10, true) == 0);
+		var undoDisabled = ((this.getPref("browser.sessionstore.max_tabs_undo", 10, true) == 0) &&
+		                    ((!this.mUseSSClosedWindowList && (this.mPref_max_closed_undo == 0)) ||
+							 (this.mUseSSClosedWindowList && this.getPref("browser.sessionstore.max_windows_undo", 10, true) == 0)));
 		var divertedMenu = aIsToolbar && document.getElementById("sessionmanager-undo");
 		var canUndo = !undoDisabled && !divertedMenu && this.initUndo(undoMenu.firstChild);
 		
