@@ -796,8 +796,11 @@ var gSessionManager = {
 			aPopup.removeChild(item);
 		}
 		
-		var backupPopup = backupMenu.menupopup; 
-		dump(backupMenu + "\n");
+		// The first time this function is run after an item is added or removed from the browser toolbar
+		// using the customize feature, the backupMenu.menupopup value is not defined.  This happens once for
+		// each menu (tools menu and toolbar button).  Using the backupMenu.firstChild will work around this
+		// Firefox bug, even though it technically isn't needed.
+		var backupPopup = backupMenu.menupopup || backupMenu.firstChild; 
 		while (backupPopup.childNodes.length) backupPopup.removeChild(backupPopup.childNodes[0]);
 		
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
@@ -2300,10 +2303,13 @@ var gSessionManager = {
 	shutDown: function()
 	{
 		//dump("Shutdown start\n");
-		// Handle sanitizing if sanitize on shutdown without prompting
-		if ((this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true)) &&
-			(!this.getPref("privacy.sanitize.promptOnSanitize", true, true)) &&
-			(this.getPref("privacy.item.extensions-sessionmanager", false, true)))
+		// Handle sanitizing if sanitize on shutdown without prompting (Firefox 3.5 never prompts)
+		var prompt = this.getPref("privacy.sanitize.promptOnSanitize", null, true);
+		var sanitize = (this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true) && 
+		               (((prompt == false) && this.getPref("privacy.item.extensions-sessionmanager", false, true)) ||
+		                ((prompt == null) && this.getPref("privacy.clearOnShutdown.extensions-sessionmanager", false, true))));
+
+		if (sanitize)
 		{
 			this.sanitize();
 		}
