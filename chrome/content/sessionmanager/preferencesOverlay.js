@@ -117,12 +117,26 @@ gSessionManager.addSanitizeItem = function () {
 		Sanitizer.items['extensions-sessionmanager'] = sessionManagerItem;
 	}
 	
+	// fix window height so we can see our entry
 	var smlb = document.getElementById("sessionmanager_listbox");
 	if (smlb) {
-		var height = window.getComputedStyle(smlb, null).height;
-		dump(height + "\n");
+		// Since other addons might insert their own check boxes above us, make sure we are visible.
+		var index;
+		for (var i=0; i<smlb.parentNode.children.length; i++) {
+			if (smlb.parentNode.children[i] == smlb) {
+				index = i + 1;
+				break;
+			}
+		}
+		
+		var currentHeight = smlb.parentNode.boxObject.height;
+		var boxHeight = smlb.parentNode.firstChild.boxObject.height;
+		
+		// Display our checkbox and any added above us if we aren't already displayed (in case other addons have the same idea)
+		if (currentHeight < (boxHeight * index)) {
+			smlb.parentNode.height = currentHeight + boxHeight * (index - 6);
+		}
 	}
-	else dump("hi\n");
 		
 	// don't leak
 	sessionManagerItem = null;
@@ -164,9 +178,11 @@ gSessionManager.addMenuItem = function (aPaneID) {
 		if (lastListbox) {
 			var listitem = document.createElement('listitem');
 			listitem.setAttribute('label', this.sanitizeLabel.label);
+			listitem.setAttribute('id', "sessionmanager_listbox");
 			listitem.setAttribute('type', 'checkbox');
 			listitem.setAttribute('accesskey', this.sanitizeLabel.accesskey);
 			listitem.setAttribute('preference', this.mSanitizePreference);
+			listitem.setAttribute('oncommand', "gSessionManager.confirm(this)");
 			if (typeof(gSanitizePromptDialog) == 'object') {
 				listitem.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
 			}
@@ -177,6 +193,7 @@ gSessionManager.addMenuItem = function (aPaneID) {
 			check.setAttribute('label', this.sanitizeLabel.label);
 			check.setAttribute('accesskey', this.sanitizeLabel.accesskey);
 			check.setAttribute('preference', this.mSanitizePreference);
+			check.setAttribute('oncommand', "gSessionManager.confirm(this)");
 			if (typeof(gSanitizePromptDialog) == 'object') {
 				check.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
 			}
@@ -222,6 +239,19 @@ gSessionManager.tryToSanitize = function () {
 
 	gSessionManager.sanitize();
 	return true;
+}
+
+gSessionManager.confirm = function (aElem) {
+	if (!aElem.checked) return;
+
+	var stringBundle = Components.classes["@mozilla.org/intl/stringbundle;1"]
+	                   .getService(Components.interfaces.nsIStringBundleService)
+	                   .createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+	
+	var okay = this.mPromptService.confirmEx(null, stringBundle.GetStringFromName("sessionManager"), stringBundle.GetStringFromName("delete_all_confirm"), 
+	                                         this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1,
+	                                         null, null, null, null, {});
+	aElem.checked = !okay;
 }
 
 window.addEventListener("load", gSessionManager_preferencesOverlay.init, false);
