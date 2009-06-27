@@ -33,9 +33,6 @@ var gSessionManager = {
 	mCleanBrowser: null,
 	mClosedWindowName: null,
 	
-	// Used to store original closeWindow function
-	mOrigCloseWindow: null,
-	
 	mSessionCache: { timestamp: 0 },
 	mClosedWindowsCache: { timestamp: 0, data: null },
 	
@@ -419,12 +416,6 @@ var gSessionManager = {
 			gBrowser.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 		}
 		gBrowser.mStrip.removeEventListener("click", this.onTabBarClick, false);
-		
-		// restore original close window functionality
-		if (this.mOrigCloseWindow) {
-			closeWindow = this.mOrigCloseWindow;
-			this.mOrigCloseWindow = null;
-		}
 		
 		// stop watching for titlebar changes
 		gBrowser.ownerDocument.unwatch("title");
@@ -1354,9 +1345,19 @@ var gSessionManager = {
 		var defaultIcon = (this.mApp.idEquals("SEAMONKEY")) ? "chrome://sessionmanager/skin/bookmark-item.png" :
 		                                                      "chrome://sessionmanager/skin/defaultFavicon.png";
 		
+		var badClosedWindowData = false;
 		var closedWindows = this.getClosedWindows();
 		closedWindows.forEach(function(aWindow, aIx) {
-			var state = this.JSON_decode(aWindow.state);
+			var state = this.JSON_decode(aWindow.state, true);
+			
+			// detect corrupt sessionmanager.dat file
+			if (state._JSON_decode_failed && !this.mUseSSClosedWindowList) {
+				// flag it for removal from the list and go to next entry
+				badClosedWindowData = true;
+				aWindow._decode_error = state._JSON_decode_error;
+				return;
+			}
+			
 			// Get favicon
 			var image = defaultIcon;
 			if (state.windows[0].tabs[0].xultab)
@@ -1395,6 +1396,25 @@ var gSessionManager = {
 			menuitem.setAttribute("crop", "center");
 			aPopup.insertBefore(menuitem, separator);
 		}, this);
+		
+		// Remove any bad closed windows
+		if (badClosedWindowData)
+		{
+			var error = null;
+			for (var i=0; i < closedWindows.length; i++)
+			{
+				if (closedWindows[i]._decode_error)
+				{
+					error = closedWindows[i]._decode_error;
+					closedWindows.splice(i, 1);
+					this.storeClosedWindows_SM(closedWindows);
+					// Do this so we don't skip over the next entry because of splice
+					i--;
+				}
+			}
+			this.sessionError(error);
+		}
+		
 		label.hidden = (closedWindows.length == 0);
 		
 		var listEnd = get_("end-separator");
@@ -3595,6 +3615,7 @@ var gSessionManager = {
 			}
 		}
 		catch(ex) {
+			jsObject._JSON_decode_error = ex;
 			if (!noError) this.sessionError(ex);
 		}
 		return jsObject;
