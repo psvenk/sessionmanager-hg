@@ -1345,77 +1345,104 @@ var gSessionManager = {
 		var defaultIcon = (this.mApp.idEquals("SEAMONKEY")) ? "chrome://sessionmanager/skin/bookmark-item.png" :
 		                                                      "chrome://sessionmanager/skin/defaultFavicon.png";
 		
-		var badClosedWindowData = false;
-		var closedWindows = this.getClosedWindows();
-		closedWindows.forEach(function(aWindow, aIx) {
-			var state = this.JSON_decode(aWindow.state, true);
-			
-			// detect corrupt sessionmanager.dat file
-			if (state._JSON_decode_failed && !this.mUseSSClosedWindowList) {
-				// flag it for removal from the list and go to next entry
-				badClosedWindowData = true;
-				aWindow._decode_error = state._JSON_decode_error;
-				return;
+		var encrypt_okay = true;
+		// make sure user enters master password if using sessionmanager.dat
+		if (!this.mUseSSClosedWindowList && this.mPref_encrypt_sessions) {
+			try { 
+				this.mSecretDecoderRing.encryptString("");
 			}
-			
-			// Get favicon
-			var image = defaultIcon;
-			if (state.windows[0].tabs[0].xultab)
-			{
-				var xultabData = state.windows[0].tabs[0].xultab.split(" ");
-				xultabData.forEach(function(bValue, bIndex) {
-					var data = bValue.split("=");
-					if (data[0] == "image") {
-						image = data[1];
-					}
-				}, this);
+			catch(ex) {
+				encrypt_okay = false;
+				this.cryptError(this._string("decrypt_fail2"));
 			}
-			// Firefox 3.5 uses attributes instead of xultab
-			if (state.windows[0].tabs[0].attributes && state.windows[0].tabs[0].attributes.image)
-			{
-				image = state.windows[0].tabs[0].attributes.image;
-			}
-			// Trying to display a favicon for an https with an invalid certificate will throw up an exception box, so don't do that
-			// Firefox's about:sessionrestore also fails with authentication requests, but Session Manager seems okay with that so just
-			// use the work around for https.
-			if (/^https:/.test(image)) {
-				image = "moz-anno:favicon:" + image;
-			}
-			
-			// Get tab count
-			var count = state.windows[0].tabs.length;
-		
-			var menuitem = document.createElement("menuitem");
-			menuitem.setAttribute("class", "menuitem-iconic sessionmanager-closedtab-item");
-			menuitem.setAttribute("label", aWindow.name + " (" + count + ")");
-			menuitem.setAttribute("index", "window" + aIx);
-			menuitem.setAttribute("image", image);
-			menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey || event.metaKey)?"append":"");');
-			menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
-			menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
-			menuitem.setAttribute("crop", "center");
-			aPopup.insertBefore(menuitem, separator);
-		}, this);
-		
-		// Remove any bad closed windows
-		if (badClosedWindowData)
-		{
-			var error = null;
-			for (var i=0; i < closedWindows.length; i++)
-			{
-				if (closedWindows[i]._decode_error)
-				{
-					error = closedWindows[i]._decode_error;
-					closedWindows.splice(i, 1);
-					this.storeClosedWindows_SM(closedWindows);
-					// Do this so we don't skip over the next entry because of splice
-					i--;
-				}
-			}
-			this.sessionError(error);
 		}
 		
-		label.hidden = (closedWindows.length == 0);
+		if (encrypt_okay) {
+			var badClosedWindowData = false;
+			var closedWindows = this.getClosedWindows();
+			closedWindows.forEach(function(aWindow, aIx) {
+				// Try to decrypt is using sessionmanager.dat, if can't then data is bad since we checked for master password above
+				var state = this.mUseSSClosedWindowList ? aWindow.state : this.decrypt(aWindow.state, true);
+				if (!state && !this.mUseSSClosedWindowList) {
+					// flag it for removal from the list and go to next entry
+					badClosedWindowData = true;
+					aWindow._decode_error = "crypt_error";
+					return;
+				}
+				state = this.JSON_decode(state, true);
+			
+				// detect corrupt sessionmanager.dat file
+				if (state._JSON_decode_failed && !this.mUseSSClosedWindowList) {
+					// flag it for removal from the list and go to next entry
+					badClosedWindowData = true;
+					aWindow._decode_error = state._JSON_decode_error;
+					return;
+				}
+			
+				// Get favicon
+				var image = defaultIcon;
+				if (state.windows[0].tabs[0].xultab)
+				{
+					var xultabData = state.windows[0].tabs[0].xultab.split(" ");
+					xultabData.forEach(function(bValue, bIndex) {
+						var data = bValue.split("=");
+						if (data[0] == "image") {
+							image = data[1];
+						}
+					}, this);
+				}
+				// Firefox 3.5 uses attributes instead of xultab
+				if (state.windows[0].tabs[0].attributes && state.windows[0].tabs[0].attributes.image)
+				{
+					image = state.windows[0].tabs[0].attributes.image;
+				}
+				// Trying to display a favicon for an https with an invalid certificate will throw up an exception box, so don't do that
+				// Firefox's about:sessionrestore also fails with authentication requests, but Session Manager seems okay with that so just
+				// use the work around for https.
+				if (/^https:/.test(image)) {
+					image = "moz-anno:favicon:" + image;
+				}
+			
+				// Get tab count
+				var count = state.windows[0].tabs.length;
+		
+				var menuitem = document.createElement("menuitem");
+				menuitem.setAttribute("class", "menuitem-iconic sessionmanager-closedtab-item");
+				menuitem.setAttribute("label", aWindow.name + " (" + count + ")");
+				menuitem.setAttribute("index", "window" + aIx);
+				menuitem.setAttribute("image", image);
+				menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey || event.metaKey)?"append":"");');
+				menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
+				menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
+				menuitem.setAttribute("crop", "center");
+				aPopup.insertBefore(menuitem, separator);
+			}, this);
+		
+			// Remove any bad closed windows
+			if (badClosedWindowData)
+			{
+				var error = null;
+				for (var i=0; i < closedWindows.length; i++)
+				{
+					if (closedWindows[i]._decode_error)
+					{
+						error = closedWindows[i]._decode_error;
+						closedWindows.splice(i, 1);
+						this.storeClosedWindows_SM(closedWindows);
+						// Do this so we don't skip over the next entry because of splice
+						i--;
+					}
+				}
+				if (error == "crypt_error") {
+					this.cryptError(this._string("decrypt_fail1"));
+				}
+				else {
+					this.sessionError(error);
+				}
+			}
+		}
+		
+		label.hidden = !encrypt_okay || (closedWindows.length == 0);
 		
 		var listEnd = get_("end-separator");
 		for (item = separator.nextSibling.nextSibling; item != listEnd; item = separator.nextSibling.nextSibling)
