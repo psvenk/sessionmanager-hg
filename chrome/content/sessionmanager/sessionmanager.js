@@ -142,6 +142,12 @@ var gSessionManager = {
 			}
 		}
 		
+		// Save Command Line Empty value since it won't be valid if we restore the prompt below
+		this._isCmdLineEmpty = this.isCmdLineEmpty();
+		
+		// Restore startup preference is it was changed during startup by SessionManagerHelperComponent
+		this.mObserverService.notifyObservers(null, "sessionmanager:restore_start_prompt", null);
+		
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		
@@ -1100,7 +1106,7 @@ var gSessionManager = {
 		
 		if (aMode == "startup")
 		{
-			overwriteTabs = this.isCmdLineEmpty();
+			overwriteTabs = this._isCmdLineEmpty;
 			tabsToMove = (!overwriteTabs)?Array.slice(gBrowser.mTabs):null;
 		}
 		else if (aMode == "append")
@@ -3129,7 +3135,7 @@ var gSessionManager = {
 	{
 		var browser_startup = this.getPref("browser.startup.page", 1, true);
 		var sm_startup = this.getPref("startup", 0);
-		//dump(aData + ", " + browser_startup + ", " + sm_startup + "\n");
+		//dump(aData + ", page:" + browser_startup + ", startup:" + sm_startup + "\n");
 
 		switch(aData) {
 			// if browser startup preference changed
@@ -3186,10 +3192,11 @@ var gSessionManager = {
 	recoverSession: function()
 	{
 		var recovering = this.getPref("_recovering");
-		// Use SessionStart's value in FF3 because preference is cleared by the time we are called, in FF2 SessionStart doesn't set this value
+		// Use SessionStart's value in FF3 because preference is cleared by the time we are called
 		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
-		var recoverOnly = this.mPref__running || sessionstart;
-		
+		var recoverOnly = this.mPref__running || sessionstart || this.getPref("_no_prompt_for_session", false);
+		this.delPref("_no_prompt_for_session");
+
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
@@ -3220,6 +3227,10 @@ var gSessionManager = {
 				this.setPref("resume_session", session || this.mBackupSessionName);
 				this.setPref("startup", (session)?2:0);
 			}
+			// Display Home Page if user selected to do so
+			//if (display home page && this._isCmdLineEmpty) {
+			//	BrowserHome();
+			//}
 		}
 		// handle browser reload with same session and when opening new windows
 		else if (recoverOnly) {
@@ -3256,19 +3267,41 @@ var gSessionManager = {
 
 	isCmdLineEmpty: function()
 	{
-		if (this.mApp.idEquals("FIREFOX")) {
-			var defaultArgs = Components.classes["@mozilla.org/browser/clh;1"].getService(Components.interfaces.nsIBrowserHandler).defaultArgs;
-			if (window.arguments && window.arguments[0] && window.arguments[0] == defaultArgs) {
-				window.arguments[0] = null;
+		if (!this.mApp.idEquals("SEAMONKEY")) {
+			try {
+				// Flock needs to read defaultArgs since it adds it's own special page.  Firefox should read startPage so update pages don't
+				// get overwritten.
+				var defaultArgs = this.mApp.idEquals("FIREFOX") ? 
+				                  Components.classes["@mozilla.org/browser/clh;1"].getService(Components.interfaces.nsIBrowserHandler).startPage :
+				                  Components.classes["@mozilla.org/browser/clh;1"].getService(Components.interfaces.nsIBrowserHandler).defaultArgs;
+				if (window.arguments && window.arguments[0] && window.arguments[0] == defaultArgs) {
+					window.arguments[0] = null;
+				}
+				return !window.arguments || !window.arguments[0];
 			}
+			catch(ex) {
+				dump(ex + "\n");
+				return false;
+			}
+		}
+		else {
+			var startPage = "about:blank";
+			if (this.getPref("browser.startup.page", 1, true) == 1) {
+				startPage = this.SeaMonkey_getHomePageGroup();
+			}
+			return "arguments" in window && window.arguments.length && (window.arguments[0] == startPage);
+		}
+	},
 
-			return !window.arguments || !window.arguments[0];
+	SeaMonkey_getHomePageGroup: function()
+	{
+		var homePage = this.mPrefRoot.getComplexValue("browser.startup.homepage", Components.interfaces.nsIPrefLocalizedString).data;
+		var count = this.getPref("browser.startup.homepage.count", 0, true);
+
+		for (var i = 1; i < count; ++i) {
+			homePage += '\n' + this.getPref("browser.startup.homepage." + i, "", true);
 		}
-		else if (this.mApp.idEquals("SEAMONKEY")) {
-			// Seamonkey will always display the home page if the option is set to do so.
-			return "arguments" in window && window.arguments.length && (window.arguments[0] == "about:blank");
-		}
-		else return false;
+		return homePage;
 	},
 	
 	isPrivateBrowserMode: function()
@@ -3665,9 +3698,12 @@ var gSessionManager = {
 	}
 };
 
-String.prototype.trim = function() {
-	return this.replace(/^\s+|\s+$/g, "").replace(/\s+/g, " ");
-};
+// String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
+if (typeof(String.trim) != "function") {
+	String.prototype.trim = function() {
+		return this.replace(/^\s+|\s+$/g, "");
+	};
+}
 
 // Initialize conditional variables, if no Session Store don't add event listener
 if (gSessionManager.initialize()) {
