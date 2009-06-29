@@ -136,6 +136,9 @@ gSessionManager.restorePrompt = function() {
 		// do this via a preference so we don't save twice in case user loads a different auto save sessions
 		this.setPref("_save_prefs", true);  
 	}
+	
+	// Don't prompt for a session again if user cancels crash prompt
+	this.setPref("_no_prompt_for_session", true);
 };
 		
 gSessionManager.restorePrompt();
