@@ -247,8 +247,12 @@ gSessionManager.confirm = function (aElem) {
 	var stringBundle = Components.classes["@mozilla.org/intl/stringbundle;1"]
 	                   .getService(Components.interfaces.nsIStringBundleService)
 	                   .createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+					   
+	var timeframe = document.getElementById("sanitizeDurationChoice");
+	var txt = stringBundle.GetStringFromName("delete_all_confirm") +
+	          (timeframe ? (" - " + timeframe.label) : "");
 	
-	var okay = this.mPromptService.confirmEx(null, stringBundle.GetStringFromName("sessionManager"), stringBundle.GetStringFromName("delete_all_confirm"), 
+	var okay = this.mPromptService.confirmEx(null, stringBundle.GetStringFromName("sessionManager"), txt, 
 	                                         this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1,
 	                                         null, null, null, null, {});
 	aElem.checked = !okay;
