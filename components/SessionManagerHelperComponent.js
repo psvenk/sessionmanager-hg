@@ -37,6 +37,8 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 const report = Components.utils.reportError;
 
+const STARTUP_PROMPT = -11;
+
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function SessionManagerHelperComponent() {}
@@ -101,8 +103,20 @@ SessionManagerHelperComponent.prototype = {
 			try
 			{
 				this._handle_crash();
+				
+				// Handle case if user cancels out of session prompt
+				let prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+				if (prefroot.getIntPref("browser.startup.page") == STARTUP_PROMPT) 
+				{
+					// Change browser.startup.page to old value stored by Session Manager
+					let page = prefroot.getIntPref("extensions.sessionmanager.old_startup_page");
+					prefroot.setIntPref("browser.startup.page", page);
+					// listen for initial window load to set browser.startup.page back to STARTUP_PROMPT
+					os.addObserver(this, "sessionmanager:process-closed-window", false);
+					//dump("Set page to " + page + "\n");
+				}
 			}
-			catch (ex) { dump(ex); }
+			catch (ex) { dump(ex + "\n"); }
 			
 			// stuff to handle preference file saving
 			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
@@ -123,6 +137,15 @@ SessionManagerHelperComponent.prototype = {
 			this.mTimer.initWithCallback({
 				notify:function (aTimer) { Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).savePrefFile(null); }
 			}, 250, Ci.nsITimer.TYPE_ONE_SHOT);
+			break;
+		case "sessionmanager:process-closed-window":
+			os.removeObserver(this, "sessionmanager:process-closed-window");
+			// Restore startup prompt if changed in final-ui-startup
+			try {
+				Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch).setIntPref("browser.startup.page", STARTUP_PROMPT);
+			}
+			catch (ex) { dump(ex + "\n"); }
+			//dump("Set page to prompt\n");
 			break;
 		case "quit-application-granted":
 			os.removeObserver(this, "sessionmanager-preference-save");
