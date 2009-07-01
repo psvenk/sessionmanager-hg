@@ -62,13 +62,26 @@ var gSessionManager_preferencesOverlay = {
 			height = height + parseInt(window.getComputedStyle(menuitem, null).height);
 			// Actually set preference so browser will pick up if user changes it
 			if (startup) {
-				// Two problems:
-				// 1. If user selects menu item for browser.startup.page preference value, nothing happens unless I use valueFromPreferences
-				//    below, but that triggers a preference notification, plus if user cancels, then preference is stuck as our value.
-				// 2. Trying to set preference to browser value triggers turning off Session Manager.  Since setting session manager triggers the setting
-				//    of browser.startup.page when it equals 3, this causes Session Manager to be turned off.  There needs to be some kind of
-				//    lock to prevent this from happening.
-				document.getElementById("browser.startup.page").value = ((startup == 1) ? gSessionManager.STARTUP_PROMPT() : gSessionManager.STARTUP_LOAD());
+				// Save current value
+				var currentValue = document.getElementById("browser.startup.page").valueFromPreferences;
+			
+				// Tell Session Manager Helper Component to ignore preference change below
+				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:ignore-preference-changes", "true");
+				document.getElementById("browser.startup.page").valueFromPreferences = ((startup == 1) ? gSessionManager.STARTUP_PROMPT() : gSessionManager.STARTUP_LOAD());
+				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:ignore-preference-changes", "false");
+				
+				// Listen for window closing in case user cancels without applying changes
+				window.addEventListener("unload", function() {
+					window.removeEventListener("unload", arguments.callee, false);
+					
+					if (document.getElementById("browser.startup.page").valueFromPreferences <= gSessionManager.STARTUP_PROMPT()) {
+						//dump("restoring preference\n");
+						// Tell Session Manager Helper Component to ignore preference change below
+						gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:ignore-preference-changes", "true");
+						document.getElementById("browser.startup.page").valueFromPreferences = currentValue;
+						gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:ignore-preference-changes", "false");
+					}
+				}, false);		
 			}
 		}
 		
