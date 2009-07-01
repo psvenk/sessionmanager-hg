@@ -33,7 +33,6 @@
 			<preference id="extensions.sessionmanager.old_startup_page" name="extensions.sessionmanager.old_startup_page" type="int"/>
 			<preference id="extensions.sessionmanager.overwrite" name="extensions.sessionmanager.overwrite" type="bool"/>
 			<preference id="extensions.sessionmanager.preselect_previous_session" name="extensions.sessionmanager.preselect_previous_session" type="bool"/>
-			<preference id="extensions.sessionmanager.real_old_startup_page" name="extensions.sessionmanager.real_old_startup_page" type="int"/>
 			<preference id="extensions.sessionmanager.reload" name="extensions.sessionmanager.reload" type="bool"/>
 			<preference id="extensions.sessionmanager.resume_session" name="extensions.sessionmanager.resume_session" type="string"/>
 			<preference id="extensions.sessionmanager.save_cookies" name="extensions.sessionmanager.save_cookies" type="bool"/>
@@ -60,7 +59,7 @@
 							<radio label="&selectSession.label;" accesskey="&selectSession.accesskey;"/>
 						</radiogroup>
 						<hbox>
-							<menulist id="browserStartupPage" preference="browser.startup.page" onsyncfrompreference="return readStartupPage();">
+							<menulist id="browserStartupPage" preference="browser.startup.page">
 								<menupopup id="browserStartupPage_menu"/>
 							</menulist>
 						</hbox>

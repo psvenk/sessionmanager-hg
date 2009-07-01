@@ -4,6 +4,11 @@ gSessionManager._onLoad = gSessionManager.onLoad;
 gSessionManager.onLoad = function() {
 	this._onLoad(true);
 	
+	// If instant Apply is on, hide the apply button
+	if (this.getPref("browser.preferences.instantApply", false, true)) {
+		_("sessionmanagerOptions").getButton("extra1").style.visibility = "collapse";
+	}
+	
 	// Populate select session list and select previously selected session
 	var resume_session = _("resume_session");
 	var sessions = this.getSessions();
@@ -74,20 +79,6 @@ gSessionManager.onUnload = function() {
 };
 
 var _disable = gSessionManager.setDisabled;
-
-// The processing in this is also duplicated in selectStartup since _("startupOption").selectedIndex is 0 when this first runs
-// so we need to change it manually there.  This handles the case where the startup.page preference changes when selecting the
-// startup option.
-function readStartupPage()
-{
-	var page = _("browser.startup.page").value;
-	// If using Sesssion Manager select old startup page value in case user wants to use it
-	if (_("startupOption").selectedIndex) {
-		page = _("extensions.sessionmanager.real_old_startup_page").value;
-		_("browser.startup.page").value = page;
-	}
-	return page;
-}
 
 function readMaxClosedUndo(aID)
 {
@@ -217,10 +208,9 @@ function startupSelect(index) {
 	_("resume_session").style.visibility = (index != 2)?"collapse":"visible";
 	//if (index == 1) _("resume_session").style.visibility = "hidden";
 	
-	// If using Sesssion Manager select old startup page value in case user wants to use it (see readStartupPage)
-	if (index) {
-		_("browserStartupPage").value = _("extensions.sessionmanager.real_old_startup_page").value;
-		_("browser.startup.page").value = _("extensions.sessionmanager.real_old_startup_page").value;
+	// If instant apply on, apply immediately
+	if (gSessionManager.getPref("browser.preferences.instantApply", false, true)) {
+		setStartValue();
 	}
 }
 
@@ -236,11 +226,11 @@ function savePrefs() {
 	setStartValue();
 	
 	// Disable Apply Button
-	document.getElementById("sessionmanagerOptions").getButton("extra1").disabled = true;
+	_("sessionmanagerOptions").getButton("extra1").disabled = true;
 }	
 
 function enableApply() {
-	document.getElementById("sessionmanagerOptions").getButton("extra1").disabled = false;
+	_("sessionmanagerOptions").getButton("extra1").disabled = false;
 }
 
 function goHelp() {
