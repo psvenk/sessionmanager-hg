@@ -38,6 +38,9 @@ const Cu = Components.utils;
 const report = Components.utils.reportError;
 
 const STARTUP_PROMPT = -11;
+const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
+const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
+const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -49,6 +52,7 @@ SessionManagerHelperComponent.prototype = {
 	classID:          Components.ID("{5714d620-47ce-11db-b0de-0800200c9a66}"),
 	contractID:       "@morac/sessionmanager-helper;1",
 	_xpcom_categories: [{ category: "app-startup", service: true }],
+	_ignorePrefChange: false,
 	mAutoPrivacy: false,
 	mBackupState: null,
 	mSessionData: null,
@@ -60,6 +64,7 @@ SessionManagerHelperComponent.prototype = {
 	observe: function(aSubject, aTopic, aData)
 	{
 		let os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+		let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 		
 		switch (aTopic)
 		{
@@ -68,6 +73,7 @@ SessionManagerHelperComponent.prototype = {
 			os.addObserver(this, "profile-after-change", false);
 			os.addObserver(this, "final-ui-startup", false);
 			os.addObserver(this, "sessionstore-state-read", false);
+			os.addObserver(this, "profile-change-teardown", false);
 			break;
 		case "private-browsing-change-granted":
 			switch(aData) {
@@ -103,25 +109,18 @@ SessionManagerHelperComponent.prototype = {
 			try
 			{
 				this._handle_crash();
-				
-				// Handle case if user cancels out of session prompt
-				let prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-				if (prefroot.getIntPref("browser.startup.page") == STARTUP_PROMPT) 
-				{
-					// Change browser.startup.page to old value stored by Session Manager
-					let page = prefroot.getIntPref("extensions.sessionmanager.old_startup_page");
-					prefroot.setIntPref("browser.startup.page", page);
-					// listen for initial window load to set browser.startup.page back to STARTUP_PROMPT
-					os.addObserver(this, "sessionmanager:process-closed-window", false);
-					//dump("Set page to " + page + "\n");
-				}
 			}
-			catch (ex) { dump(ex + "\n"); }
+			catch (ex) { report(ex); }
 			
 			// stuff to handle preference file saving
 			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
 			os.addObserver(this, "quit-application-granted", false);
 			os.addObserver(this, "sessionmanager-preference-save", false);
+			os.addObserver(this, "sessionmanager:restore-startup-preference", false);
+			os.addObserver(this, "sessionmanager:ignore-preference-changes", false);
+			
+			// Observe startup preference
+			pb.addObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this, false);
 			break;
 		case "sessionstore-state-read":
 			os.removeObserver(this, aTopic);
@@ -138,18 +137,52 @@ SessionManagerHelperComponent.prototype = {
 				notify:function (aTimer) { Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefService).savePrefFile(null); }
 			}, 250, Ci.nsITimer.TYPE_ONE_SHOT);
 			break;
-		case "sessionmanager:process-closed-window":
-			os.removeObserver(this, "sessionmanager:process-closed-window");
-			// Restore startup prompt if changed in final-ui-startup
-			try {
-				Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch).setIntPref("browser.startup.page", STARTUP_PROMPT);
+		case "sessionmanager:restore-startup-preference":
+			os.removeObserver(this, aTopic);
+			this._ignorePrefChange = true;
+			try 
+			{
+				// Restore browser startup preference if Session Manager previously saved it, otherwise backup current browser startup preference
+				if (pb.prefHasUserValue(OLD_BROWSER_STARTUP_PAGE_PREFERENCE)) {
+					pb.setIntPref(BROWSER_STARTUP_PAGE_PREFERENCE, pb.getIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE));
+				}
+				else {
+					pb.setIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE));
+				}
 			}
-			catch (ex) { dump(ex + "\n"); }
-			//dump("Set page to prompt\n");
+			catch (ex) { report(ex); }
+			this._ignorePrefChange = false;
+			break;
+		case "sessionmanager:ignore-preference-changes":
+			this._ignorePrefChange = (aData == "true");
 			break;
 		case "quit-application-granted":
 			os.removeObserver(this, "sessionmanager-preference-save");
 			os.removeObserver(this, aTopic);
+			
+			// Remove preference observer
+			pb.removeObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this);
+			break;
+		case "profile-change-teardown":
+			let page = pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE);
+			// If Session Manager is handling startup, save the current startup preference and then set it to home page
+			// otherwise clear the saved startup preference
+			if ((page == 3) && pb.getIntPref(SM_STARTUP_PREFERENCE)) {
+				pb.setIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, page);
+				pb.clearUserPref(BROWSER_STARTUP_PAGE_PREFERENCE);
+			}
+			else if (pb.prefHasUserValue(OLD_BROWSER_STARTUP_PAGE_PREFERENCE)) {
+				pb.clearUserPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE);
+			}
+			break;
+		case "nsPref:changed":
+			switch(aData) 
+			{
+				case BROWSER_STARTUP_PAGE_PREFERENCE:
+					// Handle case where user changes browser startup preference
+					if (!this._ignorePrefChange) this._synchStartup();
+					break;
+			}
 			break;
 		}
 	},
@@ -157,7 +190,7 @@ SessionManagerHelperComponent.prototype = {
 	/* ........ public methods ............... */
 
 	// this will save the passed in session data into the mSessionData variable
-	setSessionData: function(aState) 
+	setSessionData: function sm_setSessionData(aState) 
 	{
 		this.mSessionData = aState;
 	},
@@ -166,7 +199,7 @@ SessionManagerHelperComponent.prototype = {
 
 	// this will handle the case where user turned off crash recovery and browser crashed and
 	// preference indicates there is an active session, but there really isn't
-	_handle_crash: function()
+	_handle_crash: function sm_handle_crash()
 	{
 		let prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 		let sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"] || Cc["@mozilla.org/suite/sessionstartup;1"];
@@ -192,7 +225,7 @@ SessionManagerHelperComponent.prototype = {
 	
 	// This will check to see if there was a crash and if so put up the crash prompt 
 	// to allow the user to choose a session to restore.  This is only called for Firefox 3.5 and up and SeaMonkey 2.0 and up
-	_check_for_crash: function(aStateDataString)
+	_check_for_crash: function sm_check_for_crash(aStateDataString)
 	{
 		let initialState;
 		try {
@@ -227,7 +260,7 @@ SessionManagerHelperComponent.prototype = {
 	},
 
 	// code adapted from Danil Ivanov's "Cache Fixer" extension
-	_restoreCache: function()
+	_restoreCache: function sm_restoreCache()
 	{
     	let cache = null;
 		try 
@@ -275,9 +308,35 @@ SessionManagerHelperComponent.prototype = {
 		output.flush();
 		output.close();
 	},
-	
+
+	// Make sure that the browser and Session Manager are on the same page with regards to the startup preferences
+	_synchStartup: function sm_synchStartup()
+	{
+		let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+		let browser_startup = pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE);
+		let sm_startup = pb.getIntPref(SM_STARTUP_PREFERENCE);
+		//dump("page:" + browser_startup + ", startup:" + sm_startup + "\n");
+
+		// Ignore any preference changes made in this function
+		this._ignorePrefChange = true;
+		
+		// If browser handling startup, disable Session Manager startup and backup startup page
+		// otherwise set Session Manager to handle startup and restore browser startup setting
+		if (browser_startup > STARTUP_PROMPT) {
+			pb.setIntPref(SM_STARTUP_PREFERENCE, 0);
+			pb.setIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, browser_startup);
+		}
+		else {
+			pb.setIntPref(SM_STARTUP_PREFERENCE, (browser_startup == STARTUP_PROMPT) ? 1 : 2);
+			pb.setIntPref(BROWSER_STARTUP_PAGE_PREFERENCE, pb.getIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE));
+		}
+
+		// Resume listening to preference changes
+		this._ignorePrefChange = false;
+	},
+			
 	// Decode JSON string to javascript object
-	JSON_decode: function(aStr) {
+	JSON_decode: function sm_JSON_decode(aStr) {
 		let jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
 		try {
 			let hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
@@ -305,7 +364,7 @@ SessionManagerHelperComponent.prototype = {
 	},
 	
 	// Encode javascript object to JSON string - use JSON if built-in.
-	JSON_encode: function(aObj) {
+	JSON_encode: function sm_JSON_encode(aObj) {
 		let jsString = null;
 		try {
 			jsString = JSON.stringify(aObj);
