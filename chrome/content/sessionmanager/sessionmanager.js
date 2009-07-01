@@ -142,12 +142,6 @@ var gSessionManager = {
 			}
 		}
 		
-		// Save Command Line Empty value since it won't be valid if we restore the prompt below
-		this._isCmdLineEmpty = this.isCmdLineEmpty();
-		
-		// Restore startup preference is it was changed during startup by SessionManagerHelperComponent
-		this.mObserverService.notifyObservers(null, "sessionmanager:restore_start_prompt", null);
-		
 		this.mPrefBranch = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("extensions.sessionmanager.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		this.mPrefBranch2 = this.mPrefRoot.QueryInterface(Components.interfaces.nsIPrefService).getBranch("browser.startup.").QueryInterface(Components.interfaces.nsIPrefBranch2);
 		
@@ -1106,7 +1100,7 @@ var gSessionManager = {
 		
 		if (aMode == "startup")
 		{
-			overwriteTabs = this._isCmdLineEmpty;
+			overwriteTabs = this.isCmdLineEmpty();
 			tabsToMove = (!overwriteTabs)?Array.slice(gBrowser.mTabs):null;
 		}
 		else if (aMode == "append")
@@ -3135,57 +3129,20 @@ var gSessionManager = {
 	{
 		var browser_startup = this.getPref("browser.startup.page", 1, true);
 		var sm_startup = this.getPref("startup", 0);
-		//dump(aData + ", page:" + browser_startup + ", startup:" + sm_startup + "\n");
+		dump(aData + ", page:" + browser_startup + ", startup:" + sm_startup + "\n");
 
-		switch(aData) {
-			// if browser startup preference changed
-			case "page":
-				// If Session Manager handling startup and browser should now do so
-				if (sm_startup && (browser_startup > this.STARTUP_PROMPT())) {
-					this.setPref("startup", 0);
-				}
-				// If browser preference changed to use Session Manager
-				else if (browser_startup <= this.STARTUP_PROMPT()) {
-					// and Session Manager already being used, simply update startup preference, otherwise read in old startup preference.
-					var new_startup = (browser_startup == this.STARTUP_PROMPT()) ? 1 : 2;
-					if (sm_startup != new_startup) {
-						this.setPref("startup", new_startup);
-					}
-				}
-				
-				// Backup new browser startup preference if using browser startup
-				if (browser_startup > this.STARTUP_PROMPT()) {
-					this.setPref("old_startup_page", browser_startup);
-				}
-				break;
-			// if session manager's startup preference changed
-			case "startup":
-				// If Session Manager should now handle startup
-				if (sm_startup) {
-					// New browser startup is new Session Manager startup if using Session Manager or old browser startup if not
-					var new_startup = sm_startup ? ((sm_startup == 1) ? this.STARTUP_PROMPT() : this.STARTUP_LOAD()) : this.getPref("old_startup_page",1);
-					
-					// If browser handling startup, save current settings and set to list Session Manager
-					if (browser_startup > this.STARTUP_PROMPT()) {
-						this.setPref("old_startup_page", browser_startup);
-						this.setPref("browser.startup.page", new_startup, true);
-					}
-					// otherwise just update
-					else  {
-						if (browser_startup != new_startup) {
-							this.setPref("browser.startup.page", new_startup, true);
-						}
-					}
-				}
-				// Since the "page" preference updates first, this will only hit If "startup" 
-				// is turned off without updating the "page" preference, update it to the old value here.
-				// This will happen any time setPref("startup", 0) is called or when the Session Manager is currently handling
-				// startup and the user selects "None" in the options without changing the browser preference.
-				else if (browser_startup <= this.STARTUP_PROMPT()) {
-					//dump("Updating page to old page\n");
-					this.setPref("browser.startup.page", this.getPref("old_startup_page",1), true);
-				}
-				break;
+		// browser currently sent to resume browser session and Session Manager thinks it's handling sessions
+		if (browser_startup >= 3 && sm_startup) {
+			if (aData == "page") this.setPref("startup",0);
+			else {
+				this.setPref("browser.startup.page",  this.getPref("old_startup_page",1), true);
+				// restore preference after line above triggers it to change
+				this.setPref("real_old_startup_page", browser_startup);
+			}
+		}
+		else {
+			this.setPref("old_startup_page", ((browser_startup != 3) ? browser_startup : 1));
+			this.setPref("real_old_startup_page", browser_startup);
 		}
 	},
 
@@ -3228,7 +3185,7 @@ var gSessionManager = {
 				this.setPref("startup", (session)?2:0);
 			}
 			// Display Home Page if user selected to do so
-			//if (display home page && this._isCmdLineEmpty) {
+			//if (display home page && this.isCmdLineEmpty()) {
 			//	BrowserHome();
 			//}
 		}
@@ -3269,9 +3226,9 @@ var gSessionManager = {
 	{
 		if (!this.mApp.idEquals("SEAMONKEY")) {
 			try {
-				// Flock needs to read defaultArgs since it adds it's own special page.  Firefox should read startPage so update pages don't
-				// get overwritten.
-				var defaultArgs = this.mApp.idEquals("FIREFOX") ? 
+				// Use the defaultArgs, unless SessionStore was trying to resume or handle a crash.
+				// This handles the case where the browser updated and SessionStore thought it was supposed to display the update page, so make sure we don't overwrite it.
+				var defaultArgs = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION) ? 
 				                  Components.classes["@mozilla.org/browser/clh;1"].getService(Components.interfaces.nsIBrowserHandler).startPage :
 				                  Components.classes["@mozilla.org/browser/clh;1"].getService(Components.interfaces.nsIBrowserHandler).defaultArgs;
 				if (window.arguments && window.arguments[0] && window.arguments[0] == defaultArgs) {
@@ -3617,12 +3574,6 @@ var gSessionManager = {
 	doResumeCurrent: function()
 	{
 		return (this.getPref("browser.startup.page", 1, true) == 3)?true:false;
-	},
-
-	setResumeCurrent: function(aValue)
-	{
-		if (aValue) this.setPref("browser.startup.page", 3, true);
-		else this.setPref("browser.startup.page", this.getPref("old_startup_page", 1), true);
 	},
 
 	isCleanBrowser: function(aBrowser)
