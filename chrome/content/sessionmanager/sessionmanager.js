@@ -3131,8 +3131,18 @@ var gSessionManager = {
 		var sm_startup = this.getPref("startup", 0);
 		dump(aData + ", page:" + browser_startup + ", startup:" + sm_startup + "\n");
 
+		// User made change in browser startup options
+		if (browser_startup <= this.STARTUP_PROMPT()) {
+			dump("picked session mananager\n");
+			var old_real_startup = this.getPref("real_old_startup_page",1);
+			this.setPref("startup", browser_startup == this.STARTUP_PROMPT() ? 1 : 2);
+			this.setPref("browser.startup.page",  this.getPref("old_startup_page",1), true);
+			// restore preference after line above triggers it to change
+			this.setPref("real_old_startup_page", old_real_startup);
+		}
 		// browser currently sent to resume browser session and Session Manager thinks it's handling sessions
-		if (browser_startup >= 3 && sm_startup) {
+		else if (browser_startup >= 3 && sm_startup) {
+			dump("window swap\n");
 			if (aData == "page") this.setPref("startup",0);
 			else {
 				this.setPref("browser.startup.page",  this.getPref("old_startup_page",1), true);
@@ -3141,8 +3151,68 @@ var gSessionManager = {
 			}
 		}
 		else {
+			dump("other\n");
+			//if (aData == "page") this.setPref("startup",0);
 			this.setPref("old_startup_page", ((browser_startup != 3) ? browser_startup : 1));
 			this.setPref("real_old_startup_page", browser_startup);
+		}
+	},
+
+	newer_synchStartup: function(aData)
+	{
+		var browser_startup = this.getPref("browser.startup.page", 1, true);
+		var sm_startup = this.getPref("startup", 0);
+		//dump(aData + ", page:" + browser_startup + ", startup:" + sm_startup + "\n");
+
+		switch(aData) {
+			// if browser startup preference changed
+			case "page":
+				// If Session Manager handling startup and browser should now do so
+				if (sm_startup && (browser_startup > this.STARTUP_PROMPT())) {
+					this.setPref("startup", 0);
+				}
+				// If browser preference changed to use Session Manager
+				else if (browser_startup <= this.STARTUP_PROMPT()) {
+					// and Session Manager already being used, simply update startup preference, otherwise read in old startup preference.
+					var new_startup = (browser_startup == this.STARTUP_PROMPT()) ? 1 : 2;
+					if (sm_startup != new_startup) {
+						this.setPref("startup", new_startup);
+					}
+				}
+				
+				// Backup new browser startup preference if using browser startup
+				if (browser_startup > this.STARTUP_PROMPT()) {
+					this.setPref("old_startup_page", browser_startup);
+				}
+				break;
+			// if session manager's startup preference changed
+			case "startup":
+				// If Session Manager should now handle startup
+				if (sm_startup) {
+					// New browser startup is new Session Manager startup if using Session Manager or old browser startup if not
+					var new_startup = sm_startup ? ((sm_startup == 1) ? this.STARTUP_PROMPT() : this.STARTUP_LOAD()) : this.getPref("old_startup_page",1);
+					
+					// If browser handling startup, save current settings and set to list Session Manager
+					if (browser_startup > this.STARTUP_PROMPT()) {
+						this.setPref("old_startup_page", browser_startup);
+						this.setPref("browser.startup.page", new_startup, true);
+					}
+					// otherwise just update
+					else  {
+						if (browser_startup != new_startup) {
+							this.setPref("browser.startup.page", new_startup, true);
+						}
+					}
+				}
+				// Since the "page" preference updates first, this will only hit If "startup" 
+				// is turned off without updating the "page" preference, update it to the old value here.
+				// This will happen any time setPref("startup", 0) is called or when the Session Manager is currently handling
+				// startup and the user selects "None" in the options without changing the browser preference.
+				else if (browser_startup <= this.STARTUP_PROMPT()) {
+					//dump("Updating page to old page\n");
+					this.setPref("browser.startup.page", this.getPref("old_startup_page",1), true);
+				}
+				break;
 		}
 	},
 

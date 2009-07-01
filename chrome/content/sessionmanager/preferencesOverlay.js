@@ -55,12 +55,21 @@ var gSessionManager_preferencesOverlay = {
 		var startMenu = document.getElementById("browserStartupPage") || document.getElementById("startupPage");
 		var height = 0;
 		if (startMenu) {
+			var startup = gSessionManager.getPref("extensions.sessionmanager.startup", 0, true);
 			var menuitem = startMenu.appendItem(stringBundle.GetStringFromName("startup_load"), gSessionManager.STARTUP_LOAD());
 			height = height + parseInt(window.getComputedStyle(menuitem, null).height);
-			if (startMenu.value == gSessionManager.STARTUP_LOAD()) startMenu.selectedItem = menuitem;
 			menuitem = startMenu.appendItem(stringBundle.GetStringFromName("startup_prompt"), gSessionManager.STARTUP_PROMPT());
 			height = height + parseInt(window.getComputedStyle(menuitem, null).height);
-			if (startMenu.value == gSessionManager.STARTUP_PROMPT()) startMenu.selectedItem = menuitem;
+			// Actually set preference so browser will pick up if user changes it
+			if (startup) {
+				// Two problems:
+				// 1. If user selects menu item for browser.startup.page preference value, nothing happens unless I use valueFromPreferences
+				//    below, but that triggers a preference notification, plus if user cancels, then preference is stuck as our value.
+				// 2. Trying to set preference to browser value triggers turning off Session Manager.  Since setting session manager triggers the setting
+				//    of browser.startup.page when it equals 3, this causes Session Manager to be turned off.  There needs to be some kind of
+				//    lock to prevent this from happening.
+				document.getElementById("browser.startup.page").value = ((startup == 1) ? gSessionManager.STARTUP_PROMPT() : gSessionManager.STARTUP_LOAD());
+			}
 		}
 		
 		// SeaMonkey needs window size to be fixed since the radio buttons take up space
