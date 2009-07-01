@@ -75,12 +75,16 @@ gSessionManager.onUnload = function() {
 
 var _disable = gSessionManager.setDisabled;
 
+// The processing in this is also duplicated in selectStartup since _("startupOption").selectedIndex is 0 when this first runs
+// so we need to change it manually there.  This handles the case where the startup.page preference changes when selecting the
+// startup option.
 function readStartupPage()
 {
 	var page = _("browser.startup.page").value;
 	// If using Sesssion Manager select old startup page value in case user wants to use it
-	if (page <= gSessionManager.STARTUP_PROMPT()) {
-		page = _("extensions.sessionmanager.old_startup_page").value;
+	if (_("startupOption").selectedIndex) {
+		page = _("extensions.sessionmanager.real_old_startup_page").value;
+		_("browser.startup.page").value = page;
 	}
 	return page;
 }
@@ -212,6 +216,12 @@ function startupSelect(index) {
 	_("preselect").style.visibility = (index != 1)?"collapse":"visible";
 	_("resume_session").style.visibility = (index != 2)?"collapse":"visible";
 	//if (index == 1) _("resume_session").style.visibility = "hidden";
+	
+	// If using Sesssion Manager select old startup page value in case user wants to use it (see readStartupPage)
+	if (index) {
+		_("browserStartupPage").value = _("extensions.sessionmanager.real_old_startup_page").value;
+		_("browser.startup.page").value = _("extensions.sessionmanager.real_old_startup_page").value;
+	}
 }
 
 function setStartValue() {
