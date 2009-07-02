@@ -2438,6 +2438,7 @@ var gSessionManager = {
 			// if Last window state saved retrieve it in case the current state has been wiped and we need to use it
 			// The current state should only be wiped if the browser is set to clear the "Visited Pages" on shutdown.
 			if (this.mLastState) {
+				this.log("mLastState exists");
 				if (!helper_state) lastState = this.mLastState;
 				this.mLastState = null;
 			}
@@ -2450,15 +2451,19 @@ var gSessionManager = {
 			try {
 				var aState = this.JSON_decode(state.split("\n")[4]);
 				// if window data has been cleared ("Visited Pages" cleared on shutdown), use lastState, if it exists.
+				this.log("Number of Windows #1 = " + aState.windows.length);
+				this.log(state);
 				if (aState.windows.length == 0 && lastState) {
-					//dump("Using saved Last State\n");
+					this.log("Using saved Last State");
 					var count = this.getCount(lastState);
 					state = state.split("\n");
 					state[3] = state[3].replace(/count=0\/0/,"count=" + count.windows + "/" + count.tabs);
 					state[4] = lastState;
 					state = state.join("\n");
 					aState = this.JSON_decode(lastState);
+					this.log(lastState);
 				}
+				this.log("Number of Windows #2 = " + aState.windows.length);
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
 		    		(aState.windows[0].tabs[0].entries.length > 1) || 
 		    		((aState.windows[0].tabs[0].entries.length == 1 && aState.windows[0].tabs[0].entries[0].url != "about:blank")))) {

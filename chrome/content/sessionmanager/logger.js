@@ -6,8 +6,8 @@ gSessionManager.logFileName = "sessionmanager_log.txt";
 gSessionManager.logError = function(e, force) {
 	try { 
 		if (force || this.getPref("debug", false)) {
-			var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
-			var consoleError = Components.classes['@mozilla.org/scripterror;1'].createInstance(Components.interfaces.nsIScriptError);
+			var consoleService = this.mComponents.classes['@mozilla.org/consoleservice;1'].getService(this.mComponents.interfaces.nsIConsoleService);
+			var consoleError = this.mComponents.classes['@mozilla.org/scripterror;1'].createInstance(this.mComponents.interfaces.nsIScriptError);
 
 			consoleError.init(e.message, e.fileName, e.lineNumber, e.lineNumber, e.columnNumber, 0, null);
 
@@ -26,7 +26,7 @@ gSessionManager.logError = function(e, force) {
 gSessionManager.log = function(aMessage, force) {
 	try {
 		if (force || this.getPref("debug", false)) {
-			var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
+			var consoleService = this.mComponents.classes['@mozilla.org/consoleservice;1'].getService(this.mComponents.interfaces.nsIConsoleService);
 			consoleService.logStringMessage("Session Manager (" + (new Date).toGMTString() + "): " + aMessage);
 			this.write_log((new Date).toGMTString() + "): " + aMessage + "\n");
 		}
@@ -41,14 +41,14 @@ gSessionManager.log = function(aMessage, force) {
 //
 gSessionManager.openLogFile = function() {
 	var logFile = this.getProfileFile(this.logFileName);
-	if (!logFile.exists() || !(logFile instanceof Components.interfaces.nsILocalFile)) return;
+	if (!logFile.exists() || !(logFile instanceof this.mComponents.interfaces.nsILocalFile)) return;
 	try {
 		// "Double click" the log file to open it
 		logFile.launch();
 	} catch (e) {
 		try {
 			// If launch fails (probably because it's not implemented), let the OS handler try to open the log file
-			var mimeInfoService = Components.classes["@mozilla.org/uriloader/external-helper-app-service;1"].getService(Components.interfaces.nsIMIMEService);
+			var mimeInfoService = this.mComponents.classes["@mozilla.org/uriloader/external-helper-app-service;1"].getService(this.mComponents.interfaces.nsIMIMEService);
 			var mimeInfo = mimeInfoService.getFromTypeAndExtension(mimeInfoService.getTypeFromFile(logFile), "txt");
 			mimeInfo.preferredAction = mimeInfo.useSystemDefault;
 			mimeInfo.launchWithFile(logFile);      
@@ -83,11 +83,11 @@ gSessionManager.write_log = function(aMessage) {
 	try {
 		var logFile = this.getProfileFile(this.logFileName);
 
-		var stream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
+		var stream = this.mComponents.classes["@mozilla.org/network/file-output-stream;1"].createInstance(this.mComponents.interfaces.nsIFileOutputStream);
 		// ioFlags: write only, create file, append;	Permission: read/write owner
 		stream.init(logFile, 0x02 | 0x08 | 0x10, 0600, 0);
-		var cvstream = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
-		cvstream.init(stream, "UTF-8", 0, Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
+		var cvstream = this.mComponents.classes["@mozilla.org/intl/converter-output-stream;1"].createInstance(this.mComponents.interfaces.nsIConverterOutputStream);
+		cvstream.init(stream, "UTF-8", 0, this.mComponents.interfaces.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 
 		cvstream.writeString(aMessage.replace(/[\n$]/g, this.mEOL));
 		cvstream.flush();
