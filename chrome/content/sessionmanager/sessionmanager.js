@@ -86,6 +86,12 @@ var gSessionManager = {
 		this.STARTUP_PROMPT = function() { return STARTUP_PROMPT; }
 		this.STARTUP_LOAD = function() { return STARTUP_LOAD; }
 		this.VERSION = function() { return VERSION; }
+		
+		// read logger scripts
+		var subscriptLoader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
+                      .getService(Components.interfaces.mozIJSSubScriptLoader);
+
+		subscriptLoader.loadSubScript("chrome://sessionmanager/content/logger.js");
 	
 		// Get SessionStore service component 
 		if (!this.getSessionStoreComponent()) return false;
@@ -2345,7 +2351,7 @@ var gSessionManager = {
 
 	shutDown: function()
 	{
-		//dump("Shutdown start\n");
+		this.log("Shutdown start");
 		// Handle sanitizing if sanitize on shutdown without prompting (Firefox 3.5 never prompts)
 		var prompt = this.getPref("privacy.sanitize.promptOnSanitize", null, true);
 		var sanitize = (this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true) && 
@@ -2380,7 +2386,7 @@ var gSessionManager = {
 			
 			this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
 		}
-		//dump("Shutdown end\n");
+		this.log("Shutdown end");
 		
 		this.delPref("_running");
 		this.delPref("_autosave_values");
@@ -2418,11 +2424,14 @@ var gSessionManager = {
 
 	backupCurrentSession: function()
 	{
+		this.log("backupCurrentSession start");
 		var backup = this.mPref_backup_session;
 		var temp_backup = (this.mPref_startup > 0) && (this.mPref_resume_session == this.mBackupSessionName);
 		// If shut down in private browsing mode, use the pre-private sesssion, otherwise get the current one
 		var helper_state = (this.mShutDownInPrivateBrowsingMode || this.isPrivateBrowserMode()) ? this.mSMHelper.mBackupState : null;
 
+		this.log("backup = " + backup + ", temp_backup = " + temp_backup + ", helper_state = " + helper_state);
+		
 		// Don't save if just a blank window, if there's an error parsing data, just save
 		var state = null, lastState = null;
 		if ((backup > 0) || temp_backup) {
@@ -2432,7 +2441,12 @@ var gSessionManager = {
 				if (!helper_state) lastState = this.mLastState;
 				this.mLastState = null;
 			}
-			state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, this.getNoUndoData(), null, (this._string_backup_sessions || this._string("backup_sessions")), true, null, helper_state);
+			try {
+				state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, this.getNoUndoData(), null, (this._string_backup_sessions || this._string("backup_sessions")), true, null, helper_state);
+			} catch(ex) {
+				dump(ex);
+				this.logError(ex);
+			}
 			try {
 				var aState = this.JSON_decode(state.split("\n")[4]);
 				// if window data has been cleared ("Visited Pages" cleared on shutdown), use lastState, if it exists.
@@ -2451,7 +2465,10 @@ var gSessionManager = {
 					backup = 0;
 					temp_backup = false;
 				}
-			} catch(ex) { dump(ex); }
+			} catch(ex) { 
+				dump(ex);
+				this.logError(ex);
+			}
 		}
 
 		if (backup == 2)
@@ -2497,9 +2514,11 @@ var gSessionManager = {
 			catch (ex)
 			{
 				this.ioError(ex);
+				this.logError(ex);
 			}
 		}
 		else this.keepOldBackups(false);
+		this.log("backupCurrentSession end");
 	},
 
 	keepOldBackups: function(backingUp)

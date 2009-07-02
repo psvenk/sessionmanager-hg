@@ -26,6 +26,7 @@
 			<preference id="extensions.sessionmanager.append_by_default" name="extensions.sessionmanager.append_by_default" type="bool"/>
 			<preference id="extensions.sessionmanager.autosave_session" name="extensions.sessionmanager.autosave_session" type="bool"/>
 			<preference id="extensions.sessionmanager.backup_session" name="extensions.sessionmanager.backup_session" type="int"/>
+			<preference id="extensions.sessionmanager.debug" name="extensions.sessionmanager.debug" type="bool"/>
 			<preference id="extensions.sessionmanager.hide_tools_menu" name="extensions.sessionmanager.hide_tools_menu" type="bool"/>
 			<preference id="extensions.sessionmanager.max_backup_keep" name="extensions.sessionmanager.max_backup_keep" type="int"/>
 			<preference id="extensions.sessionmanager.max_display" name="extensions.sessionmanager.max_display" type="int"/>
@@ -152,6 +153,14 @@
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
+		<groupbox>
+			<caption label="Logging"/>
+			<hbox>
+				<checkbox label="Enable Logging" preference="extensions.sessionmanager.debug"/>
+				<button label="Open Log File" oncommand="gSessionManager.openLogFile();"/>
+				<button label="Delete Log File" oncommand="gSessionManager.deleteLogFile(true);"/>
+			</hbox>
+		</groupbox>
 		<groupbox>
 			<caption label="&sessionImport.caption;"/>
 			<hbox>
