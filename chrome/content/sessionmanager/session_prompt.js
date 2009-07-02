@@ -83,13 +83,11 @@ gSessionManager.onLoad = function() {
 			try {
 				sessions = window.opener.gSessionManager.getSessionsOverride();
 			} catch (ex) { 
-				var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
-				consoleService.logStringMessage("Session Manager: Override function error. " + ex);
+				this.log("Override function error. " + ex, true);
 			}
 		}
 		else {
-			var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
-			consoleService.logStringMessage("Session Manager: Passed override function parameter is not a function.");
+			this.log("Passed override function parameter is not a function.", true);
 		}
 		if (!sessions || !_isValidSessionList(sessions)) {
 			window.close();
@@ -583,8 +581,7 @@ function _isValidSessionList(aSessions)
 {
 	if (aSessions==null || typeof(aSessions)!="object" || typeof(aSessions.length)!="number" || 
 	    aSessions.length == 0 || !aSessions[0].name) {
-		var consoleService = Components.classes['@mozilla.org/consoleservice;1'].getService(Components.interfaces.nsIConsoleService);
-		consoleService.logStringMessage("Session Manager: Override function returned an invalid session list.");
+		this.log("Override function returned an invalid session list.", true);
 		return false;
 	}
 	return true;

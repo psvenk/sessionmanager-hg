@@ -40,7 +40,7 @@ gSessionManager.restorePrompt = function() {
 			if (count.windows && count.tabs) countString = count.windows + "," + count.tabs;
 		}
 		catch(ex) { 
-			dump(ex + "\n"); 
+			this.logError(ex); 
 		}
 	}
 	
