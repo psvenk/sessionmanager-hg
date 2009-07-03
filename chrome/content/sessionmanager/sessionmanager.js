@@ -3163,6 +3163,7 @@ var gSessionManager = {
 		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
 		var recoverOnly = this.mPref__running || sessionstart || this.getPref("_no_prompt_for_session", false);
 		this.delPref("_no_prompt_for_session");
+		this.log("recoverSession: recovering = " + recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly);
 
 		// handle crash where user chose a specific session
 		if (recovering)
