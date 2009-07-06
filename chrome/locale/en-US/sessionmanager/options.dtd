@@ -107,3 +107,10 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Pre-select previous session">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "Logging">
+<!ENTITY enable_logging.label "Enable Logging">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Open Log File">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Delete Log File">
+<!ENTITY delete_log.accesskey "d">
