@@ -259,6 +259,9 @@ function goHelp() {
 		case (_("sessionstorePrefPane")):
 			link = link + "sessionstore";
 			break;
+		case (_("loggingPrefPane")):
+			link = link + "logging";
+			break;
 	}
 	
 	openLink(link);

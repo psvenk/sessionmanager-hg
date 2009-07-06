@@ -182,6 +182,7 @@ var gSessionManager = {
 		this.mPref_click_restore_tab = this.getPref("click_restore_tab", true);
 		this.mPref_encrypt_sessions = this.getPref("encrypt_sessions", false);
 		this.mPref_encrypted_only = this.getPref("encrypted_only", false);
+		this.mPref_logging = this.getPref("logging", false);
 		this.mPref_max_backup_keep = this.getPref("max_backup_keep", 0);
 		this.mPref_max_closed_undo = this.getPref("max_closed_undo", 10);
 		this.mPref_max_display = this.getPref("max_display", 20);
@@ -475,7 +476,7 @@ var gSessionManager = {
 
 	observe: function(aSubject, aTopic, aData)
 	{
-		this.log("observe: Subject = " + aSubject + ", aTopic = " + aTopic + ", aData = " + aData);
+		this.log("observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject);
 		switch (aTopic)
 		{
 		case "sessionmanager:windowtabopenclose":

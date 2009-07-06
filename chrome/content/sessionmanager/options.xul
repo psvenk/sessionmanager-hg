@@ -20,13 +20,12 @@
 	<!-- ************************************** -->
 	<!-- ****** Main Preference Panel ********* -->
 	<!-- ************************************** -->
-		<prefpane id="mainPrefPane" label="&general.caption;" helpURI="" helpTopic="prefs-main">
+	<prefpane id="mainPrefPane" label="&general.caption;" helpURI="" helpTopic="prefs-main">
 		<preferences>
 			<preference id="browser.startup.page" name="browser.startup.page" type="int"/>
 			<preference id="extensions.sessionmanager.append_by_default" name="extensions.sessionmanager.append_by_default" type="bool"/>
 			<preference id="extensions.sessionmanager.autosave_session" name="extensions.sessionmanager.autosave_session" type="bool"/>
 			<preference id="extensions.sessionmanager.backup_session" name="extensions.sessionmanager.backup_session" type="int"/>
-			<preference id="extensions.sessionmanager.debug" name="extensions.sessionmanager.debug" type="bool"/>
 			<preference id="extensions.sessionmanager.hide_tools_menu" name="extensions.sessionmanager.hide_tools_menu" type="bool"/>
 			<preference id="extensions.sessionmanager.max_backup_keep" name="extensions.sessionmanager.max_backup_keep" type="int"/>
 			<preference id="extensions.sessionmanager.max_display" name="extensions.sessionmanager.max_display" type="int"/>
@@ -154,14 +153,6 @@
 			</tabpanels>
 		</tabbox>
 		<groupbox>
-			<caption label="Logging"/>
-			<hbox>
-				<checkbox label="Enable Logging" preference="extensions.sessionmanager.debug"/>
-				<button label="Open Log File" oncommand="gSessionManager.openLogFile();"/>
-				<button label="Delete Log File" oncommand="gSessionManager.deleteLogFile(true);"/>
-			</hbox>
-		</groupbox>
-		<groupbox>
 			<caption label="&sessionImport.caption;"/>
 			<hbox>
 				<button label="&importTMP.label;" accesskey="&importTMP.accesskey;" oncommand="gConvertTMPSession.init();"/>
@@ -173,7 +164,7 @@
 	<!-- ******************************************* -->
 	<!-- ****** UndoClose Preference Panel ********* -->
 	<!-- ******************************************* -->
-		<prefpane id="undoclosePrefPane" label="&undoClose.caption;" helpURI="" helpTopic="prefs-undo">
+	<prefpane id="undoclosePrefPane" label="&undoClose.caption;" helpURI="" helpTopic="prefs-undo">
 		<preferences>
 			<preference id="browser.sessionstore.max_tabs_undo" name="browser.sessionstore.max_tabs_undo" type="int"/>
 			<preference id="browser.sessionstore.max_windows_undo" name="browser.sessionstore.max_windows_undo" type="int"/>
@@ -252,7 +243,7 @@
 	<!-- ****************************************** -->
 	<!-- ****** Advanced Preference Panel ********* -->
 	<!-- ****************************************** -->
-		<prefpane id="advancedPrefPane" label="&advanced.caption;" helpURI="" helpTopic="prefs-advanced">
+	<prefpane id="advancedPrefPane" label="&advanced.caption;" helpURI="" helpTopic="prefs-advanced">
 		<preferences>
 			<preference id="extensions.sessionmanager.disable_cache_fixer" name="extensions.sessionmanager.disable_cache_fixer" type="bool"/>
 			<preference id="extensions.sessionmanager.sessions_dir" name="extensions.sessionmanager.sessions_dir" type="string"/>
@@ -289,7 +280,7 @@
 	<!-- ********************************************** -->
 	<!-- ****** SessionStore Preference Panel ********* -->
 	<!-- ********************************************** -->
-		<prefpane id="sessionstorePrefPane" label="&sessionstore.caption;" helpURI="" helpTopic="prefs-sessionstore">
+	<prefpane id="sessionstorePrefPane" label="&sessionstore.caption;" helpURI="" helpTopic="prefs-sessionstore">
 		<preferences>
 			<preference id="browser.sessionstore.interval" name="browser.sessionstore.interval" type="int"/>
 			<preference id="browser.sessionstore.postdata" name="browser.sessionstore.postdata" type="int"/>
@@ -331,6 +322,23 @@
 		</groupbox>
 	</prefpane>
 
+	<!-- ******************************************* -->
+	<!-- ****** Logging Preference Panel ********* -->
+	<!-- ******************************************* -->
+	<prefpane id="loggingPrefPane" label="&logging.caption;" helpURI="" helpTopic="prefs-logging">
+		<preferences>
+			<preference id="extensions.sessionmanager.logging" name="extensions.sessionmanager.logging" type="bool"/>
+		</preferences>
+		<groupbox>
+			<caption label="&logging.caption;"/>
+			<hbox>
+				<checkbox label="&enable_logging.label;" accesskey="enable_logging.accesskey;" preference="extensions.sessionmanager.logging"/>
+				<button label="&open_log.label;" accesskey="open_log.accesskey;" oncommand="gSessionManager.openLogFile();"/>
+				<button label="&delete_log.label;" accesskey="delete_log.accesskey;" oncommand="gSessionManager.deleteLogFile(true);"/>
+			</hbox>
+		</groupbox>
+	</prefpane>
+	
 	<stringbundleset id="stringbundleset">
 		<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
 	</stringbundleset>

@@ -5,7 +5,7 @@ gSessionManager.logFileName = "sessionmanager_log.txt";
 //
 gSessionManager.logError = function(e, force) {
 	try { 
-		if (force || this.getPref("debug", false)) {
+		if (force || this.mPref_logging) {
 			var consoleService = this.mComponents.classes['@mozilla.org/consoleservice;1'].getService(this.mComponents.interfaces.nsIConsoleService);
 			var consoleError = this.mComponents.classes['@mozilla.org/scripterror;1'].createInstance(this.mComponents.interfaces.nsIScriptError);
 
@@ -25,7 +25,7 @@ gSessionManager.logError = function(e, force) {
 //
 gSessionManager.log = function(aMessage, force) {
 	try {
-		if (force || this.getPref("debug", false)) {
+		if (force || this.mPref_logging) {
 			var consoleService = this.mComponents.classes['@mozilla.org/consoleservice;1'].getService(this.mComponents.interfaces.nsIConsoleService);
 			consoleService.logStringMessage("Session Manager (" + (new Date).toGMTString() + "): " + aMessage);
 			this.write_log((new Date).toGMTString() + "): " + aMessage + "\n");
@@ -41,7 +41,11 @@ gSessionManager.log = function(aMessage, force) {
 //
 gSessionManager.openLogFile = function() {
 	var logFile = this.getProfileFile(this.logFileName);
-	if (!logFile.exists() || !(logFile instanceof this.mComponents.interfaces.nsILocalFile)) return;
+	if (!logFile.exists() || !(logFile instanceof this.mComponents.interfaces.nsILocalFile)) {
+		var ex = new Components.Exception(this._string("file_not_found"));
+		this.ioError(ex);
+		return;
+	}
 	try {
 		// "Double click" the log file to open it
 		logFile.launch();
@@ -67,7 +71,7 @@ gSessionManager.deleteLogFile = function(aForce) {
 	try { 
 		var logFile = this.getProfileFile(this.logFileName);
 
-		if (logFile.exists() && (aForce || !this.getPref("debug", false) || logFile.fileSize > 1048576)) {
+		if (logFile.exists() && (aForce || !this.mPref_logging || logFile.fileSize > 1048576)) {
 			logFile.remove(false);
 		}
 	}
