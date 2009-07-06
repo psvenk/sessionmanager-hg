@@ -28,3 +28,6 @@ radio[pane=sessionstorePrefPane] {
 radio[pane=sessionstorePrefPane]:hover, radio[pane=sessionstorePrefPane][selected="true"] {
 	-moz-image-region:rect(32px,128px,64px,96px);
 }
+radio[pane=loggingPrefPane] {
+	-moz-image-region:rect(0px,160px,32px,128px);
+}
