@@ -15,13 +15,15 @@
 		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" buttontooltiptext="&toolbar.tooltip;"
 		               oncommand="gSessionManager.save(null, null, null, event.shiftKey);" onclick="gSessionManager.onToolbarClick(event, this);" tooltiptext="&toolbar.menu.tooltip;" contextmenu="">
 			<menupopup onpopupshowing="gSessionManager.init(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
-				<menuitem label="SQL Conversion Test" oncommand="gSessionManager.convertToSQL();"/>
-				<menuitem label="&session_explorer.label;" accesskey="&session_explorer.accesskey;" oncommand="gSessionManager.openSessionExplorer();"/>
+				<!--menuitem label="SQL Conversion Test" oncommand="gSessionManager.convertToSQL();"/>
+				<menuitem label="&session_explorer.label;" accesskey="&session_explorer.accesskey;" oncommand="gSessionManager.openSessionExplorer();"/-->
 				<menuitem label="&load.label;" accesskey="&load.accesskey;" oncommand="gSessionManager.load();"/>
 				<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 				<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
 				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
 				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
+				<menuitem _id="closer_window" label="&closeWindowSession.label;" accesskey="&closeWindowSession.accesskey;" oncommand="gSessionManager.closeSession(true);"/>
+				<menuitem _id="abandon_window" label="&abandonWindowSession.label;" accesskey="&abandonWindowSession.accesskey;" oncommand="gSessionManager.abandonSession(true);"/>
 				<menuseparator _id="backup-separator"/>
 				<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
 					<menupopup onpopupshowing="event.stopPropagation();">
@@ -63,28 +65,30 @@
 	
 	<!-- Menu in Tools Menu -->
 	<menupopup id="menu_ToolsPopup"> <!-- Firefox -->
-		<menuitem id="sessionexplorer-item" label="&session_explorer.label;" accesskey="&session_explorer.accesskey;"
-		          oncommand="gSessionManager.openSessionExplorer()" insertbefore="devToolsSeparator"/>
+		<!--menuitem id="sessionexplorer-item" label="&session_explorer.label;" accesskey="&session_explorer.accesskey;"
+		          oncommand="gSessionManager.openSessionExplorer()" insertbefore="devToolsSeparator"/-->
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="devToolsSeparator">
 				<menupopup id="sessionmanager-menu-popup"/>
 		</menu>
 	</menupopup>
 	
 	<menupopup id="taskPopup"> <!-- SeaMonkey -->
-		<menuitem id="sessionexplorer-item" label="&session_explorer.label;" accesskey="&session_explorer.accesskey;"
-		          oncommand="gSessionManager.openSessionExplorer()" insertbefore="navBeginGlobalItems"/>
+		<!--menuitem id="sessionexplorer-item" label="&session_explorer.label;" accesskey="&session_explorer.accesskey;"
+		          oncommand="gSessionManager.openSessionExplorer()" insertbefore="navBeginGlobalItems"/-->
 		<menu id="sessionmanager-menu" label="&sessionManager;" accesskey="&toolsmenu.accesskey;" insertbefore="navBeginGlobalItems">
 				<menupopup id="sessionmanager-menu-popup"/>
 		</menu>
 	</menupopup>
 	
 	<menupopup id="sessionmanager-menu-popup" onpopupshowing="gSessionManager.init(this);">
-		<menuitem label="SQL Conversion Test" oncommand="gSessionManager.convertToSQL();"/>
+		<!--menuitem label="SQL Conversion Test" oncommand="gSessionManager.convertToSQL();"/-->
 		<menuitem label="&load.label;" accesskey="&load.accesskey;" oncommand="gSessionManager.load();"/>
 		<menuitem label="&save.label;" accesskey="&save.accesskey;" oncommand="gSessionManager.save();"/>
 		<menuitem _id="save" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="gSessionManager.saveWindow();"/>
 		<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.closeSession();"/>
 		<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.abandonSession();"/>
+		<menuitem _id="closer_window" label="&closeWindowSession.label;" accesskey="&closeWindowSession.accesskey;" oncommand="gSessionManager.closeSession(true);"/>
+		<menuitem _id="abandon_window" label="&abandonWindowSession.label;" accesskey="&abandonWindowSession.accesskey;" oncommand="gSessionManager.abandonSession(true);"/>
 		<menuseparator _id="backup-separator"/>
 		<menu _id="backup-menu" label="&backup_sessions.label;" accesskey="&backup_sessions.accesskey;">
 			<menupopup onpopupshowing="event.stopPropagation();">
