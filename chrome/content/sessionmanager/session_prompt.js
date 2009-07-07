@@ -145,7 +145,7 @@ gSessionManager.onLoad = function() {
 		// ban backup session names
 		if (aSession.backup) gBackupNames[trimName] = true;
 		// Don't display loaded sessions in list for delete or save or backup items in list for save or grouping
-		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && (saving || deleting))))
+		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && saving)))
 		{
 			// get window and tab counts and group name for crashed session
 			if (aSession.fileName == "*") {
@@ -219,12 +219,13 @@ gSessionManager.onLoad = function() {
 			ggMenuList = _("group_menu_list");
 
 			// Pre-populate Group Menu
+			gGroupNames.sort();
 			for (var i in gGroupNames) {
 				ggMenuList.appendItem(gGroupNames[i]);
 			}
 		}
 				
-		// session text input is enabled when not group chaning (i.e., when saving or renaming)
+		// session text input is enabled when not group changing (i.e., when saving or renaming)
 		if (!(gParams.GetInt(1) & 32)) 
 		{
 			_("session-text-container").hidden = false;
