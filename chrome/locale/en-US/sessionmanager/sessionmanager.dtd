@@ -80,3 +80,7 @@
 <!ENTITY prompt.append_window.label "Append to Current Window">
 <!ENTITY session_explorer.label "Session Explorer">
 <!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "Save and Close Window Session">
+<!ENTITY closeWindowSession.accesskey "l">
+<!ENTITY abandonWindowSession.label "Abandon Window Session">
+<!ENTITY abandonWindowSession.accesskey "b">
