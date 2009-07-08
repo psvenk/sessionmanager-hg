@@ -918,7 +918,7 @@ var gSessionManager = {
 				aPopup.appendChild(item.cloneNode(true));
 				
 				// Event handlers aren't copied so need to set them up again to display status bar text
-				if (item.getAttribute("statustext") != "") {
+				if (item.getAttribute("statustext")) {
 					aPopup.lastChild.addEventListener("DOMMenuItemActive", function(event) { this.ownerDocument.getElementById("statusbar-display").setAttribute("label",this.getAttribute("statustext")); }, false);
 					aPopup.lastChild.addEventListener("DOMMenuItemInactive",  function(event) { this.ownerDocument.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 				}
@@ -977,7 +977,6 @@ var gSessionManager = {
 			{
 				// Store autosave values into window value and also into window variables
 				this.getAutoSaveValues(autosaveValues, true);
-				gBrowser.updateTitlebar();
 			}
 		}
 	},
@@ -994,7 +993,7 @@ var gSessionManager = {
 		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
 		var group = (aOneWindow) ? this.__window_session_group : this.mPref__autosave_group;
 		var time = (aOneWindow) ? this.__window_session_time : this.mPref__autosave_time;
-		if (name != "")
+		if (name)
 		{
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
@@ -1007,12 +1006,11 @@ var gSessionManager = {
 			}
 		
 			if (!keepOpen) {
-				if (!aOneWindow) this.setPref("_autosave_values","");
+				if (!aOneWindow) {
+					this.setPref("_autosave_values","");
+				}
 				else {
-					this.__window_session_name = null;
-					this.__window_session_group = null;
-					this.__window_session_time = 0;
-					gBrowser.updateTitlebar();
+					this.getAutoSaveValues("", true);
 				}
 			}
 			return true;
@@ -1026,10 +1024,7 @@ var gSessionManager = {
 		if (this.getPref("no_abandon_prompt") || this.mPromptService.confirmEx(null, this.mTitle, this._string("abandom_prompt"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
 		{
 			if (aWindow) {
-				this.__window_session_name = null;
-				this.__window_session_group = null;
-				this.__window_session_time = 0;
-				gBrowser.updateTitlebar();
+				this.getAutoSaveValues("", true);
 			}
 			else {
 				this.setPref("_autosave_values","");
@@ -1075,10 +1070,17 @@ var gSessionManager = {
 			
 			// Don't save current session on startup since there isn't any.  Don't save if opening
 			// new window or appending to current session since nothing is lost in that case.
-			if (aMode != "startup" && aMode != "newwindow" && aMode != "append")
+			var notOverwrite = aMode != "newwindow" && aMode != "append";
+			if (aMode != "startup" && notOverwrite)
 			{
+				// close current window session if open
+				if (this.__window_session_name && notOverwrite) 
+				{
+					this.closeSession(true);
+				}
+				
 				// close current autosave session if open
-				if (this.mPref__autosave_name != "" && aMode != "newwindow" && aMode != "append") 
+				if (this.mPref__autosave_name && notOverwrite) 
 				{
 					this.closeSession(false);
 				}
@@ -2082,7 +2084,7 @@ var gSessionManager = {
 		var dir = null;
 		var dirname = this.getPref("sessions_dir", "");
 		try {
-			if (dirname != "") {
+			if (dirname) {
 				var dir = this.mComponents.classes["@mozilla.org/file/local;1"].createInstance(this.mComponents.interfaces.nsILocalFile);
 				dir.initWithPath(dirname);
 				if (dir.isDirectory && dir.isWritable()) {
@@ -3083,12 +3085,13 @@ var gSessionManager = {
 		if (aWindow) {
 			this.__window_session_name = values[0];
 			this.__window_session_group = values[1];
-			this.__window_session_time = isNaN(values[2]) ? 0 : values[2] ;
+			this.__window_session_time = (!values[2] || isNaN(values[2])) ? 0 : values[2];
+			gBrowser.updateTitlebar();
 		}
 		else {
 			this.mPref__autosave_name = values[0];
 			this.mPref__autosave_group = values[1];
-			this.mPref__autosave_time = isNaN(values[2]) ? 0 : values[2] ;
+			this.mPref__autosave_time = (!values[2] || isNaN(values[2])) ? 0 : values[2];
 		}
 	},
 
@@ -3295,12 +3298,12 @@ var gSessionManager = {
 	checkTimer: function()
 	{
 		// only act if timer already started
-		if ((this._timer) && ((this.mPref__autosave_time <= 0) || (this.mPref__autosave_name == ""))) {
+		if ((this._timer) && ((this.mPref__autosave_time <= 0) || (!this.mPref__autosave_name))) {
 			this._timer.cancel();
 			this._timer = null;
 			this.log("checkTimer: Timer stopped");
 		}
-		else if (!this._timer && (this.mPref__autosave_time > 0) && (this.mPref__autosave_name != "")) {
+		else if (!this._timer && (this.mPref__autosave_time > 0) && (this.mPref__autosave_name)) {
 			this.log("checkTimer: Check if timer already running and if not start it");
 			var allWindows = this.getBrowserWindows();
 			var timerRunning = false;
@@ -3426,7 +3429,6 @@ var gSessionManager = {
 		if (aWindowSessionValues)
 		{
 			this.getAutoSaveValues(aWindowSessionValues, true);
-			gBrowser.updateTitlebar();
 			this.log("restoreSession: restore done, window_name  = " + this.__window_session_name);
 		}
 		return true;
@@ -3542,7 +3544,7 @@ var gSessionManager = {
 	{
 		var windowSessions = {};
 		this.getBrowserWindows().forEach(function(aWindow) {
-			if (aWindow.gSessionManager && aWindow.gSessionManager.__window_session_name && aWindow.gSessionManager.__window_session_name != "") { 
+			if (aWindow.gSessionManager && aWindow.gSessionManager.__window_session_name && aWindow.gSessionManager.__window_session_name) { 
 				windowSessions[aWindow.gSessionManager.__window_session_name.trim().toLowerCase()] = true;
 			}
 		});
