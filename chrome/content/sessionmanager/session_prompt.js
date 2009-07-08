@@ -480,7 +480,7 @@ function onTextboxInput(aNewValue)
 		var currentChecked = _("checkbox_autosave").checked;
 		if (gExistingName >= 0) {
 			_("checkbox_autosave").checked = gSessionTreeData[gExistingName].autosave != "false";
-			_("autosave_time").value = gSessionTreeData[gExistingName].autosave_time;
+			_("autosave_time").value = gSessionTreeData[gExistingName].autosave_time || "";
 		}
 		else {
 			_("checkbox_autosave").checked = false;
