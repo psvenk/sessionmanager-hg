@@ -259,6 +259,9 @@ var gSessionManager = {
 			
 			// make sure that the _running preference is saved in case we crash
 			this.setPref("_running", true);
+			
+			// Log installed extensions, if logging enabled
+			if (this.mPref_logging) this.logExtensions();
 		}
 		else if (this.getPref("_save_prefs",false)) {
 			// Save preference file if this preference is true in order to prevent problems on a crash.

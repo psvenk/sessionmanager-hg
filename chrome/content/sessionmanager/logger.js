@@ -101,4 +101,85 @@ gSessionManager.write_log = function(aMessage) {
 		dump(ex + "\n"); 
 	}
 }
-	
+
+//
+// Log Extensions
+// Adopted from Mr Tech Toolkit addon - http://www.mrtech.com/extensions/
+// Can't use nsiExtensionManager since it doesn't know what addons are disabled
+//
+gSessionManager.logExtensions = function() {
+	try {
+		function getRDFValue(thisElement, thisType) {
+			try { 
+				var thisArc = RDFService.GetResource("http://www.mozilla.org/2004/em-rdf#" + thisType);
+				var target = extensionDS.GetTarget(thisElement, thisArc, true);
+        
+				// Null Safety Check for null crasher on sorting names
+				// Return blank string to avoid issue with name or description being blank
+       
+				if (target instanceof Components.interfaces.nsIRDFLiteral || target instanceof Components.interfaces.nsIRDFInt)
+					return (target.Value == null) ? "" : target.Value
+			} catch(ex) {}
+      
+			return "";
+		}
+
+		var RDFService = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
+		var Container = Components.classes["@mozilla.org/rdf/container;1"].getService(Components.interfaces.nsIRDFContainer);
+		var extensionDS= Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager).datasource;
+
+		var whichRoot = "urn:mozilla:item:root";
+
+		var root = RDFService.GetResource(whichRoot);
+
+		/* Pre-generate GUID list for name-id matchup later in loop */
+		var item_list = {};
+  
+		var myExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager);
+
+		// get extensions guids
+		var items = myExtensionManager.getItemList(Components.interfaces.nsIUpdateItem.TYPE_EXTENSION, { });
+
+		if (items) {
+			for (x in items) {
+				item_list[items[x].name] = items[x];
+			}
+		}
+		items = null;
+		/* End Pre-generating GUID list */
+		
+		Container.Init(extensionDS, root);
+
+		var elements = Container.GetElements();
+
+		this.log("Extensions installed and enabled:");
+		while(elements.hasMoreElements()) {
+			var element = elements.getNext();
+			element.QueryInterface(Components.interfaces.nsIRDFResource);
+
+			var thisType = getRDFValue(element, "type");
+			if (thisType == 2) {
+				var name = getRDFValue(element, "name");
+				var disabled = getRDFValue(element, "isDisabled");
+			
+				if ((name.length > 0) && (!disabled || disabled != "true")) {
+					var version = getRDFValue(element, "version");
+					var minAppVersion = item_list[name].minAppVersion;
+					var maxAppVersion = item_list[name].maxAppVersion;
+					var homepageURL = getRDFValue(element, "homepageURL");
+
+					if (homepageURL.indexOf("www.") == 0) {
+						homepageURL = "http://" + homepageURL; 
+					}
+			
+					this.log(name + " " + version + " (" + minAppVersion + "-" + maxAppVersion + ")" + (homepageURL ? (" - " + homepageURL) : ""));
+				}
+			}
+		}
+		item_list = null;
+		this.log("");
+	} 
+	catch(ex) { 
+		this.logError(ex);
+	}
+}
