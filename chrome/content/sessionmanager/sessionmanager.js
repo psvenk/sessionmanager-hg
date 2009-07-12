@@ -742,11 +742,16 @@ var gSessionManager = {
 				// Don't do this if preference to shutdown on last window closed is set.
 				if (!this.mPref_shutdown_on_last_window_close) {
 					var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : null;
-					this.mLastState = (name) ? 
+					try {
+						this.mLastState = (name) ? 
 		    	               this.getSessionState(name, null, this.getNoUndoData(), true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
 		        	           this.getSessionState(null, true, null, null, null, true); 
-					this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
-					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+						this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
+						this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+					}
+					catch(ex) { 
+						this.logError(ex); 
+					}
 				}
 			}
 		}
@@ -975,8 +980,11 @@ var gSessionManager = {
 			}
 			else 
 			{
-				// Store autosave values into window value and also into window variables
-				this.getAutoSaveValues(autosaveValues, true);
+				if (values.autoSave)
+				{
+					// Store autosave values into window value and also into window variables
+					this.getAutoSaveValues(autosaveValues, true);
+				}
 			}
 		}
 	},
@@ -3379,7 +3387,14 @@ var gSessionManager = {
 		
 		// Use passed in State if specified, otherwise grab the current one.  Used for saving old state when shut down in 
 		// private browsing mode
-		var state = (aState) ? aState : (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
+		try {
+			var state = (aState) ? aState : (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
+		}
+		catch(ex) {
+			// Log and rethrow errors
+			this.logError(ex);
+			throw(ex);
+		}
 		
 		state = this.modifySessionData(state, aNoUndoData, true);
 		var count = this.getCount(state);
