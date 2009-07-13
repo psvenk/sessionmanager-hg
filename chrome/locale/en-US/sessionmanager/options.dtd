@@ -114,3 +114,14 @@
 <!ENTITY open_log.accesskey "o">
 <!ENTITY delete_log.label "Delete Log File">
 <!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "Log Shutdown State">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "Log Trace Data">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Log Variable Data">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Log Informational Messages">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Log Extra Debugging Data">
+<!ENTITY log_level_extra.accesskey "e">
+
