@@ -328,6 +328,7 @@
 	<prefpane id="loggingPrefPane" label="&logging.caption;" helpURI="" helpTopic="prefs-logging">
 		<preferences>
 			<preference id="extensions.sessionmanager.logging" name="extensions.sessionmanager.logging" type="bool"/>
+			<preference id="extensions.sessionmanager.logging_level" name="extensions.sessionmanager.logging_level" type="int"/>
 		</preferences>
 		<groupbox>
 			<caption label="&logging.caption;"/>
@@ -336,6 +337,13 @@
 				<button label="&open_log.label;" accesskey="open_log.accesskey;" oncommand="gSessionManager.openLogFile();"/>
 				<button label="&delete_log.label;" accesskey="delete_log.accesskey;" oncommand="gSessionManager.deleteLogFile(true);"/>
 			</hbox>
+			<vbox>
+				<checkbox class="logLevel" label="&log_level_state.label;" accesskey="&log_level_state.accesskey;" _logLevel="STATE" oncommand="logLevelUpdate();"/>
+				<checkbox class="logLevel" label="&log_level_trace.label;" accesskey="&log_level_trace.accesskey;" _logLevel="TRACE" oncommand="logLevelUpdate();"/>
+				<checkbox class="logLevel" label="&log_level_data.label;" accesskey="&log_level_data.accesskey;" _logLevel="DATA" oncommand="logLevelUpdate();"/>
+				<checkbox class="logLevel" label="&log_level_info.label;" accesskey="&log_level_info.accesskey;" _logLevel="INFO" oncommand="logLevelUpdate();"/>
+				<checkbox class="logLevel" label="&log_level_extra.label;" accesskey="&log_level_extra.accesskey;" _logLevel="EXTRA" oncommand="logLevelUpdate();"/>
+			</vbox>
 		</groupbox>
 	</prefpane>
 	

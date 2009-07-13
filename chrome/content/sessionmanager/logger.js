@@ -1,4 +1,20 @@
-gSessionManager.logFileName = "sessionmanager_log.txt";
+// 
+// Initialize Logger
+//
+gSessionManager.logInit = function() {
+	this.logFileName = "sessionmanager_log.txt";
+
+	this.logging_level = new Array();
+	this.logging_level["STATE"] = 1;
+	this.logging_level["TRACE"] = 2;
+	this.logging_level["DATA"] = 4;
+	this.logging_level["INFO"] = 8;
+	this.logging_level["EXTRA"] = 16;
+	this.logging_level["ERROR"] = 33;
+	
+	// delete log file if logging is not enabled or log file is too large
+	this.deleteLogFile();
+}
 
 //
 // Utility to create an error message in the log without throwing an error.
@@ -23,9 +39,9 @@ gSessionManager.logError = function(e, force) {
 //
 // Log info messages
 //
-gSessionManager.log = function(aMessage, force) {
+gSessionManager.log = function(aMessage, level, force) {
 	try {
-		if (force || this.mPref_logging) {
+		if (force || (this.mPref_logging && (this.logging_level[level] & this.mPref_logging_level))) {
 			var consoleService = this.mComponents.classes['@mozilla.org/consoleservice;1'].getService(this.mComponents.interfaces.nsIConsoleService);
 			consoleService.logStringMessage("Session Manager (" + (new Date).toGMTString() + "): " + aMessage);
 			this.write_log((new Date).toGMTString() + "): " + aMessage + "\n");
@@ -65,13 +81,13 @@ gSessionManager.openLogFile = function() {
 }
 
 // 
-// Delete Log File if it exists and not logging or it's too large (> 1 MB)
+// Delete Log File if it exists and not logging or it's too large (> 10 MB)
 //
 gSessionManager.deleteLogFile = function(aForce) {
 	try { 
 		var logFile = this.getProfileFile(this.logFileName);
 
-		if (logFile.exists() && (aForce || !this.mPref_logging || logFile.fileSize > 1048576)) {
+		if (logFile.exists() && (aForce || !this.mPref_logging || logFile.fileSize > 10485760)) {
 			logFile.remove(false);
 		}
 	}
@@ -183,3 +199,6 @@ gSessionManager.logExtensions = function() {
 		this.logError(ex);
 	}
 }
+
+// Initialize Logger
+gSessionManager.logInit();

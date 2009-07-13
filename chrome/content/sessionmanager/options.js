@@ -67,6 +67,9 @@ gSessionManager.onLoad = function() {
 			_("open_as_tabs").style.visibility = "collapse";
 		}
 	}
+	
+	// Update Logging Level checkboxes
+	readLogLevel();
 
 	// Disable Apply Button by default
 	_("sessionmanagerOptions").getButton("extra1").disabled = true;
@@ -76,6 +79,7 @@ gSessionManager.onLoad = function() {
 
 gSessionManager.onUnload = function() {
 	_("extensions.sessionmanager.options_selected_tab").valueFromPreferences = _("generalPrefsTab").selectedIndex;
+	setLogLevel();
 };
 
 var _disable = gSessionManager.setDisabled;
@@ -136,6 +140,31 @@ function readPrivacyLevel()
 	_disable(document.getElementsByAttribute("control", "postdata")[0], value > 1);
 	
 	return value;
+}
+
+function logLevelUpdate() {
+	// If instant apply on, apply immediately
+	if (gSessionManager.getPref("browser.preferences.instantApply", false, true)) {
+		setLogLevel();
+	}
+}
+
+function setLogLevel() {
+	var logLevel = 0;
+	var logCB = document.getElementsByAttribute("class", "logLevel");
+	for (var i=0; i < logCB.length; i++) {
+		logLevel = logLevel | (logCB[i].checked ? gSessionManager.logging_level[logCB[i].getAttribute("_logLevel")] : 0);
+	};
+	
+	_("extensions.sessionmanager.logging_level").valueFromPreferences = logLevel;
+}
+
+function readLogLevel() {
+	var logLevel = _("extensions.sessionmanager.logging_level").valueFromPreferences;
+	var logCB = document.getElementsByAttribute("class", "logLevel");
+	for (var i=0; i < logCB.length; i++) {
+		logCB[i].checked = ((logLevel & gSessionManager.logging_level[logCB[i].getAttribute("_logLevel")]) > 0);
+	};
 }
 
 function _(aId)
