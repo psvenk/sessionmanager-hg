@@ -40,6 +40,7 @@ gSessionManager.logError = function(e, force) {
 // Log info messages
 //
 gSessionManager.log = function(aMessage, level, force) {
+	if (!level) level = "INFO";
 	try {
 		if (force || (this.mPref_logging && (this.logging_level[level] & this.mPref_logging_level))) {
 			var consoleService = this.mComponents.classes['@mozilla.org/consoleservice;1'].getService(this.mComponents.interfaces.nsIConsoleService);
