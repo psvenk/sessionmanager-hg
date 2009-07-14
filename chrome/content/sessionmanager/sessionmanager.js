@@ -1,7 +1,6 @@
 // To Do:
-// 1. Window sessions are lost if browser is restarted or it crashes.  
-// 2. Window sessions don't save periodically if set to do so.
-// 3. No way to create a window session with only 1 window open.
+// 1. Window sessions don't save periodically if set to do so.
+// 2. No way to create a window session with only 1 window open.
 
 var gSessionManager = {
 	_timer : null,
@@ -23,7 +22,8 @@ var gSessionManager = {
 	mSessionStore : null,
 	mSessionStartup : null,
 
-	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager-list-update", "sessionmanager:updatetitlebar", "browser:purge-session-history", "quit-application-granted"],
+	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager-list-update", "sessionmanager:updatetitlebar", 
+	             "sessionstore-windows-restored", "browser:purge-session-history", "quit-application-granted"],
 	// These won't be removed on last window closed since we still need to watch for them.
 	mObserving2: ["quit-application", "private-browsing-change-granted", "sessionmanager:process-closed-window"],
 	mClosedWindowFile: "sessionmanager.dat",
@@ -107,6 +107,12 @@ var gSessionManager = {
 			this.VERSION = function() { return VERSION; }
 			this.logError(ex);
 		}
+
+		// Get logging preferences here so they are always available
+		this.mPref_logging = this.getPref("extensions.sessionmanager.logging", false, true);
+		this.mPref_logging_level = this.getPref("extensions.sessionmanager.logging_level", 15, true);
+
+		this.mEOL = this.getEOL();
 		
 		// read logger scripts
 		var subscriptLoader = Components.classes["@mozilla.org/moz/jssubscript-loader;1"]
@@ -149,15 +155,10 @@ var gSessionManager = {
 
 	onLoad: function(aDialog)
 	{
+		this.log("onLoad start, aDialog = " + aDialog, "TRACE");
+		
 		this.mBundle = document.getElementById("bundle_sessionmanager");
 		this.mTitle = this._string("sessionManager");
-		this.mEOL = this.getEOL();
-		
-		// Log logging preferences here so they are available in aDialog windows
-		this.mPref_logging = this.getPref("extensions.sessionmanager.logging", false, true);
-		this.mPref_logging_level = this.getPref("extensions.sessionmanager.logging_level", 15, true);
-
-		this.log("onLoad start, aDialog = " + aDialog, "TRACE");
 		
 		// Fix tooltips for toolbar buttons
 		var buttons = [document.getElementById("sessionmanager-toolbar"), document.getElementById("sessionmanager-undo")];
@@ -181,7 +182,7 @@ var gSessionManager = {
 		this.mUseSSClosedWindowList = (this.getPref("use_SS_closed_window_list", true)) && 
 		                              (typeof(this.mSessionStore.getClosedWindowCount) == "function");
 									  
-		if (!window.SessionManager) // if Tab Mix Plus isn't installed
+		if (typeof(window.SessionManager) == "undefined") // if Tab Mix Plus isn't installed
 		{
 			window.SessionManager = gSessionManager;
 		}
@@ -192,7 +193,8 @@ var gSessionManager = {
 		}
 		
 		// This will handle any left over processing that results from closing the last browser window, but
-		// not actually exiting the browser and then opening a new browser window.
+		// not actually exiting the browser and then opening a new browser window.  We do this before adding the observer
+		// below because we don't want to run on the opening window, only on the closed window
 		if (this.getBrowserWindows().length == 1) this.mObserverService.notifyObservers(window, "sessionmanager:process-closed-window", null);
 		
 		this.mObserving.forEach(function(aTopic) {
@@ -311,10 +313,6 @@ var gSessionManager = {
 		// where the user disabled option to prompt before clearing data 
 		var cmd = document.getElementById("Tools:Sanitize");
 		if (cmd) cmd.setAttribute("oncommand", "gSessionManager.tryToSanitize();" + cmd.getAttribute("oncommand"));
-		
-		//this.getAutoSaveValues(this.mSessionStore.getWindowValue(window,"_sm_window_session_values"), true);
-		//this.log("restore new window done " + this.__window_session_name, "DATA");
-		//this.log(this.mSessionStore.getWindowValue(window,"_sm_window_session_values"), "DATA");
 		
 		// Perform any needed update processing
 		var oldVersion = this.getPref("version", "")
@@ -505,6 +503,10 @@ var gSessionManager = {
 		this.log("observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
 		switch (aTopic)
 		{
+		case "sessionstore-windows-restored":
+			this.getAutoSaveValues(this.mSessionStore.getWindowValue(window,"_sm_window_session_values"), true, true);
+			this.log("restore new window done, window session = " + this.__window_session_name, "DATA");
+			break;
 		case "sessionmanager:windowtabopenclose":
 			// only update all windows if window state changed.
 			if ((aData != "tab") || (window == aSubject)) this.updateToolbarButton();
@@ -3119,14 +3121,14 @@ var gSessionManager = {
 /* ........ Miscellaneous Enhancements .............. */
 
 	// Read Autosave values from preference and store into global variables
-	getAutoSaveValues: function(aValues, aWindow)
+	getAutoSaveValues: function(aValues, aWindow, aNoSetWindowValue)
 	{
 		var values = aValues.split("\n");
 		if (aWindow) {
 			this.__window_session_name = values[0];
 			this.__window_session_group = values[1];
 			this.__window_session_time = (!values[2] || isNaN(values[2])) ? 0 : values[2];
-			this.mSessionStore.setWindowValue(window, "_sm_window_session_values", values);
+			if (!aNoSetWindowValue) this.mSessionStore.setWindowValue(window, "_sm_window_session_values", aValues);
 			gBrowser.updateTitlebar();
 		}
 		else {
