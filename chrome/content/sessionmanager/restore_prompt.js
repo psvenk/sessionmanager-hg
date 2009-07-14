@@ -99,7 +99,7 @@ gSessionManager.restorePrompt = function() {
 				// delete autosave preferences
 				deletePrefs = true;
 				
-				//dump("Saving crashed autosave session " + autosave_name + "\n");
+				this.log("Saving crashed autosave session " + autosave_name, "DATA");
 				var temp_state = this.readFile(file);
 				// encrypt if encryption enabled
 				if (this.mPref_encrypt_sessions) {
@@ -125,7 +125,11 @@ gSessionManager.restorePrompt = function() {
 					this.delPref("_recovering");
 					params.SetInt(0, 0);
 				}
-				else this.setPref("_recovering", backupFile.leafName);
+				else {
+					// delete autosave preferences
+					deletePrefs = true;
+					this.setPref("_recovering", backupFile.leafName);
+				}
 			}
 		}
 	}
