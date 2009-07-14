@@ -4,6 +4,7 @@
 
 var gSessionManager = {
 	_timer : null,
+	_win_timer : null,
 	
 	// Browser Components
 	mObserverService: Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService),
@@ -23,7 +24,7 @@ var gSessionManager = {
 	mSessionStartup : null,
 
 	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager-list-update", "sessionmanager:updatetitlebar", 
-	             "sessionstore-windows-restored", "browser:purge-session-history", "quit-application-granted"],
+	             "sessionstore-windows-restored", "browser:purge-session-history", "quit-application-requested", "quit-application-granted"],
 	// These won't be removed on last window closed since we still need to watch for them.
 	mObserving2: ["quit-application", "private-browsing-change-granted", "sessionmanager:process-closed-window"],
 	mClosedWindowFile: "sessionmanager.dat",
@@ -32,7 +33,7 @@ var gSessionManager = {
 	mAutoSaveSessionName: "autosave.session",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
-	mSessionRegExp: /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
+	mSessionRegExp: /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
 
 	mLastState: null,
 	mCleanBrowser: null,
@@ -462,9 +463,9 @@ var gSessionManager = {
 			}, this);
 		}
 		
-		// Stop timer and start another if needed
+		// Stop Session timer and start another if needed
 		if (this._timer) { 
-			this.log("onUnload: Timer stopped because window closed", "INFO");
+			this.log("onUnload: Session Timer stopped because window closed", "INFO");
 			this._timer.cancel();
 			this._timer = null;
 			if (numWindows != 0) allWindows[0].gSessionManager.checkTimer();
@@ -649,13 +650,10 @@ var gSessionManager = {
 				this.closeSession(false, false, true);
 			}
 			break;
+		case "quit-application-requested":
+			this._restart_requested = (aData == "restart");
+			break;
 		case "quit-application-granted":
-			// Prevent window sessions from closing on a restart
-			if (aData == "restart")
-			{
-				this._dont_close_window_session = true;
-			}
-		
 			// work around for mr tech toolkit, breaking our shutdown processing when browser is set to clear private data on shutdown
 			if ((typeof(Local_Install) != "undefined") && this.getPref("local_install.closeAllWindows", false, true) && (this.getBrowserWindows().length == 0)) {
 				this.log("Working around shutdown issue caused by Mr Tech Toolkit's close all child windows feature", "INFO");
@@ -668,8 +666,9 @@ var gSessionManager = {
 			break;
 		// timer periodic call
 		case "timer-callback":
-			// save auto-save session if open, but don't close it
-			this.closeSession(false, false, true);
+			// save auto-save or window session if open, but don't close it
+			this.log("Timer callback for " + ((aSubject == this._win_timer) ? "window" : "session" ) + " timer", "EXTRA");
+			this.closeSession((aSubject == this._win_timer), false, true);
 			break;
 		}
 	},
@@ -751,7 +750,7 @@ var gSessionManager = {
 		// if there is a window session save it (leave it open if browser is restarting)
 		if (this.__window_session_name) 
 		{
-			this.closeSession(true, false, this._dont_close_window_session);
+			this.closeSession(true, false, this._restart_requested);
 		}
 			
 		this.log("onWindowClose: running = " + this.mPref__running + ", stopping = " + this.mPref__stopping, "DATA");
@@ -1030,9 +1029,9 @@ var gSessionManager = {
 	},
 	
 	// if aOneWindow is true, then close the window session otherwise close the browser session
-	closeSession: function(aOneWindow, aForceSave, keepOpen)
+	closeSession: function(aOneWindow, aForceSave, aKeepOpen)
 	{
-		this.log("closeSession: " + ((aOneWindow) ? this.__window_session_name : this.mPref__autosave_name), "DATA");
+		this.log("closeSession: " + ((aOneWindow) ? this.__window_session_name : this.mPref__autosave_name) + ", aKeepOpen = " + aKeepOpen, "DATA");
 		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
 		var group = (aOneWindow) ? this.__window_session_group : this.mPref__autosave_group;
 		var time = (aOneWindow) ? this.__window_session_time : this.mPref__autosave_time;
@@ -1048,7 +1047,7 @@ var gSessionManager = {
 				this.ioError(ex);
 			}
 		
-			if (!keepOpen) {
+			if (!aKeepOpen) {
 				if (!aOneWindow) {
 					this.setPref("_autosave_values","");
 				}
@@ -1138,9 +1137,9 @@ var gSessionManager = {
 			{
 				// if this is a window session, keep track of it
 				if (/^window\/?(\d*)$/.test(autosave)) {
-					this.log("load: window session", "INFO");
 					var time = parseInt(RegExp.$1);
 					window_autosave_values = this.mergeAutoSaveValues(name, group, time);
+					this.log("load: window session", "INFO");
 				}
 			
 				// If this is an autosave session, keep track of it if there is not already an active session
@@ -3123,12 +3122,19 @@ var gSessionManager = {
 	// Read Autosave values from preference and store into global variables
 	getAutoSaveValues: function(aValues, aWindow, aNoSetWindowValue)
 	{
+		this.log("getAutoSaveValues: aWindow = " + aWindow + ", aValues = " + aValues, "EXTRA");
 		var values = aValues.split("\n");
 		if (aWindow) {
 			this.__window_session_name = values[0];
 			this.__window_session_group = values[1];
 			this.__window_session_time = (!values[2] || isNaN(values[2])) ? 0 : values[2];
-			if (!aNoSetWindowValue) this.mSessionStore.setWindowValue(window, "_sm_window_session_values", aValues);
+			try {
+				// This throws on shutdown because SessionStore no longer allows setting window values
+				if (!aNoSetWindowValue) this.mSessionStore.setWindowValue(window, "_sm_window_session_values", aValues);
+			}
+			catch(ex) {}
+			// start/stop window timer
+			this.checkWinTimer();
 			gBrowser.updateTitlebar();
 		}
 		else {
@@ -3341,13 +3347,13 @@ var gSessionManager = {
 	checkTimer: function()
 	{
 		// only act if timer already started
-		if ((this._timer) && ((this.mPref__autosave_time <= 0) || (!this.mPref__autosave_name))) {
+		if (this._timer && ((this.mPref__autosave_time <= 0) || !this.mPref__autosave_name)) {
 			this._timer.cancel();
 			this._timer = null;
-			this.log("checkTimer: Timer stopped", "INFO");
+			this.log("checkTimer: Session Timer stopped", "INFO");
 		}
-		else if (!this._timer && (this.mPref__autosave_time > 0) && (this.mPref__autosave_name)) {
-			this.log("checkTimer: Check if timer already running and if not start it", "INFO");
+		else if (!this._timer && (this.mPref__autosave_time > 0) && this.mPref__autosave_name) {
+			this.log("checkTimer: Check if session timer already running and if not start it", "INFO");
 			var allWindows = this.getBrowserWindows();
 			var timerRunning = false;
 			for (var i in allWindows) {
@@ -3359,8 +3365,23 @@ var gSessionManager = {
 			if (!timerRunning) {
 				this._timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 				this._timer.init(gSessionManager, this.mPref__autosave_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
-				this.log("checkTimer: Timer started for " + this.mPref__autosave_time + " minutes", "INFO");
+				this.log("checkTimer: Session Timer started for " + this.mPref__autosave_time + " minutes", "INFO");
 			}
+		}
+	},
+	
+	checkWinTimer: function()
+	{
+		// only act if timer already started
+		if ((this._win_timer && ((this.__window_session_time <=0) || !this.__window_session_name))) {
+			this._win_timer.cancel();
+			this._win_timer = null;
+			this.log("checkWinTimer: Window Timer stopped", "INFO");
+		}
+		else if (!this._win_timer && (this.__window_session_time > 0) && this.__window_session_name) {
+			this._win_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+			this._win_timer.init(gSessionManager, this.__window_session_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
+			this.log("checkWinTimer: Window Timer started for " + this.__window_session_time + " minutes", "INFO");
 		}
 	},
 	
