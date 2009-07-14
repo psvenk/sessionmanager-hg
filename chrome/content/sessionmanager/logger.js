@@ -188,7 +188,7 @@ gSessionManager.logExtensions = function() {
 						homepageURL = "http://" + homepageURL; 
 					}
 			
-					this.log(name + " " + version + " (" + minAppVersion + "-" + maxAppVersion + ")" + (homepageURL ? (" - " + homepageURL) : ""));
+					this.log(name + " " + version + " (" + minAppVersion + "-" + maxAppVersion + ")" + (homepageURL ? (" - " + homepageURL) : ""), "INFO");
 				}
 			}
 		}
