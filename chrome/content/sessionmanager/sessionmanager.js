@@ -1,6 +1,7 @@
 // To Do:
-// 1. Window sessions don't save periodically if set to do so.
-// 2. No way to create a window session with only 1 window open.
+// 1. No way to create a window session with only 1 window open.
+// 2. On crash if don't select to restore current session or select tabs, window sessions will be lost.  Should label window sessions as such in 
+//    windows list and restore said sessions if don't select tabs for that window.  Might be tricky.
 
 var gSessionManager = {
 	_timer : null,
@@ -24,7 +25,7 @@ var gSessionManager = {
 	mSessionStartup : null,
 
 	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager-list-update", "sessionmanager:updatetitlebar", 
-	             "sessionstore-windows-restored", "browser:purge-session-history", "quit-application-requested", "quit-application-granted"],
+	             "browser:purge-session-history", "quit-application-requested", "quit-application-granted"],
 	// These won't be removed on last window closed since we still need to watch for them.
 	mObserving2: ["quit-application", "private-browsing-change-granted", "sessionmanager:process-closed-window"],
 	mClosedWindowFile: "sessionmanager.dat",
@@ -127,6 +128,10 @@ var gSessionManager = {
 		var privateBrowsing = Components.classes["@mozilla.org/privatebrowsing;1"];
 		if (privateBrowsing)
 			this.mPrivateBrowsing = privateBrowsing.getService(Components.interfaces.nsIPrivateBrowsingService);
+			
+		// Listen for SessionStore restore complete notification.  Need to do this before the window loads because SessionStore
+		// can send the notification before our onLoad function runs.
+		this.mObserverService.addObserver(this, "sessionstore-windows-restored", false);
 			
 		// Determine Mozilla version to see what is supported
 		try {
@@ -314,6 +319,11 @@ var gSessionManager = {
 		// where the user disabled option to prompt before clearing data 
 		var cmd = document.getElementById("Tools:Sanitize");
 		if (cmd) cmd.setAttribute("oncommand", "gSessionManager.tryToSanitize();" + cmd.getAttribute("oncommand"));
+		
+		// Clear current window value setting if shouldn't be set.  Need try catch because first browser window will throw an exception.
+		try {
+			if (!this.__window_session_name) this.getAutoSaveValues(null, true);
+		} catch(ex) {}
 		
 		// Perform any needed update processing
 		var oldVersion = this.getPref("version", "")
@@ -505,8 +515,9 @@ var gSessionManager = {
 		switch (aTopic)
 		{
 		case "sessionstore-windows-restored":
+			this.mObserverService.removeObserver(this, aTopic);
 			this.getAutoSaveValues(this.mSessionStore.getWindowValue(window,"_sm_window_session_values"), true, true);
-			this.log("restore new window done, window session = " + this.__window_session_name, "DATA");
+			this.log("observe: Restore new window done, window session = " + this.__window_session_name, "DATA");
 			break;
 		case "sessionmanager:windowtabopenclose":
 			// only update all windows if window state changed.
@@ -1052,7 +1063,7 @@ var gSessionManager = {
 					this.setPref("_autosave_values","");
 				}
 				else {
-					this.getAutoSaveValues("", true);
+					this.getAutoSaveValues(null, true);
 				}
 			}
 			return true;
@@ -1066,7 +1077,7 @@ var gSessionManager = {
 		if (this.getPref("no_abandon_prompt") || this.mPromptService.confirmEx(null, this.mTitle, this._string("abandom_prompt"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
 		{
 			if (aWindow) {
-				this.getAutoSaveValues("", true);
+				this.getAutoSaveValues(null, true);
 			}
 			else {
 				this.setPref("_autosave_values","");
@@ -3122,7 +3133,8 @@ var gSessionManager = {
 	// Read Autosave values from preference and store into global variables
 	getAutoSaveValues: function(aValues, aWindow, aNoSetWindowValue)
 	{
-		this.log("getAutoSaveValues: aWindow = " + aWindow + ", aValues = " + aValues, "EXTRA");
+		if (!aValues) aValues = "";
+		this.log("getAutoSaveValues: aWindow = " + aWindow + ", aValues = " + aValues.split("\n").join(", "), "EXTRA");
 		var values = aValues.split("\n");
 		if (aWindow) {
 			this.__window_session_name = values[0];
@@ -3497,11 +3509,8 @@ var gSessionManager = {
 		}
 		
 		// Store autosave values into window value and also into window variables
-		if (aWindowSessionValues)
-		{
-			this.getAutoSaveValues(aWindowSessionValues, true);
-			this.log("restoreSession: restore done, window_name  = " + this.__window_session_name, "DATA");
-		}
+		this.getAutoSaveValues(aWindowSessionValues, true);
+		this.log("restoreSession: restore done, window_name  = " + this.__window_session_name, "DATA");
 		return true;
 	},
 
