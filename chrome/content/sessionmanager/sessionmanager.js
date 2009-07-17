@@ -1,6 +1,5 @@
 // To Do:
-// 1. No way to create a window session with only 1 window open.
-// 2. On crash if don't select to restore current session or select tabs, window sessions will be lost.  Should label window sessions as such in 
+// 1. On crash if don't select to restore current session or select tabs, window sessions will be lost.  Should label window sessions as such in 
 //    windows list and restore said sessions if don't select tabs for that window.  Might be tricky.
 
 var gSessionManager = {
@@ -864,7 +863,7 @@ var gSessionManager = {
 		
 		closer.hidden = abandon.hidden = (this.mPref__autosave_name=="");
 		closerWindow.hidden = abandonWindow.hidden = !this.__window_session_name;
-		save.hidden = (this.getBrowserWindows().length == 1);
+		//save.hidden = (this.getBrowserWindows().length == 1);
 		
 		// Disable saving in privacy mode
 		var inPrivateBrowsing = this.isPrivateBrowserMode();
@@ -984,7 +983,7 @@ var gSessionManager = {
 	save: function(aName, aFileName, aGroup, aOneWindow)
 	{
 		if (this.isPrivateBrowserMode()) return;
-		aOneWindow = aOneWindow && (this.getBrowserWindows().length > 1);
+		aOneWindow = aOneWindow; // && (this.getBrowserWindows().length > 1);
 		
 		var values = { text: this.getFormattedName(content.document.title || "about:blank", new Date()) || (new Date()).toLocaleString(), autoSaveable : true };
 		if (!aName)
