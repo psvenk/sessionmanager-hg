@@ -94,7 +94,7 @@ gSessionManager.restorePrompt = function() {
 			}
 			
 			// not recovering autosave session or current session (selecting tabs), save the autosave session first
-			if ((chosen_name != autosave_name) && (fileName != backupFile.leafName))
+			if (values.choseTabs || ((chosen_name != autosave_name) && (fileName != backupFile.leafName)))
 			{
 				// delete autosave preferences
 				deletePrefs = true;
@@ -119,17 +119,9 @@ gSessionManager.restorePrompt = function() {
 			// choose to recover autosave session so just recover last session
 			else 
 			{
-				// if not selecting tabs, let Firefox handle the recovery, else use our backup
 				// we could delete the autosave preferences here, but it doesn't matter (actually it saves us from saving prefs.js file again)
-				if (!values.choseTabs) {
-					this.delPref("_recovering");
-					params.SetInt(0, 0);
-				}
-				else {
-					// delete autosave preferences
-					deletePrefs = true;
-					this.setPref("_recovering", backupFile.leafName);
-				}
+				this.delPref("_recovering");
+				params.SetInt(0, 0);
 			}
 		}
 	}
