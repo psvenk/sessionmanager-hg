@@ -1,6 +1,11 @@
 // To Do:
 // 1. On crash if don't select to restore current session or select tabs, window sessions will be lost.  Should label window sessions as such in 
 //    windows list and restore said sessions if don't select tabs for that window.  Might be tricky.
+// 2. Add option to allow saving of sessions in private browser mode if encryption is enabled.
+// 3. Add way of add window(s) to an existing session.
+// 4. Add way of deleting window(s) from an existing session.
+// 5. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
+//    having the prompt window close. (Session Editor)
 
 var gSessionManager = {
 	_timer : null,
@@ -45,15 +50,15 @@ var gSessionManager = {
 	mSanitizePreference: "privacy.item.extensions-sessionmanager",
 	
 	// Class used to store current application version and name as well as comparison functions
-	mApp: new function sm_app_data_class() {
+	mApp: new function app_data_class() {
 		this.version = 0;
 		this.id = "UNKNOWN";
 		
-		this.idEquals = function(aID) {
+		this.idEquals = function idEquals(aID) {
 			return this.id == aID;
 		}
 		
-		this.compareVersion = function(aVersion) {
+		this.compareVersion = function compareVersion(aVersion) {
 			if (typeof(aVersion) == "undefined") {
 				return 1;
 			}
@@ -65,7 +70,7 @@ var gSessionManager = {
 		}
 	},
 
-	getSessionStoreComponent : function() {
+	getSessionStoreComponent : function getSessionStoreComponent() {
 		// Firefox or SeaMonkey
 		var sessionStore = Components.classes["@mozilla.org/browser/sessionstore;1"] || Components.classes["@mozilla.org/suite/sessionstore;1"];
 		var sessionStart = Components.classes["@mozilla.org/browser/sessionstartup;1"] || Components.classes["@mozilla.org/suite/sessionstartup;1"];
@@ -82,15 +87,15 @@ var gSessionManager = {
 		return true;
 	},
 
-	initialize: function()
+	initialize: function initialize()
 	{
 		// Define Constants using closure functions
 		const STARTUP_PROMPT = -11;
 		const STARTUP_LOAD = -12;
 		const VERSION = "0.6.6";
 	
-		this.STARTUP_PROMPT = function() { return STARTUP_PROMPT; }
-		this.STARTUP_LOAD = function() { return STARTUP_LOAD; }
+		this.STARTUP_PROMPT = function STARTUP_PROMPT() { return STARTUP_PROMPT; }
+		this.STARTUP_LOAD = function STARTUP_LOAD() { return STARTUP_LOAD; }
 		
 		// Use the actual version number, if there's an error use the constant above
 		try {
@@ -98,14 +103,14 @@ var gSessionManager = {
 			var sm = liExtensionManager.getItemForID("{1280606b-2510-4fe0-97ef-9b5a22eafe30}");
 			if (sm) {
 				var version = sm.version;
-				this.VERSION = function() { return version; }
+				this.VERSION = function VERSION1() { return version; }
 			}
 			else {
-				this.VERSION = function() { return VERSION; }
+				this.VERSION = function VERSION2() { return VERSION; }
 			}
 		}
 		catch (ex) {
-			this.VERSION = function() { return VERSION; }
+			this.VERSION = function VERSION3() { return VERSION; }
 			this.logError(ex);
 		}
 
@@ -151,14 +156,14 @@ var gSessionManager = {
 
 /* ........ Listeners / Observers.............. */
 
-	onLoad_proxy: function()
+	onLoad_proxy: function onLoad_proxy()
 	{
 		this.removeEventListener("load", gSessionManager.onLoad_proxy, false);
 		window.addEventListener("unload", gSessionManager.onUnload_proxy, false);			
 		gSessionManager.onLoad();
 	},
 
-	onLoad: function(aDialog)
+	onLoad: function onLoad(aDialog)
 	{
 		this.log("onLoad start, aDialog = " + aDialog, "TRACE");
 		
@@ -202,10 +207,10 @@ var gSessionManager = {
 		// below because we don't want to run on the opening window, only on the closed window
 		if (this.getBrowserWindows().length == 1) this.mObserverService.notifyObservers(window, "sessionmanager:process-closed-window", null);
 		
-		this.mObserving.forEach(function(aTopic) {
+		this.mObserving.forEach(function addObservers1(aTopic) {
 			this.mObserverService.addObserver(this, aTopic, false);
 		}, this);
-		this.mObserving2.forEach(function(aTopic) {
+		this.mObserving2.forEach(function addObservers2(aTopic) {
 			this.mObserverService.addObserver(this, aTopic, false);
 		}, this);
 		
@@ -310,7 +315,7 @@ var gSessionManager = {
 		
 		// SeaMonkey doesn't have an undoCloseTab function so create one
 		if (typeof(undoCloseTab) == "undefined") {
-			undoCloseTab = function (aIndex) { gSessionManager.undoCloseTabSM(aIndex); }
+			undoCloseTab = function undoCloseTab(aIndex) { gSessionManager.undoCloseTabSM(aIndex); }
 		}
 		
 		// add call to gSessionManager_Sanitizer (code take from Tab Mix Plus)
@@ -348,7 +353,7 @@ var gSessionManager = {
 							catch(ex) {};
 						}
 
-						windows.forEach(function(aWindow) {
+						windows.forEach(function recryptClosedWindows(aWindow) {
 							aWindow.state = this.decrypt(aWindow.state, true, true);
 							aWindow.state = this.decryptEncryptByPreference(aWindow.state);
 						}, this);
@@ -379,7 +384,7 @@ var gSessionManager = {
 			// Add backup sessions to backup group
 			if (vc.compare(oldVersion, "0.6.2.8") < 0) {
 				var sessions = this.getSessions();
-				sessions.forEach(function(aSession) {
+				sessions.forEach(function addToBackupGroup(aSession) {
 					if (aSession.backup) {
 						this.group(aSession.fileName, this._string("backup_sessions"));
 					}
@@ -390,7 +395,7 @@ var gSessionManager = {
 			
 			// One time message on update
 			if (this.getPref("update_message", true)) {
-				setTimeout(function() {
+				setTimeout(function updateMessage() {
 					var tBrowser = getBrowser();
 					tBrowser.selectedTab = tBrowser.addTab(gSessionManager.mFirstUrl);
 				},100);
@@ -401,7 +406,7 @@ var gSessionManager = {
 	},
 
 	// If SessionStore component does not exist hide Session Manager GUI and uninstall
-	onLoad_Uninstall: function()
+	onLoad_Uninstall: function onLoad_Uninstall()
 	{
 		window.removeEventListener("load", gSessionManager.onLoad_Uninstall, false);
 		window.addEventListener("unload", gSessionManager.onUnload_Uninstall, false);
@@ -418,7 +423,7 @@ var gSessionManager = {
 			var title = bundle.getString("sessionManager");
 			var text = bundle.getString("not_supported");
 			var promptService = Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService);
-			setTimeout(function() { promptService.alert((bundle)?window:null, title, text); }, 0);
+			setTimeout(function noSessionStorePrompt() { promptService.alert((bundle)?window:null, title, text); }, 0);
 			var liExtensionManager = Components.classes["@mozilla.org/extensions/manager;1"].getService(Components.interfaces.nsIExtensionManager);
 			liExtensionManager.uninstallItem("{1280606b-2510-4fe0-97ef-9b5a22eafe30}");
 			gSessionManager.setPref("browser.sessionmanager.uninstalled", true, true);
@@ -426,7 +431,7 @@ var gSessionManager = {
 	},
 	
 	// If uninstalling because of incompatability remove preference
-	onUnload_Uninstall: function()
+	onUnload_Uninstall: function onUnload_Uninstall()
 	{
 		this.removeEventListener("unload", gSessionManager.onUnload_Uninstall, false);
 		
@@ -436,19 +441,19 @@ var gSessionManager = {
 		}
 	},
 	
-	onUnload_proxy: function()
+	onUnload_proxy: function onUnload_proxy()
 	{
 		this.removeEventListener("unload", gSessionManager.onUnload_proxy, false);
 		gSessionManager.onUnload();
 	},
 
-	onUnload: function()
+	onUnload: function onUnload()
 	{
 		this.log("onUnload start", "TRACE");
 		var allWindows = this.getBrowserWindows();
 		var numWindows = allWindows.length;
 		
-		this.mObserving.forEach(function(aTopic) {
+		this.mObserving.forEach(function removeObservers1a(aTopic) {
 			this.mObserverService.removeObserver(this, aTopic);
 		}, this);
 		this.mPrefBranch.removeObserver("", this);
@@ -467,7 +472,7 @@ var gSessionManager = {
 		// Last window closing will leaks briefly since mObserving2 observers are not removed from it 
 		// until after shutdown is run, but since browser is closing anyway, who cares?
 		if (numWindows != 0) {
-			this.mObserving2.forEach(function(aTopic) {
+			this.mObserving2.forEach(function removeObservers2a(aTopic) {
 				this.mObserverService.removeObserver(this, aTopic);
 			}, this);
 		}
@@ -497,7 +502,7 @@ var gSessionManager = {
 			
 			// This executes whenever the last browser window is closed.
 			if (this.mPref_shutdown_on_last_window_close && !this.mPref__stopping) {
-				this.mObserving2.forEach(function(aTopic) {
+				this.mObserving2.forEach(function removeObservers2b(aTopic) {
 					this.mObserverService.removeObserver(this, aTopic);
 				}, this);
 				this.shutDown();
@@ -508,7 +513,7 @@ var gSessionManager = {
 		this.log("onUnload end", "TRACE");
 	},
 
-	observe: function(aSubject, aTopic, aData)
+	observe: function observe(aSubject, aTopic, aData)
 	{
 		this.log("observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
 		switch (aTopic)
@@ -535,7 +540,7 @@ var gSessionManager = {
 				this.mLastState = null;
 				this.mCleanBrowser = null;
 				this.mClosedWindowName = null;
-				this.mObserving2.forEach(function(aTopic) {
+				this.mObserving2.forEach(function removeObservers2c(aTopic) {
 					this.mObserverService.removeObserver(this, aTopic);
 				}, this);
 				this.log("observe: done processing closed window", "INFO");
@@ -564,7 +569,7 @@ var gSessionManager = {
 					}
 
 					// Prevent other windows from doing the saving processing
-					this.getBrowserWindows().forEach(function(aWindow) {
+					this.getBrowserWindows().forEach(function haltPrivateProcessing(aWindow) {
 						if (aWindow != window) { 
 							aWindow.gSessionManager.doNotDoPrivateProcessing = true; 
 						}
@@ -646,7 +651,7 @@ var gSessionManager = {
 			}
 			break;
 		case "quit-application":
-			this.mObserving2.forEach(function(aTopic) {
+			this.mObserving2.forEach(function removeObservers1b(aTopic) {
 				this.mObserverService.removeObserver(this, aTopic);
 			}, this);
 			// only run shutdown for one window and if not restarting browser
@@ -683,15 +688,15 @@ var gSessionManager = {
 		}
 	},
 
-	onTabOpenClose: function(aEvent)
+	onTabOpenClose: function onTabOpenClose(aEvent)
 	{
 		// Give browser a chance to update count closed tab count.  Only SeaMonkey currently needs this, but it doesn't hurt Firefox.
-		setTimeout(function () { gSessionManager.updateToolbarButton(); }, 0);
+		setTimeout(function updateToolbar() { gSessionManager.updateToolbarButton(); }, 0);
 	},
 	
 	// This is to try and prevent tabs that are closed during the restore preocess from actually reloading.  
 	// It doesn't work all the time, but it's better than nothing.
-	onTabRestoring_proxy: function(aEvent) {
+	onTabRestoring_proxy: function onTabRestoring_proxy(aEvent) {
 		// If tab reloading enabled and not offline
 		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
 
@@ -706,7 +711,7 @@ var gSessionManager = {
 		}
 	},
 
-	onTabRestored_proxy: function(aEvent)
+	onTabRestored_proxy: function onTabRestored_proxy(aEvent)
 	{
 		// If tab reloading enabled and not offline
 		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
@@ -730,7 +735,7 @@ var gSessionManager = {
 		}
 	},
 	
-	onTabBarClick: function(aEvent)
+	onTabBarClick: function onTabBarClick(aEvent)
 	{
 		//undo close tab on middle click on tab bar
 		if (aEvent.button == 1 && aEvent.target.localName != "tab")
@@ -739,7 +744,7 @@ var gSessionManager = {
 		}
 	},
 
-	onToolbarClick: function(aEvent, aButton)
+	onToolbarClick: function onToolbarClick(aEvent, aButton)
 	{
 		if (aEvent.button == 1)
 		{
@@ -754,7 +759,7 @@ var gSessionManager = {
 		}
 	},
 
-	onWindowClose: function()
+	onWindowClose: function onWindowClose()
 	{
 		this.log("onWindowClosed start", "TRACE");
 		// if there is a window session save it (leave it open if browser is restarting)
@@ -805,7 +810,7 @@ var gSessionManager = {
 	// Put current session name in browser titlebar
 	// This is a watch function which is called any time the titlebar text changes
 	// See https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Object/watch
-	updateTitlebar: function(id, oldVal, newVal)
+	updateTitlebar: function updateTitlebar(id, oldVal, newVal)
 	{
 		if (id == "title") {
 			// Don't kill browser if something goes wrong
@@ -825,7 +830,7 @@ var gSessionManager = {
 	
 	// Undo close tab if middle click on tab bar if enabled by user - only do this if Tab Clicking Options
 	// or Tab Mix Plus are not installed.
-	watchForMiddleMouseClicks: function() 
+	watchForMiddleMouseClicks: function watchForMiddleMouseClicks() 
 	{
 		if (this.mPref_click_restore_tab && (typeof(tabClicking) == "undefined") && (typeof(TM_checkClick) == "undefined")) {
 			gBrowser.mStrip.addEventListener("click", this.onTabBarClick, false);
@@ -835,7 +840,7 @@ var gSessionManager = {
 
 /* ........ Menu Event Handlers .............. */
 
-	init: function(aPopup, aIsToolbar)
+	init: function init(aPopup, aIsToolbar)
 	{
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
@@ -879,7 +884,7 @@ var gSessionManager = {
 		var backupCount = 0;
 		var user_latest = false;
 		var backup_latest = false;
-		sessions.forEach(function(aSession, aIx) {
+		sessions.forEach(function createSMMenu(aSession, aIx) {
 			if (!aSession.backup && !aSession.group && (this.mPref_max_display >= 0) && (count >= this.mPref_max_display)) return;
 	
 			var key = (aSession.backup || aSession.group)?"":(++count < 10)?count:(count == 10)?"0":"";
@@ -931,10 +936,10 @@ var gSessionManager = {
 		
 		// Display groups in alphabetical order at the top of the list
 		if (groupNames.length) {
-			groupNames.sort(function(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+			groupNames.sort(function sortGroups1(a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
 			var insertBeforeEntry = startSep.nextSibling;
 			
-			groupNames.forEach(function(aGroup, aIx) {
+			groupNames.forEach(function sortGroups2(aGroup, aIx) {
 				aPopup.insertBefore(groupMenus[aGroup], insertBeforeEntry);
 			},this);
 		}
@@ -968,8 +973,8 @@ var gSessionManager = {
 				
 				// Event handlers aren't copied so need to set them up again to display status bar text
 				if (item.getAttribute("statustext")) {
-					aPopup.lastChild.addEventListener("DOMMenuItemActive", function(event) { this.ownerDocument.getElementById("statusbar-display").setAttribute("label",this.getAttribute("statustext")); }, false);
-					aPopup.lastChild.addEventListener("DOMMenuItemInactive",  function(event) { this.ownerDocument.getElementById("statusbar-display").setAttribute("label",''); }, false); 
+					aPopup.lastChild.addEventListener("DOMMenuItemActive", function showStatusBarURL1(event) { this.ownerDocument.getElementById("statusbar-display").setAttribute("label",this.getAttribute("statustext")); }, false);
+					aPopup.lastChild.addEventListener("DOMMenuItemInactive",  function hideStatusBarURL1(event) { this.ownerDocument.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 				}
 			}
 		}
@@ -980,7 +985,7 @@ var gSessionManager = {
 		}
 	},
 
-	save: function(aName, aFileName, aGroup, aOneWindow)
+	save: function save(aName, aFileName, aGroup, aOneWindow)
 	{
 		if (this.isPrivateBrowserMode()) return;
 		aOneWindow = aOneWindow; // && (this.getBrowserWindows().length > 1);
@@ -1033,13 +1038,13 @@ var gSessionManager = {
 		}
 	},
 
-	saveWindow: function(aName, aFileName, aGroup)
+	saveWindow: function saveWindow(aName, aFileName, aGroup)
 	{
 		this.save(aName, aFileName, aGroup, true);
 	},
 	
 	// if aOneWindow is true, then close the window session otherwise close the browser session
-	closeSession: function(aOneWindow, aForceSave, aKeepOpen)
+	closeSession: function closeSession(aOneWindow, aForceSave, aKeepOpen)
 	{
 		this.log("closeSession: " + ((aOneWindow) ? this.__window_session_name : this.mPref__autosave_name) + ", aKeepOpen = " + aKeepOpen, "DATA");
 		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
@@ -1070,7 +1075,7 @@ var gSessionManager = {
 		return false;
 	},
 	
-	abandonSession: function(aWindow)
+	abandonSession: function abandonSession(aWindow)
 	{
 		var dontPrompt = { value: false };
 		if (this.getPref("no_abandon_prompt") || this.mPromptService.confirmEx(null, this.mTitle, this._string("abandom_prompt"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
@@ -1088,7 +1093,7 @@ var gSessionManager = {
 		}
 	},
 
-	load: function(aFileName, aMode, aChoseTabs)
+	load: function load(aFileName, aMode, aChoseTabs)
 	{
 		var state, chosenState, window_autosave_values;
 		if (!aFileName) {
@@ -1203,7 +1208,7 @@ var gSessionManager = {
 		else
 		{
 			// Don't save closed windows when loading session
-			this.getBrowserWindows().forEach(function(aWindow) {
+			this.getBrowserWindows().forEach(function setStoppingVariable(aWindow) {
 				if (aWindow != window) { 
 					aWindow.gSessionManager.mPref__stopping = true; 
 				}
@@ -1230,7 +1235,7 @@ var gSessionManager = {
 			catch (ex) { this.logError(ex); };
 		}
 		
-		setTimeout(function() {
+		setTimeout(function delayRestoreSession() {
 			var tabcount = gBrowser.mTabs.length;
 			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, noUndoData, 
 			                                          (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode || (aMode == "append"), startup, window_autosave_values);
@@ -1240,7 +1245,7 @@ var gSessionManager = {
 				if (tabsToMove)
 				{
 					var endPos = gBrowser.mTabs.length - 1;
-					tabsToMove.forEach(function(aTab) { gBrowser.moveTabTo(aTab, endPos); });
+					tabsToMove.forEach(function moveTab(aTab) { gBrowser.moveTabTo(aTab, endPos); });
 				}
 			}
 			// failed to load so clear autosession in case user tried to load one
@@ -1248,7 +1253,7 @@ var gSessionManager = {
 		}, 0);
 	},
 
-	rename: function(aSession)
+	rename: function rename(aSession)
 	{
 		var values;
 		if (aSession) values = { name: aSession, text: this.mSessionCache[aSession].name };
@@ -1290,7 +1295,7 @@ var gSessionManager = {
 		}
 	},
 	
-	group: function(aSession, aNewGroup)
+	group: function group(aSession, aNewGroup)
 	{
 		var values = { multiSelect: true, grouping: true };
 		if (typeof(aNewGroup) == "undefined") {
@@ -1304,12 +1309,12 @@ var gSessionManager = {
 		if (aSession)
 		{
 			var auto_save_file_name = this.makeFileName(this.mPref__autosave_name);
-			values.name.split("\n").forEach(function(aFileName) {
+			values.name.split("\n").forEach(function addToGroup(aFileName) {
 				try
 				{
 					var file = this.getSessionDir(aFileName);
 					var state = this.readSessionFile(file);
-					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=.+)?$/m, function($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group) : ""); });
+					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=.+)?$/m, function changeGroup($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group) : ""); });
 					this.writeFile(file, state);
 
 					// Grouped active session
@@ -1327,7 +1332,7 @@ var gSessionManager = {
 		}
 	},
 
-	remove: function(aSession)
+	remove: function remove(aSession)
 	{
 		if (!aSession)
 		{
@@ -1335,7 +1340,7 @@ var gSessionManager = {
 		}
 		if (aSession)
 		{
-			aSession.split("\n").forEach(function(aFileName) {
+			aSession.split("\n").forEach(function checkForLoadedSessions(aFileName) {
 				// If deleted autoload session, revert to no autoload session
 				if ((aFileName == this.mPref_resume_session) && (aFileName != this.mBackupSessionName)) {
 					this.setPref("resume_session", this.mBackupSessionName);
@@ -1348,7 +1353,7 @@ var gSessionManager = {
 		}
 	},
 
-	openFolder: function()
+	openFolder: function openFolder()
 	{
 		var dir = this.getSessionDir();
 		try {
@@ -1371,7 +1376,7 @@ var gSessionManager = {
 		}
 	},
 
-	openOptions: function()
+	openOptions: function openOptions()
 	{
 		var dialog = this.mWindowMediator.getMostRecentWindow("SessionManager:Options");
 		if (dialog)
@@ -1385,7 +1390,7 @@ var gSessionManager = {
 
 /* ........ Undo Menu Event Handlers .............. */
 
-	initUndo: function(aPopup, aStandAlone)
+	initUndo: function initUndo(aPopup, aStandAlone)
 	{
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
@@ -1415,7 +1420,7 @@ var gSessionManager = {
 		if (encrypt_okay) {
 			var badClosedWindowData = false;
 			var closedWindows = this.getClosedWindows();
-			closedWindows.forEach(function(aWindow, aIx) {
+			closedWindows.forEach(function buildUndoWindowsMenu(aWindow, aIx) {
 				// Try to decrypt is using sessionmanager.dat, if can't then data is bad since we checked for master password above
 				var state = this.mUseSSClosedWindowList ? aWindow.state : this.decrypt(aWindow.state, true);
 				if (!state && !this.mUseSSClosedWindowList) {
@@ -1439,7 +1444,7 @@ var gSessionManager = {
 				if (state.windows[0].tabs[0].xultab)
 				{
 					var xultabData = state.windows[0].tabs[0].xultab.split(" ");
-					xultabData.forEach(function(bValue, bIndex) {
+					xultabData.forEach(function getFavIcon1(bValue, bIndex) {
 						var data = bValue.split("=");
 						if (data[0] == "image") {
 							image = data[1];
@@ -1508,7 +1513,7 @@ var gSessionManager = {
 		var closedTabs = this.mSessionStore.getClosedTabData(window);
 		var mClosedTabs = [];
 		closedTabs = this.JSON_decode(closedTabs);
-		closedTabs.forEach(function(aValue, aIndex) {
+		closedTabs.forEach(function buildUndoTabsMenu(aValue, aIndex) {
 			mClosedTabs[aIndex] = { title:aValue.title, image:null, 
 								url:aValue.state.entries[aValue.state.entries.length - 1].url }
 			// Get favicon
@@ -1516,7 +1521,7 @@ var gSessionManager = {
 			if (aValue.state.xultab)
 			{
 				var xultabData = aValue.state.xultab.split(" ");
-				xultabData.forEach(function(bValue, bIndex) {
+				xultabData.forEach(function getFavIcon2(bValue, bIndex) {
 					var data = bValue.split("=");
 					if (data[0] == "image") {
 						mClosedTabs[aIndex].image = data[1];
@@ -1536,15 +1541,15 @@ var gSessionManager = {
 			}
 		}, this);
 
-		mClosedTabs.forEach(function(aTab, aIx) {
+		mClosedTabs.forEach(function addTabsToMenu(aTab, aIx) {
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("class", "menuitem-iconic sessionmanager-closedtab-item");
 			menuitem.setAttribute("image", aTab.image);
 			menuitem.setAttribute("label", aTab.title);
 			menuitem.setAttribute("index", "tab" + aIx);
 			menuitem.setAttribute("statustext", aTab.url);
-			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
-			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
+			menuitem.addEventListener("DOMMenuItemActive", function showStatusBarURL2(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
+			menuitem.addEventListener("DOMMenuItemInactive",  function hideStatusBarURL2(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
 			menuitem.setAttribute("crop", "center");
 			// Removing closed tabs does not work in SeaMonkey so don't give option to do so.
@@ -1564,7 +1569,7 @@ var gSessionManager = {
 			if (!showPopup)
 			{
 				this.updateToolbarButton(false);
-				setTimeout(function(aPopup) { aPopup.parentNode.open = false; }, 0, aPopup);
+				setTimeout(function setPopupClosed(aPopup) { aPopup.parentNode.open = false; }, 0, aPopup);
 			}
 			else {
 				// Bug copies tooltiptext to children so specifically set tooltiptext for all children
@@ -1575,7 +1580,7 @@ var gSessionManager = {
 		return showPopup;
 	},
 
-	undoCloseWindow: function(aIx, aMode)
+	undoCloseWindow: function undoCloseWindow(aIx, aMode)
 	{
 		var closedWindows = this.getClosedWindows();
 		if (closedWindows[aIx || 0])
@@ -1604,7 +1609,7 @@ var gSessionManager = {
 		}
 	},
 
-	clickClosedUndoMenuItem: function(aEvent) 
+	clickClosedUndoMenuItem: function clickClosedUndoMenuItem(aEvent) 
 	{
 		// if ctrl/command right click, remove item from list
 		if ((aEvent.button == 2) && (aEvent.ctrlKey || aEvent.metaKey))
@@ -1615,7 +1620,7 @@ var gSessionManager = {
 		}
 	},
 	
-	removeUndoMenuItem: function(aTarget)
+	removeUndoMenuItem: function removeUndoMenuItem(aTarget)
 	{	
 		var aIx = null;
 		var indexAttribute = aTarget.getAttribute("index");
@@ -1665,7 +1670,7 @@ var gSessionManager = {
 		}
 	},
 	
-	updateClosedList: function(aMenuItem, aIx, aClosedListLength, aType) 
+	updateClosedList: function updateClosedList(aMenuItem, aIx, aClosedListLength, aType) 
 	{
 		// Get menu popup
 		var popup = aMenuItem.parentNode;
@@ -1697,7 +1702,7 @@ var gSessionManager = {
 		}
 	},
 
-	clearUndoList: function()
+	clearUndoList: function clearUndoList()
 	{
 		var max_tabs_undo = this.getPref("browser.sessionstore.max_tabs_undo", 10, true);
 		
@@ -1725,14 +1730,14 @@ var gSessionManager = {
 	},
 	
 /* ........ Right click menu handlers .............. */
-	group_popupInit: function(aPopup) {
+	group_popupInit: function group_popupInit(aPopup) {
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
 		var childMenu = document.popupNode.menupopup || document.popupNode.lastChild;
 		childMenu.hidePopup();
 	},
 	
-	group_rename: function() {
+	group_rename: function group_rename() {
 		var filename = document.popupNode.getAttribute("filename");
 		var parentMenu = document.popupNode.parentNode.parentNode;
 		var group = filename ? ((parentMenu.id != "sessionmanager-toolbar") ? parentMenu.label : "")
@@ -1749,7 +1754,7 @@ var gSessionManager = {
 			if (filename) this.group(filename, newgroup.value);
 			else {
 				var sessions = this.getSessions();
-				sessions.forEach(function(aSession) {
+				sessions.forEach(function changeGroupName(aSession) {
 					if (aSession.group == group) {
 						this.group(aSession.fileName, newgroup.value);
 					}
@@ -1758,13 +1763,13 @@ var gSessionManager = {
 		}
 	},
 	
-	group_remove: function() {
+	group_remove: function group_remove() {
 		var group = document.popupNode.getAttribute("label");
 		if (this.mPromptService.confirm(window, this.mTitle, this._string("delete_confirm_group"))) {
 			
 			var sessions = this.getSessions();
 			var sessionsToDelete = [];
-			sessions.forEach(function(aSession) {
+			sessions.forEach(function removeFromGroup(aSession) {
 				if (aSession.group == group) {
 					sessionsToDelete.push(aSession.fileName);
 				}
@@ -1776,7 +1781,7 @@ var gSessionManager = {
 		}
 	},
 
-	session_popupInit: function(aPopup) {
+	session_popupInit: function session_popupInit(aPopup) {
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
 		var current = (document.popupNode.getAttribute("disabled") == "true");
@@ -1800,7 +1805,7 @@ var gSessionManager = {
 		this.setDisabled(get_("startup"), ((this.mPref_startup == 2) && (document.popupNode.getAttribute("filename") == this.mPref_resume_session)));
 	},
 
-	session_load: function(aReplace) {
+	session_load: function session_load(aReplace) {
 		var session = document.popupNode.getAttribute("filename");
 		var oldOverwrite = this.mPref_overwrite;
 		if (aReplace) {
@@ -1816,7 +1821,7 @@ var gSessionManager = {
 		this.mPref_overwrite = oldOverwrite;
 	},
 	
-	session_replace: function(aWindow) {
+	session_replace: function session_replace(aWindow) {
 		var session = document.popupNode.getAttribute("filename");
 		var parent = document.popupNode.parentNode.parentNode;
 		var group = null;
@@ -1831,12 +1836,12 @@ var gSessionManager = {
 		}
 	},
 	
-	session_rename: function() {
+	session_rename: function session_rename() {
 		var session = document.popupNode.getAttribute("filename");
 		this.rename(session);
 	},
 
-	session_remove: function() {
+	session_remove: function session_remove() {
 		var dontPrompt = { value: false };
 		var session = document.popupNode.getAttribute("filename");
 		if (this.getPref("no_delete_prompt") || this.mPromptService.confirmEx(window, this.mTitle, this._string("delete_confirm"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0) {
@@ -1847,13 +1852,13 @@ var gSessionManager = {
 		}
 	},
 	
-	session_setStartup: function() {
+	session_setStartup: function session_setStartup() {
 		var session = document.popupNode.getAttribute("filename");
 		this.setPref("resume_session", session);
 		this.setPref("startup", 2);
 	},
 	
-	hidePopup: function() {
+	hidePopup: function hidePopup() {
 		var popup = document.popupNode.parentNode;
 		while (popup.parentNode.id.indexOf("sessionmanager-") == -1) {
 			popup = popup.parentNode;
@@ -1864,7 +1869,7 @@ var gSessionManager = {
 	
 /* ........ User Prompts .............. */
 
-	openSessionExplorer: function() {
+	openSessionExplorer: function openSessionExplorer() {
 		this.openWindow(
 //			"chrome://sessionmanager/content/sessionexplorer.xul",
 			"chrome://sessionmanager/content/places/places.xul",
@@ -1874,7 +1879,7 @@ var gSessionManager = {
 		);
 	},
 
-	prompt: function(aSessionLabel, aAcceptLabel, aValues, aTextLabel, aAcceptExistingLabel)
+	prompt: function prompt(aSessionLabel, aAcceptLabel, aValues, aTextLabel, aAcceptExistingLabel)
 	{
 		var params = Components.classes["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Components.interfaces.nsIDialogParamBlock);
 		aValues = aValues || {};
@@ -1918,7 +1923,7 @@ var gSessionManager = {
 	// If the session list is not formatted correctly a message will be displayed in the Error console
 	// and the session select window will not be displayed.
 	//
-	selectSession: function(aSessionLabel, aAcceptLabel, aValues, aOverride)
+	selectSession: function selectSession(aSessionLabel, aAcceptLabel, aValues, aOverride)
 	{
 		var values = aValues || {};
 		
@@ -1934,17 +1939,17 @@ var gSessionManager = {
 		return null;
 	},
 
-	ioError: function(aException)
+	ioError: function ioError(aException)
 	{
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, (this.mBundle)?this.mBundle.getFormattedString("io_error", [(aException)?aException.message:this._string("unknown_error")]):aException);
 	},
 
-	sessionError: function(aException)
+	sessionError: function sessionError(aException)
 	{
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, (this.mBundle)?this.mBundle.getFormattedString("session_error", [(aException)?aException.message:this._string("unknown_error")]):aException);
 	},
 
-	openWindow: function(aChromeURL, aFeatures, aArgument, aParent)
+	openWindow: function openWindow(aChromeURL, aFeatures, aArgument, aParent)
 	{
 		if (!aArgument || typeof aArgument == "string")
 		{
@@ -1956,7 +1961,7 @@ var gSessionManager = {
 		return Components.classes["@mozilla.org/embedcomp/window-watcher;1"].getService(Components.interfaces.nsIWindowWatcher).openWindow(aParent || null, aChromeURL, "_blank", aFeatures, aArgument);
 	},
 
-	clearUndoListPrompt: function()
+	clearUndoListPrompt: function clearUndoListPrompt()
 	{
 		var dontPrompt = { value: false };
 		if (this.getPref("no_clear_list_prompt") || this.mPromptService.confirmEx(null, this.mTitle, this._string("clear_list_prompt"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
@@ -1970,7 +1975,7 @@ var gSessionManager = {
 	},
 	
 /* ........ File Handling .............. */
-	convertToSQL: function() {
+	convertToSQL: function convertToSQL() {
 		// Open SQL file and connect to it
 		var file = Components.classes["@mozilla.org/file/directory_service;1"]
 		           .getService(Components.interfaces.nsIProperties)
@@ -1996,7 +2001,7 @@ var gSessionManager = {
 		var everythingOkay = true;
 		mDBConn.beginTransaction();
 		
-		sessions.forEach(function(aSession) {
+		sessions.forEach(function convertSessionToSQL(aSession) {
 			
 			if (everythingOkay) {
 				var file = this.getSessionDir(aSession.fileName);
@@ -2051,7 +2056,7 @@ var gSessionManager = {
 		}, this);
 
 		var closedWindows = this.getClosedWindows_SM();
-		closedWindows.forEach(function(aWindow) {
+		closedWindows.forEach(function convertClosedWindowToSQL(aWindow) {
 			var statement = mDBConn.createStatement("INSERT INTO closed_windows (name, state) VALUES (:name, :state)");
 			// need to wrap in older versions of Firefox
 			if (this.mApp.compareVersion("1.9.1a1pre") < 0) {
@@ -2094,7 +2099,7 @@ var gSessionManager = {
 		mDBConn.close();
 	},
 
-	sanitize: function()
+	sanitize: function sanitize()
 	{
 		// If Sanitize GUI not used (or not Firefox 3.5 and above)
 		if (this.mSanitizePreference == "privacy.item.extensions-sessionmanager") {
@@ -2115,7 +2120,7 @@ var gSessionManager = {
 			else {
 				// Delete only sessions after startDate
 				var sessions = this.getSessions();
-				sessions.forEach(function(aSession, aIx) { 
+				sessions.forEach(function deleteOlderSessions(aSession, aIx) { 
 					if (range[0] <= aSession.timestamp*1000) {
 						this.delFile(this.getSessionDir(aSession.fileName));
 					}
@@ -2124,14 +2129,14 @@ var gSessionManager = {
 		}
 	},
 
-	getProfileFile: function(aFileName)
+	getProfileFile: function getProfileFile(aFileName)
 	{
 		var file = this.mProfileDirectory.clone();
 		file.append(aFileName);
 		return file;
 	},
 	
-	getUserDir: function(aFileName)
+	getUserDir: function getUserDir(aFileName)
 	{
 		var dir = null;
 		var dirname = this.getPref("sessions_dir", "");
@@ -2155,7 +2160,7 @@ var gSessionManager = {
 		}
 	},
 
-	getSessionDir: function(aFileName, aUnique)
+	getSessionDir: function getSessionDir(aFileName, aUnique)
 	{
 		// allow overriding of location of sessions directory
 		var dir = this.getUserDir("sessions");
@@ -2198,7 +2203,7 @@ var gSessionManager = {
 	//
 	// filter - optional regular expression. If specified, will only return sessions that match that expression
 	//
-	getSessions: function(filter)
+	getSessions: function getSessions(filter)
 	{
 		var matchArray;
 		var sessions = [];
@@ -2263,10 +2268,10 @@ var gSessionManager = {
 		switch (Math.abs(this.mPref_session_list_order))
 		{
 		case 1: // alphabetically
-			sessions = sessions.sort(function(a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
+			sessions = sessions.sort(function abcSort(a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
 			break;
 		case 2: // chronologically
-			sessions = sessions.sort(function(a, b) { return a.timestamp - b.timestamp; });
+			sessions = sessions.sort(function timeSort(a, b) { return a.timestamp - b.timestamp; });
 			break;
 		}
 		
@@ -2277,12 +2282,12 @@ var gSessionManager = {
 	},
 
 	// Get SessionStore's or Session Manager's Closed window List depending on preference.
-	getClosedWindows: function()
+	getClosedWindows: function getClosedWindows()
 	{
 		if (this.mUseSSClosedWindowList) {
 			var closedWindows = this.JSON_decode(this.mSessionStore.getClosedWindowData());
 			var parts = new Array(closedWindows.length);
-			closedWindows.forEach(function(aWindow, aIx) {
+			closedWindows.forEach(function buildClosedWindowObject(aWindow, aIx) {
 				parts[aIx] = { name: aWindow.title, state: this.JSON_encode({windows:[aWindow]}) };
 			}, this);
 			return parts;
@@ -2292,7 +2297,7 @@ var gSessionManager = {
 		}
 	},
 
-	getClosedWindows_SM: function()
+	getClosedWindows_SM: function getClosedWindows_SM()
 	{
 		// Use cached data unless file has changed or was deleted
 		var data = this.mClosedWindowsCache.data;
@@ -2303,14 +2308,14 @@ var gSessionManager = {
 			this.mClosedWindowsCache.data = data;
 			if (data) this.mClosedWindowsCache.timestamp = file.lastModifiedTime;
 		}
-		return (data)?data.split("\n\n").map(function(aEntry) {
+		return (data)?data.split("\n\n").map(function buildClosedWindowObject_SM(aEntry) {
 			var parts = aEntry.split("\n");
 			return { name: parts.shift(), state: parts.join("\n") };
 		}):[];
 	},
 
 	// Stored closed windows into Session Store or Session Manager controller list.
-	storeClosedWindows: function(aList, aIx)
+	storeClosedWindows: function storeClosedWindows(aList, aIx)
 	{
 		if (this.mUseSSClosedWindowList) {
 			// The following works in that the closed window appears to be removed from the list with no side effects
@@ -2328,12 +2333,12 @@ var gSessionManager = {
 	},
 
 	// Store closed windows into Session Manager controlled list
-	storeClosedWindows_SM: function(aList)
+	storeClosedWindows_SM: function storeClosedWindows_SM(aList)
 	{
 		var file = this.getProfileFile(this.mClosedWindowFile);
 		if (aList.length > 0)
 		{
-			var data = aList.map(function(aEntry) {
+			var data = aList.map(function createClosedWindowData(aEntry) {
 				return aEntry.name + "\n" + aEntry.state
 			}).join("\n\n");
 			try {
@@ -2362,7 +2367,7 @@ var gSessionManager = {
 		this.updateToolbarButton(aList.length + this.mSessionStore.getClosedTabCount(window)  > 0);
 	},
 
-	appendClosedWindow: function(aState)
+	appendClosedWindow: function appendClosedWindow(aState)
 	{
 		var cleanBrowser = (this.mCleanBrowser != null) ? this.mCleanBrowser : Array.every(gBrowser.browsers, this.isCleanBrowser);
 		if (this.mPref_max_closed_undo == 0 || this.isPrivateBrowserMode() || cleanBrowser)
@@ -2385,7 +2390,7 @@ var gSessionManager = {
 		this.storeClosedWindows_SM(windows.slice(0, this.mPref_max_closed_undo));
 	},
 
-	clearUndoData: function(aType, aSilent, aShuttingDown)
+	clearUndoData: function clearUndoData(aType, aSilent, aShuttingDown)
 	{
 		if (aType == "window" || aType == "all")
 		{
@@ -2394,7 +2399,7 @@ var gSessionManager = {
 		if (!aShuttingDown) this.updateToolbarButton((aType == "all")?false:undefined);
 	},
 
-	shutDown: function()
+	shutDown: function shutDown()
 	{
 		this.log("Shutdown start", "TRACE");
 		// Handle sanitizing if sanitize on shutdown without prompting (Firefox 3.5 never prompts)
@@ -2451,7 +2456,7 @@ var gSessionManager = {
 		this.log("Shutdown end", "TRACE");
 	},
 	
-	autoSaveCurrentSession: function(aForceSave)
+	autoSaveCurrentSession: function autoSaveCurrentSession(aForceSave)
 	{
 		try
 		{
@@ -2467,7 +2472,7 @@ var gSessionManager = {
 		}
 	},
 
-	backupCurrentSession: function()
+	backupCurrentSession: function backupCurrentSession()
 	{
 		this.log("backupCurrentSession start", "TRACE");
 		var backup = this.mPref_backup_session;
@@ -2569,7 +2574,7 @@ var gSessionManager = {
 		this.log("backupCurrentSession end", "TRACE");
 	},
 
-	keepOldBackups: function(backingUp)
+	keepOldBackups: function keepOldBackups(backingUp)
 	{
 		if (!backingUp) this.mPref_max_backup_keep = this.mPref_max_backup_keep + 1; 
 		var backup = this.getSessionDir(this.mBackupSessionName);
@@ -2586,17 +2591,17 @@ var gSessionManager = {
 		
 		if (this.mPref_max_backup_keep != -1)
 		{
-			this.getSessions().filter(function(aSession) {
+			this.getSessions().filter(function sortBackups(aSession) {
 				return /^backup-\d+\.session$/.test(aSession.fileName);
-			}).sort(function(a, b) {
+			}).sort(function sliceBackups(a, b) {
 				return b.timestamp - a.timestamp;
-			}).slice(this.mPref_max_backup_keep).forEach(function(aSession) {
+			}).slice(this.mPref_max_backup_keep).forEach(function deleteBackups(aSession) {
 				this.delFile(this.getSessionDir(aSession.fileName), true);
 			}, this);
 		}
 	},
 
-	readSessionFile: function(aFile,headerOnly)
+	readSessionFile: function readSessionFile(aFile,headerOnly)
 	{
 		function getCountString(aCount) { 
 			return "\tcount=" + aCount.windows + "/" + aCount.tabs + "\n"; 
@@ -2711,7 +2716,7 @@ var gSessionManager = {
 		return state;
 	},
 	
-	readFile: function(aFile,headerOnly)
+	readFile: function readFile(aFile,headerOnly)
 	{
 		try
 		{
@@ -2736,7 +2741,7 @@ var gSessionManager = {
 		return null;
 	},
 
-	writeFile: function(aFile, aData)
+	writeFile: function writeFile(aFile, aData)
 	{
 		if (!aData) return;  // this handles case where data could not be encrypted and null was passed to writeFile
 		var stream = this.mComponents.classes["@mozilla.org/network/file-output-stream;1"].createInstance(this.mComponents.interfaces.nsIFileOutputStream);
@@ -2749,7 +2754,7 @@ var gSessionManager = {
 		cvstream.close();
 	},
 
-	delFile: function(aFile, aSilent)
+	delFile: function delFile(aFile, aSilent)
 	{
 		if (aFile.exists())
 		{
@@ -2767,7 +2772,7 @@ var gSessionManager = {
 		}
 	},
 	
-	moveToCorruptFolder: function(aFile, aSilent)
+	moveToCorruptFolder: function moveToCorruptFolder(aFile, aSilent)
 	{
 		try {
 			if (aFile.exists()) 
@@ -2789,7 +2794,7 @@ var gSessionManager = {
 
 /* ........ Encryption functions .............. */
 
-	cryptError: function(aException, notSaved)
+	cryptError: function cryptError(aException, notSaved)
 	{
 		var text;
 		if (aException.message) {
@@ -2809,7 +2814,7 @@ var gSessionManager = {
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, text);
 	},
 
-	decrypt: function(aData, aNoError, doNotDecode)
+	decrypt: function decrypt(aData, aNoError, doNotDecode)
 	{
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
 		// The encryptString function cannot handle non-ASCII data so encode it first and decode the results
@@ -2833,7 +2838,7 @@ var gSessionManager = {
 
 	// This function will encrypt the data if the encryption preference is set.
 	// It will also decrypt encrypted data if the encryption preference is not set.
-	decryptEncryptByPreference: function(aData)
+	decryptEncryptByPreference: function decryptEncryptByPreference(aData)
 	{
 		// Encrypted data is in BASE64 format so ":" won't be in encrypted data, but is in session data.
 		// The encryptString function cannot handle non-ASCII data so encode it first and decode the results
@@ -2858,14 +2863,14 @@ var gSessionManager = {
 		return aData;
 	},
 
-	encryptionChange: function()
+	encryptionChange: function encryptionChange()
 	{
 		try {
 			// force a master password prompt so we don't waste time if user cancels it
 			this.mSecretDecoderRing.encryptString("");
 			
 			var sessions = this.getSessions();
-			sessions.forEach(function(aSession) {
+			sessions.forEach(function decryptEncryptSessions(aSession) {
 				var file = this.getSessionDir(aSession.fileName);
 				var state = this.readSessionFile(file);
 				if (state) 
@@ -2882,7 +2887,7 @@ var gSessionManager = {
 		
 			if (!this.mUseSSClosedWindowList) {
 				var windows = this.getClosedWindows_SM();
-				windows.forEach(function(aWindow) {
+				windows.forEach(function decryptEncryptClosedWindows(aWindow) {
 					aWindow.state = this.decryptEncryptByPreference(aWindow.state);
 				}, this);
 				this.storeClosedWindows_SM(windows);
@@ -2897,7 +2902,7 @@ var gSessionManager = {
 
 /* ........ Conversion functions .............. */
 
-	decodeOldFormat: function(aIniString, moveClosedTabs)
+	decodeOldFormat: function decodeOldFormat(aIniString, moveClosedTabs)
 	{
 		var rootObject = {};
 		var obj = rootObject;
@@ -2927,7 +2932,7 @@ var gSessionManager = {
 		{
 			try
 			{
-				rootObject.windows.forEach(function(aValue, aIndex) {
+				rootObject.windows.forEach(function convertClosedTabs(aValue, aIndex) {
 					if (aValue.tabs && aValue.tabs[0]._closedTabs)
 					{
 						aValue["_closedTabs"] = aValue.tabs[0]._closedTabs;
@@ -2941,7 +2946,7 @@ var gSessionManager = {
 		return rootObject;
 	},
 
-	ini_getObjForHeader: function(aObj, aLine)
+	ini_getObjForHeader: function ini_getObjForHeader(aObj, aLine)
 	{
 		var names = aLine.split("]")[0].substr(1).split(".");
 	
@@ -2969,7 +2974,7 @@ var gSessionManager = {
 		return aObj;
 	},
 
-	ini_setValueForLine: function(aObj, aLine)
+	ini_setValueForLine: function ini_setValueForLine(aObj, aLine)
 	{
 		var ix = aLine.indexOf("=");
 		if (ix < 1)
@@ -3005,7 +3010,7 @@ var gSessionManager = {
 	// This results in some kind of closed tab data being restored, but it is incomplete
 	// as all closed tabs show up as "undefined" and they don't restore.  If someone
 	// can fix this feel free, but since it is basically only used once I'm not going to bother.
-	ini_parseCloseTabList: function(aObj, aCloseTabData)
+	ini_parseCloseTabList: function ini_parseCloseTabList(aObj, aCloseTabData)
 	{
 		var ClosedTabObject = {};
 		var ix = aCloseTabData.indexOf("=");
@@ -3015,15 +3020,15 @@ var gSessionManager = {
 		}
 		var serializedTabs = aCloseTabData.substr(ix + 1);
 		serializedTabs = decodeURI(serializedTabs.replace(/%3B/gi, ";"));
-		var closedTabs = serializedTabs.split("\f\f").map(function(aData) {
+		var closedTabs = serializedTabs.split("\f\f").map(function serializeTabData(aData) {
 			if (/^(\d+) (.*)\n([\s\S]*)/.test(aData))
 			{
 				return { name: RegExp.$2, pos: parseInt(RegExp.$1), state: RegExp.$3 };
 			}
 			return null;
-		}).filter(function(aTab) { return aTab != null; }).slice(0, this.getPref("browser.sessionstore.max_tabs_undo", 10, true));
+		}).filter(function sliceClosedTabs(aTab) { return aTab != null; }).slice(0, this.getPref("browser.sessionstore.max_tabs_undo", 10, true));
 
-		closedTabs.forEach(function(aValue, aIndex) {
+		closedTabs.forEach(function convertOldClosedTabs(aValue, aIndex) {
 			closedTabs[aIndex] = this.decodeOldFormat(aValue.state, false)
 			closedTabs[aIndex] = closedTabs[aIndex].windows;
 			closedTabs[aIndex] = closedTabs[aIndex][0].tabs;
@@ -3031,12 +3036,12 @@ var gSessionManager = {
 
 		aObj["_closedTabs"] = [];
 
-		closedTabs.forEach(function(aValue, aIndex) {
+		closedTabs.forEach(function buildOldClosedTabObject(aValue, aIndex) {
 			aObj["_closedTabs"][aIndex] = this.JSON_decode({ state : this.JSON_encode(aValue[0]) });
 		}, this);
 	},
 
-	ini_fixName: function(aName)
+	ini_fixName: function ini_fixName(aName)
 	{
 		switch (aName)
 		{
@@ -3060,7 +3065,7 @@ var gSessionManager = {
 /* ........ Preference Access .............. */
 
 	// Certain preferences should be force saved in case of a crash
-	checkForForceSave: function(aName, aValue, aUseRootBranch)
+	checkForForceSave: function checkForForceSave(aName, aValue, aUseRootBranch)
 	{
 		var names = [ "_running", "_autosave_values" ];
 		
@@ -3074,7 +3079,7 @@ var gSessionManager = {
 	},
 		
 
-	getPref: function(aName, aDefault, aUseRootBranch)
+	getPref: function getPref(aName, aDefault, aUseRootBranch)
 	{
 		try
 		{
@@ -3096,7 +3101,7 @@ var gSessionManager = {
 		return aDefault;
 	},
 
-	setPref: function(aName, aValue, aUseRootBranch)
+	setPref: function setPref(aName, aValue, aUseRootBranch)
 	{
 		var forceSave = this.checkForForceSave(aName, aValue, aUseRootBranch);
 		
@@ -3122,7 +3127,7 @@ var gSessionManager = {
 		if (forceSave) this.mObserverService.notifyObservers(null,"sessionmanager-preference-save",null);
 	},
 
-	delPref: function(aName, aUseRootBranch)
+	delPref: function delPref(aName, aUseRootBranch)
 	{
 		((aUseRootBranch)?this.mPrefRoot:this.mPrefBranch).deleteBranch(aName);
 	},
@@ -3130,7 +3135,7 @@ var gSessionManager = {
 /* ........ Miscellaneous Enhancements .............. */
 
 	// Read Autosave values from preference and store into global variables
-	getAutoSaveValues: function(aValues, aWindow, aNoSetWindowValue)
+	getAutoSaveValues: function getAutoSaveValues(aValues, aWindow, aNoSetWindowValue)
 	{
 		if (!aValues) aValues = "";
 		this.log("getAutoSaveValues: aWindow = " + aWindow + ", aValues = " + aValues.split("\n").join(", "), "EXTRA");
@@ -3156,7 +3161,7 @@ var gSessionManager = {
 	},
 
 	// Merge autosave variables into a a string
-	mergeAutoSaveValues: function(name, group, time)
+	mergeAutoSaveValues: function mergeAutoSaveValues(name, group, time)
 	{
 		var values = [ name, group, time ];
 		return values.join("\n");
@@ -3165,7 +3170,7 @@ var gSessionManager = {
 	// Bug 374288 causes all elements that don't have a specified tooltip or tooltiptext to inherit their
 	// ancestors tooltip/tooltiptext.  To work around this set a blank tooltiptext for all descendents of aNode.
 	//
-	fixBug374288: function(aNode)
+	fixBug374288: function fixBug374288(aNode)
 	{
 		if (aNode && aNode.childNodes) {
 			for (var i in aNode.childNodes) {
@@ -3183,7 +3188,7 @@ var gSessionManager = {
 	// is set, this function ignores the request and let's the Firefox Sanitize function call
 	// gSessionManager.santize when Clear Private Data okay button is pressed and Session Manager's checkbox
 	// is selected.
-	tryToSanitize: function ()
+	tryToSanitize: function tryToSanitize()
 	{
 		// User disabled the prompt before clear option and session manager is checked in the privacy data settings
 		if ( !this.getPref("privacy.sanitize.promptOnSanitize", true, true) &&
@@ -3196,7 +3201,7 @@ var gSessionManager = {
 		return false;
 	},
 		
-	recoverSession: function()
+	recoverSession: function recoverSession()
 	{
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called
@@ -3273,7 +3278,7 @@ var gSessionManager = {
 		}
 	},
 
-	isCmdLineEmpty: function()
+	isCmdLineEmpty: function isCmdLineEmpty()
 	{
 		if (!this.mApp.idEquals("SEAMONKEY")) {
 			try {
@@ -3301,7 +3306,7 @@ var gSessionManager = {
 		}
 	},
 
-	SeaMonkey_getHomePageGroup: function()
+	SeaMonkey_getHomePageGroup: function SeaMonkey_getHomePageGroup()
 	{
 		var homePage = this.mPrefRoot.getComplexValue("browser.startup.homepage", Components.interfaces.nsIPrefLocalizedString).data;
 		var count = this.getPref("browser.startup.homepage.count", 0, true);
@@ -3312,7 +3317,7 @@ var gSessionManager = {
 		return homePage;
 	},
 	
-	isPrivateBrowserMode: function()
+	isPrivateBrowserMode: function isPrivateBrowserMode()
 	{
 		// Private Browsing Mode is only available in Firefox 3.5 and above
 		if (this.mPrivateBrowsing) {
@@ -3323,7 +3328,7 @@ var gSessionManager = {
 		}
 	},
 
-	isAutoStartPrivateBrowserMode: function()
+	isAutoStartPrivateBrowserMode: function isAutoStartPrivateBrowserMode()
 	{
 		// Private Browsing Mode is only available in Firefox 3.5 and above
 		if (this.mPrivateBrowsing) {
@@ -3334,7 +3339,7 @@ var gSessionManager = {
 		}
 	},
 
-	updateToolbarButton: function(aEnable)
+	updateToolbarButton: function updateToolbarButton(aEnable)
 	{
 		var button = (document)?document.getElementById("sessionmanager-undo"):null;
 		if (button)
@@ -3349,13 +3354,13 @@ var gSessionManager = {
 		}
 	},
 	
-	showHideToolsMenu: function()
+	showHideToolsMenu: function showHideToolsMenu()
 	{
 		var sessionMenu = document.getElementById("sessionmanager-menu");
 		if (sessionMenu) sessionMenu.hidden = this.mPref_hide_tools_menu;
 	},
 
-	checkTimer: function()
+	checkTimer: function checkTimer()
 	{
 		// only act if timer already started
 		if (this._timer && ((this.mPref__autosave_time <= 0) || !this.mPref__autosave_name)) {
@@ -3381,7 +3386,7 @@ var gSessionManager = {
 		}
 	},
 	
-	checkWinTimer: function()
+	checkWinTimer: function checkWinTimer()
 	{
 		// only act if timer already started
 		if ((this._win_timer && ((this.__window_session_time <=0) || !this.__window_session_name))) {
@@ -3398,7 +3403,7 @@ var gSessionManager = {
 	
 /* ........ Auxiliary Functions .............. */
 	// Undo closed tab function for SeaMonkey
-	undoCloseTabSM: function (aIndex)
+	undoCloseTabSM: function undoCloseTabSM(aIndex)
 	{
 		if (gSessionManager.mSessionStore.getClosedTabCount(window) == 0)	return;
 		gSessionManager.mSessionStore.undoCloseTab(window, aIndex || 0);
@@ -3406,7 +3411,7 @@ var gSessionManager = {
 		if (!aIndex) gSessionManager.updateToolbarButton();
 	},
 	
-	getNoUndoData: function(aLoad, aMode)
+	getNoUndoData: function getNoUndoData(aLoad, aMode)
 	{
 		return aLoad ? { tabs: (!this.mPref_save_closed_tabs || (this.mPref_save_closed_tabs == 1 && (aMode != "startup"))),
 		                 windows: (!this.mPref_save_closed_windows || (this.mPref_save_closed_windows == 1 && (aMode != "startup"))) }
@@ -3414,13 +3419,13 @@ var gSessionManager = {
 	},
 
 	// count windows and tabs
-	getCount: function (aState)
+	getCount: function getCount(aState)
 	{
 		var windows = 0, tabs = 0;
 		
 		try {
 			var state = this.JSON_decode(aState);
-			state.windows.forEach(function(aWindow) {
+			state.windows.forEach(function countTabsAndWindows(aWindow) {
 				windows = windows + 1;
 				tabs = tabs + aWindow.tabs.length;
 			});
@@ -3430,7 +3435,7 @@ var gSessionManager = {
 		return { windows: windows, tabs: tabs };
 	},
 	
-	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt, aAutoSaveTime, aState)
+	getSessionState: function getSessionState(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt, aAutoSaveTime, aState)
 	{
 		// Return last closed window state if it is stored.
 		if (this.mLastState) {
@@ -3477,7 +3482,7 @@ var gSessionManager = {
 				(aGroup? ("\tgroup=" + aGroup) : "") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup, aWindowSessionValues)
+	restoreSession: function restoreSession(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup, aWindowSessionValues)
 	{
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
@@ -3486,7 +3491,7 @@ var gSessionManager = {
 		if (!aWindow)
 		{
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
-			aWindow.__SM_restore = function() {
+			aWindow.__SM_restore = function restoreSessionInNewWindow() {
 				this.removeEventListener("load", this.__SM_restore, true);
 				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aNoUndoData, null, null, null, aWindowSessionValues);
 				delete this.__SM_restore;
@@ -3513,16 +3518,16 @@ var gSessionManager = {
 		return true;
 	},
 
-	nameState: function(aState, aName)
+	nameState: function nameState(aState, aName)
 	{
 		if (!/^\[SessionManager v2\]/m.test(aState))
 		{
 			return "[SessionManager v2]\nname=" + aName + "\n" + aState;
 		}
-		return aState.replace(/^(\[SessionManager v2\])(?:\nname=.*)?/m, function($0, $1) { return $1 + "\nname=" + aName; });
+		return aState.replace(/^(\[SessionManager v2\])(?:\nname=.*)?/m, function replaceSessionName($0, $1) { return $1 + "\nname=" + aName; });
 	},
 	
-	makeOneWindow: function(aState)
+	makeOneWindow: function makeOneWindow(aState)
 	{
 		aState = this.JSON_decode(aState);
 		if (aState.windows.length > 1)
@@ -3532,7 +3537,7 @@ var gSessionManager = {
 			// make sure toolbars are not hidden on the window
 			delete(firstWindow.hidden);
 			// Move tabs to first window
-			aState.windows.forEach(function(aWindow) {
+			aState.windows.forEach(function moveTabsToFirstWindow(aWindow) {
 				while (aWindow.tabs.length > 0)
 				{
 					this.tabs.push(aWindow.tabs.shift());
@@ -3545,7 +3550,7 @@ var gSessionManager = {
 		return this.JSON_encode(aState);
 	},
 	
-	modifySessionData: function(aState, aNoUndoData, aSaving, aReplacingWindow, aStartup)
+	modifySessionData: function modifySessionData(aState, aNoUndoData, aSaving, aReplacingWindow, aStartup)
 	{
 		// Don't do anything if not modifying session data
 		if (!(aNoUndoData || aSaving || aReplacingWindow || aStartup)) {
@@ -3557,7 +3562,7 @@ var gSessionManager = {
 		if (aStartup) aState._firstTabs = true;
 		
 		// process opened windows
-		aState.windows.forEach(function(aWindow) {
+		aState.windows.forEach(function cleanWindow(aWindow) {
 			// Strip out cookies if user doesn't want to save them
 			if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
 
@@ -3571,7 +3576,7 @@ var gSessionManager = {
 				aState._closedWindows = [];
 			}
 			else  {
-				aState._closedWindows.forEach(function(aWindow) {
+				aState._closedWindows.forEach(function cleanClosedWindow(aWindow) {
 					// Strip out cookies if user doesn't want to save them
 					if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
 
@@ -3588,7 +3593,7 @@ var gSessionManager = {
 		return this.JSON_encode(aState);
 	},
 
-	getFormattedName: function(aTitle, aDate, aFormat)
+	getFormattedName: function getFormattedName(aTitle, aDate, aFormat)
 	{
 		function cut(aString, aLength)
 		{
@@ -3605,24 +3610,24 @@ var gSessionManager = {
 		}
 		function pad2(a) { return (a < 10)?"0" + a:a; }
 		
-		return (aFormat || this.mPref_name_format).split("%%").map(function(aPiece) {
-			return aPiece.replace(/%(\d*)([tdm])(\"(.*)\")?/g, function($0, $1, $2, $3, $4) {
+		return (aFormat || this.mPref_name_format).split("%%").map(function formatName(aPiece) {
+			return aPiece.replace(/%(\d*)([tdm])(\"(.*)\")?/g, function formatName2($0, $1, $2, $3, $4) {
 				$0 = ($2 == "t")?aTitle:($2 == "d")?toISO8601(aDate, $4):pad2(aDate.getHours()) + ":" + pad2(aDate.getMinutes());
 				return ($1)?cut($0, Math.max(parseInt($1), 3)):$0;
 			});
 		}).join("%");
 	},
 
-	makeFileName: function(aString)
+	makeFileName: function makeFileName(aString)
 	{
 		return aString.replace(/[^\w ',;!()@&*+=~\x80-\xFE-]/g, "_").substr(0, 64) + this.mSessionExt;
 	},
 	
 	// Look for open window sessions
-	getWindowSessions: function()
+	getWindowSessions: function getWindowSessions()
 	{
 		var windowSessions = {};
-		this.getBrowserWindows().forEach(function(aWindow) {
+		this.getBrowserWindows().forEach(function buildWindowSessionList(aWindow) {
 			if (aWindow.gSessionManager && aWindow.gSessionManager.__window_session_name && aWindow.gSessionManager.__window_session_name) { 
 				windowSessions[aWindow.gSessionManager.__window_session_name.trim().toLowerCase()] = true;
 			}
@@ -3630,7 +3635,7 @@ var gSessionManager = {
 		return windowSessions;
 	},
 
-	getBrowserWindows: function()
+	getBrowserWindows: function getBrowserWindows()
 	{
 		var windowsEnum = this.mWindowMediator.getEnumerator("navigator:browser");
 		var windows = [];
@@ -3643,7 +3648,7 @@ var gSessionManager = {
 		return windows;
 	},
 	
-	updateAutoSaveSessions: function(aOldName, aNewName) 
+	updateAutoSaveSessions: function updateAutoSaveSessions(aOldName, aNewName) 
 	{
 		var updateTitlebar = false;
 		
@@ -3662,7 +3667,7 @@ var gSessionManager = {
 		}
 		
 		// window sessions
-		this.getBrowserWindows().forEach(function(aWindow) {
+		this.getBrowserWindows().forEach(function updateAutoSaveData(aWindow) {
 			if (aWindow.gSessionManager && aWindow.gSessionManager.__window_session_name && (aWindow.gSessionManager.__window_session_name == aOldName)) { 
 				this.log("updateAutoSaveSessions: window change: aOldName = " + aOldName + ", aNewName = " + aNewName, "DATA");
 				aWindow.gSessionManager.__window_session_name = aNewName;
@@ -3680,17 +3685,17 @@ var gSessionManager = {
 		if (updateTitlebar) this.mObserverService.notifyObservers(null, "sessionmanager:updatetitlebar", null);
 	},
 
-	doResumeCurrent: function()
+	doResumeCurrent: function doResumeCurrent()
 	{
 		return (this.getPref("browser.startup.page", 1, true) == 3)?true:false;
 	},
 
-	isCleanBrowser: function(aBrowser)
+	isCleanBrowser: function isCleanBrowser(aBrowser)
 	{
 		return aBrowser.sessionHistory.count < 2 && aBrowser.currentURI.spec == "about:blank";
 	},
 
-	setDisabled: function(aObj, aValue)
+	setDisabled: function setDisabled(aObj, aValue)
 	{
 		if (aValue)
 		{
@@ -3702,18 +3707,18 @@ var gSessionManager = {
 		}
 	},
 
-	getEOL: function()
+	getEOL: function getEOL()
 	{
 		return /win|os[\/_]?2/i.test(navigator.platform)?"\r\n":/mac/i.test(navigator.platform)?"\r":"\n";
 	},
 
-	_string: function(aName)
+	_string: function _string(aName)
 	{
 		return this.mBundle.getString(aName);
 	},
 
 	// Decode JSON string to javascript object - use JSON if built-in.
-	JSON_decode: function(aStr, noError) {
+	JSON_decode: function JSON_decode(aStr, noError) {
 		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
 		try {
 			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
@@ -3729,7 +3734,7 @@ var gSessionManager = {
 			}
 			catch (ex) {
 				if (/[\u2028\u2029]/.test(aStr)) {
-					aStr = aStr.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
+					aStr = aStr.replace(/[\u2028\u2029]/g, function fixJSON1($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 				}
 				jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
 			}
@@ -3742,13 +3747,13 @@ var gSessionManager = {
 	},
 	
 	// Encode javascript object to JSON string - use JSON if built-in.
-	JSON_encode: function(aObj) {
+	JSON_encode: function JSON_encode(aObj) {
 		var jsString = null;
 		try {
 			jsString = this.mNativeJSON.encode(aObj);
 			// Needed until Firefox bug 387859 is fixed or else Firefox won't except JSON strings with \u2028 or \u2029 characters
 			if (/[\u2028\u2029]/.test(jsString)) {
-				jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
+				jsString = jsString.replace(/[\u2028\u2029]/g, function fixJSON2($0) {"\\u" + $0.charCodeAt(0).toString(16)});
 			}
 		}
 		catch(ex) {
@@ -3760,7 +3765,7 @@ var gSessionManager = {
 
 // String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
 if (typeof(String.trim) != "function") {
-	String.prototype.trim = function() {
+	String.prototype.trim = function trimString() {
 		return this.replace(/^\s+|\s+$/g, "");
 	};
 }
