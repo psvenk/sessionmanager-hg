@@ -218,6 +218,7 @@ var gSessionManager = {
 		this.mPref_autosave_session = this.getPref("autosave_session", true);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
 		this.mPref_click_restore_tab = this.getPref("click_restore_tab", true);
+		this.mPref_enable_saving_in_private_browsing_mode = this.getPref("enable_saving_in_private_browsing_mode", false);
 		this.mPref_encrypt_sessions = this.getPref("encrypt_sessions", false);
 		this.mPref_encrypted_only = this.getPref("encrypted_only", false);
 		this.mPref_max_backup_keep = this.getPref("max_backup_keep", 0);
@@ -3317,11 +3318,18 @@ var gSessionManager = {
 		return homePage;
 	},
 	
+	// Return private browsing mode (PBM) state - If user choose to allow saving in PBM and encryption
+	// is enabled, return false.
 	isPrivateBrowserMode: function isPrivateBrowserMode()
 	{
 		// Private Browsing Mode is only available in Firefox 3.5 and above
 		if (this.mPrivateBrowsing) {
-			return this.mPrivateBrowsing.privateBrowsingEnabled;
+			if (this.mPref_enable_saving_in_private_browsing_mode && this.mPref_encrypt_sessions) {
+				return false;
+			}
+			else {
+				return this.mPrivateBrowsing.privateBrowsingEnabled;
+			}
 		}
 		else {
 			return false;
