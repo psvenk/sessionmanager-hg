@@ -26,6 +26,7 @@
 			<preference id="extensions.sessionmanager.append_by_default" name="extensions.sessionmanager.append_by_default" type="bool"/>
 			<preference id="extensions.sessionmanager.autosave_session" name="extensions.sessionmanager.autosave_session" type="bool"/>
 			<preference id="extensions.sessionmanager.backup_session" name="extensions.sessionmanager.backup_session" type="int"/>
+			<preference id="extensions.sessionmanager.enable_saving_in_private_browsing_mode" name="extensions.sessionmanager.enable_saving_in_private_browsing_mode" type="bool"/>
 			<preference id="extensions.sessionmanager.hide_tools_menu" name="extensions.sessionmanager.hide_tools_menu" type="bool"/>
 			<preference id="extensions.sessionmanager.max_backup_keep" name="extensions.sessionmanager.max_backup_keep" type="int"/>
 			<preference id="extensions.sessionmanager.max_display" name="extensions.sessionmanager.max_display" type="int"/>
@@ -92,9 +93,11 @@
 				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&saving.caption;"/>
-						<hbox align="center">
+						<vbox align="left">
 							<checkbox label="&cookies.label;" accesskey="&cookies.accesskey;" preference="extensions.sessionmanager.save_cookies"/>
-						</hbox>
+							<checkbox id="allow_save_in_pbm" label="&allow_saving_during_pbm.label;" accesskey="&allow_saving_during_pbm.accesskey;" 
+							          tooltiptext="&allow_saving_during_pbm.label2;" preference="extensions.sessionmanager.enable_saving_in_private_browsing_mode"/>
+						</vbox>
 						<hbox align="center">
 							<label value="&max_backup.label;" accesskey="&max_backup.accesskey;" control="max_backup_keep"/>
 							<textbox id="max_backup_keep" preference="extensions.sessionmanager.max_backup_keep" size="1" maxlength="5"/>

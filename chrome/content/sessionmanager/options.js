@@ -55,6 +55,9 @@ gSessionManager.onLoad = function() {
 	originalOverwriteLabel = _("overwrite").label;
 	changeOverwriteLabel(_("extensions.sessionmanager.append_by_default").valueFromPreferences);
 	
+	// Disable or enable "allow saving in PBM" depending on encryption state
+	_("allow_save_in_pbm").disabled = !_("encrypt_sessions").checked;
+	
 	// Hide mid-click preference if Tab Mix Plus or Tab Clicking Options is enabled
 	var browser = this.mWindowMediator.getMostRecentWindow("navigator:browser");
 	if (browser) {
@@ -198,6 +201,7 @@ function checkEncryption(aState) {
 		return !aState;
 	}
 	_("encrypted_only").hidden = !aState;
+	_("allow_save_in_pbm").disabled = !aState;
 	
 	// When animating preferences the window can get cut off so just refresh the window size here
 	if (aState && gSessionManager.getPref("browser.preferences.animateFadeIn", false, true))

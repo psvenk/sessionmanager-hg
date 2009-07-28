@@ -1,10 +1,9 @@
 // To Do:
 // 1. On crash if don't select to restore current session or select tabs, window sessions will be lost.  Should label window sessions as such in 
 //    windows list and restore said sessions if don't select tabs for that window.  Might be tricky.
-// 2. Add option to allow saving of sessions in private browser mode if encryption is enabled.
-// 3. Add way of add window(s) to an existing session.
-// 4. Add way of deleting window(s) from an existing session.
-// 5. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
+// 2. Add way of add window(s) to an existing session.
+// 3. Add way of deleting window(s) from an existing session.
+// 4. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
 //    having the prompt window close. (Session Editor)
 
 var gSessionManager = {
