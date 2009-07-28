@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "b">
 <!ENTITY options.label "&sessionManager; indstillinger">
 <!ENTITY options.accesskey "i">
-<!ENTITY resume.label "Genoptag nuværende session ved opstart">
-<!ENTITY resume.accesskey "G">
-<!ENTITY reload.label "Genindlæs genskabte">
-<!ENTITY reload.accesskey "æ">
-<!ENTITY overwrite.label "Erstat vinduer">
-<!ENTITY overwrite.accesskey "E">
 <!ENTITY undoClosed.label "Genåbn lukkede...">
 <!ENTITY undoClosed.accesskey "l">
 <!ENTITY closedWindows "Lukkede vinduer:">

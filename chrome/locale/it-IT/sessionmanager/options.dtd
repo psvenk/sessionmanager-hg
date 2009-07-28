@@ -68,3 +68,7 @@
 <!ENTITY default_dir.accesskey "D">
 <!ENTITY sanitizer.label "Sessioni salvate">
 <!ENTITY sanitizer.accesskey "i">
+<!ENTITY reload.label "Ricaricare tutte le finestre ripristinate">
+<!ENTITY reload.accesskey "i">
+<!ENTITY overwrite.label "Sostituire le finestre esistenti">
+<!ENTITY overwrite.accesskey "o">

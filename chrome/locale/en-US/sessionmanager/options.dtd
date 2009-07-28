@@ -15,7 +15,7 @@
 <!ENTITY restoring.caption "Session Restoring">
 <!ENTITY sessionList.caption "Session List">
 <!ENTITY orderList.label "Order the session list">
-<!ENTITY orderList.accesskey "d">
+<!ENTITY orderList.accesskey "r">
 <!ENTITY orderList.label1 "alphabetically">
 <!ENTITY orderList.label2 "oldest to newest">
 <!ENTITY orderList.label_2 "newest to oldest">
@@ -80,7 +80,7 @@
 <!ENTITY cookies.accesskey "C">
 <!ENTITY sessionImport.caption "Import Sessions from...">
 <!ENTITY importSS.label "SessionSaver">
-<!ENTITY importSS.accesskey "I">
+<!ENTITY importSS.accesskey "e">
 <!ENTITY importTMP.label "Tab Mix Plus">
 <!ENTITY importTMP.accesskey "I">
 <!ENTITY apply.label "Apply">
@@ -124,4 +124,9 @@
 <!ENTITY log_level_info.accesskey "i">
 <!ENTITY log_level_extra.label "Log Extra Debugging Data">
 <!ENTITY log_level_extra.accesskey "e">
-
+<!ENTITY reload.label "Reload All Restored Windows">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "Replace Existing Windows">
+<!ENTITY overwrite.accesskey "R">
+<!ENTITY allow_saving_during_pbm.label "Allow saving while in Private Browsing Mode (requires encryption to be enabled)">
+<!ENTITY allow_saving_during_pbm.accesskey "S">

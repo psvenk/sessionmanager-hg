@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "F">
 <!ENTITY options.label "&sessionManager; 옵션(O)">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "시작할 때 현재 세션을 재개하기(M)">
-<!ENTITY resume.accesskey "M">
-<!ENTITY reload.label "모든 복원된 창을 새로 고침(L)">
-<!ENTITY reload.accesskey "L">
-<!ENTITY overwrite.label "기존의 창에 덮어쓰기(P)">
-<!ENTITY overwrite.accesskey "P">
 <!ENTITY undoClosed.label "닫은 탭 다시 열기(C)...">
 <!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "닫은 창:">

@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Förmarkera föregående session">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY reload.label "Ladda om alla återställda fönster">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "Ersätt existerande fönster">
+<!ENTITY overwrite.accesskey "p">

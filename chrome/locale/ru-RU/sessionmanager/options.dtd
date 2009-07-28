@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "з">
 <!ENTITY preselect_previous_session.label "Выбрать предыдущую сессию">
 <!ENTITY preselect_previous_session.accesskey "п">
+<!ENTITY reload.label "Обновить все восстановленные окна">
+<!ENTITY reload.accesskey "б">
+<!ENTITY overwrite.label "Заменить существующие окна">
+<!ENTITY overwrite.accesskey "З">

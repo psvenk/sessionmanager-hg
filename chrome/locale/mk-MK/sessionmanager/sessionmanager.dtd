@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "Ф">
 <!ENTITY options.label "&sessionManager; Опции">
 <!ENTITY options.accesskey "О">
-<!ENTITY resume.label "Продолжи ја моменталната сесија при стартовањето">
-<!ENTITY resume.accesskey "р">
-<!ENTITY reload.label "Превчитај ги сите обновени прозорци">
-<!ENTITY reload.accesskey "е">
-<!ENTITY overwrite.label "Замени ги постоечките прозорци">
-<!ENTITY overwrite.accesskey "а">
 <!ENTITY undoClosed.label "Повторно отвори ги затворените...">
 <!ENTITY undoClosed.accesskey "н">
 <!ENTITY closedWindows "Затворени прозорци:">
@@ -66,7 +60,7 @@
 <!ENTITY prompt.save_every2.label "минути (оневозможено ако е празно)">
 <!ENTITY winTabTree.restoreHeader "Обнови">
 <!ENTITY winTabTree.listHeader "Прозорци и Јазичиња">
-<!--   LOCALIZATION NOTE: &#37;S will be replaced with a number.   -->
+<!--    LOCALIZATION NOTE: &#37;S will be replaced with a number.    -->
 <!ENTITY winTabTree.windowLabel "Прозорец &#37;S">
 <!ENTITY load.label "Вчитај ја сесијата...">
 <!ENTITY load.accesskey "В">

@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "あらかじめ前のセッションを選択する">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY reload.label "すべての復元したウインドウを再読み込みする">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "既存のウインドウを取り替える">
+<!ENTITY overwrite.accesskey "p">

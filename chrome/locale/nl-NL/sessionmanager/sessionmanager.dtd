@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "m">
 <!ENTITY options.label "&sessionManager; opties">
 <!ENTITY options.accesskey "o">
-<!ENTITY resume.label "Huidige sessie hernemen bij opstarten">
-<!ENTITY resume.accesskey "n">
-<!ENTITY reload.label "Alle herstelde vensters vernieuwen">
-<!ENTITY reload.accesskey "w">
-<!ENTITY overwrite.label "Bestaande vensters vervangen">
-<!ENTITY overwrite.accesskey "e">
 <!ENTITY undoClosed.label "Heropen gesloten ...">
 <!ENTITY undoClosed.accesskey "p">
 <!ENTITY closedWindows "Gesloten vensters:">

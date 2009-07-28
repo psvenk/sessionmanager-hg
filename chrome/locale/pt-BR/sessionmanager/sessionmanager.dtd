@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "A">
 <!ENTITY options.label "Opções do &sessionManager;...">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Continuar a Sessão Atual Quando Iniciar">
-<!ENTITY resume.accesskey "C">
-<!ENTITY reload.label "Recarregar Todas as Janelas Restauradas">
-<!ENTITY reload.accesskey "T">
-<!ENTITY overwrite.label "Substituir Janelas Existentes">
-<!ENTITY overwrite.accesskey "u">
 <!ENTITY undoClosed.label "Reabrir Fechadas ...">
 <!ENTITY undoClosed.accesskey "F">
 <!ENTITY closedWindows "Janelas Fechadas:">
@@ -66,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "minutos (se estiver em branco será desativado)">
 <!ENTITY winTabTree.restoreHeader "Restaurar">
 <!ENTITY winTabTree.listHeader "Janelas e Abas">
+<!--   LOCALIZATION NOTE: &#37;S will be replaced with a number.   -->
 <!ENTITY winTabTree.windowLabel "Janela &#37;S">
 <!ENTITY load.label "Carregar Sessão:">
 <!ENTITY load.accesskey "C">

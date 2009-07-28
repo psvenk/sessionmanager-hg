@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "z">
 <!ENTITY preselect_previous_session.label "Predvybrať predchádzajúcu reláciu">
 <!ENTITY preselect_previous_session.accesskey "d">
+<!ENTITY reload.label "Obnoviť obsah všetkých obnovených okien">
+<!ENTITY reload.accesskey "i">
+<!ENTITY overwrite.label "Nahradiť existujúce okná">
+<!ENTITY overwrite.accesskey "h">

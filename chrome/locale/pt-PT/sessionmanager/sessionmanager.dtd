@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "P">
 <!ENTITY options.label "Opções do &sessionManager;">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Resumir a sessão actual ao Iniciar">
-<!ENTITY resume.accesskey "m">
-<!ENTITY reload.label "Recarregar todas Janelas Restauradas">
-<!ENTITY reload.accesskey "o">
-<!ENTITY overwrite.label "Substituir as Janelas Existentes">
-<!ENTITY overwrite.accesskey "u">
 <!ENTITY undoClosed.label "Re-abrir Fechadas...">
 <!ENTITY undoClosed.accesskey "F">
 <!ENTITY closedWindows "Janelas Fechadas:">

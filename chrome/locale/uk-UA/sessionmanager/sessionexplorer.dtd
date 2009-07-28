@@ -1,0 +1,42 @@
+<!ENTITY session_open.label "Відкрити">
+<!ENTITY session_open.accesskey "O">
+<!ENTITY session_open.tooltip "Відкрити обрану сесію">
+<!ENTITY session_open_overwrite.label "Відкрити (перезаписати)">
+<!ENTITY session_open_overwrite.accesskey "v">
+<!ENTITY session_open_overwrite.tooltip "Відкрити обрану сесію">
+<!ENTITY session_open_newwindow.label "Відкрити (в новому вікні)">
+<!ENTITY session_open_newwindow.accesskey "n">
+<!ENTITY session_open_newwindow.tooltip "Відкрити обрану сесію">
+<!ENTITY session_open_append.label "Відкрити (додати)">
+<!ENTITY session_open_append.accesskey "a">
+<!ENTITY session_open_append.tooltip "Відкрити обрану сесію">
+<!ENTITY session_rename.label "Перейменувати...">
+<!ENTITY session_rename.accesskey "R">
+<!ENTITY session_rename.tooltip "Перейменувати обрану сесію">
+<!ENTITY session_rename_ok.label "Перейменувати">
+<!ENTITY session_delete.label "Вилучити">
+<!ENTITY session_delete.accesskey "D">
+<!ENTITY session_delete.tooltip "Вилучити обрану сессію">
+<!ENTITY session_save.label "Зберегти...">
+<!ENTITY session_save.accesskey "S">
+<!ENTITY session_save.tooltip "Зберегти поточні вікна до нової сесії">
+<!ENTITY session_save_ok.label "Зберегти">
+<!ENTITY session_save_w.label "Зберегти вікно...">
+<!ENTITY session_save_w.accesskey "W">
+<!ENTITY session_save_w.tooltip "Зберегти поточне вікно до нової сесії">
+<!ENTITY session_save_w_ok.label "Зберегти вікно">
+<!ENTITY session_open_folder.label "Відкрити теку">
+<!ENTITY session_open_folder.accesskey "f">
+<!ENTITY session_open_folder.tooltip "Відкрити теку Менеджера Сесій">
+<!ENTITY column_autosave.label "A">
+<!ENTITY column_autosave.tooltip "Автозбереження сесії">
+<!ENTITY column_windows.label "W">
+<!ENTITY column_windows.tooltip "Вікна">
+<!ENTITY column_tabs.label "T">
+<!ENTITY column_tabs.tooltip "Вкладки">
+<!ENTITY column_time.label "Час">
+<!ENTITY column_time.tooltip "Мітка часу">
+<!ENTITY column_name.label "Назва">
+<!ENTITY cancel.label "Відміна">
+<!ENTITY done.label "Так">
+<!ENTITY done.tooltip "Закрити вікно Оглядача Сесій">

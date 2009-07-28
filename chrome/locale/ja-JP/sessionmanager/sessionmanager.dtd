@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "F">
 <!ENTITY options.label "セッションマネージャオプション">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "スタートアップ時に現在のセッションを再開する">
-<!ENTITY resume.accesskey "m">
-<!ENTITY reload.label "すべての復元したウインドウを再読み込みする">
-<!ENTITY reload.accesskey "l">
-<!ENTITY overwrite.label "既存のウインドウを取り替える">
-<!ENTITY overwrite.accesskey "p">
 <!ENTITY undoClosed.label "閉じたタブ等を再び開く">
 <!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "閉じたウインドウ">

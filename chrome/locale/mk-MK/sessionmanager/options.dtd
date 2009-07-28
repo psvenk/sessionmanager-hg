@@ -97,5 +97,17 @@
 <!ENTITY encrypted_only.label "Ако шифрирањето не успее, Не ги зачувувај нешифрираните податоци.">
 <!ENTITY encrypted_only.accesskey "Н">
 <!ENTITY encrypt2.desc "Предупредување: Ако ова е избрано и ако податоците на сесијата или прозорецот не можат да бидат шифрирани, податоците ќе бидат изгубени без да начин да бидат обновени. Шифрирањето нема да успее ако главната лозинка е побарана и ако не е внесена, затоа размислете внимателно пред да го изберите ова поле.">
+<!ENTITY closed_window_list.label "Користи ја вградената затворена листа на прозорецот на прелистувачот">
+<!ENTITY closed_window_list.accesskey "К">
+<!ENTITY closed_windows.label "Обнови ја листата на затворени прозорци што можат повторно да бидат отворени:">
+<!ENTITY closed_windows.accesskey "н">
 <!ENTITY open_as_tabs.label "Отвори како јазичиња во тековниот прозорец">
 <!ENTITY open_as_tabs.accesskey "т">
+<!ENTITY last_window_shutdown.label "Третирај го затворањето на последниот отворен прозорец како затворање на прелистувачот">
+<!ENTITY last_window_shutdown.accesskey "Т">
+<!ENTITY preselect_previous_session.label "Изберете ја предходната сесија">
+<!ENTITY preselect_previous_session.accesskey "з">
+<!ENTITY reload.label "Превчитај ги сите обновени прозорци">
+<!ENTITY reload.accesskey "е">
+<!ENTITY overwrite.label "Замени ги постоечките прозорци">
+<!ENTITY overwrite.accesskey "а">

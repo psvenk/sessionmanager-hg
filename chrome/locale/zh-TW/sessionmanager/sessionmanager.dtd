@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "F">
 <!ENTITY options.label "「&sessionManager;」選項">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "開啟瀏覽器時續用當前瀏覽頁組">
-<!ENTITY resume.accesskey "m">
-<!ENTITY reload.label "重新載入所有已還原視窗">
-<!ENTITY reload.accesskey "l">
-<!ENTITY overwrite.label "取代當前視窗">
-<!ENTITY overwrite.accesskey "p">
 <!ENTITY undoClosed.label "重新開啟...">
 <!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "關閉的視窗：">

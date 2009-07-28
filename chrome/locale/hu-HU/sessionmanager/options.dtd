@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "u">
 <!ENTITY preselect_previous_session.label "Előző munkamenet automatikus kiválasztása">
 <!ENTITY preselect_previous_session.accesskey "a">
+<!ENTITY reload.label "Minden ablak újratöltése">
+<!ENTITY reload.accesskey "d">
+<!ENTITY overwrite.label "Létező ablakok lecserélése">
+<!ENTITY overwrite.accesskey "a">

@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "F">
 <!ENTITY options.label "&sessionManager; Options">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Resume Current Session At Startup">
-<!ENTITY resume.accesskey "m">
-<!ENTITY reload.label "Reload All Restored Windows">
-<!ENTITY reload.accesskey "l">
-<!ENTITY overwrite.label "Replace Existing Windows">
-<!ENTITY overwrite.accesskey "p">
 <!ENTITY undoClosed.label "Reopen Closed ...">
 <!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "Closed Windows:">

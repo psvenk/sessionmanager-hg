@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "t">
 <!ENTITY preselect_previous_session.label "De vorige sessie pre-selecteren">
 <!ENTITY preselect_previous_session.accesskey "r">
+<!ENTITY reload.label "Alle herstelde vensters vernieuwen">
+<!ENTITY reload.accesskey "w">
+<!ENTITY overwrite.label "Bestaande vensters vervangen">
+<!ENTITY overwrite.accesskey "e">

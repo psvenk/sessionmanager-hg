@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "預選「最近一項瀏覽頁組」">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY reload.label "重新載入所有已還原視窗">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "取代當前視窗">
+<!ENTITY overwrite.accesskey "p">

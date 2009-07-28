@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "A">
 <!ENTITY options.label "&sessionManager; nustatymai">
 <!ENTITY options.accesskey "n">
-<!ENTITY resume.label "Tęsti šią sesiją paleidžiant">
-<!ENTITY resume.accesskey "d">
-<!ENTITY reload.label "Perkrauti visus atkurtus langus">
-<!ENTITY reload.accesskey "e">
-<!ENTITY overwrite.label "Pakeisti egzistuojančius langus">
-<!ENTITY overwrite.accesskey "k">
 <!ENTITY undoClosed.label "Iš naujo atverti užvertus...">
 <!ENTITY undoClosed.accesskey "u">
 <!ENTITY closedWindows "Užverti langai:">

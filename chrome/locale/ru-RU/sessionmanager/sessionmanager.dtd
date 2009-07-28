@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "т">
 <!ENTITY options.label "Настройки Менеджера сессий">
 <!ENTITY options.accesskey "Н">
-<!ENTITY resume.label "Восстановить текущую сессию при загрузке">
-<!ENTITY resume.accesskey "В">
-<!ENTITY reload.label "Обновить все восстановленные окна">
-<!ENTITY reload.accesskey "б">
-<!ENTITY overwrite.label "Заменить существующие окна">
-<!ENTITY overwrite.accesskey "З">
 <!ENTITY undoClosed.label "Восстановить закрытое...">
 <!ENTITY undoClosed.accesskey "к">
 <!ENTITY closedWindows "Закрытые окна:">

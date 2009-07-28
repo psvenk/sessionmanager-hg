@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "F">
 <!ENTITY options.label "&sessionManager; Alternativ">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Återuppta nuvarande session vid start">
-<!ENTITY resume.accesskey "m">
-<!ENTITY reload.label "Ladda om alla återställda fönster">
-<!ENTITY reload.accesskey "l">
-<!ENTITY overwrite.label "Ersätt existerande fönster">
-<!ENTITY overwrite.accesskey "p">
 <!ENTITY undoClosed.label "Återställ stängda...">
 <!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "Stängda fönster:">

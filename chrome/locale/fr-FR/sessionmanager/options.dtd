@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Présélectionner la session précédente">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY reload.label "Recharger toutes les fenêtres rétablies">
+<!ENTITY reload.accesskey "c">
+<!ENTITY overwrite.label "Remplacer les fenêtres existantes">
+<!ENTITY overwrite.accesskey "x">

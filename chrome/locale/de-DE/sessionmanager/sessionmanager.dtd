@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "O">
 <!ENTITY options.label "&sessionManager;-Einstellungen...">
 <!ENTITY options.accesskey "E">
-<!ENTITY resume.label "Aktuelle Sitzung nach Neustart fortsetzen">
-<!ENTITY resume.accesskey "N">
-<!ENTITY reload.label "Alle Fenster neu laden">
-<!ENTITY reload.accesskey "l">
-<!ENTITY overwrite.label "Vorhandene Fenster ersetzen">
-<!ENTITY overwrite.accesskey "V">
 <!ENTITY undoClosed.label "Kürzlich geschlossene Fenster/Tabs">
 <!ENTITY undoClosed.accesskey "G">
 <!ENTITY closedWindows "Geschlossene Fenster:">
@@ -66,14 +60,17 @@
 <!ENTITY prompt.save_every2.label "Minuten sichern (deaktiviert wenn leer)">
 <!ENTITY winTabTree.restoreHeader "Wiederherstellen">
 <!ENTITY winTabTree.listHeader "Fenster und Tabs">
-<!--    LOCALIZATION NOTE: &#37;S will be replaced with a number.    -->
+<!--     LOCALIZATION NOTE: &#37;S will be replaced with a number.     -->
 <!ENTITY winTabTree.windowLabel "Fenster &#37;S">
 <!ENTITY load.label "Sitzung laden...">
 <!ENTITY load.accesskey "l">
-<!ENTITY prompt.append.label "Sitzung hinzufügen">
+<!ENTITY prompt.append.label "Zu bestehender Sitzung hinzufügen">
 <!ENTITY prompt.replace.label "Sitzung ersetzen">
-<!ENTITY ctrl_click_note.label "Hinweis: Mit gedrückt gehaltener Strg-Taste angeklickte Tab-Einträge werden im aktuellen Fenster geöffnet.">
+<!ENTITY ctrl_click_note.label "Hinweis: Klicken auf einen Tab-Eintrag mit gedrückter Strg-Taste öffnet den Tab direkt im bestehenden Fenster.">
 <!ENTITY select_all.label "Alle auswählen">
 <!ENTITY select_none.label "Keine auswählen">
 <!ENTITY toggle_selection.label "Auswahl umkehren">
 <!ENTITY winTabTree.urlHeader "Adresse">
+<!ENTITY prompt.append_window.label "Zu aktuellem Fenster hinzufügen">
+<!ENTITY session_explorer.label "Sitzungs-Explorer">
+<!ENTITY session_explorer.accesskey "E">

@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "F">
 <!ENTITY options.label "&sessionManager; Seçenekleri">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Geçerli Oturume Başlangıçta devam et">
-<!ENTITY resume.accesskey "m">
-<!ENTITY reload.label "Yüklenmiş Pencereleri Yenile">
-<!ENTITY reload.accesskey "l">
-<!ENTITY overwrite.label "Varolan Pencereyi Değiştir">
-<!ENTITY overwrite.accesskey "p">
 <!ENTITY undoClosed.label "Kapatılanı Tekrar Aç...">
 <!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "Kapatılmış Pencereler:">

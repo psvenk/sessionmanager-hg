@@ -68,3 +68,7 @@
 <!ENTITY default_dir.accesskey "A">
 <!ENTITY sanitizer.label "Sesijų tvarkytojo išsaugotos sesijos">
 <!ENTITY sanitizer.accesskey "i">
+<!ENTITY reload.label "Perkrauti visus atkurtus langus">
+<!ENTITY reload.accesskey "e">
+<!ENTITY overwrite.label "Pakeisti egzistuojančius langus">
+<!ENTITY overwrite.accesskey "k">

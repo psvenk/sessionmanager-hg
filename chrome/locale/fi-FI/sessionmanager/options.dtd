@@ -97,3 +97,7 @@
 <!ENTITY encrypted_only.label "Jos salaus epäonnistuu, ÄLÄ tallenna tietoja salaamattomina.">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Varoitus: Jos tämä asetus on valittuna eikä istunnon tai ikkunan tietoja voida salata, tiedot katoavat ilman palautusmahdollisuutta. Salaus epäonnistuu jos pääsalasanaa ei anneta sitä pyydettäessä, joten mieti tarkkaan ennen kuin valitset tämän asetuksen.">
+<!ENTITY reload.label "Lataa uudelleen kaikki palautetut ikkunat">
+<!ENTITY reload.accesskey "L">
+<!ENTITY overwrite.label "Korvaa olemassaolevat ikkunat">
+<!ENTITY overwrite.accesskey "P">

@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "u">
 <!ENTITY preselect_previous_session.label "Preselectează sesiunea precedentă">
 <!ENTITY preselect_previous_session.accesskey "P">
+<!ENTITY reload.label "Reîncarcă toate ferestrele restaurate">
+<!ENTITY reload.accesskey "R">
+<!ENTITY overwrite.label "Înlocuieşte fereastra curentă">
+<!ENTITY overwrite.accesskey "c">

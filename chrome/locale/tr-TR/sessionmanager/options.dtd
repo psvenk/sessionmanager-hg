@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "önceki oturumu seç">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY reload.label "Yüklenmiş Pencereleri Yenile">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "Varolan Pencereyi Değiştir">
+<!ENTITY overwrite.accesskey "p">

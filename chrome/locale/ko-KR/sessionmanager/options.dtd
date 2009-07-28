@@ -68,3 +68,7 @@
 <!ENTITY default_dir.accesskey "D">
 <!ENTITY sanitizer.label "Session Manager의 저장된 세션(M)">
 <!ENTITY sanitizer.accesskey "M">
+<!ENTITY reload.label "모든 복원된 창을 새로 고침(L)">
+<!ENTITY reload.accesskey "L">
+<!ENTITY overwrite.label "기존의 창에 덮어쓰기(P)">
+<!ENTITY overwrite.accesskey "P">

@@ -1,0 +1,113 @@
+<!ENTITY options.title "Налаштування Менеджера Сесій">
+<!ENTITY general.caption "Загальні">
+<!ENTITY startNend.caption "Запуск та закриття">
+<!ENTITY resume_sess.label "При запуску завжди завантажувати наступну сесію:">
+<!ENTITY resume_sess.accesskey "s">
+<!ENTITY backup_sess.label "При закритті">
+<!ENTITY backup_sess.accesskey "h">
+<!ENTITY backup_session.label0 "відкинути поточну сесію">
+<!ENTITY backup_session.label1 "зберегти поточну сесію">
+<!ENTITY backup_session.label2 "запит на збереження поточної сесії">
+<!ENTITY crashrecovery.label "Увімкнути відновлення при краху">
+<!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "Автоматично зберегти заміщену сесію">
+<!ENTITY autosave_session.accesskey "a">
+<!ENTITY restoring.caption "Відновлення сесії">
+<!ENTITY sessionList.caption "Список сесій">
+<!ENTITY orderList.label "Порядок списка сесій">
+<!ENTITY orderList.accesskey "d">
+<!ENTITY orderList.label1 "за абеткою">
+<!ENTITY orderList.label2 "зі старіших до новіших">
+<!ENTITY orderList.label_2 "з новіших до старіших">
+<!ENTITY max_backup.label "Кількість архівів старіших (загиблих) сесій, що зберігаються:">
+<!ENTITY max_backup.accesskey "N">
+<!ENTITY undoClose.caption "Відмінити закриття">
+<!ENTITY windowsNtabs.caption "Закриті вікна й вкладки">
+<!ENTITY max_closed.label "Максимальна кількість закритих вікон, що запам&apos;ятовуються:">
+<!ENTITY max_closed.accesskey "w">
+<!ENTITY max_tabs.label "Максимальна кількість закритих вкладок, що запам&apos;ятовуються (на вікно):">
+<!ENTITY max_tabs.accesskey "t">
+<!ENTITY submenu.label "Список всіх закритих вікон й вкладок в підменю">
+<!ENTITY submenu.accesskey "c">
+<!ENTITY persistence.caption "Постійність">
+<!ENTITY closed_tabs.label "Відновлювати список закритих вкладок (якщо можливо) для всіх вікон:">
+<!ENTITY closed_tabs.accesskey "e">
+<!ENTITY closed_tabs.label0 "ніколи">
+<!ENTITY closed_tabs.label1 "при старті">
+<!ENTITY closed_tabs.label2 "завжди">
+<!ENTITY window_list.label "Не очищувати список закритих вікон при виході">
+<!ENTITY window_list.accesskey "o">
+<!ENTITY clear_list.label "Очистити список">
+<!ENTITY clear_list.accesskey "r">
+<!ENTITY advanced.caption "Поглиблено">
+<!ENTITY name_format.caption "Назви сесії">
+<!ENTITY name_format.label "Формат назв сесій">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "Використовуйте &#37;t для заголовку активної вкладки, &#37;d для сьогоднішньої дати та &#37;m для часу; додатково довжина заголовку може бути обмежена # символами: &#37;#t.">
+<!ENTITY sessionstore.caption "Збереження сесій">
+<!ENTITY service.caption "Налаштування збереження сесій">
+<!ENTITY service.description "Не чіпайте це, якщо не впевнені у власних діях!">
+<!ENTITY interval.label "Мінімальний часовий інтервал між двома збереженнями станів (в секундах):">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "Максимальний обсяг POSTDATA до збереження (в байтах; -1 для всього):">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Зберігати вразливі дані (дані форм, POSTDATA та куки) для">
+<!ENTITY privacy.accesskey "v">
+<!ENTITY privacy.level0 "всіх сайтів">
+<!ENTITY privacy.level1 "лише для незашифрованих сайтів">
+<!ENTITY privacy.level2 "жодних сайтів">
+<!ENTITY sessiondir.caption "Розміщення збережених сесій">
+<!ENTITY sessiondir.desc "Типове розміщення збережених сесій може бути перевизначене тут.">
+<!ENTITY encrypt.caption "Кодування">
+<!ENTITY encrypt.desc "Попередження: дані закодованих сесій можуть бути відкриті з ідентичними файлами key3.db. Додатково, якщо головний пароль встановлено, сесії не можуть бути закодовані чи розкодовані без введення головного паролю.">
+<!ENTITY encrypt.label "Кодувати збережену сесію та дані закритого вікна">
+<!ENTITY encrypt.accesskey "e">
+<!ENTITY change_dir.label "Змінити">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "За умовчанням">
+<!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "Збережені сесії менеджера сесій">
+<!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Збереження сесії">
+<!ENTITY lastpage.label "Показувати мою останню сторінку">
+<!ENTITY noSession.label "Жодну">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Запит щодо сесії">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "Вибрати сесію">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Зберегти куки сесії">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "Імпортувати сесії з...">
+<!ENTITY importSS.label "Зберігач сесій">
+<!ENTITY importSS.accesskey "i">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "i">
+<!ENTITY apply.label "Застосувати">
+<!ENTITY save_and_restore.caption "Збереження й відновлення">
+<!ENTITY display.caption "Показ">
+<!ENTITY middleclick.label "Клацання середньою перевідкриє останню закрити вкладку">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Найбільша кількість сесій, що відображається в меню (-1 для всіх)">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Не показувати меню Менеджера сесій в меню Інструменти">
+<!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "Відключити виравлення кешу">
+<!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Якщо кодування не вдалося, НЕ зберігати дані незакодованими">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Попередження: якщо це ввімкнено та дані вікна/сесії не можуть бути закодовані, дані буде втрачено без можливості відновлення. Закодування провалиться якщо запит на головний пароль буде зігноровано, тому будьте обережні з увімкненням цього режиму.">
+<!ENTITY closed_window_list.label "Використовувати список закритих вікон переглядача">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Відновлювати список закритих вікон (якщо можливо)">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Відкрити як вкладки в поточному вікні">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "Вважати закриття останнього відкритого вікна переглядача закриттям">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "Заздалегідь обрана попередня сесія">
+<!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY reload.label "Перезавантажити всі відновлені вікна">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "Замістити існуючі вікна">
+<!ENTITY overwrite.accesskey "p">

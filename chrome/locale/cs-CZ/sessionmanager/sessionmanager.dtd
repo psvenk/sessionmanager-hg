@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "s">
 <!ENTITY options.label "Možnosti Správce relací">
 <!ENTITY options.accesskey "N">
-<!ENTITY resume.label "Přejmenovat poslední relaci při startu">
-<!ENTITY resume.accesskey "e">
-<!ENTITY reload.label "Znovu načíst všechna obnovená okna">
-<!ENTITY reload.accesskey "v">
-<!ENTITY overwrite.label "Nahradit existující okna">
-<!ENTITY overwrite.accesskey "h">
 <!ENTITY undoClosed.label "Znovu otevřít zavřené...">
 <!ENTITY undoClosed.accesskey "z">
 <!ENTITY closedWindows "Zavřená okna:">

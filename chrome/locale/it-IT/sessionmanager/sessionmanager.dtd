@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "A">
 <!ENTITY options.label "Opzioni &sessionManager;">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Ripristinare la sessione corrente al riavvio">
-<!ENTITY resume.accesskey "p">
-<!ENTITY reload.label "Ricaricare tutte le finestre ripristinate">
-<!ENTITY reload.accesskey "i">
-<!ENTITY overwrite.label "Sostituire le finestre esistenti">
-<!ENTITY overwrite.accesskey "o">
 <!ENTITY undoClosed.label "Riapri chiuse ...">
 <!ENTITY undoClosed.accesskey "c">
 <!ENTITY closedWindows "Finestre chiuse:">

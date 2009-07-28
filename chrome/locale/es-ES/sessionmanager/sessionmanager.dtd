@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "A">
 <!ENTITY options.label "&sessionManager; Opciones">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Recuperar la sesión actual al iniciar">
-<!ENTITY resume.accesskey "s">
-<!ENTITY reload.label "Recargar todas las ventanas restauradas">
-<!ENTITY reload.accesskey "d">
-<!ENTITY overwrite.label "Reemplazar las ventanas existentes">
-<!ENTITY overwrite.accesskey "n">
 <!ENTITY undoClosed.label "Volver a abrir las cerradas...">
 <!ENTITY undoClosed.accesskey "c">
 <!ENTITY closedWindows "Ventanas cerradas:">

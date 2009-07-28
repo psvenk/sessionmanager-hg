@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "F">
 <!ENTITY options.label "&sessionManager;选项">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "开启浏览器时恢复当前会话">
-<!ENTITY resume.accesskey "m">
-<!ENTITY reload.label "重新载入全部已恢复窗口">
-<!ENTITY reload.accesskey "l">
-<!ENTITY overwrite.label "替代已存在窗口">
-<!ENTITY overwrite.accesskey "x">
 <!ENTITY undoClosed.label "重新打开...">
 <!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "已关闭的窗口：">
@@ -66,7 +60,7 @@
 <!ENTITY prompt.save_every2.label "分钟 (空白表示禁用)">
 <!ENTITY winTabTree.restoreHeader "恢复">
 <!ENTITY winTabTree.listHeader "窗口和标签页">
-<!--   LOCALIZATION NOTE: &#37;S will be replaced with a number.   -->
+<!--    LOCALIZATION NOTE: &#37;S will be replaced with a number.    -->
 <!ENTITY winTabTree.windowLabel "窗口&#37;S">
 <!ENTITY load.label "载入会话...">
 <!ENTITY load.accesskey "L">

@@ -97,3 +97,17 @@
 <!ENTITY encrypted_only.label "Falls die Verschlüsselung fehlschlägt, Daten NICHT unverschlüsselt sichern">
 <!ENTITY encrypted_only.accesskey "N">
 <!ENTITY encrypt2.desc "Warnung: Alle Daten gehen unwiederbringlich verloren, wenn diese Option aktiviert wird und Sitzungs- oder Fensterdaten nicht verschlüsselt werden können. Dies ist der Fall, wenn das Master-Passwort verlangt aber nicht eingegeben wird. Überlegen Sie also gut, ob sie diese Option aktivieren!">
+<!ENTITY closed_window_list.label "Liste der Bowser-Chronik für geschlossene Fenster verwenden">
+<!ENTITY closed_window_list.accesskey "w">
+<!ENTITY closed_windows.label "Liste der geschlossenen Fenster wiederherstellen:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Als Tabs im aktuellen Fenster öffnen">
+<!ENTITY open_as_tabs.accesskey "T">
+<!ENTITY last_window_shutdown.label "Beim Schließen des letzten Fensters den Browser beenden">
+<!ENTITY last_window_shutdown.accesskey "t">
+<!ENTITY preselect_previous_session.label "Letzte Sitzung vorauswählen">
+<!ENTITY preselect_previous_session.accesskey "v">
+<!ENTITY reload.label "Alle Fenster neu laden">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "Vorhandene Fenster ersetzen">
+<!ENTITY overwrite.accesskey "V">

@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "D">
 <!ENTITY options.label "Opţiuni &sessionManager;">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Restaurează sesiunea la lansarea aplicaţiei">
-<!ENTITY resume.accesskey "p">
-<!ENTITY reload.label "Reîncarcă toate ferestrele restaurate">
-<!ENTITY reload.accesskey "R">
-<!ENTITY overwrite.label "Înlocuieşte fereastra curentă">
-<!ENTITY overwrite.accesskey "c">
 <!ENTITY undoClosed.label "Redeschide ferestrele şi/sau filele închise...">
 <!ENTITY undoClosed.accesskey "R">
 <!ENTITY closedWindows "Ferestre închise:">

@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "预先选定前一个会话">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY reload.label "重新载入全部已恢复窗口">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "替代已存在窗口">
+<!ENTITY overwrite.accesskey "x">

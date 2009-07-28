@@ -107,3 +107,7 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Pré-selecionar">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY reload.label "Recarregar Todas as Janelas Restauradas">
+<!ENTITY reload.accesskey "T">
+<!ENTITY overwrite.label "Substituir Janelas Existentes">
+<!ENTITY overwrite.accesskey "u">

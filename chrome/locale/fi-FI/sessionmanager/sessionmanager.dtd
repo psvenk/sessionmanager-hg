@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "F">
 <!ENTITY options.label "&sessionManager; -asetukset">
 <!ENTITY options.accesskey "O">
-<!ENTITY resume.label "Jatka nykyistä istuntoa seuraavalla käynnistyskerralla">
-<!ENTITY resume.accesskey "M">
-<!ENTITY reload.label "Lataa uudelleen kaikki palautetut ikkunat">
-<!ENTITY reload.accesskey "L">
-<!ENTITY overwrite.label "Korvaa olemassaolevat ikkunat">
-<!ENTITY overwrite.accesskey "P">
 <!ENTITY undoClosed.label "Avaa suljetut uudelleen...">
 <!ENTITY undoClosed.accesskey "C">
 <!ENTITY closedWindows "Suljetut ikkunat:">

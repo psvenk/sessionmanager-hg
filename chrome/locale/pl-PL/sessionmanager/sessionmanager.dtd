@@ -16,12 +16,6 @@
 <!ENTITY openFolder.accesskey "f">
 <!ENTITY options.label "Menedżer sesji – ustawienia">
 <!ENTITY options.accesskey "M">
-<!ENTITY resume.label "Podczas otwierania odtwórz ostatnią aktywną sesję">
-<!ENTITY resume.accesskey "k">
-<!ENTITY reload.label "Odśwież wszystkie odtworzone okna">
-<!ENTITY reload.accesskey "i">
-<!ENTITY overwrite.label "Zamień istniejące okna">
-<!ENTITY overwrite.accesskey "a">
 <!ENTITY undoClosed.label "Otwórz ponownie">
 <!ENTITY undoClosed.accesskey "O">
 <!ENTITY closedWindows "Zamknięte okna:">
@@ -66,7 +60,7 @@
 <!ENTITY prompt.save_every2.label "min (puste pole powoduje wyłączenie funkcji)">
 <!ENTITY winTabTree.restoreHeader "Odtwórz">
 <!ENTITY winTabTree.listHeader "Okna i karty">
-<!--    -->
+<!--      -->
 <!ENTITY winTabTree.windowLabel "Okno &#37;S">
 <!ENTITY load.label "Wczytaj sesję…">
 <!ENTITY load.accesskey "W">
