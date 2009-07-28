@@ -128,5 +128,6 @@
 <!ENTITY reload.accesskey "l">
 <!ENTITY overwrite.label "Replace Existing Windows">
 <!ENTITY overwrite.accesskey "R">
-<!ENTITY allow_saving_during_pbm.label "Allow saving while in Private Browsing Mode (requires encryption to be enabled)">
+<!ENTITY allow_saving_during_pbm.label "Allow saving during Private Browsing Mode">
+<!ENTITY allow_saving_during_pbm.label2 "Requires encryption to be enabled">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
