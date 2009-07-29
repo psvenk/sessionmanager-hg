@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "önceki oturumu seç">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "Günlük">
+<!ENTITY enable_logging.label "Günlük Aktif">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Log Dosyasını Aç">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Log Dosyasını Sil">
+<!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "Kapatma Kaydını logla">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "İzleme datasını logla">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Kararsız Datayı logla">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Bilgi Mesajlarını logla">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Ekstra Ayıklama datasını logla">
+<!ENTITY log_level_extra.accesskey "e">
 <!ENTITY reload.label "Yüklenmiş Pencereleri Yenile">
 <!ENTITY reload.accesskey "l">
 <!ENTITY overwrite.label "Varolan Pencereyi Değiştir">
 <!ENTITY overwrite.accesskey "p">
+<!ENTITY allow_saving_during_pbm.label "Gizli Tarama Modunda kaydetmeye izin ver">
+<!ENTITY allow_saving_during_pbm.label2 "Şifrelemenin aktif olması gerekir">
+<!ENTITY allow_saving_during_pbm.accesskey "S">

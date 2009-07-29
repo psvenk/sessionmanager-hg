@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Заздалегідь обрана попередня сесія">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "Журналювання">
+<!ENTITY enable_logging.label "Дозволити журналювання">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Відкрити файл журналу">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Стерти файл журналу">
+<!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "Записувати стан закриття">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "Записувати дані трасування">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Записувати дані змінних">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Записувати інформаційні повідомлення">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Записувати додаткові дані зневаджування">
+<!ENTITY log_level_extra.accesskey "e">
 <!ENTITY reload.label "Перезавантажити всі відновлені вікна">
 <!ENTITY reload.accesskey "l">
 <!ENTITY overwrite.label "Замістити існуючі вікна">
 <!ENTITY overwrite.accesskey "p">
+<!ENTITY allow_saving_during_pbm.label "Дозволити збереження під час потайливого режиму">
+<!ENTITY allow_saving_during_pbm.label2 "Вимагає увімкненого кодування">
+<!ENTITY allow_saving_during_pbm.accesskey "S">

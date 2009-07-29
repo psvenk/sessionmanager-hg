@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "D">
 <!ENTITY preselect_previous_session.label "Zaznacz wstępnie poprzednią sesję">
 <!ENTITY preselect_previous_session.accesskey "W">
+<!ENTITY logging.caption "Dziennik zdarzeń">
+<!ENTITY enable_logging.label "Włącz dziennik zdarzeń">
+<!ENTITY enable_logging.accesskey "D">
+<!ENTITY open_log.label "Otwórz plik dziennika">
+<!ENTITY open_log.accesskey "O">
+<!ENTITY delete_log.label "Usuń plik dziennika">
+<!ENTITY delete_log.accesskey "U">
+<!ENTITY log_level_state.label "Zapisuj stan zamknięcia">
+<!ENTITY log_level_state.accesskey "M">
+<!ENTITY log_level_trace.label "Zapisuj dane śledzenia">
+<!ENTITY log_level_trace.accesskey "D">
+<!ENTITY log_level_data.label "Zapisuj dane zmienne">
+<!ENTITY log_level_data.accesskey "E">
+<!ENTITY log_level_info.label "Zapisuj wiadomości informacyjne">
+<!ENTITY log_level_info.accesskey "W">
+<!ENTITY log_level_extra.label "Zapisuj dodatkowe dane debugowania">
+<!ENTITY log_level_extra.accesskey "B">
 <!ENTITY reload.label "Odśwież wszystkie odtworzone okna">
 <!ENTITY reload.accesskey "i">
 <!ENTITY overwrite.label "Zamień istniejące okna">
 <!ENTITY overwrite.accesskey "a">
+<!ENTITY allow_saving_during_pbm.label "Zezwalaj na zapis w trakcie korzystania z trybu prywatnego">
+<!ENTITY allow_saving_during_pbm.label2 "Wymaga włączenia kodowania">
+<!ENTITY allow_saving_during_pbm.accesskey "K">

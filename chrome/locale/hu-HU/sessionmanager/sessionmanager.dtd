@@ -74,3 +74,7 @@
 <!ENTITY prompt.append_window.label "Hozzácsatolás a jelenlegi ablakhoz">
 <!ENTITY session_explorer.label "Munkamenet intéző">
 <!ENTITY session_explorer.accesskey "z">
+<!ENTITY closeWindowSession.label "Munkamenet ablak mentése és bezárása">
+<!ENTITY closeWindowSession.accesskey "s">
+<!ENTITY abandonWindowSession.label "Munkamenet ablak elvetése">
+<!ENTITY abandonWindowSession.accesskey "v">

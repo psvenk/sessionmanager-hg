@@ -73,3 +73,7 @@
 <!ENTITY prompt.append_window.label "Añadir a la ventana actual">
 <!ENTITY session_explorer.label "Explorador de sesiones">
 <!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "Guardar y cerrar la sesión">
+<!ENTITY closeWindowSession.accesskey "c">
+<!ENTITY abandonWindowSession.label "Abandonar la sesión">
+<!ENTITY abandonWindowSession.accesskey "b">

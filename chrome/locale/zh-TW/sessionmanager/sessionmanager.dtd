@@ -73,3 +73,7 @@
 <!ENTITY prompt.append_window.label "附加到當前視窗">
 <!ENTITY session_explorer.label "「瀏覽頁組」調查員">
 <!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "存檔後關閉瀏覽視窗組">
+<!ENTITY closeWindowSession.accesskey "l">
+<!ENTITY abandonWindowSession.label "不存檔關閉瀏覽視窗組">
+<!ENTITY abandonWindowSession.accesskey "b">

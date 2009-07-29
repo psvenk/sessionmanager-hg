@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Pré-seleccionar a última sessão">
 <!ENTITY preselect_previous_session.accesskey "l">
+<!ENTITY logging.caption "A registar">
+<!ENTITY enable_logging.label "Activar registo">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Abrir ficheiro de registo">
+<!ENTITY open_log.accesskey "b">
+<!ENTITY delete_log.label "Eliminar ficheiro de registo">
+<!ENTITY delete_log.accesskey "l">
+<!ENTITY log_level_state.label "Registar estado do encerramento">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "Registar dados de trace">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Registar dados da variável">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Registar mensagens de informação">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Registar dados extra de debug">
+<!ENTITY log_level_extra.accesskey "e">
 <!ENTITY reload.label "Recarregar todas Janelas Restauradas">
 <!ENTITY reload.accesskey "o">
 <!ENTITY overwrite.label "Substituir as Janelas Existentes">
 <!ENTITY overwrite.accesskey "u">
+<!ENTITY allow_saving_during_pbm.label "Permitir guardar durante o modo de navegação privado">
+<!ENTITY allow_saving_during_pbm.label2 "Necessita de cifra para ser activado">
+<!ENTITY allow_saving_during_pbm.accesskey "c">

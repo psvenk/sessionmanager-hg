@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "u">
 <!ENTITY preselect_previous_session.label "Preselectează sesiunea precedentă">
 <!ENTITY preselect_previous_session.accesskey "P">
+<!ENTITY logging.caption "Jurnal">
+<!ENTITY enable_logging.label "Activează înregistrarea în jurnal">
+<!ENTITY enable_logging.accesskey "j">
+<!ENTITY open_log.label "Deschide jurnalul">
+<!ENTITY open_log.accesskey "D">
+<!ENTITY delete_log.label "Şterge jurnalul">
+<!ENTITY delete_log.accesskey "t">
+<!ENTITY log_level_state.label "Înregistrează starea la închidere">
+<!ENTITY log_level_state.accesskey "h">
+<!ENTITY log_level_trace.label "Înregistrează datele de urmărire">
+<!ENTITY log_level_trace.accesskey "u">
+<!ENTITY log_level_data.label "Înregistrează datele variabile">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Înregistrează mesajele informative">
+<!ENTITY log_level_info.accesskey "m">
+<!ENTITY log_level_extra.label "Înregistrează datele de depanare suplimetare">
+<!ENTITY log_level_extra.accesskey "p">
 <!ENTITY reload.label "Reîncarcă toate ferestrele restaurate">
 <!ENTITY reload.accesskey "R">
 <!ENTITY overwrite.label "Înlocuieşte fereastra curentă">
 <!ENTITY overwrite.accesskey "c">
+<!ENTITY allow_saving_during_pbm.label "Autorizează arhivarea la navigarea în mod privat">
+<!ENTITY allow_saving_during_pbm.label2 "Necesită activarea criptării">
+<!ENTITY allow_saving_during_pbm.accesskey "p">

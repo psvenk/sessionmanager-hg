@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "u">
 <!ENTITY preselect_previous_session.label "Előző munkamenet automatikus kiválasztása">
 <!ENTITY preselect_previous_session.accesskey "a">
+<!ENTITY logging.caption "Naplózás">
+<!ENTITY enable_logging.label "Naplózás engedélyezése">
+<!ENTITY enable_logging.accesskey "z">
+<!ENTITY open_log.label "Naplófájl megnyitása">
+<!ENTITY open_log.accesskey "m">
+<!ENTITY delete_log.label "Naplófájl törlése">
+<!ENTITY delete_log.accesskey "t">
+<!ENTITY log_level_state.label "Bezárás állapotának naplózása">
+<!ENTITY log_level_state.accesskey "B">
+<!ENTITY log_level_trace.label "Nyomkövetés adatok naplózása">
+<!ENTITY log_level_trace.accesskey "N">
+<!ENTITY log_level_data.label "Változót tartalmazó adatok naplózása">
+<!ENTITY log_level_data.accesskey "V">
+<!ENTITY log_level_info.label "Információs üzenetek naplózása">
+<!ENTITY log_level_info.accesskey "I">
+<!ENTITY log_level_extra.label "Extra nyomkövetést tartalmazó adatok naplózása">
+<!ENTITY log_level_extra.accesskey "E">
 <!ENTITY reload.label "Minden ablak újratöltése">
 <!ENTITY reload.accesskey "d">
 <!ENTITY overwrite.label "Létező ablakok lecserélése">
 <!ENTITY overwrite.accesskey "a">
+<!ENTITY allow_saving_during_pbm.label "Mentés engedélyezése a privát böngészés során">
+<!ENTITY allow_saving_during_pbm.label2 "Az engedélyezéshez titkosítás szükséges">
+<!ENTITY allow_saving_during_pbm.accesskey "p">

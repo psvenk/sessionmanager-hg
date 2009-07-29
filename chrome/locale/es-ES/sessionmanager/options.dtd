@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Preseleccionar la sesión previa">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "Registro">
+<!ENTITY enable_logging.label "Habilitar registro">
+<!ENTITY enable_logging.accesskey "h">
+<!ENTITY open_log.label "Abrir archivo de registro">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Borrar archivo de registro">
+<!ENTITY delete_log.accesskey "b">
+<!ENTITY log_level_state.label "Registrar estado de apagado">
+<!ENTITY log_level_state.accesskey "a">
+<!ENTITY log_level_trace.label "Registrar traza de datos">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Registrar datos variables">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Registrar mensajes de información">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Registrar datos extra de depuración">
+<!ENTITY log_level_extra.accesskey "d">
 <!ENTITY reload.label "Recargar todas las ventanas restauradas">
 <!ENTITY reload.accesskey "d">
 <!ENTITY overwrite.label "Reemplazar las ventanas existentes">
 <!ENTITY overwrite.accesskey "n">
+<!ENTITY allow_saving_during_pbm.label "Permitir guardar en el modo de navegación privada">
+<!ENTITY allow_saving_during_pbm.label2 "Necesita habilitar el cifrado">
+<!ENTITY allow_saving_during_pbm.accesskey "s">

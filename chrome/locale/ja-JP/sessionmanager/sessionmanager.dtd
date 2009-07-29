@@ -73,3 +73,7 @@
 <!ENTITY prompt.append_window.label "現在のウィンドウを追加する">
 <!ENTITY session_explorer.label "セッションエクスプローラ">
 <!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "ウィンドウセッションを保存して閉じる">
+<!ENTITY closeWindowSession.accesskey "l">
+<!ENTITY abandonWindowSession.label "詳細なウィンドウセッション">
+<!ENTITY abandonWindowSession.accesskey "b">

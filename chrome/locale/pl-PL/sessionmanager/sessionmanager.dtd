@@ -74,3 +74,7 @@
 <!ENTITY prompt.append_window.label "Dołącz do bieżącej sesji">
 <!ENTITY session_explorer.label "Eksplorator sesji">
 <!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "Zapisz i zamknij okno sesji">
+<!ENTITY closeWindowSession.accesskey "M">
+<!ENTITY abandonWindowSession.label "Opuść okno sesji">
+<!ENTITY abandonWindowSession.accesskey "K">

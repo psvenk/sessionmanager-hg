@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "u">
 <!ENTITY preselect_previous_session.label "Předvybrat předchozí relaci">
 <!ENTITY preselect_previous_session.accesskey "r">
+<!ENTITY logging.caption "Zaznamenávání">
+<!ENTITY enable_logging.label "Zapnout zaznamenávání">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Otevřít soubor se záznamem">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Odstranit soubor se záznamem">
+<!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "Zaznamenávat stav při vypínání">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "Zaznamenávat stopy dat">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Zaznamenávat proměnná data">
+<!ENTITY log_level_data.accesskey "p">
+<!ENTITY log_level_info.label "Zaznamenávat informační zprávy">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Zaznamenávat další debuggovací data">
+<!ENTITY log_level_extra.accesskey "e">
 <!ENTITY reload.label "Znovu načíst všechna obnovená okna">
 <!ENTITY reload.accesskey "v">
 <!ENTITY overwrite.label "Nahradit existující okna">
 <!ENTITY overwrite.accesskey "h">
+<!ENTITY allow_saving_during_pbm.label "Povolit ukládání při zapnutém Anonymním prohlížení">
+<!ENTITY allow_saving_during_pbm.label2 "Vyžaduje zapnuté šifrování">
+<!ENTITY allow_saving_during_pbm.accesskey "f">

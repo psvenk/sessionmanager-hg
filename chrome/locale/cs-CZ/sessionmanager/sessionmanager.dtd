@@ -73,3 +73,7 @@
 <!ENTITY prompt.append_window.label "Přiřadit k aktuálnímu oknu">
 <!ENTITY session_explorer.label "Průzkumník relací">
 <!ENTITY session_explorer.accesskey "P">
+<!ENTITY closeWindowSession.label "Uložit a zavřít okno relace">
+<!ENTITY closeWindowSession.accesskey "l">
+<!ENTITY abandonWindowSession.label "Přerušit relaci v okně">
+<!ENTITY abandonWindowSession.accesskey "b">

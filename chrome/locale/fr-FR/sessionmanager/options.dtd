@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Présélectionner la session précédente">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "Connexion">
+<!ENTITY enable_logging.label "Activer la connexion">
+<!ENTITY enable_logging.accesskey "A">
+<!ENTITY open_log.label "Ouvrir le fichier journal">
+<!ENTITY open_log.accesskey "O">
+<!ENTITY delete_log.label "Supprimer le fichier journal">
+<!ENTITY delete_log.accesskey "S">
+<!ENTITY log_level_state.label "Enregistrer les arrêts">
+<!ENTITY log_level_state.accesskey "g">
+<!ENTITY log_level_trace.label "Enregistrer les données de traçage">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Enregistrer les données variables">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Enregistrer les messages d&apos;informations">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Enregistrer des données de débogage supplémentaires">
+<!ENTITY log_level_extra.accesskey "d">
 <!ENTITY reload.label "Recharger toutes les fenêtres rétablies">
 <!ENTITY reload.accesskey "c">
 <!ENTITY overwrite.label "Remplacer les fenêtres existantes">
 <!ENTITY overwrite.accesskey "x">
+<!ENTITY allow_saving_during_pbm.label "Autoriser l&apos;enregistrement en mode de navigation privée">
+<!ENTITY allow_saving_during_pbm.label2 "Nécessite le chiffrement pour être activé">
+<!ENTITY allow_saving_during_pbm.accesskey "m">

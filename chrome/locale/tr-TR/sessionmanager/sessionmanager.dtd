@@ -73,3 +73,7 @@
 <!ENTITY prompt.append_window.label "Şimdiki pencereye ekle">
 <!ENTITY session_explorer.label "Oturum Gezgini">
 <!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "Pencere Oturumunu Kaydet ve Kapat">
+<!ENTITY closeWindowSession.accesskey "l">
+<!ENTITY abandonWindowSession.label "Pencere Oturumunu iptal et">
+<!ENTITY abandonWindowSession.accesskey "b">

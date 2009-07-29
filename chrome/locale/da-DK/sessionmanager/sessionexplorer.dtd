@@ -40,7 +40,3 @@
 <!ENTITY cancel.label "Annuller">
 <!ENTITY done.label "Færdig">
 <!ENTITY done.tooltip "Luk Sessions-stifinder vindue">
-<!ENTITY reload.label "Genindlæs genskabte">
-<!ENTITY reload.accesskey "æ">
-<!ENTITY overwrite.label "Erstat vinduer">
-<!ENTITY overwrite.accesskey "E">

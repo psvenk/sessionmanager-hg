@@ -103,11 +103,31 @@
 <!ENTITY closed_windows.accesskey "s">
 <!ENTITY open_as_tabs.label "Abrir como abas na janela atual">
 <!ENTITY open_as_tabs.accesskey "p">
-<!ENTITY last_window_shutdown.label "Tratar o fechamento da última janela aberta do browser como um desligamento">
+<!ENTITY last_window_shutdown.label "Tratar o fechamento da última janela aberta do navegador como um desligamento">
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Pré-selecionar">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "Fazendo log">
+<!ENTITY enable_logging.label "Ativar logs">
+<!ENTITY enable_logging.accesskey "r">
+<!ENTITY open_log.label "Abrir arquivo de Log">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Apagar arquivo de logs">
+<!ENTITY delete_log.accesskey "A">
+<!ENTITY log_level_state.label "Estado do log de desligamento">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "Fazer log de dados de rastreamento">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Fazer log de dados de variáveis">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Fazer log de mensagens informativas">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Fazer log de dados extra de depuração">
+<!ENTITY log_level_extra.accesskey "e">
 <!ENTITY reload.label "Recarregar Todas as Janelas Restauradas">
 <!ENTITY reload.accesskey "T">
 <!ENTITY overwrite.label "Substituir Janelas Existentes">
 <!ENTITY overwrite.accesskey "u">
+<!ENTITY allow_saving_during_pbm.label "Permitir salvamento durante o Modo de Navegação Privado">
+<!ENTITY allow_saving_during_pbm.label2 "Requer encriptação ativada">
+<!ENTITY allow_saving_during_pbm.accesskey "S">

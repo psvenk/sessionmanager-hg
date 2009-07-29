@@ -66,7 +66,7 @@
 <!ENTITY load.accesskey "L">
 <!ENTITY prompt.append.label "Додати до сесії">
 <!ENTITY prompt.replace.label "Замістити сесію">
-<!ENTITY ctrl_click_note.label "Зауважте: клацання по табу з натисненою клавішею CTRL відкриє цей таб в існуючому вікні">
+<!ENTITY ctrl_click_note.label "Зауважте: клацання по вкладці з натисненою клавішею CTRL відкриє цю вкладку в існуючому вікні">
 <!ENTITY select_all.label "Виділити все">
 <!ENTITY select_none.label "Не виділяти нічого">
 <!ENTITY toggle_selection.label "Перемкнути виділення">
@@ -74,3 +74,7 @@
 <!ENTITY prompt.append_window.label "Додати до поточного вікна">
 <!ENTITY session_explorer.label "Переглядач сесій">
 <!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "Зберегти й закрити вікно сесії">
+<!ENTITY closeWindowSession.accesskey "i">
+<!ENTITY abandonWindowSession.label "Полишити вікно сесії">
+<!ENTITY abandonWindowSession.accesskey "b">

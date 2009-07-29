@@ -73,3 +73,7 @@
 <!ENTITY prompt.append_window.label "Adaugă la fereastra curentă">
 <!ENTITY session_explorer.label "Explorator de sesiuni">
 <!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "Salvează şi închide sesiunea ferestrei">
+<!ENTITY closeWindowSession.accesskey "v">
+<!ENTITY abandonWindowSession.label "Abandonează sesiunea ferestrei">
+<!ENTITY abandonWindowSession.accesskey "b">
