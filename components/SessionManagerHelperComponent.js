@@ -41,6 +41,8 @@ const STARTUP_PROMPT = -11;
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
 const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
+const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
+const SM_TEMP_RESTORE_PREFERENCE = "extensions.sessionmanager.temp_restore";
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -51,15 +53,42 @@ SessionManagerHelperComponent.prototype = {
 	classDescription: "Session Manager Helper Component",
 	classID:          Components.ID("{5714d620-47ce-11db-b0de-0800200c9a66}"),
 	contractID:       "@morac/sessionmanager-helper;1",
-	_xpcom_categories: [{ category: "app-startup", service: true }],
+	_xpcom_categories: [{ category: "app-startup", service: true },
+	                    { category: "command-line-handler", entry: "sessionmanager" }],
 	_ignorePrefChange: false,
+	_sessionExt: ".session",
 	mAutoPrivacy: false,
 	mBackupState: null,
 	mSessionData: null,
 	
 	// interfaces supported
-	QueryInterface: XPCOMUtils.generateQI([Ci.nsISessionManangerHelperComponent, Ci.nsIObserver]),
+	QueryInterface: XPCOMUtils.generateQI([Ci.nsISessionManangerHelperComponent, Ci.nsIObserver, Ci.nsICommandLineHandler]),
 
+	/* nsICommandLineHandler */
+	handle : function clh_handle(cmdLine)
+	{
+		// Find and remove the *.session command line argument and save it to a preference
+		try {
+			for (let i=0; i<cmdLine.length; i++) {
+				let name = cmdLine.getArgument(i);
+				if (/^.*\.session$/.test(name)) {
+					var file = this.getSessionDir(name);
+					if (file.exists()) {
+						cmdLine.removeArguments(i,i);
+						let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+						let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+						str.data = name;
+						pb.setComplexValue(SM_TEMP_RESTORE_PREFERENCE,Ci.nsISupportsString, str);
+						break;
+					}
+				}
+			}
+		}
+		catch (ex) {
+			report("Session Manager: Command Line Error - " + ex);
+		}
+	},
+	
 	// observer
 	observe: function(aSubject, aTopic, aData)
 	{
@@ -334,7 +363,82 @@ SessionManagerHelperComponent.prototype = {
 		// Resume listening to preference changes
 		this._ignorePrefChange = false;
 	},
+
+	// Get the profile dir
+	getProfileFile: function getProfileFile(aFileName)
+	{
+		let file = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsILocalFile).clone();
+		file.append(aFileName);
+		return file;
+	},
+	
+	// Get the user specific sessions directory
+	getUserDir: function getUserDir(aFileName)
+	{
+		let dir = null;
+		let dirname = null;
+
+		try {
+			let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
+			dirname = pb.getComplexValue(SM_SESSIONS_DIR_PREFERENCE,Ci.nsISupportsString).data;
+			if (dirname) {
+				let dir = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+				dir.initWithPath(dirname);
+				if (dir.isDirectory && dir.isWritable()) {
+					dir.append(aFileName);
+				}
+				else {
+					dir = null;
+				}
+			}
+		} catch (ex) {
+			dir = null;
+		} finally {
+			return dir;
+		}
+	},
+
+	// Get the sessions dir
+	getSessionDir: function getSessionDir(aFileName, aUnique)
+	{
+		// allow overriding of location of sessions directory
+		let dir = this.getUserDir("sessions");
 			
+		// use default is not specified or not a writable directory
+		if (dir == null) {
+			dir = this.getProfileFile("sessions");
+		}
+		if (!dir.exists())
+		{
+			try {
+				dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0700);
+			}
+			catch (ex) {
+				report("Session Manager: File Error - " + ex);
+				return null;
+			}
+		}
+		if (aFileName)
+		{
+			dir.append(aFileName);
+			if (aUnique)
+			{
+				let postfix = 1, ext = "";
+				if (aFileName.slice(-this._sessionExt.length) == this._sessionExt)
+				{
+					aFileName = aFileName.slice(0, -this._sessionExt.length);
+					ext = this._sessionExt;
+				}
+				while (dir.exists())
+				{
+					dir = dir.parent;
+					dir.append(aFileName + "-" + (++postfix) + ext);
+				}
+			}
+		}
+		return dir.QueryInterface(Ci.nsILocalFile);
+	},
+	
 	// Decode JSON string to javascript object
 	JSON_decode: function sm_JSON_decode(aStr) {
 		let jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
