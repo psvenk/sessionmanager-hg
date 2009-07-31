@@ -220,6 +220,7 @@ var gSessionManager = {
 		this.mPref_enable_saving_in_private_browsing_mode = this.getPref("enable_saving_in_private_browsing_mode", false);
 		this.mPref_encrypt_sessions = this.getPref("encrypt_sessions", false);
 		this.mPref_encrypted_only = this.getPref("encrypted_only", false);
+		this.mPref_hide_tools_menu = this.getPref("hide_tools_menu", false);
 		this.mPref_max_backup_keep = this.getPref("max_backup_keep", 0);
 		this.mPref_max_closed_undo = this.getPref("max_closed_undo", 10);
 		this.mPref_max_display = this.getPref("max_display", 20);
@@ -235,9 +236,9 @@ var gSessionManager = {
 		this.mPref_save_window_list = this.getPref("save_window_list", false);
 		this.mPref_session_list_order = this.getPref("session_list_order", 1);
 		this.mPref_shutdown_on_last_window_close = this.getPref("shutdown_on_last_window_close", false);
-		this.mPref_hide_tools_menu = this.getPref("hide_tools_menu", false);
 		this.mPref_startup = this.getPref("startup",0);
 		this.mPref_submenus = this.getPref("submenus", false);
+		this.mPref_temp_restore = this.getPref("temp_restore", "");
 		this.mPref__running = this.getPref("_running", false);
 		// split out name and group
 		this.getAutoSaveValues(this.getPref("_autosave_values", ""));
@@ -288,6 +289,9 @@ var gSessionManager = {
 
 			// If we did a temporary restore, set it to false			
 			if (this.mPref_restore_temporary) this.setPref("restore_temporary", false)
+
+			// Clear the command line load preference in case it's set
+			this.delPref("temp_restore");
 			
 			// make sure that the _running preference is saved in case we crash
 			this.setPref("_running", true);
@@ -3209,6 +3213,7 @@ var gSessionManager = {
 		var recoverOnly = this.mPref__running || sessionstart || this.getPref("_no_prompt_for_session", false);
 		this.delPref("_no_prompt_for_session");
 		this.log("recoverSession: recovering = " + recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
+		this.log("recoverSession: command line session = " + this.mPref_temp_restore, "DATA");
 
 		// handle crash where user chose a specific session
 		if (recovering)
@@ -3219,12 +3224,14 @@ var gSessionManager = {
 			this.delPref("_chose_tabs"); // delete chose tabs preference if set
 			this.load(recovering, "startup", choseTabs);
 		}
-		else if (!recoverOnly && (this.mPref_restore_temporary || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
+		else if (!recoverOnly && (this.mPref_restore_temporary || this.mPref_temp_restore || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
 			// allow prompting for tabs in Firefox 3.5
 			var values = { ignorable: true, preselect: this.mPref_preselect_previous_session };
 			
-			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
+			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:(this.mPref_temp_restore?this.mPref_temp_restore:
+			              ((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session));
+			this.log("recoverSession: Startup session = " + session, "DATA");
 			if (session && this.getSessionDir(session).exists())
 			{
 				this.load(session, "startup", values.choseTabs);
