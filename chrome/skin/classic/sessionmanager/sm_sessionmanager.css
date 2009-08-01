@@ -1,0 +1,22 @@
+#sessionmanager-undo {
+	list-style-image: url("chrome://sessionmanager/skin/sm_toolbar.png");
+}
+#sessionmanager-undo {
+	-moz-image-region: rect(-1px, 61px, 31px, 29px);
+}
+#sessionmanager-undo[disabled="true"] {
+	-moz-image-region: rect(-1px, 91px, 31px, 59px);
+}
+toolbar[iconsize="small"] #sessionmanager-undo {
+	-moz-image-region: rect(30px, 50px, 50px, 30px);
+}
+toolbar[iconsize="small"] #sessionmanager-undo[disabled="true"] {
+	-moz-image-region: rect(30px, 80px, 50px, 60px);
+}
+
+#sessionmanager-toolbar {
+	-moz-image-region: rect(0px, 32px, 32px, 0px);
+}
+toolbar[iconsize="small"] #sessionmanager-toolbar {
+	-moz-image-region: rect(13px, 75px, 33px, 55px);
+}
