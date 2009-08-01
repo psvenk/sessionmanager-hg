@@ -43,6 +43,7 @@ overlay chrome://communicator/content/sanitize.xul				chrome://sessionmanager/co
 overlay	chrome://navigator/content/navigator.xul				chrome://sessionmanager/content/sessionmanager.xul		application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 overlay chrome://sessionmanager/content/options.xul				chrome://sessionmanager/content/sm-options.xul			application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 style	chrome://sessionmanager/content/session_prompt.xul		chrome://sessionmanager/skin/tabWinSM.css				application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
+style	chrome://sessionmanager/content/sessionmanager.xul		chrome://sessionmanager/skin/sm_sessionmanager.css		application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
 
 # Flock
 overlay chrome://sessionmanager/content/options.xul				chrome://sessionmanager/content/flock-options.xul		application={a463f10c-3994-11da-9945-000d60ca027b}
