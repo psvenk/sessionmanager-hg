@@ -51,3 +51,6 @@ overlay chrome://sessionmanager/content/options.xul				chrome://sessionmanager/c
 # Shared Styles (needs to be below any other styles)
 style	chrome://sessionmanager/content/session_prompt.xul		chrome://sessionmanager/skin/tabWin.css
 style	chrome://global/content/customizeToolbar.xul			chrome://sessionmanager/skin/sessionmanager.css
+
+# SeaMonkey - overrides above line
+style	chrome://global/content/customizeToolbar.xul			chrome://sessionmanager/skin/sm_sessionmanager.css		application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}
