@@ -4,6 +4,7 @@ pref("browser.sessionstore.restore_prompt_uri", "chrome://sessionmanager/content
 
 pref("extensions.sessionmanager.append_by_default", false);
 pref("extensions.sessionmanager.autosave_session", true);
+pref("extensions.sessionmanager.backup_on_restart", false);
 pref("extensions.sessionmanager.backup_session", 1);
 pref("extensions.sessionmanager.backup_temporary", false);
 pref("extensions.sessionmanager.click_restore_tab", true);

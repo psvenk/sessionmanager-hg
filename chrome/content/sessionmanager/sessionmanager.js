@@ -215,6 +215,7 @@ var gSessionManager = {
 		
 		this.mPref_append_by_default = this.getPref("append_by_default", false);
 		this.mPref_autosave_session = this.getPref("autosave_session", true);
+		this.mPref_backup_on_restart = this.getPref("backup_on_restart", false);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
 		this.mPref_click_restore_tab = this.getPref("click_restore_tab", true);
 		this.mPref_enable_saving_in_private_browsing_mode = this.getPref("enable_saving_in_private_browsing_mode", false);
@@ -658,8 +659,8 @@ var gSessionManager = {
 			this.mObserving2.forEach(function removeObservers1b(aTopic) {
 				this.mObserverService.removeObserver(this, aTopic);
 			}, this);
-			// only run shutdown for one window and if not restarting browser
-			if (aData != "restart")
+			// only run shutdown for one window and if not restarting browser (or on restart is user wants)
+			if (this.mPref_backup_on_restart || (aData != "restart"))
 			{
 				this.shutDown();
 			}
