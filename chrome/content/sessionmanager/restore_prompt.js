@@ -19,6 +19,7 @@ gSessionManager.restorePrompt = function() {
 	var countString = "";
 	
 	var session = null, backupFile = null, state = null, count = null;
+	var	screensize = screen.width + "x" + screen.height;
 			
 	// Get count from crashed session and prepare to save it.  Don't save it yet or it will show up in selection list.
 	var file = this.getProfileFile("sessionstore.js");
@@ -34,7 +35,7 @@ gSessionManager.restorePrompt = function() {
 			var name = this.getFormattedName("", new Date(file.lastModifiedTime), this._string("crashed_session"));
 			state = this.readFile(file);
 			count = this.getCount(state);
-			session = this.nameState(state, name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + "\tgroup=" + this._string("backup_sessions"));
+			session = this.nameState(state, name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + "\tgroup=" + this._string("backup_sessions") + "\tscreensize=" + screensize);
 			backupFile = this.getSessionDir(this.mBackupSessionName, true);
 			
 			if (count.windows && count.tabs) countString = count.windows + "," + count.tabs;
