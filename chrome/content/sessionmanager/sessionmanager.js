@@ -37,7 +37,7 @@ var gSessionManager = {
 	mAutoSaveSessionName: "autosave.session",
 	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
-	mSessionRegExp: /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=(.+))?/m,
+	mSessionRegExp: /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=([^\t|^\n|^\r]+))?(\tscreensize=(\d+)x(\d+))?/m,
 
 	mLastState: null,
 	mCleanBrowser: null,
@@ -502,6 +502,8 @@ var gSessionManager = {
 			this._string_encrypt_fail = this._string("encrypt_fail");
 			this._string_encrypt_fail2 = this._string("encrypt_fail2");
 			this._string_save_and_restore = this._string("save_and_restore");
+			this._screen_width = screen.width;
+			this._screen_height = screen.height;
 			
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 			
@@ -1123,11 +1125,15 @@ var gSessionManager = {
 			return;
 		}
 
-		if (this.mSessionRegExp.test(state))
+		var matchArray = this.mSessionRegExp.exec(state);
+		if (matchArray)
 		{
-			var name = RegExp.$1;
-			var autosave = RegExp.$3;
-			var group = RegExp.$7;
+			var sessionWidth = parseInt(matchArray[9]);
+			var sessionHeight = parseInt(matchArray[10]);
+			var xDelta = (!sessionWidth || isNaN(sessionWidth)) ? 1 : (screen.width / sessionWidth);
+			var yDelta = (!sessionHeight || isNaN(sessionHeight)) ? 1 : (screen.height / sessionHeight);
+			this.log("xDelta = " + xDelta + ", yDelta = " + yDelta, "DATA");
+			
 			state = (aChoseTabs && chosenState) ? chosenState : state.split("\n")[4];
 			
 			// Don't save current session on startup since there isn't any.  Don't save if opening
@@ -1156,17 +1162,17 @@ var gSessionManager = {
 			if (!aChoseTabs && !this.isPrivateBrowserMode())
 			{
 				// if this is a window session, keep track of it
-				if (/^window\/?(\d*)$/.test(autosave)) {
+				if (/^window\/?(\d*)$/.test(matchArray[3])) {
 					var time = parseInt(RegExp.$1);
-					window_autosave_values = this.mergeAutoSaveValues(name, group, time);
+					window_autosave_values = this.mergeAutoSaveValues(matchArray[1], matchArray[7], time);
 					this.log("load: window session", "INFO");
 				}
 			
 				// If this is an autosave session, keep track of it if there is not already an active session
-				if (this.mPref__autosave_name=="" && /^session\/?(\d*)$/.test(autosave)) 
+				if (this.mPref__autosave_name=="" && /^session\/?(\d*)$/.test(matchArray[3])) 
 				{
 					var time = parseInt(RegExp.$1);
-					this.setPref("_autosave_values", this.mergeAutoSaveValues(name, group, time));
+					this.setPref("_autosave_values", this.mergeAutoSaveValues(matchArray[1], matchArray[7], time));
 				}
 			}
 		}
@@ -1243,7 +1249,7 @@ var gSessionManager = {
 		setTimeout(function delayRestoreSession() {
 			var tabcount = gBrowser.mTabs.length;
 			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, noUndoData, 
-			                                          (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode || (aMode == "append"), startup, window_autosave_values);
+			                                          (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode || (aMode == "append"), startup, window_autosave_values, xDelta, yDelta);
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
@@ -1279,7 +1285,7 @@ var gSessionManager = {
 			// Get original name
 			if (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(state)) oldname = RegExp.$2;
 			// remove group name if it was a backup session
-			if (this.mSessionCache[values.name].backup) state = state.replace(/\tgroup=.+$/m, "");
+			if (this.mSessionCache[values.name].backup) state = state.replace(/\tgroup=[^\t|^\n|^\r]+/m, "");
 			this.writeFile(newFile || file, this.nameState(state, values.text));
 			if (newFile)
 			{
@@ -1319,7 +1325,7 @@ var gSessionManager = {
 				{
 					var file = this.getSessionDir(aFileName);
 					var state = this.readSessionFile(file);
-					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=.+)?$/m, function changeGroup($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group) : ""); });
+					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=[^\t|^\n|^\r]+)?/m, function changeGroup($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group.replace(/\t/g, " ")) : ""); });
 					this.writeFile(file, state);
 
 					// Grouped active session
@@ -2633,42 +2639,35 @@ var gSessionManager = {
 		else if ((/^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!this.mSessionRegExp.test(state)))
 		{
 			// This should always match, but is required to get the RegExp values set correctly.
-			// RegExp.$1 - Entire 4 line header
-			// RegExp.$2 - Top 3 lines (includes name and timestamp)
-			// RegExp.$3 - " v2" (if it exists) - if missing file is in old format
-			// RegExp.$4 - Autosave string (if it exists)
-			// RegExp.$5 - Autosave value (not really used at the moment)
-			// RegExp.$6 - Count string (if it exists)
-			// RegExp.$7 - Group string and any invalid count string before (if either exists)
-			// RegExp.$8 - Invalid count string (if it exists)
-			// RegExp.$9 - Group string (if it exists)
-			if (/((^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=.+\n))?)/m.test(state))
+			// matchArray[0] - Entire 4 line header
+			// matchArray[1] - Top 3 lines (includes name and timestamp)
+			// matchArray[2] - " v2" (if it exists) - if missing file is in old format
+			// matchArray[3] - Autosave string (if it exists)
+			// matchArray[4] - Autosave value (not really used at the moment)
+			// matchArray[5] - Count string (if it exists)
+			// matchArray[6] - Group string and any invalid count string before (if either exists)
+			// matchArray[7] - Invalid count string (if it exists)
+			// matchArray[8] - Group string (if it exists)
+			// matchArray[9] - Screen size string and, if no group string, any invalid count string before (if either exists)
+			// matchArray[10] - Invalid count string (if it exists)
+			// matchArray[11] - Screen size string (if it exists)
+			var matchArray = /(^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window\/?\d*)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=[^\t|^\n|^\r]+[\n]?))?((\t.*)?(\tscreensize=\d+x\d+[\n]?))?/m.exec(state)
+			if (matchArray)
 			{	
-				var header = RegExp.$1;
-				var nameTime = RegExp.$2;
-				var oldFormat = (RegExp.$3 == "");
-				var auto = RegExp.$4;
-				var autoValue = RegExp.$5;
-				var count = RegExp.$6;
-				var group = RegExp.$9 ? RegExp.$9 : "";
-				var goodSession = true;
-
 				// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
-				if (/autosave=(false|true|session\/?\d*|window).*\nautosave=(false|true|session\/?\d*|window)/m.test(state)) {
-					goodSession = false;
-				}
+				var goodSession = !/autosave=(false|true|session\/?\d*|window\/?\d*).*\nautosave=(false|true|session\/?\d*|window\/?\d*)/m.test(state);
 				
 				// read entire file if only read header
 				if (headerOnly) state = this.readFile(aFile);
 
 				if (goodSession)
 				{
-					var data = state.split("\n")[((auto) ? 4 : 3)];
+					var data = state.split("\n")[((matchArray[3]) ? 4 : 3)];
 					var backup_data = data;
-					data = this.decrypt(data, true, oldFormat);
+					data = this.decrypt(data, true, matchArray[2]);
 					// If old format test JSON data
-					if (oldFormat) {
-						nameTime = nameTime.replace(/^\[SessionManager\]/, "[SessionManager v2]");
+					if (!matchArray[2]) {
+						matchArray[1] = matchArray[1].replace(/^\[SessionManager\]/, "[SessionManager v2]");
 						var test_decode = this.JSON_decode(data, true);
 						// if it failed to decode, try to decode again using new format
 						if (test_decode._JSON_decode_failed) {
@@ -2683,12 +2682,12 @@ var gSessionManager = {
 						}
 						return null;
 					}
-					var countString = (count) ? (count) : getCountString(this.getCount(data));
-					// remove \n from count string if group is there
-					if (group && (countString[countString.length-1] == "\n")) countString = countString.substring(0, countString.length - 1);
-					var autoSaveString = (auto) ? (auto).split("\n")[0] : "autosave=false";
+					var countString = (matchArray[5]) ? (matchArray[5]) : getCountString(this.getCount(data));
+					// remove \n from count string if group or screen size is there
+					if ((matchArray[8] || matchArray[11]) && (countString[countString.length-1] == "\n")) countString = countString.substring(0, countString.length - 1);
+					var autoSaveString = (matchArray[3]) ? (matchArray[3]).split("\n")[0] : "autosave=false";
 					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session/";
-					state = nameTime + autoSaveString + countString + group + this.decryptEncryptByPreference(data);
+					state = matchArray[1] + autoSaveString + countString + (matchArray[8] ? matchArray[8] : "") + (matchArray[11] ? matchArray[11] : "") + this.decryptEncryptByPreference(data);
 					// bad session so rename it so it won't load again - This catches case where window and/or 
 					// tab count is zero.  Technically we can load when tab count is 0, but that should never
 					// happen so session is probably corrupted anyway so just flag it so.
@@ -3494,10 +3493,11 @@ var gSessionManager = {
 		
 		return (aName != null)?this.nameState(("[SessionManager v2]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
 				"\nautosave=" + ((aAutoSave)?aOneWindow?("window/" + aAutoSaveTime):("session/" + aAutoSaveTime):"false") + "\tcount=" + count.windows + "/" + count.tabs + 
-				(aGroup? ("\tgroup=" + aGroup) : "") + "\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName || ""):state;
+				(aGroup? ("\tgroup=" + aGroup.replace(/\t/g, " ")) : "") + "\tscreensize=" + (this._screen_width || screen.width) + "x" + (this._screen_height || screen.height) + 
+				"\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName.replace(/\t/g, " ") || ""):state;
 	},
 
-	restoreSession: function restoreSession(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup, aWindowSessionValues)
+	restoreSession: function restoreSession(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup, aWindowSessionValues, xDelta, yDelta)
 	{
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
@@ -3508,14 +3508,14 @@ var gSessionManager = {
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
 			aWindow.__SM_restore = function restoreSessionInNewWindow() {
 				this.removeEventListener("load", this.__SM_restore, true);
-				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aNoUndoData, null, null, null, aWindowSessionValues);
+				this.gSessionManager.restoreSession(this, aState, aReplaceTabs, aNoUndoData, null, null, null, aWindowSessionValues, xDelta, yDelta);
 				delete this.__SM_restore;
 			};
 			aWindow.addEventListener("load", aWindow.__SM_restore, true);
 			return true;
 		}
 
-		aState = this.modifySessionData(aState, aNoUndoData, false, aEntireSession, aStartup);  
+		aState = this.modifySessionData(aState, aNoUndoData, false, aEntireSession, aStartup, xDelta, yDelta);  
 
 		if (aEntireSession)
 		{
@@ -3537,9 +3537,9 @@ var gSessionManager = {
 	{
 		if (!/^\[SessionManager v2\]/m.test(aState))
 		{
-			return "[SessionManager v2]\nname=" + aName + "\n" + aState;
+			return "[SessionManager v2]\nname=" + aName.replace(/\t/g, " ") + "\n" + aState;
 		}
-		return aState.replace(/^(\[SessionManager v2\])(?:\nname=.*)?/m, function replaceSessionName($0, $1) { return $1 + "\nname=" + aName; });
+		return aState.replace(/^(\[SessionManager v2\])(?:\nname=.*)?/m, function replaceSessionName($0, $1) { return $1 + "\nname=" + aName.replace(/\t/g, " "); });
 	},
 	
 	makeOneWindow: function makeOneWindow(aState)
@@ -3565,10 +3565,13 @@ var gSessionManager = {
 		return this.JSON_encode(aState);
 	},
 	
-	modifySessionData: function modifySessionData(aState, aNoUndoData, aSaving, aReplacingWindow, aStartup)
+	modifySessionData: function modifySessionData(aState, aNoUndoData, aSaving, aReplacingWindow, aStartup, xDelta, yDelta)
 	{
+		if (!xDelta) xDelta = 1;
+		if (!yDelta) yDelta = 1;
+	
 		// Don't do anything if not modifying session data
-		if (!(aNoUndoData || aSaving || aReplacingWindow || aStartup)) {
+		if (!(aNoUndoData || aSaving || aReplacingWindow || aStartup || (xDelta != 1) || (yDelta != 1))) {
 			return aState;
 		}
 		aState = this.JSON_decode(aState);
@@ -3576,14 +3579,22 @@ var gSessionManager = {
 		// set _firsttabs to true on startup to prevent closed tabs list from clearing when not overwriting tabs.
 		if (aStartup) aState._firstTabs = true;
 		
-		// process opened windows
-		aState.windows.forEach(function cleanWindow(aWindow) {
+		var fixWindow = function fixWindow(aWindow) {
 			// Strip out cookies if user doesn't want to save them
 			if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
 
 			// remove closed tabs			
 			if (aNoUndoData && aNoUndoData.tabs) aWindow._closedTabs = [];
-		}, this);
+			
+			// adjust window position and height if screen dimensions don't match saved screen dimensions
+			aWindow.width = aWindow.width * xDelta;
+			aWindow.height = aWindow.height * yDelta;
+			aWindow.screenX = aWindow.screenX * xDelta;
+			aWindow.screenY = aWindow.screenY * yDelta;
+		};
+		
+		// process opened windows
+		aState.windows.forEach(fixWindow, this);
 		
 		// process closed windows (for sessions only)
 		if (aState._closedWindows) {
@@ -3591,13 +3602,7 @@ var gSessionManager = {
 				aState._closedWindows = [];
 			}
 			else  {
-				aState._closedWindows.forEach(function cleanClosedWindow(aWindow) {
-					// Strip out cookies if user doesn't want to save them
-					if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
-
-					// remove closed tabs			
-					if (aNoUndoData && aNoUndoData.tabs) aWindow._closedTabs = [];
-				}, this);
+				aState._closedWindows.forEach(fixWindow, this);
 			}
 		}
 
