@@ -2,7 +2,11 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>{1280606b-2510-4fe0-97ef-9b5a22eafe30}</em:id>
-    <em:version>0.6.6.2</em:version>
+    <em:version>0.6.6.2009081101</em:version>
+    
+	<!-- Temporary lines for development version -->
+	<em:updateURL>http://sessionmanager.mozdev.org/update.rdf</em:updateURL>
+    <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCX78sBYEBcAAN7uB6M8L+2S587tweKF97hwc6uqO8K1FPo8juYUsT4OA1mNr/qzf3dlV9JxB9eLap4VQxsNOmMy9yT2G+2I796+eQlCi5LSPF5pVXZHGpZHlWei4MiF61pqYfPfb8x7XdbGctCgM84Z+O9u1YHvkq7ZF3oifpI6wIDAQAB</em:updateKey>
     
     <!-- Firefox -->
     <em:targetApplication>
@@ -72,7 +76,7 @@
     <!-- Front End Integration Hooks (used by Extension Manager)-->
     <em:optionsURL>chrome://sessionmanager/content/options.xul</em:optionsURL>
     <em:iconURL>chrome://sessionmanager/skin/icon.png</em:iconURL>  
-    
+	
     <!-- Localizations -->
     <em:localized>
       <Description>
