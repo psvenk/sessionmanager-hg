@@ -150,6 +150,17 @@ var gSessionManager = {
 			}
 		} catch (e) { this.logError(e); }
 			
+		// If the shutdown on last window closed preference is not set, set it based on the O/S.
+		// Enable for Macs, disable for everything else
+		if (!this.mPrefRoot.prefHasUserValue("extensions.sessionmanager.shutdown_on_last_window_close")) {
+			if (/mac/i.test(navigator.platform)) {
+				this.setPref("extensions.sessionmanager.shutdown_on_last_window_close", true, true);
+			}
+			else {
+				this.setPref("extensions.sessionmanager.shutdown_on_last_window_close", false, true);
+			}
+		}
+			
 		return true;
 	},
 
