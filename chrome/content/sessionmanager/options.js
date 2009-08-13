@@ -150,6 +150,7 @@ function logLevelUpdate() {
 	if (gSessionManager.getPref("browser.preferences.instantApply", false, true)) {
 		setLogLevel();
 	}
+	else enableApply();
 }
 
 function setLogLevel() {
