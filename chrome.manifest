@@ -1,5 +1,5 @@
+resource sessionmanager ./
 content	sessionmanager	jar:chrome/sessionmanager.jar!/content/sessionmanager/
-
 skin	sessionmanager	classic/1.0	jar:chrome/sessionmanager.jar!/skin/classic/sessionmanager/
 
 locale	sessionmanager	en-US	jar:chrome/sessionmanager.jar!/locale/en-US/sessionmanager/
