@@ -83,11 +83,11 @@ gSessionManager.onLoad = function() {
 			try {
 				sessions = window.opener.gSessionManager.getSessionsOverride();
 			} catch (ex) { 
-				this.log("Override function error. " + ex, "ERROR", true);
+				this.gLogger.log("Override function error. " + ex, "ERROR", true);
 			}
 		}
 		else {
-			this.log("Passed override function parameter is not a function.", "ERROR", true);
+			this.gLogger.log("Passed override function parameter is not a function.", "ERROR", true);
 		}
 		if (!sessions || !_isValidSessionList(sessions)) {
 			window.close();
@@ -582,7 +582,7 @@ function _isValidSessionList(aSessions)
 {
 	if (aSessions==null || typeof(aSessions)!="object" || typeof(aSessions.length)!="number" || 
 	    aSessions.length == 0 || !aSessions[0].name) {
-		this.log("Override function returned an invalid session list.", "ERROR", true);
+		this.gLogger.log("Override function returned an invalid session list.", "ERROR", true);
 		return false;
 	}
 	return true;

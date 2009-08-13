@@ -41,7 +41,7 @@ gSessionManager.restorePrompt = function() {
 			if (count.windows && count.tabs) countString = count.windows + "," + count.tabs;
 		}
 		catch(ex) { 
-			this.logError(ex); 
+			this.gLogger.logError(ex); 
 		}
 	}
 	
@@ -100,7 +100,7 @@ gSessionManager.restorePrompt = function() {
 				// delete autosave preferences
 				deletePrefs = true;
 				
-				this.log("Saving crashed autosave session " + autosave_name, "DATA");
+				this.gLogger.log("Saving crashed autosave session " + autosave_name, "DATA");
 				var temp_state = this.readFile(file);
 				// encrypt if encryption enabled
 				if (this.mPref_encrypt_sessions) {

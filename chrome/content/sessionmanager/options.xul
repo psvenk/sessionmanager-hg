@@ -337,8 +337,8 @@
 			<caption label="&logging.caption;"/>
 			<hbox>
 				<checkbox label="&enable_logging.label;" accesskey="&enable_logging.accesskey;" preference="extensions.sessionmanager.logging"/>
-				<button label="&open_log.label;" accesskey="&open_log.accesskey;" oncommand="gSessionManager.openLogFile();"/>
-				<button label="&delete_log.label;" accesskey="&delete_log.accesskey;" oncommand="gSessionManager.deleteLogFile(true);"/>
+				<button label="&open_log.label;" accesskey="&open_log.accesskey;" oncommand="gSessionManager.gLogger.openLogFile(gSessionManager._string('file_not_found'));"/>
+				<button label="&delete_log.label;" accesskey="&delete_log.accesskey;" oncommand="gSessionManager.gLogger.deleteLogFile(true);"/>
 			</hbox>
 			<vbox>
 				<checkbox class="logLevel" label="&log_level_state.label;" accesskey="&log_level_state.accesskey;" _logLevel="STATE" oncommand="logLevelUpdate();"/>
