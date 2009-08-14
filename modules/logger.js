@@ -8,7 +8,7 @@ var EXPORTED_SYMBOLS = ["logger", "logging_level"];
 var gLogger = null;
 
 // globals
-logging_level = {};
+var logging_level = {};
 logging_level["STATE"] = 1;
 logging_level["TRACE"] = 2;
 logging_level["DATA"] = 4;
@@ -17,18 +17,24 @@ logging_level["EXTRA"] = 16;
 logging_level["ERROR"] = 32;
 
 // Function to create singleton of logging class
-function logger(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, aPlatform) {
-	// If parameters missing return
-	if (!aFilename || !aAddonName || !aLogEnablePrefereneceName || !aLogLevelPreferenceName || !aPlatform) {
-		report("Incorrect parameters to logger");
+function logger(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName) {
+	// If parameters or window is missing just return the current gLogger (if it exists)
+	if (!aFilename || !aAddonName || !aLogEnablePrefereneceName || !aLogLevelPreferenceName) {
 		return gLogger;
 	}
+
+	// Try to get the most recent window to find the platform
+	let recentWindow = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow(null);
+	let platform = (recentWindow ? recentWindow.navigator.platform : null);
+	
+	if (!platform) return gLogger;
 	
 	// Create singleton if it does not exist and call the deleteLogFile function
 	if (!gLogger) {
-		gLogger = new loggerClass(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, aPlatform);
+		gLogger = new loggerClass(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, platform);
 	}
 	gLogger.deleteLogFile();
+
 	return gLogger;
 }
 
@@ -43,7 +49,7 @@ loggerClass.prototype = {
 	// 
 	// Initialize variables
 	//
-	_init: function logger_init(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, aPlatform) {
+	_init: function(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, aPlatform) {
 		this.addonName = aAddonName;
 		this.logEnablePrefereneceName = aLogEnablePrefereneceName;
 		this.logLevelPreferenceName = aLogLevelPreferenceName;
@@ -77,7 +83,7 @@ loggerClass.prototype = {
 	
 	},
 
-	observe: function observe(aSubject, aTopic, aData)
+	observe: function(aSubject, aTopic, aData)
 	{
 		switch (aTopic)
 		{
@@ -104,7 +110,7 @@ loggerClass.prototype = {
 	//
 	// Utility to create an error message in the log without throwing an error.
 	//
-	logError: function logger_logError(e, force) {
+	logError: function(e, force) {
 		try { 
 			if (force || this.logEnabled) {
 				let consoleError = Cc['@mozilla.org/scripterror;1'].createInstance(Ci.nsIScriptError);
@@ -122,7 +128,7 @@ loggerClass.prototype = {
 	//
 	// Log info messages
 	//
-	log: function logger_log(aMessage, level, force) {
+	log: function(aMessage, level, force) {
 		if (!level) level = "INFO";
 		try {
 			if (force || (this.logEnabled && (logging_level[level] & this.logLevel))) {
@@ -138,7 +144,7 @@ loggerClass.prototype = {
 	//
 	// Open Log File
 	//
-	openLogFile: function logger_openLogFile(aErrorString) {
+	openLogFile: function(aErrorString) {
 		if (!this.logFile.exists() || !(this.logFile instanceof Ci.nsILocalFile)) {
 			this.mPromptService.alert(null, this.addonName, aErrorString);
 			return;
@@ -164,7 +170,7 @@ loggerClass.prototype = {
 	// 
 	// Delete Log File if it exists and not logging or it's too large (> 10 MB)
 	//
-	deleteLogFile: function logger_deleteLogFile(aForce) {
+	deleteLogFile: function(aForce) {
 		try { 
 			if (this.logFile.exists() && (aForce || !this.logEnabled || this.logFile.fileSize > 10485760)) {
 				this.logFile.remove(false);
@@ -178,7 +184,7 @@ loggerClass.prototype = {
 	//
 	// Write to Log File
 	// 
-	write_log: function logger_write_log(aMessage) {
+	write_log: function(aMessage) {
 		try {
 			let stream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
 			// ioFlags: write only, create file, append;	Permission: read/write owner
@@ -198,7 +204,8 @@ loggerClass.prototype = {
 	//
 	// Log Extensions
 	//
-	logExtensions: function logger_logExtensions() {
+	logExtensions: function() {
+		if (!this.logEnabled) return;
 		let Application = Components.classes["@mozilla.org/fuel/application;1"].getService(Components.interfaces.fuelIApplication);
 		let extensions = Application.extensions.all;
 		if (extensions.length) {
