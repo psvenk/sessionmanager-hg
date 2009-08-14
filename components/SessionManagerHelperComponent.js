@@ -179,8 +179,13 @@ SessionManagerHelperComponent.prototype = {
 			{
 				// Tell the browser windows that the initial session has been restored
 				// Do this here so we don't have to add an observer to every window that opens which is
-				// pointless since this only fires at browser startup
-				os.notifyObservers(null, "sessionmanager:initial-windows-restored", null);
+				// pointless since this only fires at browser startup. Delay a second to allow windows to load
+				let timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+				timer.initWithCallback({
+					notify:function (aTimer) { 
+						Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService).notifyObservers(null, "sessionmanager:initial-windows-restored", null); 
+					}
+				}, 1000, Ci.nsITimer.TYPE_ONE_SHOT);
 			}
 			catch (ex) { report(ex); }
 			break;
