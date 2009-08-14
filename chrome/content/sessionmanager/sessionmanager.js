@@ -29,7 +29,7 @@ var gSessionManager = {
 	mSessionStore : null,
 	mSessionStartup : null,
 
-	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", 
+	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "sessionmanager:initial-windows-restored",
 	             "browser:purge-session-history", "quit-application-requested", "quit-application-granted"],
 	// These won't be removed on last window closed since we still need to watch for them.
 	mObserving2: ["quit-application", "private-browsing-change-granted", "sessionmanager:process-closed-window"],
@@ -67,9 +67,12 @@ var gSessionManager = {
 		}
 		return true;
 	},
-
+	
 	initialize: function()
 	{
+		// import logger function into gSessionManager
+		Components.utils.import("resource://sessionmanager/modules/logger.js", this);
+	
 		// Define Constants using closure functions
 		const STARTUP_PROMPT = -11;
 		const STARTUP_LOAD = -12;
@@ -77,14 +80,6 @@ var gSessionManager = {
 		this.STARTUP_PROMPT = function() { return STARTUP_PROMPT; }
 		this.STARTUP_LOAD = function() { return STARTUP_LOAD; }
 		
-		// read logger functions into the logger scope
-		var logger = {};
-		Components.utils.import("resource://sessionmanager/modules/logger.js", logger);
-		// Get logger singleton (this will create it if it does not exist)
-		this.gLogger = logger.logger("sessionmanager_log.txt", "Session Manager", "extensions.sessionmanager.logging", 
-		                             "extensions.sessionmanager.logging_level", navigator.platform);
-		this.logging_level = logger.logging_level;
-	
 		// Get SessionStore service component 
 		if (!this.getSessionStoreComponent()) return false;
 		
@@ -92,15 +87,6 @@ var gSessionManager = {
 		var privateBrowsing = Components.classes["@mozilla.org/privatebrowsing;1"];
 		if (privateBrowsing)
 			this.mPrivateBrowsing = privateBrowsing.getService(Components.interfaces.nsIPrivateBrowsingService);
-			
-		// Listen for SessionStore restore complete notification.  Need to do this before the window loads because SessionStore
-		// can send the notification before our onLoad function runs.
-		this.mObserverService.addObserver(this, "sessionstore-windows-restored", false);
-		
-		// Need to add an event listener to remove the above observer in case it isn't removed (will cause memory leak if not removed)
-		window.addEventListener("unload", function() { 
-			gSessionManager.mObserverService.removeObserver(gSessionManager, "sessionstore-windows-restored"); 
-		}, false);			
 			
 		// If the shutdown on last window closed preference is not set, set it based on the O/S.
 		// Enable for Macs, disable for everything else
@@ -127,7 +113,7 @@ var gSessionManager = {
 
 	onLoad: function(aDialog)
 	{
-		this.gLogger.log("onLoad start, aDialog = " + aDialog, "TRACE");
+		this.log("onLoad start, aDialog = " + aDialog, "TRACE");
 		
 		this.mEOL = this.getEOL();
 		this.mBundle = document.getElementById("bundle_sessionmanager");
@@ -251,7 +237,7 @@ var gSessionManager = {
 					this.setPref("backup_temporary", false)
 					this.delFile(this.getSessionDir(this.mBackupSessionName));
 				}
-			} catch (ex) { this.gLogger.logError(ex); }
+			} catch (ex) { this.logError(ex); }
 
 			// If we did a temporary restore, set it to false			
 			if (this.mPref_restore_temporary) this.setPref("restore_temporary", false)
@@ -263,7 +249,7 @@ var gSessionManager = {
 			this.setPref("_running", true);
 			
 			// Log installed extensions, if logging enabled
-			if (this.mPref_logging) this.gLogger.logExtensions();
+			this.logExtensions();
 		}
 		else if (this.getPref("_save_prefs",false)) {
 			// Save preference file if this preference is true in order to prevent problems on a crash.
@@ -370,7 +356,7 @@ var gSessionManager = {
 			}
 			
 		}
-		this.gLogger.log("onLoad end", "TRACE");
+		this.log("onLoad end", "TRACE");
 	},
 
 	// If SessionStore component does not exist hide Session Manager GUI and uninstall
@@ -417,7 +403,7 @@ var gSessionManager = {
 
 	onUnload: function()
 	{
-		this.gLogger.log("onUnload start", "TRACE");
+		this.log("onUnload start", "TRACE");
 		var allWindows = this.getBrowserWindows();
 		var numWindows = allWindows.length;
 		
@@ -447,7 +433,7 @@ var gSessionManager = {
 		
 		// Stop Session timer and start another if needed
 		if (this._timer) { 
-			this.gLogger.log("onUnload: Session Timer stopped because window closed", "INFO");
+			this.log("onUnload: Session Timer stopped because window closed", "INFO");
 			this._timer.cancel();
 			this._timer = null;
 			if (numWindows != 0) allWindows[0].gSessionManager.checkTimer();
@@ -480,18 +466,17 @@ var gSessionManager = {
 		}
 		this.mBundle = null;
 		this.mFullyLoaded = false;
-		this.gLogger.log("onUnload end", "TRACE");
+		this.log("onUnload end", "TRACE");
 	},
 
 	observe: function(aSubject, aTopic, aData)
 	{
-		this.gLogger.log("observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
+		this.log("observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
 		switch (aTopic)
 		{
-		case "sessionstore-windows-restored":
-			this.mObserverService.removeObserver(this, aTopic);
+		case "sessionmanager:initial-windows-restored":
 			this.getAutoSaveValues(this.mSessionStore.getWindowValue(window,"_sm_window_session_values"), true, true);
-			this.gLogger.log("observe: Restore new window done, window session = " + this.__window_session_name, "DATA");
+			this.log("observe: Restore new window done, window session = " + this.__window_session_name, "DATA");
 			break;
 		case "sessionmanager:windowtabopenclose":
 			// only update all windows if window state changed.
@@ -506,14 +491,14 @@ var gSessionManager = {
 				try { 
 					if (!this.closeSession(false)) this.onWindowClose();
 				}
-				catch(ex) { this.gLogger.logError(ex); }
+				catch(ex) { this.logError(ex); }
 				this.mLastState = null;
 				this.mCleanBrowser = null;
 				this.mClosedWindowName = null;
 				this.mObserving2.forEach(function(aTopic) {
 					this.mObserverService.removeObserver(this, aTopic);
 				}, this);
-				this.gLogger.log("observe: done processing closed window", "INFO");
+				this.log("observe: done processing closed window", "INFO");
 			}
 			break;
 		case "sessionmanager:updatetitlebar":
@@ -634,7 +619,7 @@ var gSessionManager = {
 		case "quit-application-granted":
 			// work around for mr tech toolkit, breaking our shutdown processing when browser is set to clear private data on shutdown
 			if ((typeof(Local_Install) != "undefined") && this.getPref("local_install.closeAllWindows", false, true) && (this.getBrowserWindows().length == 0)) {
-				this.gLogger.log("Working around shutdown issue caused by Mr Tech Toolkit's close all child windows feature", "INFO");
+				this.log("Working around shutdown issue caused by Mr Tech Toolkit's close all child windows feature", "INFO");
 				this.onUnload();
 			}
 			
@@ -645,7 +630,7 @@ var gSessionManager = {
 		// timer periodic call
 		case "timer-callback":
 			// save auto-save or window session if open, but don't close it
-			this.gLogger.log("Timer callback for " + ((aSubject == this._win_timer) ? "window" : "session" ) + " timer", "EXTRA");
+			this.log("Timer callback for " + ((aSubject == this._win_timer) ? "window" : "session" ) + " timer", "EXTRA");
 			this.closeSession((aSubject == this._win_timer), false, true);
 			break;
 		}
@@ -724,21 +709,21 @@ var gSessionManager = {
 
 	onWindowClose: function()
 	{
-		this.gLogger.log("onWindowClosed start", "TRACE");
+		this.log("onWindowClosed start", "TRACE");
 		// if there is a window session save it (leave it open if browser is restarting)
 		if (this.__window_session_name) 
 		{
 			this.closeSession(true, false, this._restart_requested);
 		}
 			
-		this.gLogger.log("onWindowClose: running = " + this.mPref__running + ", stopping = " + this.mPref__stopping, "DATA");
+		this.log("onWindowClose: running = " + this.mPref__running + ", stopping = " + this.mPref__stopping, "DATA");
 		// only save closed window if running and not shutting down 
 		if (this.mPref__running && !this.mPref__stopping)
 		{
 			// Get number of windows open after closing this one.
 			var numWindows = this.getBrowserWindows().length;
 			
-			this.gLogger.log("onWindowClose: numWindows = " + numWindows, "DATA");
+			this.log("onWindowClose: numWindows = " + numWindows, "DATA");
 			// save window in closed window list if not last window, otherwise store the last window state for use later
 			if (numWindows > 0)
 			{
@@ -762,12 +747,12 @@ var gSessionManager = {
 						this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
 					}
 					catch(ex) { 
-						this.gLogger.logError(ex); 
+						this.logError(ex); 
 					}
 				}
 			}
 		}
-		this.gLogger.log("onWindowClosed end", "TRACE");
+		this.log("onWindowClosed end", "TRACE");
 	},
 	
 	// Put current session name in browser titlebar
@@ -785,7 +770,7 @@ var gSessionManager = {
 				newVal = newVal + windowTitleName + sessionTitleName;
 			} 
 			catch (ex) { 
-				this.gLogger.logError(ex); 
+				this.logError(ex); 
 			}
 		}
 		return newVal;
@@ -1009,7 +994,7 @@ var gSessionManager = {
 	// if aOneWindow is true, then close the window session otherwise close the browser session
 	closeSession: function(aOneWindow, aForceSave, aKeepOpen)
 	{
-		this.gLogger.log("closeSession: " + ((aOneWindow) ? this.__window_session_name : this.mPref__autosave_name) + ", aKeepOpen = " + aKeepOpen, "DATA");
+		this.log("closeSession: " + ((aOneWindow) ? this.__window_session_name : this.mPref__autosave_name) + ", aKeepOpen = " + aKeepOpen, "DATA");
 		var name = (aOneWindow) ? this.__window_session_name : this.mPref__autosave_name;
 		var group = (aOneWindow) ? this.__window_session_group : this.mPref__autosave_group;
 		var time = (aOneWindow) ? this.__window_session_time : this.mPref__autosave_time;
@@ -1088,7 +1073,7 @@ var gSessionManager = {
 			var sessionHeight = parseInt(matchArray[10]);
 			var xDelta = (!sessionWidth || isNaN(sessionWidth)) ? 1 : (screen.width / sessionWidth);
 			var yDelta = (!sessionHeight || isNaN(sessionHeight)) ? 1 : (screen.height / sessionHeight);
-			this.gLogger.log("xDelta = " + xDelta + ", yDelta = " + yDelta, "DATA");
+			this.log("xDelta = " + xDelta + ", yDelta = " + yDelta, "DATA");
 			
 			state = (aChoseTabs && chosenState) ? chosenState : state.split("\n")[4];
 			
@@ -1121,7 +1106,7 @@ var gSessionManager = {
 				if (/^window\/?(\d*)$/.test(matchArray[3])) {
 					var time = parseInt(RegExp.$1);
 					window_autosave_values = this.mergeAutoSaveValues(matchArray[1], matchArray[7], time);
-					this.gLogger.log("load: window session", "INFO");
+					this.log("load: window session", "INFO");
 				}
 			
 				// If this is an autosave session, keep track of it if there is not already an active session
@@ -1199,7 +1184,7 @@ var gSessionManager = {
 				}
 				state = this.JSON_encode(tempState);
 			}
-			catch (ex) { this.gLogger.logError(ex); };
+			catch (ex) { this.logError(ex); };
 		}
 		
 		setTimeout(function() {
@@ -2006,7 +1991,7 @@ var gSessionManager = {
 					}
 					catch(ex) { 
 						everythingOkay = false;
-						this.gLogger.log("convertToSQL: " + aSession.fileName + " - " + ex, "ERROR", true);
+						this.log("convertToSQL: " + aSession.fileName + " - " + ex, "ERROR", true);
 					}
 					finally {
 						if (this.mVersionCompare.compare(this.mApplication.version,"1.9.1a1pre") < 0) {
@@ -2036,7 +2021,7 @@ var gSessionManager = {
 			}
 			catch(ex) { 
 				everythingOkay = false;
-				this.gLogger.log("convertToSQL" + aWindow.name + " - " + ex, "ERROR", true);
+				this.log("convertToSQL" + aWindow.name + " - " + ex, "ERROR", true);
 			}
 			finally {
 				if (this.mVersionCompare.compare(this.mApplication.version,"1.9.1a1pre") < 0) {
@@ -2188,7 +2173,7 @@ var gSessionManager = {
 				try {
 					if (filter && !filter.test(cached.name)) continue;
 				} catch(ex) { 
-					this.gLogger.log ("getSessions: Bad Regular Expression passed to getSessions, ignoring", true); 
+					this.log ("getSessions: Bad Regular Expression passed to getSessions, ignoring", true); 
 				}
 				if (!backupItem && (sessions.latestTime < cached.timestamp)) 
 				{
@@ -2205,7 +2190,7 @@ var gSessionManager = {
 				try {
 					if (filter && !filter.test(matchArray[1])) continue;
 				} catch(ex) { 
-					this.gLogger.log ("getSessions: Bad Regular Expression passed to getSessions, ignoring", true); 
+					this.log ("getSessions: Bad Regular Expression passed to getSessions, ignoring", true); 
 				}
 				var timestamp = parseInt(matchArray[2]) || file.lastModifiedTime;
 				if (!backupItem && (sessions.latestTime < timestamp)) 
@@ -2368,7 +2353,7 @@ var gSessionManager = {
 
 	shutDown: function()
 	{
-		this.gLogger.log("Shutdown start", "TRACE");
+		this.log("Shutdown start", "TRACE");
 		// Handle sanitizing if sanitize on shutdown without prompting (Firefox 3.5 never prompts)
 		var prompt = this.getPref("privacy.sanitize.promptOnSanitize", null, true);
 		var sanitize = (this.getPref("privacy.sanitize.sanitizeOnShutdown", false, true) && 
@@ -2420,7 +2405,7 @@ var gSessionManager = {
 			this.delFile(this.getProfileFile("crashrecovery.bak"), true);
 			this.delPref("extensions.crashrecovery.resume_session_once", true);
 		}
-		this.gLogger.log("Shutdown end\n", "TRACE");
+		this.log("Shutdown end\n", "TRACE");
 	},
 	
 	autoSaveCurrentSession: function(aForceSave)
@@ -2441,14 +2426,14 @@ var gSessionManager = {
 
 	backupCurrentSession: function()
 	{
-		this.gLogger.log("backupCurrentSession start", "TRACE");
+		this.log("backupCurrentSession start", "TRACE");
 		var backup = this.mPref_backup_session;
 		var temp_backup = (this.mPref_startup > 0) && (this.mPref_resume_session == this.mBackupSessionName);
 		// If shut down in private browsing mode, use the pre-private sesssion, otherwise get the current one
 		var helper_state = (this.mShutDownInPrivateBrowsingMode || this.isPrivateBrowserMode()) ? this.mSMHelper.mBackupState : null;
 
-		this.gLogger.log("backupCurrentSession: backup = " + backup + ", temp_backup = " + temp_backup);
-		this.gLogger.log("helper_state = " + helper_state, "DATA");
+		this.log("backupCurrentSession: backup = " + backup + ", temp_backup = " + temp_backup);
+		this.log("helper_state = " + helper_state, "DATA");
 		
 		// Don't save if just a blank window, if there's an error parsing data, just save
 		var state = null, lastState = null;
@@ -2456,31 +2441,31 @@ var gSessionManager = {
 			// if Last window state saved retrieve it in case the current state has been wiped and we need to use it
 			// The current state should only be wiped if the browser is set to clear the "Visited Pages" on shutdown.
 			if (this.mLastState) {
-				this.gLogger.log("backupCurrentSession: mLastState exists", "INFO");
+				this.log("backupCurrentSession: mLastState exists", "INFO");
 				if (!helper_state) lastState = this.mLastState;
 				this.mLastState = null;
 			}
 			try {
 				state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, this.getNoUndoData(), null, (this._string_backup_sessions || this._string("backup_sessions")), true, null, helper_state);
 			} catch(ex) {
-				this.gLogger.logError(ex);
+				this.logError(ex);
 			}
 			try {
 				var aState = this.JSON_decode(state.split("\n")[4]);
 				// if window data has been cleared ("Visited Pages" cleared on shutdown), use lastState, if it exists.
-				this.gLogger.log("backupCurrentSession: Number of Windows #1 = " + aState.windows.length, "DATA");
-				this.gLogger.log(state, "STATE");
+				this.log("backupCurrentSession: Number of Windows #1 = " + aState.windows.length, "DATA");
+				this.log(state, "STATE");
 				if (aState.windows.length == 0 && lastState) {
-					this.gLogger.log("backupCurrentSession: Using saved Last State", "INFO");
+					this.log("backupCurrentSession: Using saved Last State", "INFO");
 					var count = this.getCount(lastState);
 					state = state.split("\n");
 					state[3] = state[3].replace(/count=0\/0/,"count=" + count.windows + "/" + count.tabs);
 					state[4] = lastState;
 					state = state.join("\n");
 					aState = this.JSON_decode(lastState);
-					this.gLogger.log(lastState, "STATE");
+					this.log(lastState, "STATE");
 				}
-				this.gLogger.log("backupCurrentSession: Number of Windows #2 = " + aState.windows.length, "DATA");
+				this.log("backupCurrentSession: Number of Windows #2 = " + aState.windows.length, "DATA");
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
 		    		(aState.windows[0].tabs[0].entries.length > 1) || 
 		    		((aState.windows[0].tabs[0].entries.length == 1 && aState.windows[0].tabs[0].entries[0].url != "about:blank")))) {
@@ -2488,7 +2473,7 @@ var gSessionManager = {
 					temp_backup = false;
 				}
 			} catch(ex) { 
-				this.gLogger.logError(ex);
+				this.logError(ex);
 			}
 		}
 
@@ -2535,11 +2520,11 @@ var gSessionManager = {
 			catch (ex)
 			{
 				this.ioError(ex);
-				this.gLogger.logError(ex);
+				this.logError(ex);
 			}
 		}
 		else this.keepOldBackups(false);
-		this.gLogger.log("backupCurrentSession end", "TRACE");
+		this.log("backupCurrentSession end", "TRACE");
 	},
 
 	keepOldBackups: function(backingUp)
@@ -3126,7 +3111,7 @@ var gSessionManager = {
 	getAutoSaveValues: function(aValues, aWindow, aNoSetWindowValue)
 	{
 		if (!aValues) aValues = "";
-		this.gLogger.log("getAutoSaveValues: aWindow = " + aWindow + ", aValues = " + aValues.split("\n").join(", "), "EXTRA");
+		this.log("getAutoSaveValues: aWindow = " + aWindow + ", aValues = " + aValues.split("\n").join(", "), "EXTRA");
 		var values = aValues.split("\n");
 		if (aWindow) {
 			this.__window_session_name = values[0];
@@ -3196,8 +3181,8 @@ var gSessionManager = {
 		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
 		var recoverOnly = this.mPref__running || sessionstart || this.getPref("_no_prompt_for_session", false);
 		this.delPref("_no_prompt_for_session");
-		this.gLogger.log("recoverSession: recovering = " + recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
-		this.gLogger.log("recoverSession: command line session = " + this.mPref_temp_restore, "DATA");
+		this.log("recoverSession: recovering = " + recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
+		this.log("recoverSession: command line session = " + this.mPref_temp_restore, "DATA");
 
 		// handle crash where user chose a specific session
 		if (recovering)
@@ -3215,7 +3200,7 @@ var gSessionManager = {
 			
 			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:(this.mPref_temp_restore?this.mPref_temp_restore:
 			              ((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session));
-			this.gLogger.log("recoverSession: Startup session = " + session, "DATA");
+			this.log("recoverSession: Startup session = " + session, "DATA");
 			if (session && this.getSessionDir(session).exists())
 			{
 				this.load(session, "startup", values.choseTabs);
@@ -3284,7 +3269,7 @@ var gSessionManager = {
 				return !window.arguments || !window.arguments[0];
 			}
 			catch(ex) {
-				this.gLogger.logError(ex);
+				this.logError(ex);
 				return false;
 			}
 		}
@@ -3347,7 +3332,7 @@ var gSessionManager = {
 			try {
 				wincount = this.mUseSSClosedWindowList ? this.mSessionStore.getClosedWindowCount() : this.getClosedWindowsCount();
 				tabcount = this.mSessionStore.getClosedTabCount(window);
-			} catch (ex) { this.gLogger.logError(ex); }
+			} catch (ex) { this.logError(ex); }
 			this.setDisabled(button, (aEnable != undefined)?!aEnable:tabcount == 0 && wincount == 0);
 		}
 	},
@@ -3364,10 +3349,10 @@ var gSessionManager = {
 		if (this._timer && ((this.mPref__autosave_time <= 0) || !this.mPref__autosave_name)) {
 			this._timer.cancel();
 			this._timer = null;
-			this.gLogger.log("checkTimer: Session Timer stopped", "INFO");
+			this.log("checkTimer: Session Timer stopped", "INFO");
 		}
 		else if (!this._timer && (this.mPref__autosave_time > 0) && this.mPref__autosave_name) {
-			this.gLogger.log("checkTimer: Check if session timer already running and if not start it", "INFO");
+			this.log("checkTimer: Check if session timer already running and if not start it", "INFO");
 			var allWindows = this.getBrowserWindows();
 			var timerRunning = false;
 			for (var i in allWindows) {
@@ -3379,7 +3364,7 @@ var gSessionManager = {
 			if (!timerRunning) {
 				this._timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 				this._timer.init(gSessionManager, this.mPref__autosave_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
-				this.gLogger.log("checkTimer: Session Timer started for " + this.mPref__autosave_time + " minutes", "INFO");
+				this.log("checkTimer: Session Timer started for " + this.mPref__autosave_time + " minutes", "INFO");
 			}
 		}
 	},
@@ -3390,12 +3375,12 @@ var gSessionManager = {
 		if ((this._win_timer && ((this.__window_session_time <=0) || !this.__window_session_name))) {
 			this._win_timer.cancel();
 			this._win_timer = null;
-			this.gLogger.log("checkWinTimer: Window Timer stopped", "INFO");
+			this.log("checkWinTimer: Window Timer stopped", "INFO");
 		}
 		else if (!this._win_timer && (this.__window_session_time > 0) && this.__window_session_name) {
 			this._win_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 			this._win_timer.init(gSessionManager, this.__window_session_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
-			this.gLogger.log("checkWinTimer: Window Timer started for " + this.__window_session_time + " minutes", "INFO");
+			this.log("checkWinTimer: Window Timer started for " + this.__window_session_time + " minutes", "INFO");
 		}
 	},
 	
@@ -3428,7 +3413,7 @@ var gSessionManager = {
 				tabs = tabs + aWindow.tabs.length;
 			});
 		}
-		catch (ex) { this.gLogger.logError(ex); };
+		catch (ex) { this.logError(ex); };
 
 		return { windows: windows, tabs: tabs };
 	},
@@ -3437,7 +3422,7 @@ var gSessionManager = {
 	{
 		// Return last closed window state if it is stored.
 		if (this.mLastState) {
-			this.gLogger.log("getSessionState: Returning stored state", "INFO");
+			this.log("getSessionState: Returning stored state", "INFO");
 			// encrypt state if encryption preference set
 			if (!aDoNotEncrypt) {
 				var state = this.mLastState.split("\n")
@@ -3462,7 +3447,7 @@ var gSessionManager = {
 		}
 		catch(ex) {
 			// Log and rethrow errors
-			this.gLogger.logError(ex);
+			this.logError(ex);
 			throw(ex);
 		}
 		
@@ -3513,7 +3498,7 @@ var gSessionManager = {
 		
 		// Store autosave values into window value and also into window variables
 		this.getAutoSaveValues(aWindowSessionValues, true);
-		this.gLogger.log("restoreSession: restore done, window_name  = " + this.__window_session_name, "DATA");
+		this.log("restoreSession: restore done, window_name  = " + this.__window_session_name, "DATA");
 		return true;
 	},
 
@@ -3659,7 +3644,7 @@ var gSessionManager = {
 		// auto-save session
 		if (this.mPref__autosave_name == aOldName) 
 		{
-			this.gLogger.log("updateAutoSaveSessions: autosave change: aOldName = " + aOldName + ", aNewName = " + aNewName, "DATA");
+			this.log("updateAutoSaveSessions: autosave change: aOldName = " + aOldName + ", aNewName = " + aNewName, "DATA");
 			// rename or delete?
 			if (aNewName) {
 				this.setPref("_autosave_values", this.mergeAutoSaveValues(aNewName, this.mPref__autosave_group, this.mPref__autosave_time));
@@ -3673,7 +3658,7 @@ var gSessionManager = {
 		// window sessions
 		this.getBrowserWindows().forEach(function(aWindow) {
 			if (aWindow.gSessionManager && aWindow.gSessionManager.__window_session_name && (aWindow.gSessionManager.__window_session_name == aOldName)) { 
-				this.gLogger.log("updateAutoSaveSessions: window change: aOldName = " + aOldName + ", aNewName = " + aNewName, "DATA");
+				this.log("updateAutoSaveSessions: window change: aOldName = " + aOldName + ", aNewName = " + aNewName, "DATA");
 				aWindow.gSessionManager.__window_session_name = aNewName;
 				// delete
 				if (!aNewName)
@@ -3764,6 +3749,41 @@ var gSessionManager = {
 			this.sessionError(ex);
 		}
 		return jsString;
+	},
+	
+	// 
+	// Logging functions
+	// Get logger singleton (this will create it if it does not exist)
+	//
+	initLogger : function() {
+		if ((typeof(this.logger) != "function") || !this.logger()) {
+			this.logger("sessionmanager_log.txt", "Session Manager", "extensions.sessionmanager.logging", "extensions.sessionmanager.logging_level");
+		}
+	},
+	
+	log: function(aMessage, aLevel, aForce) {
+		this.initLogger();
+		if (this.logger()) this.logger().log(aMessage, aLevel, aForce);
+	},
+
+	logError: function(aMessage, aForce) {
+		this.initLogger();
+		if (this.logger()) this.logger().logError(aMessage, aForce);
+	},
+	
+	logExtensions: function() {
+		this.initLogger();
+		if (this.logger()) this.logger().logExtensions();
+	},
+	
+	deleteLogFile: function(aForce) {
+		this.initLogger();
+		if (this.logger()) this.logger().deleteLogFile(aForce);
+	},
+
+	openLogFile: function() {
+		this.initLogger();
+		if (this.logger()) this.logger().openLogFile();
 	}
 };
 
