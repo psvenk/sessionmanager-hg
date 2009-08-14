@@ -5,6 +5,10 @@
 // 3. Add way of deleting window(s) from an existing session.
 // 4. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
 //    having the prompt window close. (Session Editor)
+// 5. Current if restore windows and tabs from last time is set and user closes the last browser window that also happens to 
+//    containt a window session, then the window session will be restored next time.  There is no way to remove the window session
+//    window value at shutdown because SessionStore won't allow it to be updated once the unload event fires.  It can't be cleared on
+//    next startup since SessionStore won't let it be cleared on the first "load" event either.  Not sure what to do about this.
 
 var gSessionManager = {
 	_timer : null,
@@ -282,7 +286,11 @@ var gSessionManager = {
 		
 		// Clear current window value setting if shouldn't be set.  Need try catch because first browser window will throw an exception.
 		try {
-			if (!this.__window_session_name) this.getAutoSaveValues(null, true);
+			if (!this.__window_session_name) {
+				// Backup _sm_window_session_values first in case this is actually a restart or crash restore 
+				this._backup_window_sesion_data = this.mSessionStore.getWindowValue(window,"_sm_window_session_values");
+				this.getAutoSaveValues(null, true);
+			}
 		} catch(ex) {}
 		
 		// Perform any needed update processing
@@ -475,8 +483,11 @@ var gSessionManager = {
 		switch (aTopic)
 		{
 		case "sessionmanager:initial-windows-restored":
-			this.getAutoSaveValues(this.mSessionStore.getWindowValue(window,"_sm_window_session_values"), true, true);
+			// check both the backup and current window value just in case
+			var window_values = this._backup_window_sesion_data || this.mSessionStore.getWindowValue(window,"_sm_window_session_values");
+			this.getAutoSaveValues(window_values, true);
 			this.log("observe: Restore new window done, window session = " + this.__window_session_name, "DATA");
+			this._backup_window_sesion_data = null;
 			break;
 		case "sessionmanager:windowtabopenclose":
 			// only update all windows if window state changed.
@@ -617,6 +628,18 @@ var gSessionManager = {
 			this._restart_requested = (aData == "restart");
 			break;
 		case "quit-application-granted":
+			// If not restarting or if this window doesn't have a window session open, 
+			// hurry and wipe out the window session value unless restarting before Session Store stops allowing 
+			// window values to be updated.
+			if (!this._restart_requested || !this.__window_session_name) {
+				this.log("Clearing window session data", "INFO");
+				// this throws if it doesn't exist so try/catch it
+				try { 
+					this.mSessionStore.deleteWindowValue(window, "_sm_window_session_values");
+				}
+				catch(ex) {}
+			}
+		
 			// work around for mr tech toolkit, breaking our shutdown processing when browser is set to clear private data on shutdown
 			if ((typeof(Local_Install) != "undefined") && this.getPref("local_install.closeAllWindows", false, true) && (this.getBrowserWindows().length == 0)) {
 				this.log("Working around shutdown issue caused by Mr Tech Toolkit's close all child windows feature", "INFO");
@@ -3118,7 +3141,7 @@ var gSessionManager = {
 			this.__window_session_group = values[1];
 			this.__window_session_time = (!values[2] || isNaN(values[2])) ? 0 : values[2];
 			try {
-				// This throws on shutdown because SessionStore no longer allows setting window values
+				// This throws whenever a window is closed or on shutdown because SessionStore no longer allows setting window values
 				if (!aNoSetWindowValue) this.mSessionStore.setWindowValue(window, "_sm_window_session_values", aValues);
 			}
 			catch(ex) {}
@@ -3783,7 +3806,7 @@ var gSessionManager = {
 
 	openLogFile: function() {
 		this.initLogger();
-		if (this.logger()) this.logger().openLogFile();
+		if (this.logger()) this.logger().openLogFile(this._string("file_not_found"));
 	}
 };
 
