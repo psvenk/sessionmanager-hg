@@ -46,7 +46,15 @@ const SM_TEMP_RESTORE_PREFERENCE = "extensions.sessionmanager.temp_restore";
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-function SessionManagerHelperComponent() {}
+function SessionManagerHelperComponent() {
+	try {
+		// import logger
+		Cu.import("resource://sessionmanager/modules/logger.js", this);
+	}
+	catch (ex) {
+		report(ex);
+	}
+}
 
 SessionManagerHelperComponent.prototype = {
 	// registration details
@@ -89,12 +97,25 @@ SessionManagerHelperComponent.prototype = {
 		}
 	},
 	
+	log: function(aMsg, aLevel, aForce)
+	{
+		try {
+			if ((typeof(this.logger) == "function") && this.logger()) {
+				this.logger().log(aMsg, aLevel, aForce);
+			}
+		}
+		catch (ex) {
+			report(ex);
+		}
+	},
+	
 	// observer
 	observe: function(aSubject, aTopic, aData)
 	{
 		let os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 		let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 		
+		this.log("SessionManagerHelperComponent observer: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
 		switch (aTopic)
 		{
 		case "app-startup":
@@ -102,6 +123,7 @@ SessionManagerHelperComponent.prototype = {
 			os.addObserver(this, "profile-after-change", false);
 			os.addObserver(this, "final-ui-startup", false);
 			os.addObserver(this, "sessionstore-state-read", false);
+			os.addObserver(this, "sessionstore-windows-restored", false);
 			os.addObserver(this, "profile-change-teardown", false);
 			break;
 		case "private-browsing-change-granted":
@@ -150,6 +172,17 @@ SessionManagerHelperComponent.prototype = {
 			
 			// Observe startup preference
 			pb.addObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this, false);
+			break;
+		case "sessionstore-windows-restored":
+			os.removeObserver(this, aTopic);
+			try 
+			{
+				// Tell the browser windows that the initial session has been restored
+				// Do this here so we don't have to add an observer to every window that opens which is
+				// pointless since this only fires at browser startup
+				os.notifyObservers(null, "sessionmanager:initial-windows-restored", null);
+			}
+			catch (ex) { report(ex); }
 			break;
 		case "sessionstore-state-read":
 			os.removeObserver(this, aTopic);
