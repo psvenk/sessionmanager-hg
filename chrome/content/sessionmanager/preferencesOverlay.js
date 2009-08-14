@@ -165,7 +165,7 @@ gSessionManager.addSanitizeItem = function () {
 }
 
 gSessionManager.addMenuItem = function (aPaneID) {
-	var isSeaMonkey = aPaneID == "security_pane";
+	var isSeaMonkey = (this.mApplication.name == "SEAMONKEY");
 	var doc = isSeaMonkey ? document.getElementById(aPaneID) : document;
 	var prefs = doc.getElementsByTagName('preferences')[0];
 	var checkboxes = doc.getElementsByTagName('checkbox')
@@ -174,17 +174,9 @@ gSessionManager.addMenuItem = function (aPaneID) {
 	var lastListbox = (listboxes.length) ? listboxes[listboxes.length -1] : null;
 	if (prefs && (lastCheckbox || lastListbox)) // if this isn't true we are lost :)
 	{
-
-		// Determine Mozilla version to see what is supported
-		var appVersion = "0";
-		try {
-			appVersion = Components.classes["@mozilla.org/xre/app-info;1"].
-			             getService(Components.interfaces.nsIXULAppInfo).platformVersion;
-		} catch (e) { dump(e + "\n"); }
-		
 		var pref = document.createElement('preference');
 		// Firefox 3.5 and above only
-		if (!isSeaMonkey && this.mApp.compareVersion("1.9.1a1pre") >= 0) {
+		if (!isSeaMonkey && this.mVersionCompare.compare(this.mApplication.version,"1.9.1a1pre") >= 0) {
 			if (window.location == "chrome://browser/content/sanitize.xul") {
 				this.mSanitizePreference = "privacy.cpd.extensions-sessionmanager";
 			}
@@ -231,7 +223,7 @@ gSessionManager.addMenuItem = function (aPaneID) {
 		}
 
 		// Firefox 3 only
-		if ((typeof(gSanitizePromptDialog) == 'object') && (this.mApp.compareVersion("1.9.1a1pre") < 0))
+		if ((typeof(gSanitizePromptDialog) == 'object') && (this.mVersionCompare.compare(this.mApplication.version,"1.9.1a1pre") < 0))
 		{
 			pref.setAttribute('readonly', 'true');
 		}
