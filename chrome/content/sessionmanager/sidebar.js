@@ -15,6 +15,8 @@ gSessionManager.onUnload = function() {
 	gSessionManager.treeView = null;
 }
 
+gSessionManager.onWindowClose = function() {
+}
 
 var treeView = {
 	defaultChildData: {

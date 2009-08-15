@@ -112,6 +112,9 @@ gSessionManager.onLoad = function() {
 gSessionManager.onUnload = function() {
 }
 
+gSessionManager.onWindowClose = function() {
+}
+
 gSessionManager.addSanitizeItem = function () {
 	window.removeEventListener('load', gSessionManager.addSanitizeItem, true);
 	
