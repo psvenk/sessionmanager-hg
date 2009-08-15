@@ -291,7 +291,7 @@ var gSessionManager = {
 			if (!this.__window_session_name) {
 				// Backup _sm_window_session_values first in case this is actually a restart or crash restore 
 				this._backup_window_sesion_data = this.mSessionStore.getWindowValue(window,"_sm_window_session_values");
-				this.getAutoSaveValues(null, true);
+				if (this._backup_window_sesion_data) this.getAutoSaveValues(null, true);
 			}
 		} catch(ex) {}
 		
@@ -501,7 +501,7 @@ var gSessionManager = {
 		case "sessionmanager:initial-windows-restored":
 			// check both the backup and current window value just in case
 			var window_values = this._backup_window_sesion_data || this.mSessionStore.getWindowValue(window,"_sm_window_session_values");
-			this.getAutoSaveValues(window_values, true);
+			if (window_values) this.getAutoSaveValues(window_values, true);
 			this.log("observe: Restore new window done, window session = " + this.__window_session_name, "DATA");
 			this._backup_window_sesion_data = null;
 			break;
@@ -3156,7 +3156,10 @@ var gSessionManager = {
 					this.mSessionStore.deleteWindowValue(window, "_sm_window_session_values");
 				}
 			}
-			catch(ex) {}
+			catch(ex) {
+				// log it so we can tell when things aren't working
+				this.logError(ex);
+			}
 			
 			// start/stop window timer
 			this.checkWinTimer();
