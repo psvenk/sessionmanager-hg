@@ -2,6 +2,7 @@ gSessionManager.restorePrompt = function() {
 	this.onLoad(true);
 	this.onLoad = function() { };
 	this.onUnload = function() { };
+	this.onWindowClose = function() { };
 				
 	// Set to not delete stored autosave name and time by default
 	var deletePrefs = false;
