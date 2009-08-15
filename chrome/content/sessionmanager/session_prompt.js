@@ -278,6 +278,8 @@ gSessionManager.onLoad = function() {
 	gFinishedLoading = true;
 };
 
+gSessionManager.onWindowClose = function() {};
+
 gSessionManager.onUnload = function() {
 	function persist(aObj, aAttr, aValue)
 	{

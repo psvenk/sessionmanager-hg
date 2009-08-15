@@ -80,6 +80,8 @@ gSessionManager.onLoad = function() {
 	adjustContentHeight();
 };
 
+gSessionManager.onWindowClose = function() {};
+
 gSessionManager.onUnload = function() {
 	_("extensions.sessionmanager.options_selected_tab").valueFromPreferences = _("generalPrefsTab").selectedIndex;
 	setLogLevel();
