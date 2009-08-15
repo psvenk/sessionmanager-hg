@@ -5,10 +5,6 @@
 // 3. Add way of deleting window(s) from an existing session.
 // 4. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
 //    having the prompt window close. (Session Editor)
-// 5. Current if restore windows and tabs from last time is set and user closes the last browser window that also happens to 
-//    containt a window session, then the window session will be restored next time.  There is no way to remove the window session
-//    window value at shutdown because SessionStore won't allow it to be updated once the unload event fires.  It can't be cleared on
-//    next startup since SessionStore won't let it be cleared on the first "load" event either.  Not sure what to do about this.
 
 var gSessionManager = {
 	_timer : null,
@@ -111,6 +107,12 @@ var gSessionManager = {
 	onLoad_proxy: function()
 	{
 		this.removeEventListener("load", gSessionManager.onLoad_proxy, false);
+		
+		// The close event fires when the window is either manually closed or when the window.close() function is called.  It does not fire on shutdown or when
+		// windows close from loading sessions.  The unload event fires any time the window is closed, but fires too late to use SessionStore's setWindowValue.
+		// We need to listen to both of them so that the window session window value can be cleared when the window is closed manually.
+		// The window value is also cleared on a "quit-application-granted", but that doesn't fire when the last browser window is manually closed.
+		window.addEventListener("close", gSessionManager.onClose_proxy, false);			
 		window.addEventListener("unload", gSessionManager.onUnload_proxy, false);			
 		gSessionManager.onLoad();
 	},
@@ -403,8 +405,19 @@ var gSessionManager = {
 		}
 	},
 	
+	// This fires only when the window is manually closed by using the "X" or via a window.close() call
+	onClose_proxy: function()
+	{
+		gSessionManager.log("onClose Fired", "INFO");
+		this.removeEventListener("close", gSessionManager.onClose_proxy, false);
+		// This fires before the window closes so decrement the window count
+		gSessionManager.onWindowClose(true);
+	},
+
+	// This fires any time the window is closed.  It fires too late to use SessionStore's setWindowValue.
 	onUnload_proxy: function()
 	{
+		gSessionManager.log("onUnload Fired", "INFO");
 		this.removeEventListener("unload", gSessionManager.onUnload_proxy, false);
 		gSessionManager.onUnload();
 	},
@@ -414,6 +427,7 @@ var gSessionManager = {
 		this.log("onUnload start", "TRACE");
 		var allWindows = this.getBrowserWindows();
 		var numWindows = allWindows.length;
+		this.log("onUnload: numWindows = " + numWindows, "DATA");
 		
 		this.mObserving.forEach(function(aTopic) {
 			this.mObserverService.removeObserver(this, aTopic);
@@ -447,8 +461,10 @@ var gSessionManager = {
 			if (numWindows != 0) allWindows[0].gSessionManager.checkTimer();
 		}
 
-		this.onWindowClose();
+		// Only call onWindowClose here if shutting down since the close event doesn't fire in that case.
+		if (this.mPref__stopping) this.onWindowClose();
 						
+		// This executes whenever the last browser window is closed (either manually or via shutdown).
 		if (this.mPref__running && numWindows == 0)
 		{
 			this._string_preserve_session = this._string("preserve_session");
@@ -463,8 +479,8 @@ var gSessionManager = {
 			this._screen_height = screen.height;
 			
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
-			
-			// This executes whenever the last browser window is closed.
+
+			// This will run the shutdown processing if the preference is set and the last browser window is closed manually
 			if (this.mPref_shutdown_on_last_window_close && !this.mPref__stopping) {
 				this.mObserving2.forEach(function(aTopic) {
 					this.mObserverService.removeObserver(this, aTopic);
@@ -730,7 +746,7 @@ var gSessionManager = {
 		}
 	},
 
-	onWindowClose: function()
+	onWindowClose: function(aDecrementCount)
 	{
 		this.log("onWindowClosed start", "TRACE");
 		// if there is a window session save it (leave it open if browser is restarting)
@@ -743,8 +759,8 @@ var gSessionManager = {
 		// only save closed window if running and not shutting down 
 		if (this.mPref__running && !this.mPref__stopping)
 		{
-			// Get number of windows open after closing this one.
-			var numWindows = this.getBrowserWindows().length;
+			// Get number of windows open after closing this one.  If called from close event, decrement count by one.
+			var numWindows = this.getBrowserWindows().length - (aDecrementCount ? 1 : 0);
 			
 			this.log("onWindowClose: numWindows = " + numWindows, "DATA");
 			// save window in closed window list if not last window, otherwise store the last window state for use later
@@ -1179,15 +1195,6 @@ var gSessionManager = {
 				this.mSessionStore.getClosedTabCount(window) > 0) {
 				newWindow = true;
 			}
-		}
-		else
-		{
-			// Don't save closed windows when loading session
-			this.getBrowserWindows().forEach(function(aWindow) {
-				if (aWindow != window) { 
-					aWindow.gSessionManager.mPref__stopping = true; 
-				}
-			});
 		}
 
 		// If reload tabs enabled and not offline, set the tabs to allow reloading
@@ -2428,7 +2435,7 @@ var gSessionManager = {
 			this.delFile(this.getProfileFile("crashrecovery.bak"), true);
 			this.delPref("extensions.crashrecovery.resume_session_once", true);
 		}
-		this.log("Shutdown end\n", "TRACE");
+		this.log("Shutdown end", "TRACE");
 	},
 	
 	autoSaveCurrentSession: function(aForceSave)
@@ -3131,7 +3138,7 @@ var gSessionManager = {
 	},
 	
 	// Read Autosave values from preference and store into global variables
-	getAutoSaveValues: function(aValues, aWindow, aNoSetWindowValue)
+	getAutoSaveValues: function(aValues, aWindow)
 	{
 		if (!aValues) aValues = "";
 		this.log("getAutoSaveValues: aWindow = " + aWindow + ", aValues = " + aValues.split("\n").join(", "), "EXTRA");
@@ -3141,10 +3148,16 @@ var gSessionManager = {
 			this.__window_session_group = values[1];
 			this.__window_session_time = (!values[2] || isNaN(values[2])) ? 0 : values[2];
 			try {
-				// This throws whenever a window is closed or on shutdown because SessionStore no longer allows setting window values
-				if (!aNoSetWindowValue) this.mSessionStore.setWindowValue(window, "_sm_window_session_values", aValues);
+				// This throws whenever a window is already closed (during shutdown for example) or if the value doesn't exist and we try to delete it
+				if (aValues) {
+					this.mSessionStore.setWindowValue(window, "_sm_window_session_values", aValues);
+				}
+				else {
+					this.mSessionStore.deleteWindowValue(window, "_sm_window_session_values");
+				}
 			}
 			catch(ex) {}
+			
 			// start/stop window timer
 			this.checkWinTimer();
 			gBrowser.updateTitlebar();
