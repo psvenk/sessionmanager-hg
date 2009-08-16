@@ -645,7 +645,7 @@ var gSessionManager = {
 			break;
 		case "quit-application-granted":
 			// If not restarting or if this window doesn't have a window session open, 
-			// hurry and wipe out the window session value unless restarting before Session Store stops allowing 
+			// hurry and wipe out the window session value before Session Store stops allowing 
 			// window values to be updated.
 			if (!this._restart_requested || !this.__window_session_name) {
 				this.log("Clearing window session data", "INFO");
@@ -656,12 +656,6 @@ var gSessionManager = {
 				catch(ex) {}
 			}
 		
-			// work around for mr tech toolkit, breaking our shutdown processing when browser is set to clear private data on shutdown
-			if ((typeof(Local_Install) != "undefined") && this.getPref("local_install.closeAllWindows", false, true) && (this.getBrowserWindows().length == 0)) {
-				this.log("Working around shutdown issue caused by Mr Tech Toolkit's close all child windows feature", "INFO");
-				this.onUnload();
-			}
-			
 			// quit granted so stop listening for closed windows
 			this.mPref__stopping = true;
 			this._mUserDirectory = this.getUserDir("sessions");
