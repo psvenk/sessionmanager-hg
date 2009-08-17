@@ -30,7 +30,7 @@ var gSessionManager = {
 	mSessionStartup : null,
 
 	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "sessionmanager:initial-windows-restored",
-	             "browser:purge-session-history", "quit-application-requested", "quit-application-granted"],
+	             "sessionmanager:close-windowsession", "browser:purge-session-history", "quit-application-requested", "quit-application-granted"],
 	// These won't be removed on last window closed since we still need to watch for them.
 	mObserving2: ["quit-application", "private-browsing-change-granted", "sessionmanager:process-closed-window"],
 	mClosedWindowFile: "sessionmanager.dat",
@@ -49,6 +49,7 @@ var gSessionManager = {
 	mClosedWindowsCacheData: "Session Manager Closed Window Cache Data",
 	mClosedWindowsCacheTimestamp: "Session Manager Closed Window Cache Timestamp",
 	mClosedWindowsCacheLength: "Session Manager Closed Window Cache Length",
+	mActiveWindowSessions: "Session Manager Window Sessions",
 	mSanitizePreference: "privacy.item.extensions-sessionmanager",
 	
 	getSessionStoreComponent : function() {
@@ -504,6 +505,19 @@ var gSessionManager = {
 		this.log("observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
 		switch (aTopic)
 		{
+		case "sessionmanager:close-windowsession":
+			// notification will either specify specific window session name or be null for all window sessions
+			if (this.__window_session_name && (!aData || (this.__window_session_name == aData))) {
+				var abandon = aSubject.QueryInterface(this.mComponents.interfaces.nsISupportsPRBool).data;
+				this.log((abandon ? "Abandoning" : "Closing") + " window session " + this.__window_session_name);
+				if (abandon) {
+					this.abandonSession(true);
+				}
+				else {
+					this.closeSession(true);
+				}
+			}
+			break;
 		case "sessionmanager:initial-windows-restored":
 			// check both the backup and current window value just in case
 			var window_values = this._backup_window_sesion_data || this.mSessionStore.getWindowValue(window,"_sm_window_session_values");
@@ -1062,12 +1076,12 @@ var gSessionManager = {
 		return false;
 	},
 	
-	abandonSession: function(aWindow)
+	abandonSession: function(aOneWindow)
 	{
 		var dontPrompt = { value: false };
 		if (this.getPref("no_abandon_prompt") || this.mPromptService.confirmEx(null, this.mTitle, this._string("abandom_prompt"), this.mPromptService.BUTTON_TITLE_YES * this.mPromptService.BUTTON_POS_0 + this.mPromptService.BUTTON_TITLE_NO * this.mPromptService.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
 		{
-			if (aWindow) {
+			if (aOneWindow) {
 				this.getAutoSaveValues(null, true);
 			}
 			else {
@@ -1121,14 +1135,17 @@ var gSessionManager = {
 			var notOverwrite = aMode != "newwindow" && aMode != "append";
 			if (aMode != "startup" && notOverwrite)
 			{
-				// close current window session if open
-				if (this.__window_session_name && notOverwrite) 
+				// close current window sessions if open
+				if (this.__window_session_name) 
 				{
 					this.closeSession(true);
 				}
+				var abandonBool = Components.classes["@mozilla.org/supports-PRBool;1"].createInstance(Components.interfaces.nsISupportsPRBool);
+				abandonBool.data = false;
+				this.mObserverService.notifyObservers(abandonBool, "sessionmanager:close-windowsession", null);
 				
 				// close current autosave session if open
-				if (this.mPref__autosave_name && notOverwrite) 
+				if (this.mPref__autosave_name) 
 				{
 					this.closeSession(false);
 				}
@@ -1765,6 +1782,7 @@ var gSessionManager = {
 		function get_(a_id) { return aPopup.getElementsByAttribute("_id", a_id)[0] || null; }
 		
 		var current = (document.popupNode.getAttribute("disabled") == "true");
+		var autosave = document.popupNode.getAttribute("autosave");
 		var replace = get_("replace");
 		
 		replace.hidden = (this.getBrowserWindows().length == 1);
@@ -1781,10 +1799,30 @@ var gSessionManager = {
 		// Hide change group choice for backup items		
 		get_("changegroup").hidden = (document.popupNode.getAttribute("backup-item") == "true")
 		
+		// Hide option to close or abandon sessions if they aren't loaded
+		get_("closer").hidden = get_("abandon").hidden = !current || (autosave != "session");
+		get_("closer_window").hidden = get_("abandon_window").hidden = !current || (autosave != "window");
+		get_("close_separator").hidden = get_("closer").hidden && get_("closer_window").hidden;
+		
 		// Disable setting startup if already startup
 		this.setDisabled(get_("startup"), ((this.mPref_startup == 2) && (document.popupNode.getAttribute("filename") == this.mPref_resume_session)));
 	},
 
+	session_close: function(aOneWindow, aAbandon) {
+		if (aOneWindow) {
+			var matchArray = /(\d\) )?(.*)   \(\d+\/\d+\)/.exec(document.popupNode.getAttribute("label"))
+			if (matchArray && matchArray[2]) {
+				var abandonBool = Components.classes["@mozilla.org/supports-PRBool;1"].createInstance(Components.interfaces.nsISupportsPRBool);
+				abandonBool.data = (aAbandon == true);
+				this.mObserverService.notifyObservers(abandonBool, "sessionmanager:close-windowsession", matchArray[2]);
+			}
+		}
+		else {
+			if (aAbandon) this.abandonSession();
+			else this.closeSession();
+		}
+	},
+	
 	session_load: function(aReplace) {
 		var session = document.popupNode.getAttribute("filename");
 		var oldOverwrite = this.mPref_overwrite;
@@ -1801,14 +1839,14 @@ var gSessionManager = {
 		this.mPref_overwrite = oldOverwrite;
 	},
 	
-	session_replace: function(aWindow) {
+	session_replace: function(aOneWindow) {
 		var session = document.popupNode.getAttribute("filename");
 		var parent = document.popupNode.parentNode.parentNode;
 		var group = null;
 		if (parent.id.indexOf("sessionmanager-") == -1) {
 			group = parent.label;
 		}
-		if (aWindow) {
+		if (aOneWindow) {
 			this.saveWindow(this.getSessionCache(session).name, session, group);
 		}
 		else {
@@ -3138,22 +3176,37 @@ var gSessionManager = {
 	},
 	
 	// Read Autosave values from preference and store into global variables
-	getAutoSaveValues: function(aValues, aWindow)
+	getAutoSaveValues: function(aValues, aOneWindow)
 	{
 		if (!aValues) aValues = "";
-		this.log("getAutoSaveValues: aWindow = " + aWindow + ", aValues = " + aValues.split("\n").join(", "), "EXTRA");
+		this.log("getAutoSaveValues: aOneWindow = " + aOneWindow + ", aValues = " + aValues.split("\n").join(", "), "EXTRA");
 		var values = aValues.split("\n");
-		if (aWindow) {
+		if (aOneWindow) {
+			var old_window_session_name = this.__window_session_name;
 			this.__window_session_name = values[0];
 			this.__window_session_group = values[1];
 			this.__window_session_time = (!values[2] || isNaN(values[2])) ? 0 : values[2];
 			try {
+				var windowSessions = this.mApplication.storage.get(this.mActiveWindowSessions, {});
 				// This throws whenever a window is already closed (during shutdown for example) or if the value doesn't exist and we try to delete it
 				if (aValues) {
+					// Store window session into Application storage and set window value
+					windowSessions[values[0].trim().toLowerCase()] = true;
+					this.mApplication.storage.set(this.mActiveWindowSessions, windowSessions);
 					this.mSessionStore.setWindowValue(window, "_sm_window_session_values", aValues);
 				}
 				else {
+					if (old_window_session_name) {
+						// Remove window session from Application storage and delete window value
+						delete windowSessions[old_window_session_name.trim().toLowerCase()];
+						this.mApplication.storage.set(this.mActiveWindowSessions, windowSessions);
+					}
 					this.mSessionStore.deleteWindowValue(window, "_sm_window_session_values");
+					
+					// the following forces SessionStore to save the state to disk (bug 510965)
+					// Can't just set _sm_window_session_values to "" and then delete since that will throw an exception
+					this.mSessionStore.setWindowValue(window, "SM_dummy_value","1");
+					this.mSessionStore.deleteWindowValue(window, "SM_dummy_value");
 				}
 			}
 			catch(ex) {
@@ -3654,13 +3707,7 @@ var gSessionManager = {
 	// Look for open window sessions
 	getWindowSessions: function()
 	{
-		var windowSessions = {};
-		this.getBrowserWindows().forEach(function(aWindow) {
-			if (aWindow.gSessionManager && aWindow.gSessionManager.__window_session_name && aWindow.gSessionManager.__window_session_name) { 
-				windowSessions[aWindow.gSessionManager.__window_session_name.trim().toLowerCase()] = true;
-			}
-		});
-		return windowSessions;
+		return this.mApplication.storage.get(this.mActiveWindowSessions, {});
 	},
 
 	getBrowserWindows: function()

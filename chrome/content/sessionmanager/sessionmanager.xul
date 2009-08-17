@@ -121,6 +121,11 @@
 		<menuitem _id="replace" label="&replace_all.label;" accesskey="&replace_all.accesskey;" oncommand="gSessionManager.session_replace(false);"/>
 		<menuitem _id="replacew" label="&replace_window.label;" accesskey="&replace_window.accesskey;" oncommand="gSessionManager.session_replace(true);"/>
 		<menuseparator/>
+		<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="gSessionManager.session_close(false, false);"/>
+		<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="gSessionManager.session_close(false, true);"/>
+		<menuitem _id="closer_window" label="&closeWindowSession.label;" accesskey="&closeWindowSession.accesskey;" oncommand="gSessionManager.session_close(true, false);"/>
+		<menuitem _id="abandon_window" label="&abandonWindowSession.label;" accesskey="&abandonWindowSession.accesskey;" oncommand="gSessionManager.session_close(true, true);"/>
+		<menuseparator _id="close_separator"/>
 		<menuitem label="&rename.label;" accesskey="&rename.accesskey;" oncommand="gSessionManager.session_rename();"/>
 		<menuitem label="&remove_one.label;" accesskey="&remove.accesskey;" oncommand="gSessionManager.session_remove();"/>
 		<menuitem _id="changegroup" label="&change_group.label;" accesskey="&change_group.accesskey;" oncommand="gSessionManager.group_rename();"/>
