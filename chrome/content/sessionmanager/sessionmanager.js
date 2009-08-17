@@ -297,7 +297,8 @@ var gSessionManager = {
 		
 		// Perform any needed update processing
 		var oldVersion = this.getPref("version", "")
-		if (oldVersion != this.mApplication.extensions.get("{1280606b-2510-4fe0-97ef-9b5a22eafe30}").version)
+		var newVersion = this.mApplication.extensions.get("{1280606b-2510-4fe0-97ef-9b5a22eafe30}").version;
+		if (oldVersion != newVersion)
 		{
 			// Fix the closed window data if it's encrypted
 			if ((this.mVersionCompare.compare(oldVersion, "0.6.4.2") < 0) && !this.mUseSSClosedWindowList) {
@@ -355,7 +356,12 @@ var gSessionManager = {
 				}, this);
 			}
 			
-			this.setPref("version", this.mApplication.extensions.get("{1280606b-2510-4fe0-97ef-9b5a22eafe30}").version);
+			this.setPref("version", newVersion);
+			
+			// If development version, go to development change page
+			if (/\.20[0-9][0-9][0-1][0-9][1-3][0-9]/.test(newVersion) {
+				this.mFirstUrl = "http://sessionmanager.mozdev.org/changelog.xhtml";
+			}
 			
 			// One time message on update
 			if (this.getPref("update_message", true)) {
