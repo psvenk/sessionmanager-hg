@@ -137,6 +137,7 @@ gSessionManager.onLoad = function() {
 	var deleting = (gParams.GetInt(1) & 16);
 	var saving = (gParams.GetInt(1) & 8);
 	var grouping = (gParams.GetInt(1) & 32);
+	var loading = (gParams.GetInt(1) & 64);
 	var preselect = (gParams.GetInt(1) & 128);
 	var groupCount = 0;
 	var selected;
@@ -144,8 +145,8 @@ gSessionManager.onLoad = function() {
 		var trimName = aSession.name.trim().toLowerCase();
 		// ban backup session names
 		if (aSession.backup) gBackupNames[trimName] = true;
-		// Don't display loaded sessions in list for delete or save or backup items in list for save or grouping
-		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && saving)))
+		// Don't display loaded sessions in list for load or save or backup items in list for save or grouping
+		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && (saving || loading))))
 		{
 			// get window and tab counts and group name for crashed session
 			if (aSession.fileName == "*") {
