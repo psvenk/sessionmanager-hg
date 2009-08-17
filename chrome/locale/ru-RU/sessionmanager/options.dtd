@@ -51,15 +51,15 @@
 <!ENTITY interval.accesskey "и">
 <!ENTITY postdata.label "Максимальное количество POSTDATA для сохранения (в байтах, -1 для всех):">
 <!ENTITY postdata.accesskey "P">
-<!ENTITY privacy.label "Сохранять чувствительные данные (данные форм, POSTDATA и cookies):">
-<!ENTITY privacy.accesskey "у">
+<!ENTITY privacy.label "Сохранять важные данные (данные форм, POSTDATA и cookies):">
+<!ENTITY privacy.accesskey "ж">
 <!ENTITY privacy.level0 "для всех сайтов">
 <!ENTITY privacy.level1 "только для незашифрованных сайтов">
 <!ENTITY privacy.level2 "не сохранять">
 <!ENTITY sessiondir.caption "Папка сохраняемых сессий">
 <!ENTITY sessiondir.desc "Папка по умолчанию для сохраняемых сессий может быть указана здесь:">
 <!ENTITY encrypt.caption "Шифрование">
-<!ENTITY encrypt.desc "Внимание: Зашифрованные данные сессий могут быть открыты только в профилях с одинаковыми файлами key3.db и cert8.db. Но если установлен мастер-пароль, данные не могут быть зашифрованы или дешифрованы без его ввода.">
+<!ENTITY encrypt.desc "Внимание: Зашифрованные данные сессий могут быть открыты только в профилях с одинаковыми файлами key3.db. Но если установлен мастер-пароль, данные не могут быть зашифрованы или дешифрованы без его ввода.">
 <!ENTITY encrypt.label "Шифровать сохраненные сессии и закрытые окна">
 <!ENTITY encrypt.accesskey "Ш">
 <!ENTITY change_dir.label "Изменить">
@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "з">
 <!ENTITY preselect_previous_session.label "Выбрать предыдущую сессию">
 <!ENTITY preselect_previous_session.accesskey "п">
+<!ENTITY logging.caption "Запись логов">
+<!ENTITY enable_logging.label "Включить запись">
+<!ENTITY enable_logging.accesskey "В">
+<!ENTITY open_log.label "Открыть файл логов">
+<!ENTITY open_log.accesskey "О">
+<!ENTITY delete_log.label "Удалить файл логов">
+<!ENTITY delete_log.accesskey "У">
+<!ENTITY log_level_state.label "Записывать статус при закрытии">
+<!ENTITY log_level_state.accesskey "с">
+<!ENTITY log_level_trace.label "Записывать данные трассировки">
+<!ENTITY log_level_trace.accesskey "д">
+<!ENTITY log_level_data.label "Записывать переменные">
+<!ENTITY log_level_data.accesskey "п">
+<!ENTITY log_level_info.label "Записывать информационные сообщения">
+<!ENTITY log_level_info.accesskey "и">
+<!ENTITY log_level_extra.label "Записывать дополнительные данные для дебага">
+<!ENTITY log_level_extra.accesskey "д">
 <!ENTITY reload.label "Обновить все восстановленные окна">
 <!ENTITY reload.accesskey "б">
 <!ENTITY overwrite.label "Заменить существующие окна">
 <!ENTITY overwrite.accesskey "З">
+<!ENTITY allow_saving_during_pbm.label "Разрешить сохранение в режиме Приватного просмотра">
+<!ENTITY allow_saving_during_pbm.label2 "Необходимо, чтобы было включено шифрование">
+<!ENTITY allow_saving_during_pbm.accesskey "П">

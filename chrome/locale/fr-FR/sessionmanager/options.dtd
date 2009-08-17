@@ -120,7 +120,7 @@
 <!ENTITY log_level_trace.accesskey "t">
 <!ENTITY log_level_data.label "Enregistrer les données variables">
 <!ENTITY log_level_data.accesskey "v">
-<!ENTITY log_level_info.label "Enregistrer les messages d&apos;informations">
+<!ENTITY log_level_info.label "Enregistrer les messages d'informations">
 <!ENTITY log_level_info.accesskey "i">
 <!ENTITY log_level_extra.label "Enregistrer des données de débogage supplémentaires">
 <!ENTITY log_level_extra.accesskey "d">
@@ -128,6 +128,6 @@
 <!ENTITY reload.accesskey "c">
 <!ENTITY overwrite.label "Remplacer les fenêtres existantes">
 <!ENTITY overwrite.accesskey "x">
-<!ENTITY allow_saving_during_pbm.label "Autoriser l&apos;enregistrement en mode de navigation privée">
+<!ENTITY allow_saving_during_pbm.label "Autoriser l'enregistrement en mode de navigation privée">
 <!ENTITY allow_saving_during_pbm.label2 "Nécessite le chiffrement pour être activé">
 <!ENTITY allow_saving_during_pbm.accesskey "m">

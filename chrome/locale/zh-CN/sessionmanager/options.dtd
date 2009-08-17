@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "预先选定前一个会话">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "记录">
+<!ENTITY enable_logging.label "启用记录">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "打开 Log 文件">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "删除记录文件">
+<!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "记录关闭状态">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "记录图示数据">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "记录变量数据">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "记录信息消息">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "记录额外调试数据">
+<!ENTITY log_level_extra.accesskey "e">
 <!ENTITY reload.label "重新载入全部已恢复窗口">
 <!ENTITY reload.accesskey "l">
 <!ENTITY overwrite.label "替代已存在窗口">
 <!ENTITY overwrite.accesskey "x">
+<!ENTITY allow_saving_during_pbm.label "在私隐浏览模式时允许保存">
+<!ENTITY allow_saving_during_pbm.label2 "要求启用加密">
+<!ENTITY allow_saving_during_pbm.accesskey "S">

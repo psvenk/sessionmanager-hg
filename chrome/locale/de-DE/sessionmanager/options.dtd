@@ -1,6 +1,6 @@
 <!ENTITY options.title "&sessionManager; - Einstellungen">
 <!ENTITY general.caption "Allgemein">
-<!ENTITY startNend.caption "Starten &amp; Beenden">
+<!ENTITY startNend.caption "Starten & Beenden">
 <!ENTITY resume_sess.label "Beim Starten des Browsers folgende Sitzung laden:">
 <!ENTITY resume_sess.accesskey "S">
 <!ENTITY backup_sess.label "Beim Beenden:">
@@ -22,7 +22,7 @@
 <!ENTITY max_backup.label "Anzahl vorhergehender (abgestürzter) Sitzungs-Backups:">
 <!ENTITY max_backup.accesskey "K">
 <!ENTITY undoClose.caption "Wiederherstellen">
-<!ENTITY windowsNtabs.caption "Geschlossene Fenster &amp; Tabs">
+<!ENTITY windowsNtabs.caption "Geschlossene Fenster & Tabs">
 <!ENTITY max_closed.label "Maximale Anzahl wiederherstellbarer geschlossener Fenster:">
 <!ENTITY max_closed.accesskey "F">
 <!ENTITY max_tabs.label "Maximale Anzahl wiederherstellbarer Tabs (pro Fenster):">
@@ -114,6 +114,16 @@
 <!ENTITY open_log.accesskey "o">
 <!ENTITY delete_log.label "Protokolldatei löschen">
 <!ENTITY delete_log.accesskey "l">
+<!ENTITY log_level_state.label "Beenden-Status aufzeichnen">
+<!ENTITY log_level_state.accesskey "B">
+<!ENTITY log_level_trace.label "Tracking-Daten aufzeichnen">
+<!ENTITY log_level_trace.accesskey "T">
+<!ENTITY log_level_data.label "Variable Daten aufzeichnen">
+<!ENTITY log_level_data.accesskey "V">
+<!ENTITY log_level_info.label "Benachrichtigungsinformationen aufzeichnen">
+<!ENTITY log_level_info.accesskey "n">
+<!ENTITY log_level_extra.label "Zusätzliche Daten zur Fehlersuche aufzeichnen">
+<!ENTITY log_level_extra.accesskey "F">
 <!ENTITY reload.label "Alle Fenster neu laden">
 <!ENTITY reload.accesskey "l">
 <!ENTITY overwrite.label "Vorhandene Fenster ersetzen">

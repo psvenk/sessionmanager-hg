@@ -107,7 +107,27 @@
 <!ENTITY last_window_shutdown.accesskey "t">
 <!ENTITY preselect_previous_session.label "De vorige sessie pre-selecteren">
 <!ENTITY preselect_previous_session.accesskey "r">
+<!ENTITY logging.caption "Loggen">
+<!ENTITY enable_logging.label "Loggen inschakelen">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Logbestand openen">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Logbestand verwijderen">
+<!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "Afsluitstatus loggen">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "Trace-gegevens loggen">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Variabelen-gegevens loggen">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Informationele berichten loggen">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Extra debuggegevens loggen">
+<!ENTITY log_level_extra.accesskey "e">
 <!ENTITY reload.label "Alle herstelde vensters vernieuwen">
 <!ENTITY reload.accesskey "w">
 <!ENTITY overwrite.label "Bestaande vensters vervangen">
 <!ENTITY overwrite.accesskey "e">
+<!ENTITY allow_saving_during_pbm.label "Opslaan tijdens &quot;Privé Browsen&quot; toestaan">
+<!ENTITY allow_saving_during_pbm.label2 "Hiervoor moet versleuteling ingeschakeld zijn">
+<!ENTITY allow_saving_during_pbm.accesskey "s">

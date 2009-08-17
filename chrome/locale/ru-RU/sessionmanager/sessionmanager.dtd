@@ -10,7 +10,7 @@
 <!ENTITY abandonSession.accesskey "У">
 <!ENTITY rename.label "Переименовать сессию">
 <!ENTITY rename.accesskey "П">
-<!ENTITY remove.label "Удаление сессий...">
+<!ENTITY remove.label "Удалить сессии...">
 <!ENTITY remove.accesskey "У">
 <!ENTITY openFolder.label "Открыть папку сессий">
 <!ENTITY openFolder.accesskey "т">
@@ -20,7 +20,7 @@
 <!ENTITY undoClosed.accesskey "к">
 <!ENTITY closedWindows "Закрытые окна:">
 <!ENTITY closedTabs "Закрытые вкладки:">
-<!ENTITY clearList.label "Очистить список &apos;Закрытые&apos;...">
+<!ENTITY clearList.label "Очистить список 'Закрытые'...">
 <!ENTITY clearList.accesskey "ч">
 <!ENTITY toolbar.tooltip "Сохранить текущую сессию...">
 <!ENTITY toolbar.undo.label "Восстановить закрытую вкладку">
@@ -65,7 +65,7 @@
 <!ENTITY load.accesskey "З">
 <!ENTITY prompt.append.label "Добавить к сессии">
 <!ENTITY prompt.replace.label "Заменить сессию">
-<!ENTITY ctrl_click_note.label "Внимание: щелчок по вкладке с нажатой клавишей &lt;Ctrl&gt; добавит вкладку к содержимому существующего окна.">
+<!ENTITY ctrl_click_note.label "Внимание: щелчок по вкладке с нажатой клавишей <Ctrl> добавит вкладку к содержимому существующего окна.">
 <!ENTITY select_all.label "Выбрать все">
 <!ENTITY select_none.label "Ничего не выбирать">
 <!ENTITY toggle_selection.label "Переключить выбор">
@@ -73,3 +73,7 @@
 <!ENTITY prompt.append_window.label "Добавить в данное окно">
 <!ENTITY session_explorer.label "Обзор сессий">
 <!ENTITY session_explorer.accesskey "О">
+<!ENTITY closeWindowSession.label "Сохранить сессию окна и закрыть">
+<!ENTITY closeWindowSession.accesskey "к">
+<!ENTITY abandonWindowSession.label "Покинуть сессию окна">
+<!ENTITY abandonWindowSession.accesskey "и">

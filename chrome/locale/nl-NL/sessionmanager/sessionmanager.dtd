@@ -73,3 +73,7 @@
 <!ENTITY prompt.append_window.label "Aan het huidige venster toevoegen">
 <!ENTITY session_explorer.label "Sessie-verkenner">
 <!ENTITY session_explorer.accesskey "v">
+<!ENTITY closeWindowSession.label "Venstersessie opslaan en sluiten">
+<!ENTITY closeWindowSession.accesskey "l">
+<!ENTITY abandonWindowSession.label "Venstersessie stoppen">
+<!ENTITY abandonWindowSession.accesskey "p">
