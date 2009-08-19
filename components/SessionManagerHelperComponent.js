@@ -80,14 +80,30 @@ SessionManagerHelperComponent.prototype = {
 			for (let i=0; i<cmdLine.length; i++) {
 				let name = cmdLine.getArgument(i);
 				if (/^.*\.session$/.test(name)) {
-					var file = this.getSessionDir(name);
-					if (file.exists()) {
+					// Try using absolute path first and if that doesn't work, search for the file in the session folder
+					var file = null;
+					try {
+						file = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+						file.initWithPath(name);
+					}
+					catch (ex) {
+						file = null;
+					}
+					if (!file) {
+						file = this.getSessionDir(name);
+					}
+					if (file && file.exists() && file.isFile()) {
 						cmdLine.removeArguments(i,i);
+						// strip off path if specified
+						name = file.leafName;
 						let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 						let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-						str.data = name;
+						str.data = cmdLine.state + "\n" + name;
 						pb.setComplexValue(SM_TEMP_RESTORE_PREFERENCE,Ci.nsISupportsString, str);
 						break;
+					}
+					else {
+						report("Session Manager: Command line specified session file not found or is not valid - " + name);
 					}
 				}
 			}
