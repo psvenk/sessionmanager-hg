@@ -5,6 +5,8 @@
 // 3. Add way of deleting window(s) from an existing session.
 // 4. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
 //    having the prompt window close. (Session Editor)
+// 5. Add sub-grouping
+// 6. Currently if loading a session via command line, it lets you load an already active auto or window session.  This should not be allowed.
 
 var gSessionManager = {
 	_timer : null,
@@ -197,8 +199,12 @@ var gSessionManager = {
 		this.mPref_shutdown_on_last_window_close = this.getPref("shutdown_on_last_window_close", false);
 		this.mPref_startup = this.getPref("startup",0);
 		this.mPref_submenus = this.getPref("submenus", false);
-		this.mPref_temp_restore = this.getPref("temp_restore", "");
+		this._temp_restore = this.getPref("temp_restore", "");
 		this.mPref__running = this.getPref("_running", false);
+		
+		// make sure temp_restore is cleared
+		this.delPref("temp_restore");
+		
 		// split out name and group
 		this.getAutoSaveValues(this.getPref("_autosave_values", ""));
 		this.mPrefBranch.addObserver("", this, false);
@@ -249,9 +255,6 @@ var gSessionManager = {
 			// If we did a temporary restore, set it to false			
 			if (this.mPref_restore_temporary) this.setPref("restore_temporary", false)
 
-			// Clear the command line load preference in case it's set
-			this.delPref("temp_restore");
-			
 			// make sure that the _running preference is saved in case we crash
 			this.setPref("_running", true);
 			
@@ -1096,7 +1099,9 @@ var gSessionManager = {
 
 	load: function(aFileName, aMode, aChoseTabs)
 	{
-		var state, chosenState, window_autosave_values;
+		this.log("load: aFileName = " + aFileName + ", aMode = " + aMode + ", aChoseTabs = " + aChoseTabs, "DATA");
+		var state, chosenState, window_autosave_values, force_new_window = false, overwrite_window = false;
+
 		if (!aFileName) {
 			var values = { append_replace: true };
 			aFileName = this.selectSession(this._string("load_session"), this._string("load_session_ok"), values);
@@ -1120,30 +1125,101 @@ var gSessionManager = {
 		}
 
 		var matchArray = this.mSessionRegExp.exec(state);
-		if (matchArray)
+		if (!matchArray)
 		{
-			var sessionWidth = parseInt(matchArray[9]);
-			var sessionHeight = parseInt(matchArray[10]);
-			var xDelta = (!sessionWidth || isNaN(sessionWidth)) ? 1 : (screen.width / sessionWidth);
-			var yDelta = (!sessionHeight || isNaN(sessionHeight)) ? 1 : (screen.height / sessionHeight);
-			this.log("xDelta = " + xDelta + ", yDelta = " + yDelta, "DATA");
+			this.ioError();
+			return;
+		}		
+
+		// handle case when always want a new window (even if current window is blank) and
+		// want to overwrite the current window, but not the current session
+		switch (aMode) {
+			case "newwindow_always":
+				force_new_window = true;
+				aMode = "newwindow";
+				break;
+			case "overwrite_window":
+				overwrite_window = true;
+				aMode = "append";			// Basically an append with overwriting tabs
+				break;
+		}
+		
+		var sessionWidth = parseInt(matchArray[9]);
+		var sessionHeight = parseInt(matchArray[10]);
+		var xDelta = (!sessionWidth || isNaN(sessionWidth)) ? 1 : (screen.width / sessionWidth);
+		var yDelta = (!sessionHeight || isNaN(sessionHeight)) ? 1 : (screen.height / sessionHeight);
+		this.log("xDelta = " + xDelta + ", yDelta = " + yDelta, "DATA");
 			
-			state = (aChoseTabs && chosenState) ? chosenState : state.split("\n")[4];
+		state = (aChoseTabs && chosenState) ? chosenState : state.split("\n")[4];
 			
-			// Don't save current session on startup since there isn't any.  Don't save if opening
-			// new window or appending to current session since nothing is lost in that case.
-			var notOverwrite = aMode != "newwindow" && aMode != "append";
-			if (aMode != "startup" && notOverwrite)
-			{
+		var startup = (aMode == "startup");
+		var newWindow = false;
+		var overwriteTabs = true;
+		var tabsToMove = null;
+		var noUndoData = this.getNoUndoData(true, aMode);
+
+		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
+		var TMP_SingleWindowMode = (this.mPref_append_by_default && (aMode != "newwindow")) || 
+		                           (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
+		if (TMP_SingleWindowMode) this.log("Tab Mix Plus single window mode is enabled", "INFO");
+	
+		if (TMP_SingleWindowMode && (aMode == "newwindow" || (!startup && (aMode != "overwrite") && !this.mPref_overwrite)))
+			aMode = "append";
+		
+		// Use specified mode or default.
+		aMode = aMode || "default";
+		
+		if (startup)
+		{
+			overwriteTabs = this.isCmdLineEmpty();
+			tabsToMove = (!overwriteTabs)?Array.slice(gBrowser.mTabs):null;
+		}
+		else if (!overwrite_window && (aMode == "append"))
+		{
+			overwriteTabs = false;
+		}
+		else if (!TMP_SingleWindowMode && (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite)))
+		{
+			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
+			var tabs = window.getBrowser();
+			if (force_new_window || this.getBrowserWindows().length != 1 || !tabs || tabs.mTabs.length > 1 || 
+				tabs.mTabs[0].linkedBrowser.currentURI.spec != "about:blank" || 
+				this.mSessionStore.getClosedTabCount(window) > 0) {
+				newWindow = true;
+			}
+		}
+		
+		// Handle case where trying to restore to a newly opened window and Tab Mix Plus's Single Window Mode is active.
+		// TMP is going to close this window after the restore, so restore into existing window
+		var altWindow = null;
+		if (TMP_SingleWindowMode) {
+			var windows = this.getBrowserWindows();
+			if (windows.length == 2) {
+				this.log("load: Restoring window into existing window because TMP single window mode active", "INFO");
+				if (windows[0] == window) altWindow = windows[1];
+				else altWindow = windows[0];
+				overwriteTabs = false;
+			}
+		}
+
+		// Check whether or not to close open auto and window sessions.
+		// Don't save current session on startup since there isn't any.  Don't save unless 
+		// overwriting existing window(s) since nothing is lost in that case.
+		if (!startup) {
+			if ((!newWindow && overwriteTabs) || overwrite_window) {
 				// close current window sessions if open
 				if (this.__window_session_name) 
 				{
 					this.closeSession(true);
 				}
+			}
+			if (!newWindow && overwriteTabs && !overwrite_window)
+			{
+				// Closed all open window sessions
 				var abandonBool = Components.classes["@mozilla.org/supports-PRBool;1"].createInstance(Components.interfaces.nsISupportsPRBool);
 				abandonBool.data = false;
 				this.mObserverService.notifyObservers(abandonBool, "sessionmanager:close-windowsession", null);
-				
+			
 				// close current autosave session if open
 				if (this.mPref__autosave_name) 
 				{
@@ -1154,66 +1230,26 @@ var gSessionManager = {
 					if (this.mPref_autosave_session) this.autoSaveCurrentSession();
 				}
 			}
-			
-			// If not in private browser mode and did not choose tabs
-			if (!aChoseTabs && !this.isPrivateBrowserMode())
+		}
+		
+		// If not in private browser mode and did not choose tabs and not appending to current window
+		if (!aChoseTabs && !this.isPrivateBrowserMode() && overwriteTabs && !altWindow)
+		{
+			// if this is a window session, keep track of it
+			if (/^window\/?(\d*)$/.test(matchArray[3])) {
+				var time = parseInt(RegExp.$1);
+				window_autosave_values = this.mergeAutoSaveValues(matchArray[1], matchArray[7], time);
+				this.log("load: window session", "INFO");
+			}
+		
+			// If this is an autosave session, keep track of it if not opening it in a new window and if there is not already an active session
+			if (!newWindow && !overwrite_window && this.mPref__autosave_name=="" && /^session\/?(\d*)$/.test(matchArray[3])) 
 			{
-				// if this is a window session, keep track of it
-				if (/^window\/?(\d*)$/.test(matchArray[3])) {
-					var time = parseInt(RegExp.$1);
-					window_autosave_values = this.mergeAutoSaveValues(matchArray[1], matchArray[7], time);
-					this.log("load: window session", "INFO");
-				}
-			
-				// If this is an autosave session, keep track of it if there is not already an active session
-				if (this.mPref__autosave_name=="" && /^session\/?(\d*)$/.test(matchArray[3])) 
-				{
-					var time = parseInt(RegExp.$1);
-					this.setPref("_autosave_values", this.mergeAutoSaveValues(matchArray[1], matchArray[7], time));
-				}
+				var time = parseInt(RegExp.$1);
+				this.setPref("_autosave_values", this.mergeAutoSaveValues(matchArray[1], matchArray[7], time));
 			}
 		}
-		else {
-			this.ioError();
-			return;
-		}
 		
-		var startup = (aMode == "startup");
-		var newWindow = false;
-		var overwriteTabs = true;
-		var tabsToMove = null;
-		var noUndoData = this.getNoUndoData(true, aMode);
-
-		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
-		var TMP_SingleWindowMode = (this.mPref_append_by_default && (aMode != "newwindow")) || 
-		                           (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
-	
-		if (TMP_SingleWindowMode && (aMode == "newwindow" || ((aMode != "startup") && (aMode != "overwrite") && !this.mPref_overwrite)))
-			aMode = "append";
-		
-		// Use specified mode or default.
-		aMode = aMode || "default";
-		
-		if (aMode == "startup")
-		{
-			overwriteTabs = this.isCmdLineEmpty();
-			tabsToMove = (!overwriteTabs)?Array.slice(gBrowser.mTabs):null;
-		}
-		else if (aMode == "append")
-		{
-			overwriteTabs = false;
-		}
-		else if (!TMP_SingleWindowMode && (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite)))
-		{
-			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
-			var tabs = window.getBrowser();
-			if (this.getBrowserWindows().length != 1 || !tabs || tabs.mTabs.length > 1 || 
-				tabs.mTabs[0].linkedBrowser.currentURI.spec != "about:blank" || 
-				this.mSessionStore.getClosedTabCount(window) > 0) {
-				newWindow = true;
-			}
-		}
-
 		// If reload tabs enabled and not offline, set the tabs to allow reloading
 		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
 			try {
@@ -1233,11 +1269,11 @@ var gSessionManager = {
 			}
 			catch (ex) { this.logError(ex); };
 		}
-		
+
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			var okay = gSessionManager.restoreSession((!newWindow)?window:null, state, overwriteTabs, noUndoData, 
-			                                          (overwriteTabs && !newWindow && !TMP_SingleWindowMode), TMP_SingleWindowMode || (aMode == "append"), startup, window_autosave_values, xDelta, yDelta);
+			var okay = gSessionManager.restoreSession((!newWindow)?(altWindow?altWindow:window):null, state, overwriteTabs, noUndoData, (overwriteTabs && !newWindow && !TMP_SingleWindowMode && !overwrite_window), 
+			                                          (TMP_SingleWindowMode || (!overwriteTabs && !startup)), startup, window_autosave_values, xDelta, yDelta);
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
@@ -3268,13 +3304,20 @@ var gSessionManager = {
 		
 	recoverSession: function()
 	{
+		var temp_restore = null, temp_restore_firstWindow = false;
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called
 		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
 		var recoverOnly = this.mPref__running || sessionstart || this.getPref("_no_prompt_for_session", false);
 		this.delPref("_no_prompt_for_session");
 		this.log("recoverSession: recovering = " + recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
-		this.log("recoverSession: command line session = " + this.mPref_temp_restore, "DATA");
+		if (this._temp_restore) {
+			this._temp_restore = this._temp_restore.split("\n");
+			temp_restore_firstWindow = (this._temp_restore[0] == "0");
+			temp_restore = this._temp_restore[1];
+			this._temp_restore = null;
+			this.log("recoverSession: command line session = \"" + temp_restore + "\", initial startup = " + temp_restore_firstWindow, "DATA");
+		}
 
 		// handle crash where user chose a specific session
 		if (recovering)
@@ -3285,13 +3328,17 @@ var gSessionManager = {
 			this.delPref("_chose_tabs"); // delete chose tabs preference if set
 			this.load(recovering, "startup", choseTabs);
 		}
-		else if (!recoverOnly && (this.mPref_restore_temporary || this.mPref_temp_restore || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
+		else if (!recoverOnly && (this.mPref_restore_temporary || temp_restore || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
 			// allow prompting for tabs in Firefox 3.5
 			var values = { ignorable: true, preselect: this.mPref_preselect_previous_session };
 			
-			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:(this.mPref_temp_restore?this.mPref_temp_restore:
-			              ((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session));
+			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
+			// If no session chosen to restore, use the command line specified session
+			if (!session && temp_restore) {
+				this.log("recoverSession: Restoring only the command line specified session", "INFO");
+				session = temp_restore;
+			}
 			this.log("recoverSession: Startup session = " + session, "DATA");
 			if (session && this.getSessionDir(session).exists())
 			{
@@ -3316,6 +3363,12 @@ var gSessionManager = {
 		// handle browser reload with same session and when opening new windows
 		else if (recoverOnly) {
 			this.checkTimer();
+		}
+		
+		// Restore command line specified session in a new window if it hasn't been restored already
+		if (temp_restore && this.getSessionDir(temp_restore).exists()) {
+			this.log("recoverSession: Also restoring command line specified session", "INFO");
+			this.load(temp_restore, (temp_restore_firstWindow ? "newwindow_always" : "overwrite_window"));
 		}
 		
 		// If need to encrypt backup file, do it
@@ -3560,6 +3613,9 @@ var gSessionManager = {
 
 	restoreSession: function(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup, aWindowSessionValues, xDelta, yDelta)
 	{
+		this.log("restoreSession: aWindow = " + aWindow + ", aReplaceTabs = " + aReplaceTabs + ", aNoUndoData = " + (aNoUndoData ? this.mNativeJSON.encode(aNoUndoData) : "undefined") + 
+		         ", aEntireSession = " + aEntireSession + ", aOneWindow = " + aOneWindow + ", aStartup = " + aStartup + 
+				 ", aWindowSessionValues = " + (aWindowSessionValues ? ("\"" + aWindowSessionValues.split("\n").join(", ") + "\"") : "undefined") + ", xDelta = " + xDelta + ", yDelta = " + yDelta, "DATA");
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
 		if (!aState) return false;
@@ -3589,7 +3645,7 @@ var gSessionManager = {
 		}
 		
 		// Store autosave values into window value and also into window variables
-		this.getAutoSaveValues(aWindowSessionValues, true);
+		if (!this.__window_session_name) this.getAutoSaveValues(aWindowSessionValues, true);
 		this.log("restoreSession: restore done, window_name  = " + this.__window_session_name, "DATA");
 		return true;
 	},
