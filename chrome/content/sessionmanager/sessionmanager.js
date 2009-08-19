@@ -792,19 +792,16 @@ var gSessionManager = {
 			else
 			{
 				// store current session data in case it's needed later
-				// Don't do this if preference to shutdown on last window closed is set.
-				if (!this.mPref_shutdown_on_last_window_close) {
-					var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : null;
-					try {
-						this.mLastState = (name) ? 
-		    	               this.getSessionState(name, null, this.getNoUndoData(), true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
-		        	           this.getSessionState(null, true, null, null, null, true); 
-						this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
-						this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
-					}
-					catch(ex) { 
-						this.logError(ex); 
-					}
+				var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : null;
+				try {
+					this.mLastState = (name) ? 
+	    	               this.getSessionState(name, null, this.getNoUndoData(), true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
+	        	           this.getSessionState(null, true, null, null, null, true); 
+					this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
+					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+				}
+				catch(ex) { 
+					this.logError(ex); 
 				}
 			}
 		}
