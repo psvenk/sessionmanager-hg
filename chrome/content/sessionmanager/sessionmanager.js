@@ -2216,42 +2216,56 @@ var gSessionManager = {
 
 	getSessionDir: function(aFileName, aUnique)
 	{
-		// allow overriding of location of sessions directory
-		var dir = this.getUserDir("sessions");
-			
-		// use default is not specified or not a writable directory
-		if (dir == null) {
-			dir = this.getProfileFile("sessions");
-		}
-		if (!dir.exists())
-		{
+		// Check for absolute path first, session names can't have \ or / in them so this will work.  Relative paths will throw though.
+		if (/[\\\/]/.test(aFileName)) {
+			var file = this.mComponents.classes["@mozilla.org/file/local;1"].createInstance(this.mComponents.interfaces.nsILocalFile);
 			try {
-				dir.create(this.mComponents.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
+				file.initWithPath(aFileName);
 			}
-			catch (ex) {
+			catch(ex) {
 				this.ioError(ex);
-				return null;
+				file = null;
 			}
+			return file;
 		}
-		if (aFileName)
-		{
-			dir.append(aFileName);
-			if (aUnique)
+		else {
+			// allow overriding of location of sessions directory
+			var dir = this.getUserDir("sessions");
+			
+			// use default is not specified or not a writable directory
+			if (dir == null) {
+				dir = this.getProfileFile("sessions");
+			}
+			if (!dir.exists())
 			{
-				var postfix = 1, ext = "";
-				if (aFileName.slice(-this.mSessionExt.length) == this.mSessionExt)
-				{
-					aFileName = aFileName.slice(0, -this.mSessionExt.length);
-					ext = this.mSessionExt;
+				try {
+					dir.create(this.mComponents.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
 				}
-				while (dir.exists())
-				{
-					dir = dir.parent;
-					dir.append(aFileName + "-" + (++postfix) + ext);
+				catch (ex) {
+					this.ioError(ex);
+					return null;
 				}
 			}
+			if (aFileName)
+			{
+				dir.append(aFileName);
+				if (aUnique)
+				{
+					var postfix = 1, ext = "";
+					if (aFileName.slice(-this.mSessionExt.length) == this.mSessionExt)
+					{
+						aFileName = aFileName.slice(0, -this.mSessionExt.length);
+						ext = this.mSessionExt;
+					}
+					while (dir.exists())
+					{
+						dir = dir.parent;
+						dir.append(aFileName + "-" + (++postfix) + ext);
+					}
+				}
+			}
+			return dir.QueryInterface(this.mComponents.interfaces.nsILocalFile);
 		}
-		return dir.QueryInterface(this.mComponents.interfaces.nsILocalFile);
 	},
 
 	//
@@ -3333,11 +3347,15 @@ var gSessionManager = {
 			// allow prompting for tabs in Firefox 3.5
 			var values = { ignorable: true, preselect: this.mPref_preselect_previous_session };
 			
-			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):this.mPref_resume_session);
+			// Order preference:
+			// 1. Temporary backup session
+			// 2. Prompt or selected session
+			// 3. Command line session.
+			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):((this.mPref_startup == 2)?this.mPref_resume_session:temp_restore));
 			// If no session chosen to restore, use the command line specified session
-			if (!session && temp_restore) {
+			if (session == temp_restore) {
+				temp_restore = null;
 				this.log("recoverSession: Restoring only the command line specified session", "INFO");
-				session = temp_restore;
 			}
 			this.log("recoverSession: Startup session = " + session, "DATA");
 			if (session && this.getSessionDir(session).exists())
