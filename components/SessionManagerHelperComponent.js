@@ -95,7 +95,7 @@ SessionManagerHelperComponent.prototype = {
 					if (file && file.exists() && file.isFile()) {
 						cmdLine.removeArguments(i,i);
 						// strip off path if specified
-						name = file.leafName;
+						name = file.path;
 						let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 						let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
 						str.data = cmdLine.state + "\n" + name;
