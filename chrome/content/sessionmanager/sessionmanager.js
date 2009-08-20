@@ -47,11 +47,12 @@ var gSessionManager = {
 	mCleanBrowser: null,
 	mClosedWindowName: null,
 	
-	mSessionCache: "Session Manager Session Cache For ",
-	mClosedWindowsCacheData: "Session Manager Closed Window Cache Data",
-	mClosedWindowsCacheTimestamp: "Session Manager Closed Window Cache Timestamp",
-	mClosedWindowsCacheLength: "Session Manager Closed Window Cache Length",
-	mActiveWindowSessions: "Session Manager Window Sessions",
+	mSessionCache: "sessionmanager.cache.session.",
+	mClosedWindowsCacheData: "sessionmanager.cache.closedWindows.data",
+	mClosedWindowsCacheTimestamp: "sessionmanager.cache.closedWindows.timestamp",
+	mClosedWindowsCacheLength: "sessionmanager.cache.closedWindows.length",
+	mActiveWindowSessions: "sessionmanager.activeWindowSessions",
+	mAlreadyShutdown: "sessionmanager.alreadyShutdown",
 	mSanitizePreference: "privacy.item.extensions-sessionmanager",
 	
 	getSessionStoreComponent : function() {
@@ -496,6 +497,8 @@ var gSessionManager = {
 					this.mObserverService.removeObserver(this, aTopic);
 				}, this);
 				this.shutDown();
+				// Don't look at the session startup type if a new window is opened without shutting down the browser.
+				Application.storage.set(this.mAlreadyShutdown, true)
 			}
 		}
 		this.mBundle = null;
@@ -3304,7 +3307,7 @@ var gSessionManager = {
 		var temp_restore = null, temp_restore_firstWindow = false;
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called
-		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION)
+		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION) && !this.mApplication.storage.get(this.mAlreadyShutdown, false);
 		var recoverOnly = this.mPref__running || sessionstart || this.getPref("_no_prompt_for_session", false);
 		this.delPref("_no_prompt_for_session");
 		this.log("recoverSession: recovering = " + recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
