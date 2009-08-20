@@ -6,7 +6,6 @@
 // 4. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
 //    having the prompt window close. (Session Editor)
 // 5. Add sub-grouping
-// 6. Currently if loading a session via command line, it lets you load an already active auto or window session.  This should not be allowed.
 
 var gSessionManager = {
 	_timer : null,
@@ -1105,7 +1104,8 @@ var gSessionManager = {
 		if (!aFileName) {
 			var values = { append_replace: true };
 			aFileName = this.selectSession(this._string("load_session"), this._string("load_session_ok"), values);
-			if (!aFileName || !this.getSessionDir(aFileName).exists()) return;
+			var file;
+			if (!aFileName || !(file = this.getSessionDir(aFileName)) || !file.exists()) return;
 			aChoseTabs = values.choseTabs;
 			aMode = values.append ? "newwindow" : (values.append_window ? "append" : "overwrite");
 		}
@@ -1130,6 +1130,14 @@ var gSessionManager = {
 			this.ioError();
 			return;
 		}		
+		
+		// If user somehow managed to load an active Window or Auto Session, ignore it
+		if ((/^window/.test(matchArray[3]) && this.mApplication.storage.get(this.mActiveWindowSessions, {})[matchArray[1].trim().toLowerCase()]) ||
+		    (/^session/.test(matchArray[3]) && (this.mPref__autosave_name == matchArray[1])))
+		{
+			this.log("Opened an already active auto or window session: " + matchArray[1], "INFO");
+			return;
+		}
 
 		// handle case when always want a new window (even if current window is blank) and
 		// want to overwrite the current window, but not the current session
@@ -1304,6 +1312,8 @@ var gSessionManager = {
 		
 		try
 		{
+			if (!file || !file.exists()) throw new Error(this._string("file_not_found"));
+		
 			var state = this.readSessionFile(file);
 			var oldname = null;
 			// Get original name
@@ -1348,6 +1358,7 @@ var gSessionManager = {
 				try
 				{
 					var file = this.getSessionDir(aFileName);
+					if (!file || !file.exists()) throw new Error(this._string("file_not_found"));
 					var state = this.readSessionFile(file);
 					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=[^\t|^\n|^\r]+)?/m, function($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group.replace(/\t/g, " ")) : ""); });
 					this.writeFile(file, state);
@@ -2820,7 +2831,7 @@ var gSessionManager = {
 
 	delFile: function(aFile, aSilent)
 	{
-		if (aFile.exists())
+		if (aFile && aFile.exists())
 		{
 			try
 			{
@@ -3318,7 +3329,7 @@ var gSessionManager = {
 		
 	recoverSession: function()
 	{
-		var temp_restore = null, temp_restore_firstWindow = false;
+		var file, temp_restore = null, temp_restore_firstWindow = false;
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called
 		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION) && !this.mApplication.storage.get(this.mAlreadyShutdown, false);
@@ -3358,7 +3369,7 @@ var gSessionManager = {
 				this.log("recoverSession: Restoring only the command line specified session", "INFO");
 			}
 			this.log("recoverSession: Startup session = " + session, "DATA");
-			if (session && this.getSessionDir(session).exists())
+			if ((session) && (file = this.getSessionDir(session)) && file.exists())
 			{
 				this.load(session, "startup", values.choseTabs);
 			}
@@ -3384,7 +3395,7 @@ var gSessionManager = {
 		}
 		
 		// Restore command line specified session in a new window if it hasn't been restored already
-		if (temp_restore && this.getSessionDir(temp_restore).exists()) {
+		if (temp_restore && (file = this.getSessionDir(temp_restore)) && file.exists()) {
 			this.log("recoverSession: Also restoring command line specified session", "INFO");
 			this.load(temp_restore, (temp_restore_firstWindow ? "newwindow_always" : "overwrite_window"));
 		}
