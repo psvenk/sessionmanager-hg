@@ -42,7 +42,7 @@ const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
 const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
-const SM_TEMP_RESTORE_PREFERENCE = "extensions.sessionmanager.temp_restore";
+const SM_COMMAND_LINE_DATA = "sessionmanager.command_line_data";
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -76,8 +76,11 @@ SessionManagerHelperComponent.prototype = {
 	handle : function clh_handle(cmdLine)
 	{
 		// Find and remove the *.session command line argument and save it to a preference
+		let data = cmdLine.state;
+		let found = false;
 		try {
-			for (let i=0; i<cmdLine.length; i++) {
+			let i=0;
+			while (i<cmdLine.length) {
 				let name = cmdLine.getArgument(i);
 				if (/^.*\.session$/.test(name)) {
 					// Try using absolute path first and if that doesn't work, search for the file in the session folder
@@ -94,22 +97,29 @@ SessionManagerHelperComponent.prototype = {
 					}
 					if (file && file.exists() && file.isFile()) {
 						cmdLine.removeArguments(i,i);
+						found = true;
 						// strip off path if specified
-						name = file.path;
-						let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-						let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-						str.data = cmdLine.state + "\n" + name;
-						pb.setComplexValue(SM_TEMP_RESTORE_PREFERENCE,Ci.nsISupportsString, str);
-						break;
+						data = data + "\n" + file.path;
 					}
 					else {
+						i++;
 						report("Session Manager: Command line specified session file not found or is not valid - " + name);
 					}
 				}
+				else i++;
 			}
 		}
 		catch (ex) {
 			report("Session Manager: Command Line Error - " + ex);
+		}
+		if (found) {
+			try {
+				let app = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
+				app.storage.set(SM_COMMAND_LINE_DATA, data);
+			}
+			catch (ex) {
+				report("Session Manager: Command Line Error Setting Storage Data - " + ex);
+			}
 		}
 	},
 	
@@ -131,6 +141,7 @@ SessionManagerHelperComponent.prototype = {
 		let os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 		let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 		
+		//dump(aTopic + "\n");
 		this.log("SessionManagerHelperComponent observer: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
 		switch (aTopic)
 		{
@@ -280,29 +291,28 @@ SessionManagerHelperComponent.prototype = {
 
 	/* ........ private methods .............. */
 
-	// this will handle the case where user turned off crash recovery and browser crashed and
-	// preference indicates there is an active session, but there really isn't
+	// this will remove certain preferences in the case where user turned off crash recovery in the browser and browser is not restarting
 	_handle_crash: function sm_handle_crash()
 	{
 		let prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 		let sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"] || Cc["@mozilla.org/suite/sessionstartup;1"];
 		if (sessionStartup) sessionStartup = sessionStartup.getService(Ci.nsISessionStartup);
-		let resuming = (sessionStartup && sessionStartup.sessionType && (sessionStartup.sessionType != Ci.nsISessionStartup.NO_SESSION)) ||
-		               prefroot.getBoolPref("browser.sessionstore.resume_session_once") || 
-		               prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
+		// This will only be set to true, if crash recovery is turned off and browser is not restarting
+		let no_remove = (sessionStartup && sessionStartup.sessionType && (sessionStartup.sessionType != Ci.nsISessionStartup.NO_SESSION)) ||
+		                 prefroot.getBoolPref("browser.sessionstore.resume_session_once") || 
+		                 prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
 
-		let sm_running = (prefroot.getPrefType("extensions.sessionmanager._running") == prefroot.PREF_BOOL) && 
-		                 prefroot.getBoolPref("extensions.sessionmanager._running");
-		
-		//dump("running = " + sm_running + "\nresuming = " + resuming + "\n");
-		//report("running = " + sm_running + "\nresuming = " + resuming + "\n");
-		if (sm_running && !resuming)
+		//dump("no_remove = " + resuming + "\n");
+		//report("no_remove = " + resuming);
+		// Unless browser is restarting, always delete the following preferences if crash recovery is disabled in case the browser crashes
+		// otherwise bad things can happen
+		if (!no_remove)
 		{
-			dump("SessionManager: Removing active session\n");
+			//dump("SessionManager: Removing preferences\n");
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_values");
-			prefroot.deleteBranch("extensions.sessionmanager._running");
 			prefroot.deleteBranch("extensions.sessionmanager._recovering");
 			prefroot.deleteBranch("extensions.sessionmanager._encrypt_file");
+			prefroot.deleteBranch("extensions.sessionmanager._chose_tabs");
 		}
 	},
 	
