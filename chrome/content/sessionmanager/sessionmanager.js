@@ -199,11 +199,10 @@ var gSessionManager = {
 		this.mPref_shutdown_on_last_window_close = this.getPref("shutdown_on_last_window_close", false);
 		this.mPref_startup = this.getPref("startup",0);
 		this.mPref_submenus = this.getPref("submenus", false);
-		this._temp_restore = this.getPref("temp_restore", "");
-		this.mPref__running = this.getPref("_running", false);
+		this._temp_restore = this.mApplication.storage.get("sessionmanager.command_line_data", null);
 		
-		// make sure temp_restore is cleared
-		this.delPref("temp_restore");
+		// make sure command line data is cleared
+		if (this._temp_restore) this.mApplication.storage.set("sessionmanager.command_line_data", null);
 		
 		// split out name and group
 		this.getAutoSaveValues(this.getPref("_autosave_values", ""));
@@ -242,8 +241,11 @@ var gSessionManager = {
 			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 		}
 		
-		if (!this.mPref__running)
+		if (!this.isRunning())
 		{
+			// make sure that the _running storage value is running
+			this.setRunning(true);
+		
 			// If backup file is temporary, then delete it
 			try {
 				if (this.getPref("backup_temporary", true)) {
@@ -255,8 +257,8 @@ var gSessionManager = {
 			// If we did a temporary restore, set it to false			
 			if (this.mPref_restore_temporary) this.setPref("restore_temporary", false)
 
-			// make sure that the _running preference is saved in case we crash
-			this.setPref("_running", true);
+			// Force saving the preferences
+			this.mObserverService.notifyObservers(null,"sessionmanager-preference-save",null);
 			
 			// Log installed extensions, if logging enabled
 			this.logExtensions();
@@ -475,7 +477,7 @@ var gSessionManager = {
 		if (this.mPref__stopping) this.onWindowClose();
 						
 		// This executes whenever the last browser window is closed (either manually or via shutdown).
-		if (this.mPref__running && numWindows == 0)
+		if (this.isRunning() && numWindows == 0)
 		{
 			this._string_preserve_session = this._string("preserve_session");
 			this._string_backup_session = this._string("backup_session");
@@ -774,9 +776,9 @@ var gSessionManager = {
 			this.closeSession(true, false, this._restart_requested);
 		}
 			
-		this.log("onWindowClose: running = " + this.mPref__running + ", stopping = " + this.mPref__stopping, "DATA");
+		this.log("onWindowClose: running = " + this.isRunning() + ", stopping = " + this.mPref__stopping, "DATA");
 		// only save closed window if running and not shutting down 
-		if (this.mPref__running && !this.mPref__stopping)
+		if (this.isRunning() && !this.mPref__stopping)
 		{
 			// Get number of windows open after closing this one.  If called from close event, decrement count by one.
 			var numWindows = this.getBrowserWindows().length - (aDecrementCount ? 1 : 0);
@@ -2518,11 +2520,9 @@ var gSessionManager = {
 			this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
 		}
 		
-		this.delPref("_running");
 		this.delPref("_autosave_values");
 		this.delPref("_encrypt_file");
 		this.delPref("_recovering");
-		this.mPref__running = false;
 		this.mLastState = null;
 		this.mCleanBrowser = null;
 		this.mClosedWindowName = null;
@@ -2534,6 +2534,7 @@ var gSessionManager = {
 			this.delFile(this.getProfileFile("crashrecovery.bak"), true);
 			this.delPref("extensions.crashrecovery.resume_session_once", true);
 		}
+		this.setRunning(false);
 		this.log("Shutdown end", "TRACE");
 	},
 	
@@ -3142,7 +3143,7 @@ var gSessionManager = {
 	// Certain preferences should be force saved in case of a crash
 	checkForForceSave: function(aName, aValue, aUseRootBranch)
 	{
-		var names = [ "_running", "_autosave_values" ];
+		var names = [ "_autosave_values" ];
 		
 		for (var i=0; i<names.length; i++) {
 			if (aName == names[i]) {
@@ -3208,6 +3209,16 @@ var gSessionManager = {
 	},
 
 /* ........ Miscellaneous Enhancements .............. */
+
+	// Check for Running
+	isRunning: function() {
+		return this.mApplication.storage.get("sessionmanager._running", false);
+	},
+	
+	// Check for Running
+	setRunning: function(aValue) {
+		return this.mApplication.storage.set("sessionmanager._running", aValue);
+	},
 
 	// Caching functions
 	getSessionCache: function(aName) {
@@ -3329,20 +3340,19 @@ var gSessionManager = {
 		
 	recoverSession: function()
 	{
-		var file, temp_restore = null, temp_restore_firstWindow = false;
+		var file, temp_restore = null, first_temp_restore = null, temp_restore_index = 1;
 		var recovering = this.getPref("_recovering");
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called
 		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION) && !this.mApplication.storage.get(this.mAlreadyShutdown, false);
-		var recoverOnly = this.mPref__running || sessionstart || this.getPref("_no_prompt_for_session", false);
+		var recoverOnly = this.isRunning() || sessionstart || this.getPref("_no_prompt_for_session", false);
 		this.delPref("_no_prompt_for_session");
 		this.log("recoverSession: recovering = " + recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
-		if (this._temp_restore) {
-			this._temp_restore = this._temp_restore.split("\n");
-			temp_restore_firstWindow = (this._temp_restore[0] == "0");
-			temp_restore = this._temp_restore[1];
-			this._temp_restore = null;
-			this.log("recoverSession: command line session = \"" + temp_restore + "\", initial startup = " + temp_restore_firstWindow, "DATA");
+		if (typeof(this._temp_restore) == "string") {
+			this.log("recoverSession: command line session data = \"" + this._temp_restore + "\"", "DATA");
+			temp_restore = this._temp_restore.split("\n");
+			first_temp_restore = temp_restore[1];
 		}
+		this._temp_restore = null;
 
 		// handle crash where user chose a specific session
 		if (recovering)
@@ -3353,7 +3363,7 @@ var gSessionManager = {
 			this.delPref("_chose_tabs"); // delete chose tabs preference if set
 			this.load(recovering, "startup", choseTabs);
 		}
-		else if (!recoverOnly && (this.mPref_restore_temporary || temp_restore || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
+		else if (!recoverOnly && (this.mPref_restore_temporary || first_temp_restore || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
 			// allow prompting for tabs in Firefox 3.5
 			var values = { ignorable: true, preselect: this.mPref_preselect_previous_session };
@@ -3362,11 +3372,14 @@ var gSessionManager = {
 			// 1. Temporary backup session
 			// 2. Prompt or selected session
 			// 3. Command line session.
-			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):((this.mPref_startup == 2)?this.mPref_resume_session:temp_restore));
+			var session = (this.mPref_restore_temporary)?this.mBackupSessionName:((this.mPref_startup == 1)?this.selectSession(this._string("resume_session"), this._string("resume_session_ok"), values):
+			              ((this.mPref_startup == 2)?this.mPref_resume_session:first_temp_restore));
 			// If no session chosen to restore, use the command line specified session
-			if (session == temp_restore) {
-				temp_restore = null;
-				this.log("recoverSession: Restoring only the command line specified session", "INFO");
+			if (!session) session = first_temp_restore;
+			if (session && (session == first_temp_restore)) {
+				this.log("recoverSession: Restoring startup command line session \"" + first_temp_restore + "\"", "DATA");
+				// Go to next command line item if it exists
+				temp_restore_index++;
 			}
 			this.log("recoverSession: Startup session = " + session, "DATA");
 			if ((session) && (file = this.getSessionDir(session)) && file.exists())
@@ -3394,10 +3407,19 @@ var gSessionManager = {
 			this.checkTimer();
 		}
 		
-		// Restore command line specified session in a new window if it hasn't been restored already
-		if (temp_restore && (file = this.getSessionDir(temp_restore)) && file.exists()) {
-			this.log("recoverSession: Also restoring command line specified session", "INFO");
-			this.load(temp_restore, (temp_restore_firstWindow ? "newwindow_always" : "overwrite_window"));
+		// Restore command line specified session(s) in a new window if they haven't been restored already
+		if (first_temp_restore) {
+			// For each remaining session in the command line
+			while (temp_restore.length > temp_restore_index) {
+				file = this.getSessionDir(temp_restore[temp_restore_index]);
+				this.log(file.path);
+				if (file && file.exists()) {
+					this.log("recoverSession: Restoring additional command line session " + temp_restore_index + " \"" + temp_restore[temp_restore_index] + "\"", "DATA");
+					// Only restore into existing window if not startup and first session in command line
+					this.load(temp_restore[temp_restore_index], (((temp_restore_index > 1) || (temp_restore[0] == "0")) ? "newwindow_always" : "overwrite_window"));
+				}
+				temp_restore_index++;
+			}
 		}
 		
 		// If need to encrypt backup file, do it
