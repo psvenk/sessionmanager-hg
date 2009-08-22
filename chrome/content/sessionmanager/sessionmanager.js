@@ -259,9 +259,6 @@ var gSessionManager = {
 
 			// Force saving the preferences
 			this.mObserverService.notifyObservers(null,"sessionmanager-preference-save",null);
-			
-			// Log installed extensions, if logging enabled
-			this.logExtensions();
 		}
 		else if (this.getPref("_save_prefs",false)) {
 			// Save preference file if this preference is true in order to prevent problems on a crash.
@@ -3948,34 +3945,19 @@ var gSessionManager = {
 	// Logging functions
 	// Get logger singleton (this will create it if it does not exist)
 	//
-	initLogger : function() {
-		if ((typeof(this.logger) != "function") || !this.logger()) {
-			this.logger("sessionmanager_log.txt", "Session Manager", "extensions.sessionmanager.logging", "extensions.sessionmanager.logging_level");
-		}
-	},
-	
 	log: function(aMessage, aLevel, aForce) {
-		this.initLogger();
 		if (this.logger()) this.logger().log(aMessage, aLevel, aForce);
 	},
 
 	logError: function(aMessage, aForce) {
-		this.initLogger();
 		if (this.logger()) this.logger().logError(aMessage, aForce);
 	},
 	
-	logExtensions: function() {
-		this.initLogger();
-		if (this.logger()) this.logger().logExtensions();
-	},
-	
 	deleteLogFile: function(aForce) {
-		this.initLogger();
 		if (this.logger()) this.logger().deleteLogFile(aForce);
 	},
 
 	openLogFile: function() {
-		this.initLogger();
 		if (this.logger()) this.logger().openLogFile(this._string("file_not_found"));
 	}
 };
