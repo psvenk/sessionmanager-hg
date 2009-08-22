@@ -21,7 +21,6 @@ var gSessionManager = {
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mNativeJSON: Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON),
 	mSMHelper: Components.classes["@morac/sessionmanager-helper;1"].getService(Components.interfaces.nsISessionManangerHelperComponent),
-	mApplication: Components.classes["@mozilla.org/fuel/application;1"].getService(Components.interfaces.fuelIApplication),
 	mVersionCompare: Components.classes["@mozilla.org/xpcom/version-comparator;1"].getService(Components.interfaces.nsIVersionComparator),
 	mComponents: Components,
 	
@@ -29,6 +28,7 @@ var gSessionManager = {
 	mPrivateBrowsing: null,
 	mSessionStore : null,
 	mSessionStartup : null,
+	mApplication: null,
 
 	mObserving: ["sessionmanager:windowtabopenclose", "sessionmanager:updatetitlebar", "sessionmanager:initial-windows-restored",
 	             "sessionmanager:close-windowsession", "browser:purge-session-history", "quit-application-requested", "quit-application-granted"],
@@ -85,6 +85,14 @@ var gSessionManager = {
 		
 		// Get SessionStore service component 
 		if (!this.getSessionStoreComponent()) return false;
+		
+		// Get FUEL (SMILE in SeaMonkey) library
+		if (Components.classes["@mozilla.org/fuel/application;1"]) {
+			this.mApplication = Components.classes["@mozilla.org/fuel/application;1"].getService(Components.interfaces.fuelIApplication);
+		} else if (Components.classes["@mozilla.org/smile/application;1"]) {
+			this.mApplication = Components.classes["@mozilla.org/smile/application;1"].getService(Components.interfaces.smileIApplication);
+		}
+		if (!this.mApplication) return false;
 		
 		// Set Private Browser service variable
 		var privateBrowsing = Components.classes["@mozilla.org/privatebrowsing;1"];
