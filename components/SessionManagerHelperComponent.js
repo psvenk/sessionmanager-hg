@@ -114,7 +114,12 @@ SessionManagerHelperComponent.prototype = {
 		}
 		if (found) {
 			try {
-				let app = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
+				let app = null;
+				if (Cc["@mozilla.org/fuel/application;1"]) {
+					app = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
+				} else if (Cc["@mozilla.org/smile/application;1"]) {
+					app = Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication);
+				}
 				app.storage.set(SM_COMMAND_LINE_DATA, data);
 			}
 			catch (ex) {
