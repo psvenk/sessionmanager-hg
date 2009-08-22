@@ -2,6 +2,12 @@ const Cc = Components.classes;
 const Ci = Components.interfaces
 const report = Components.utils.reportError;
 
+// Configuration Constant Settings - Change for each addon
+const ADDON_NAME = "Session Manager";
+const FILE_NAME = "sessionmanager_log.txt";
+const LOG_ENABLE_PREFERENCE_NAME = "extensions.sessionmanager.logging";
+const LOG_LEVEL_PREFERENCE_NAME = "extensions.sessionmanager.logging_level";
+
 var EXPORTED_SYMBOLS = ["logger", "logging_level"];
 
 // singleton
@@ -16,24 +22,18 @@ logging_level["INFO"] = 8;
 logging_level["EXTRA"] = 16;
 logging_level["ERROR"] = 32;
 
-// Function to create singleton of logging class
-function logger(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName) {
-	// If parameters or window is missing just return the current gLogger (if it exists)
-	if (!aFilename || !aAddonName || !aLogEnablePrefereneceName || !aLogLevelPreferenceName) {
-		return gLogger;
-	}
+var deletedLogOK = false;
 
-	// Try to get the most recent window to find the platform
-	let recentWindow = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow(null);
-	let platform = (recentWindow ? recentWindow.navigator.platform : null);
-	
-	if (!platform) return gLogger;
-	
-	// Create singleton if it does not exist and call the deleteLogFile function
+// Function to create singleton of logging class
+function logger() {
+	// Create singleton if it does not exist
 	if (!gLogger) {
-		gLogger = new loggerClass(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, platform);
+		gLogger = new loggerClass();
 	}
-	gLogger.deleteLogFile();
+	
+	if (!deletedLogOK) {
+		deletedLogOK = gLogger.deleteLogFile();
+	}
 
 	return gLogger;
 }
@@ -41,28 +41,26 @@ function logger(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPrefe
 //
 // Logging Class
 //
-function loggerClass(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, aPlatform) {
-	this._init(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, aPlatform);
+function loggerClass() {
+	this._init();
 }
 
 loggerClass.prototype = {
+	_logged_Addons : false,
+
 	// 
 	// Initialize variables
 	//
-	_init: function(aFilename, aAddonName, aLogEnablePrefereneceName, aLogLevelPreferenceName, aPlatform) {
-		this.addonName = aAddonName;
-		this.logEnablePrefereneceName = aLogEnablePrefereneceName;
-		this.logLevelPreferenceName = aLogLevelPreferenceName;
-		
+	_init: function() {
 		// Store values of preferences and listen for changes
 		let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 		try {
-			this.logEnabled = pb.getBoolPref(aLogEnablePrefereneceName);
-			this.logLevel = pb.getIntPref(aLogLevelPreferenceName);
+			this.logEnabled = pb.getBoolPref(LOG_ENABLE_PREFERENCE_NAME);
+			this.logLevel = pb.getIntPref(LOG_LEVEL_PREFERENCE_NAME);
 			
 			// Only add one observer
-			pb.addObserver(aLogEnablePrefereneceName, this, false);
-			pb.addObserver(aLogLevelPreferenceName, this, false);
+			pb.addObserver(LOG_ENABLE_PREFERENCE_NAME, this, false);
+			pb.addObserver(LOG_LEVEL_PREFERENCE_NAME, this, false);
 		}
 		catch (ex) {
 			this.logEnabled = false;
@@ -70,17 +68,9 @@ loggerClass.prototype = {
 			report(ex);
 		}
 
-		// Get Profile folder and append log file name
-		this.logFile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsILocalFile).clone();
-		this.logFile.append(aFilename);
-	
 		// Get services
 		this.mPromptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
 		this.mConsoleService = Cc['@mozilla.org/consoleservice;1'].getService(Ci.nsIConsoleService);
-		
-		// Get EOL character
-		this.mEOL = /win|os[\/_]?2/i.test(aPlatform)?"\r\n":/mac/i.test(aPlatform)?"\r":"\n";
-	
 	},
 
 	observe: function(aSubject, aTopic, aData)
@@ -92,11 +82,11 @@ loggerClass.prototype = {
 				try {
 					switch(aData) 
 					{
-						case this.logEnablePrefereneceName:
-							this.logEnabled = pb.getBoolPref(this.logEnablePrefereneceName);
+						case LOG_ENABLE_PREFERENCE_NAME:
+							this.logEnabled = pb.getBoolPref(LOG_ENABLE_PREFERENCE_NAME);
 							break;
-						case this.logLevelPreferenceName:
-							this.logLevel = pb.getIntPref(this.logLevelPreferenceName);
+						case LOG_LEVEL_PREFERENCE_NAME:
+							this.logLevel = pb.getIntPref(LOG_LEVEL_PREFERENCE_NAME);
 							break;
 					}
 					break;
@@ -111,12 +101,15 @@ loggerClass.prototype = {
 	// Utility to create an error message in the log without throwing an error.
 	//
 	logError: function(e, force) {
+		// Log Addons if haven't already and EOL character exists
+		if (!this._logged_Addons && this.mEOL) this.logExtensions();
+		
 		try { 
 			if (force || this.logEnabled) {
 				let consoleError = Cc['@mozilla.org/scripterror;1'].createInstance(Ci.nsIScriptError);
 				consoleError.init(e.message, e.fileName, e.lineNumber, e.lineNumber, e.columnNumber, 0, null);
 
-				this.mConsoleService.logStringMessage(this.addonName + " (" + (new Date).toGMTString() + "): " + consoleError.toString());
+				this.mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + consoleError.toString());
 				this.write_log((new Date).toGMTString() + "): " + consoleError + "\n");
 			}
 		}
@@ -129,10 +122,13 @@ loggerClass.prototype = {
 	// Log info messages
 	//
 	log: function(aMessage, level, force) {
+		// Log Addons if haven't already and EOL character exists
+		if (!this._logged_Addons && this.mEOL) this.logExtensions();
+	
 		if (!level) level = "INFO";
 		try {
 			if (force || (this.logEnabled && (logging_level[level] & this.logLevel))) {
-				this.mConsoleService.logStringMessage(this.addonName + " (" + (new Date).toGMTString() + "): " + aMessage);
+				this.mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + aMessage);
 				this.write_log((new Date).toGMTString() + "): " + aMessage + "\n");
 			}
 		}
@@ -146,7 +142,7 @@ loggerClass.prototype = {
 	//
 	openLogFile: function(aErrorString) {
 		if (!this.logFile.exists() || !(this.logFile instanceof Ci.nsILocalFile)) {
-			this.mPromptService.alert(null, this.addonName, aErrorString);
+			this.mPromptService.alert(null, ADDON_NAME, aErrorString);
 			return;
 		}
 		try {
@@ -162,29 +158,71 @@ loggerClass.prototype = {
 			}
 			catch (ex)
 			{
-				this.mPromptService.alert(null, this.addonName, ex);
+				this.mPromptService.alert(null, ADDON_NAME, ex);
 			}
 		}
+	},
+	
+	//
+	// Set the Log File - This will throw if profile isn't lodaed yet
+	//
+	setLogFile: function() {
+		if (!this.logFile) {
+			try {
+				// Get Profile folder and append log file name
+				this.logFile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsILocalFile).clone();
+				this.logFile.append(FILE_NAME);
+			}
+			catch (ex) { 
+				this.logFile = null;
+				return false;
+			}
+		}
+		return true;
 	},
 
 	// 
 	// Delete Log File if it exists and not logging or it's too large (> 10 MB)
 	//
 	deleteLogFile: function(aForce) {
+		// If log file not stored, store it.  This will throw an exception if the profile hasn't been initialized so just exit in that case.
+		if (!this.logFile) {
+			if (!this.setLogFile()) return false;
+		}
+	
 		try { 
 			if (this.logFile.exists() && (aForce || !this.logEnabled || this.logFile.fileSize > 10485760)) {
 				this.logFile.remove(false);
+				return true;
 			}
 		}
 		catch (ex) { 
 			dump(ex + "\n"); 
 		}
+		return true;
 	},
 				 
 	//
 	// Write to Log File
 	// 
 	write_log: function(aMessage) {
+		// If log file not stored, store it.  This will throw an exception if the profile hasn't been initialized so just exit in that case.
+		if (!this.logFile) {
+			if (!this.setLogFile()) return;
+		}
+	
+		// If EOL character isn't stored, try to get it
+		if (!this.mEOL) {
+			// Try to get the most recent window to find the platform
+			let recentWindow = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow(null);
+			let platform = (recentWindow ? recentWindow.navigator.platform : null);
+			
+			if (platform) {
+				// Set EOL character
+				this.mEOL = /win|os[\/_]?2/i.test(platform)?"\r\n":/mac/i.test(platform)?"\r":"\n";
+			}
+		}
+	
 		try {
 			let stream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
 			// ioFlags: write only, create file, append;	Permission: read/write owner
@@ -192,7 +230,7 @@ loggerClass.prototype = {
 			let cvstream = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
 			cvstream.init(stream, "UTF-8", 0, Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 
-			cvstream.writeString(aMessage.replace(/[\n$]/g, this.mEOL));
+			cvstream.writeString(aMessage.replace(/[\n$]/g, (this.mEOL ? this.mEOL : "\n")));
 			cvstream.flush();
 			cvstream.close();
 		}
@@ -202,11 +240,24 @@ loggerClass.prototype = {
 	},
 	
 	//
-	// Log Extensions
+	// Log Extensions - Also log browser version
 	//
 	logExtensions: function() {
 		if (!this.logEnabled) return;
-		let Application = Components.classes["@mozilla.org/fuel/application;1"].getService(Components.interfaces.fuelIApplication);
+		this._logged_Addons = true;
+
+		let Application = null;
+		if (Cc["@mozilla.org/fuel/application;1"]) {
+			Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
+		} else if (Cc["@mozilla.org/smile/application;1"]) {
+			Application = Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication);
+		}
+		if (!Application) return;
+		
+		// Log browser version
+		this.log("Browser = " + Application.name + " " + Application.version, "INFO");
+		
+		// Log Addons
 		let extensions = Application.extensions.all;
 		if (extensions.length) {
 			this.log("Extensions installed and enabled:");
