@@ -387,4 +387,7 @@ function adjustContentHeight() {
 	
 	// Hide/show the encrypt only checkbox based on state of encryption checkbox
 	_("encrypted_only").hidden = !_("encrypt_sessions").checked;
+	
+	// Re-select same pane to refresh it - General pane's tab boxes aren't the right height unless the General tab is re-selected
+	_("sessionmanagerOptions")._selector.selectedItem.click();
 }
