@@ -255,7 +255,7 @@ loggerClass.prototype = {
 		if (!Application) return;
 		
 		// Log browser version
-		this.log("Browser = " + Application.name + " " + Application.version, "INFO");
+		this.log("Browser = " + Application.id + " - " + Application.name + " " + Application.version, "INFO");
 		
 		// Log Addons
 		let extensions = Application.extensions.all;
