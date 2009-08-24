@@ -31,13 +31,13 @@
 			<preference id="extensions.sessionmanager.max_backup_keep" name="extensions.sessionmanager.max_backup_keep" type="int"/>
 			<preference id="extensions.sessionmanager.max_display" name="extensions.sessionmanager.max_display" type="int"/>
 			<preference id="extensions.sessionmanager.name_format" name="extensions.sessionmanager.name_format" type="string"/>
-			<preference id="extensions.sessionmanager.old_startup_page" name="extensions.sessionmanager.old_startup_page" type="int"/>
 			<preference id="extensions.sessionmanager.overwrite" name="extensions.sessionmanager.overwrite" type="bool"/>
 			<preference id="extensions.sessionmanager.preselect_previous_session" name="extensions.sessionmanager.preselect_previous_session" type="bool"/>
 			<preference id="extensions.sessionmanager.reload" name="extensions.sessionmanager.reload" type="bool"/>
 			<preference id="extensions.sessionmanager.resume_session" name="extensions.sessionmanager.resume_session" type="string"/>
 			<preference id="extensions.sessionmanager.save_cookies" name="extensions.sessionmanager.save_cookies" type="bool"/>
 			<preference id="extensions.sessionmanager.session_list_order" name="extensions.sessionmanager.session_list_order" type="int"/>
+			<preference id="extensions.sessionmanager.session_name_in_titlebar" name="extensions.sessionmanager.session_name_in_titlebar" type="int"/>
 			<preference id="extensions.sessionmanager.shutdown_on_last_window_close" name="extensions.sessionmanager.shutdown_on_last_window_close" type="bool"/>
 		</preferences>
 
@@ -149,9 +149,20 @@
 							<textbox id="name_format" preference="extensions.sessionmanager.name_format"/>
 						</hbox>
 						<description id="name_describe" style="width: 5em;">&name_format.desc;</description>
+						<separator style="height: 0.5em;" orient="vertical"/>
+						<hbox align="center">
+							<menulist id="session_name_in_titlebar" preference="extensions.sessionmanager.session_name_in_titlebar">
+								<menupopup>
+									<menuitem value="0" label="&append.label;"/>
+									<menuitem value="1" label="&prepend.label;"/>
+									<menuitem value="2" label="&donotadd.label;"/>
+								</menupopup>
+							</menulist>
+							<label value="&session_name_in_titlebar.label;" accesskey="&session_name_in_titlebar.accesskey;" control="session_name_in_titlebar"/>
+						</hbox>
 					</groupbox>
 					<checkbox id="hide_tools_menu" label="&hide_tools_menu.label;" 
-										accesskey="&hide_tools_menu.accesskey;" preference="extensions.sessionmanager.hide_tools_menu"/>
+					          accesskey="&hide_tools_menu.accesskey;" preference="extensions.sessionmanager.hide_tools_menu"/>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>

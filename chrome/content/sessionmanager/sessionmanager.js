@@ -204,6 +204,7 @@ var gSessionManager = {
 		this.mPref_save_cookies = this.getPref("save_cookies", false);
 		this.mPref_save_window_list = this.getPref("save_window_list", false);
 		this.mPref_session_list_order = this.getPref("session_list_order", 1);
+		this.mPref_session_name_in_titlebar = this.getPref("session_name_in_titlebar", 0);
 		this.mPref_shutdown_on_last_window_close = this.getPref("shutdown_on_last_window_close", false);
 		this.mPref_startup = this.getPref("startup",0);
 		this.mPref_submenus = this.getPref("submenus", false);
@@ -655,6 +656,9 @@ var gSessionManager = {
 				                               typeof(this.mSessionStore.getClosedWindowCount) == "function");
 				this.updateToolbarButton();
 				break;
+			case "session_name_in_titlebar":
+				gBrowser.updateTitlebar();
+				break;
 			}
 			break;
 		case "quit-application":
@@ -825,14 +829,22 @@ var gSessionManager = {
 		if (id == "title") {
 			// Don't kill browser if something goes wrong
 			try {
-				var sessionTitleName = (gSessionManager.mPref__autosave_name) ? (" - (" + gSessionManager._string("current_session2") + " " + gSessionManager.mPref__autosave_name + ")") : "";
-				var windowTitleName = (gSessionManager.__window_session_name) ? (" - (" + gSessionManager._string("window_session") + " " + gSessionManager.__window_session_name + ")") : "";
-		
+				var windowTitleName = (gSessionManager.__window_session_name) ? (gSessionManager._string("window_session") + " " + gSessionManager.__window_session_name) : "";
+				var sessionTitleName = (gSessionManager.mPref__autosave_name) ? (gSessionManager._string("current_session2") + " " + gSessionManager.mPref__autosave_name) : "";
+				var title = ((windowTitleName || sessionTitleName) ? "(" : "") + windowTitleName + ((windowTitleName && sessionTitleName) ? ", " : "") + sessionTitleName + ((windowTitleName || sessionTitleName) ? ")" : "")
+				
 				// Add window and browser session titles
-				newVal = newVal + windowTitleName + sessionTitleName;
+				switch(gSessionManager.mPref_session_name_in_titlebar) {
+					case 0:
+						newVal = newVal + " - " + title;
+						break;
+					case 1:
+						newVal = title + " - " + newVal;
+						break;
+				}
 			} 
 			catch (ex) { 
-				this.logError(ex); 
+				gSessionManager.logError(ex); 
 			}
 		}
 		return newVal;
