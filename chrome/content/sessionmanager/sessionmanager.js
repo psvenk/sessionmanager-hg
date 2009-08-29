@@ -1859,6 +1859,7 @@ var gSessionManager = {
 		this.setDisabled(get_("replacew"), (inPrivateBrowsing | current));
 		
 		// Disable almost everything for currently loaded auto-save session
+		this.setDisabled(get_("loadaw"), current);
 		this.setDisabled(get_("loada"), current);
 		this.setDisabled(get_("loadr"), current);
 
@@ -1872,6 +1873,9 @@ var gSessionManager = {
 		
 		// Disable setting startup if already startup
 		this.setDisabled(get_("startup"), ((this.mPref_startup == 2) && (document.popupNode.getAttribute("filename") == this.mPref_resume_session)));
+		
+		// If Tab Mix Plus's single window mode is enabled, hide options to load into new windows
+		get_("loada").hidden = (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
 	},
 
 	session_close: function(aOneWindow, aAbandon) {
@@ -1889,19 +1893,11 @@ var gSessionManager = {
 		}
 	},
 	
-	session_load: function(aReplace) {
+	session_load: function(aReplace, aOneWindow) {
 		var session = document.popupNode.getAttribute("filename");
 		var oldOverwrite = this.mPref_overwrite;
-		if (aReplace) {
-			this.mPref_overwrite = true;
-			this.load(session);
-		}
-		else {
-			var state = this.readSessionFile(this.getSessionDir(session),true);
-			var newWindow = (((this.mSessionRegExp.test(state))?RegExp.$4:0) > 1) || this.getBrowserWindows().length > 1;
-			this.mPref_overwrite = false;
-			this.load(session, (newWindow)?"newwindow":"append");
-		}
+		this.mPref_overwrite = !!aReplace;
+		this.load(session, (aReplace?"overwrite":(aOneWindow?"append":"newwindow")));
 		this.mPref_overwrite = oldOverwrite;
 	},
 	
