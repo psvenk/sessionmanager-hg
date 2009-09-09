@@ -40,6 +40,7 @@ const report = Components.utils.reportError;
 const STARTUP_PROMPT = -11;
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
 const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
+const SM_REPLACE_QUIT = "extensions.sessionmanager.replace_browser_quit_prompt";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
 const SM_COMMAND_LINE_DATA = "sessionmanager.command_line_data";
@@ -64,6 +65,7 @@ SessionManagerHelperComponent.prototype = {
 	_xpcom_categories: [{ category: "app-startup", service: true },
 	                    { category: "command-line-handler", entry: "sessionmanager" }],
 	_ignorePrefChange: false,
+	_warnOnQuit: null,
 	_sessionExt: ".session",
 	mAutoPrivacy: false,
 	mBackupState: null,
@@ -197,6 +199,7 @@ SessionManagerHelperComponent.prototype = {
 			
 			// stuff to handle preference file saving
 			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+			os.addObserver(this, "quit-application-requested", false);
 			os.addObserver(this, "quit-application-granted", false);
 			os.addObserver(this, "sessionmanager-preference-save", false);
 			os.addObserver(this, "sessionmanager:restore-startup-preference", false);
@@ -255,8 +258,23 @@ SessionManagerHelperComponent.prototype = {
 		case "sessionmanager:ignore-preference-changes":
 			this._ignorePrefChange = (aData == "true");
 			break;
+		case "quit-application-requested":
+			if (pb.getBoolPref(SM_REPLACE_QUIT) && (aData != "restart")) {
+				// Do session prompt here (if prompt is set to 2) and then save the info in an Application Storage variable for use in
+				// the shutdown procsesing in sessionmanager.js
+			
+				if (typeof(this._warnOnQuit) != "boolean") {
+					this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
+				}
+				pb.setBoolPref("browser.warnOnQuit", false);
+			}
+			break;
 		case "quit-application-granted":
+			if (typeof(this._warnOnQuit) == "boolean") {
+				pb.setBoolPref("browser.warnOnQuit", this._warnOnQuit);
+			}
 			os.removeObserver(this, "sessionmanager-preference-save");
+			os.removeObserver(this, "quit-application-requested");
 			os.removeObserver(this, aTopic);
 			
 			// Remove preference observer
