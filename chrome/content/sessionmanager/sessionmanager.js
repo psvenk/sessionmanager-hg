@@ -6,6 +6,8 @@
 // 4. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
 //    having the prompt window close. (Session Editor)
 // 5. Add sub-grouping
+// 6. Add support for hot keys for saving and restoring
+// 7. Finish working on code that blocks the display of Firefox's Quit and Save dialog when Session Manager is set up to prompt (add cancel button)
 
 var gSessionManager = {
 	_timer : null,
@@ -1694,10 +1696,16 @@ var gSessionManager = {
 			// get index
 			aIx = indexAttribute.substring(6);
 			
-			// remove window from closed window list and tell other open windows
-			var closedWindows = this.getClosedWindows();
-			closedWindows.splice(aIx, 1);
-			this.storeClosedWindows(closedWindows, aIx);
+			// If Firefox bug 491577 is fixed and using built in closed window list, use SessionStore method.
+			if (this.mUseSSClosedWindowList && (typeof(this.mSessionStore.forgetClosedWindow) != "undefined")) {
+				this.mSessionStore.forgetClosedWindow(aIx);
+			}
+			else {
+				// remove window from closed window list and tell other open windows
+				var closedWindows = this.getClosedWindows();
+				closedWindows.splice(aIx, 1);
+				this.storeClosedWindows(closedWindows, aIx);
+			}
 			this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
 			// update the remaining entries
