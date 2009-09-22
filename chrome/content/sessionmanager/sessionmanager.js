@@ -2759,19 +2759,20 @@ var gSessionManager = {
 				{
 					var data = state.split("\n")[((matchArray[3]) ? 4 : 3)];
 					var backup_data = data;
-					data = this.decrypt(data, true, matchArray[2]);
+					// decrypt if encrypted, do not decode if in old format since old format was not encoded
+					data = this.decrypt(data, true, !matchArray[2]);
 					// If old format test JSON data
 					if (!matchArray[2]) {
 						matchArray[1] = matchArray[1].replace(/^\[SessionManager\]/, "[SessionManager v2]");
 						var test_decode = this.JSON_decode(data, true);
-						// if it failed to decode, try to decode again using new format
+						// if it failed to decode, try to decrypt again using new format
 						if (test_decode._JSON_decode_failed) {
 							data = this.decrypt(backup_data, true);
 						}
 					}
 					backup_data = null;
 					if (!data) {
-						// master password entered, but still could not be encrypted - either corrupt or saved under different profile
+						// master password entered, but still could not be decrypted - either corrupt or saved under different profile
 						if (data == false) {
 							this.moveToCorruptFolder(aFile);
 						}
