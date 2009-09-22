@@ -1280,7 +1280,7 @@ var gSessionManager = {
 		}
 		
 		// If reload tabs enabled and not offline, set the tabs to allow reloading
-		if (gSessionManager.mPref_reload && !gSessionManager.mIOService.offline) {
+		if (this.mPref_reload && !this.mIOService.offline) {
 			try {
 				state = this.decrypt(state);
 				if (!state) return;
@@ -1288,7 +1288,9 @@ var gSessionManager = {
 				var tempState = this.JSON_decode(state);
 				for (var i in tempState.windows) {
 					for (var j in tempState.windows[i].tabs) {
-						if (tempState.windows[i].tabs[j].entries && tempState.windows[i].tabs[j].entries.length != 0) {
+						// Only tag web pages as allowed to reload (this excludes chrome, about, etc)
+						if (tempState.windows[i].tabs[j].entries && tempState.windows[i].tabs[j].entries.length != 0 &&
+						    /^https?:\/\//.test(tempState.windows[i].tabs[j].entries[tempState.windows[i].tabs[j].index - 1].url)) {
 							if (!tempState.windows[i].tabs[j].extData) tempState.windows[i].tabs[j].extData = {};
 							tempState.windows[i].tabs[j].extData["session_manager_allow_reload"] = true;
 						}
