@@ -914,6 +914,7 @@ var gSessionManager = {
 			var key = (aSession.backup || aSession.group)?"":(++count < 10)?count:(count == 10)?"0":"";
 			var menuitem = document.createElement("menuitem");
 			menuitem.setAttribute("label", ((key)?key + ") ":"") + aSession.name + "   (" + aSession.windows + "/" + aSession.tabs + ")");
+			menuitem.setAttribute("tooltiptext", menuitem.getAttribute("label"));
 			menuitem.setAttribute("oncommand", 'gSessionManager.load("' + aSession.fileName + '", (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");');
 			menuitem.setAttribute("onclick", 'if (event.button == 1) gSessionManager.load("' + aSession.fileName + '", "newwindow");');
 			menuitem.setAttribute("contextmenu", "sessionmanager-ContextMenu");
@@ -942,6 +943,7 @@ var gSessionManager = {
 						groupMenu = document.createElement("menu");
 						groupMenu.setAttribute("_id", aSession.group);
 						groupMenu.setAttribute("label", aSession.group);
+						groupMenu.setAttribute("tooltiptext", aSession.group);
 						groupMenu.setAttribute("accesskey", aSession.group.charAt(0));
 						groupMenu.setAttribute("contextmenu", "sessionmanager-groupContextMenu");
 						var groupPopup = document.createElement("menupopup");
@@ -1538,6 +1540,7 @@ var gSessionManager = {
 				var menuitem = document.createElement("menuitem");
 				menuitem.setAttribute("class", "menuitem-iconic sessionmanager-closedtab-item");
 				menuitem.setAttribute("label", aWindow.name + " (" + count + ")");
+				menuitem.setAttribute("tooltiptext", aWindow.name + " (" + count + ")");
 				menuitem.setAttribute("index", "window" + aIx);
 				menuitem.setAttribute("image", image);
 				menuitem.setAttribute("oncommand", 'gSessionManager.undoCloseWindow(' + aIx + ', (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.ctrlKey || event.metaKey)?"append":"");');
@@ -1615,6 +1618,7 @@ var gSessionManager = {
 			menuitem.setAttribute("class", "menuitem-iconic sessionmanager-closedtab-item");
 			menuitem.setAttribute("image", aTab.image);
 			menuitem.setAttribute("label", aTab.title);
+			menuitem.setAttribute("tooltiptext", aTab.title);
 			menuitem.setAttribute("index", "tab" + aIx);
 			menuitem.setAttribute("statustext", aTab.url);
 			menuitem.addEventListener("DOMMenuItemActive", function(event) { document.getElementById("statusbar-display").setAttribute("label",aTab.url); }, false);
