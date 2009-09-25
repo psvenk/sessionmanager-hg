@@ -40,10 +40,11 @@ const report = Components.utils.reportError;
 const STARTUP_PROMPT = -11;
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
 const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
-const SM_REPLACE_QUIT = "extensions.sessionmanager.replace_browser_quit_prompt";
+const SM_BACKUP_SESSION = "extensions.sessionmanager.backup_session";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
 const SM_COMMAND_LINE_DATA = "sessionmanager.command_line_data";
+const SM_SHUTDOWN_PROMPT_RESULTS = "sessionmanager.shutdown_prompt_results";
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -116,18 +117,24 @@ SessionManagerHelperComponent.prototype = {
 		}
 		if (found) {
 			try {
-				let app = null;
-				if (Cc["@mozilla.org/fuel/application;1"]) {
-					app = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
-				} else if (Cc["@mozilla.org/smile/application;1"]) {
-					app = Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication);
-				}
+				let app = this.getApp();
 				app.storage.set(SM_COMMAND_LINE_DATA, data);
 			}
 			catch (ex) {
 				report("Session Manager: Command Line Error Setting Storage Data - " + ex);
 			}
 		}
+	},
+	
+	// Get FUEL or SMILE application service
+	getApp: function() {
+		let app = null;
+		if (Cc["@mozilla.org/fuel/application;1"]) {
+			app = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
+		} else if (Cc["@mozilla.org/smile/application;1"]) {
+			app = Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication);
+		}
+		return app;
 	},
 	
 	log: function(aMsg, aLevel, aForce)
@@ -259,10 +266,87 @@ SessionManagerHelperComponent.prototype = {
 			this._ignorePrefChange = (aData == "true");
 			break;
 		case "quit-application-requested":
-			if (pb.getBoolPref(SM_REPLACE_QUIT) && (aData != "restart")) {
-				// Do session prompt here (if prompt is set to 2) and then save the info in an Application Storage variable for use in
-				// the shutdown procsesing in sessionmanager.js
+			// If quit already canceled, just return
+			if (aSubject.QueryInterface(Ci.nsISupportsPRBool) && aSubject.data) return;
+		
+			let backup = pb.getIntPref(SM_BACKUP_SESSION);
+			let resume_current = (pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE) == 3) || pb.getBoolPref("browser.sessionstore.resume_session_once");
 			
+			// If not restarting and backing up or browser or SM is loading a session at startup, disable FF's quit prompt
+			if ((aData != "restart") && ((backup == 2) || ((backup == 1) || pb.getIntPref(SM_STARTUP_PREFERENCE) || resume_current))) {
+				if (backup == 2) {
+
+					// Do session prompt here and then save the info in an Application Storage variable for use in
+					// the shutdown procsesing in sessionmanager.js
+					let watcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
+					let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
+					let app = this.getApp();
+					if (app) {
+						let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+
+						// Manually construct the prompt window because the promptService doesn't allow 4 button prompts
+						let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
+						params.SetInt(0, 1); 												// Set default to cancel
+						params.SetString(0, bundle.GetStringFromName("preserve_session"));	// dialog text
+						params.SetString(1, bundle.GetStringFromName("prompt_not_again"));	// checkbox text
+						params.SetString(12, bundle.GetStringFromName("sessionManager"));	// title
+						
+						// buttons are tricky because they don't display in order
+						// if there are 4 buttons they display as 11, 8, 10, 9
+						// if there are 3 buttons they display as 8, 10, 9
+						// A button always returns it's string number - 8, eg: 10 returns 2.
+						// So we need to tweak things when displaying 3 or 4 buttons.
+						
+						if (resume_current) {
+							params.SetInt(2, 3);												// Display 3 buttons
+							params.SetString(8, bundle.GetStringFromName("save_quit"));			// first button text (returns 0)
+							params.SetString(10, bundle.GetStringFromName("quit"));				// second button text (returns 2)
+							params.SetString(9, bundle.GetStringFromName("cancel"));			// third button text (returns 1)
+						}
+						else {
+							params.SetInt(2, 4);												// Display 4 buttons
+							params.SetString(11, bundle.GetStringFromName("save_quit"));		// first button text (returns 3)
+							params.SetString(8, bundle.GetStringFromName("quit"));				// second button text (returns 0)
+							params.SetString(10, bundle.GetStringFromName("save_and_restore"));	// third button text (returns 2)
+							params.SetString(9, bundle.GetStringFromName("cancel"));			// fourth button text (returns 1)
+						}
+						
+						watcher.openWindow(window, "chrome://global/content/commonDialog.xul", "_blank", "centerscreen,chrome,modal,titlebar", params);
+						let results = params.GetInt(0);
+							
+						// If cancel pressed, cancel shutdown and return;
+						if (results == 1) {
+							aSubject.QueryInterface(Ci.nsISupportsPRBool);
+							aSubject.data = true;
+							return;
+						}
+						
+						// At this point the results value doesn't match what the
+						// backupCurrentSession function in sessionmanager.js expects which is
+						// the Save & Quit to be 0, Quit to be 1 and Save & Restore to be 2, so tweak the values here.
+						switch (results) {
+							// Save & Quit when four buttons displayed
+							case 3:
+								results = 0;
+								break;
+							// Quit (4 buttons) or Save & Quit (3 buttons)
+							case 0:
+								results = resume_current ? 0 : 1;
+								break;
+							case 2:
+								results = resume_current ? 1 : 2;
+						}
+						
+						// If checkbox checked
+						if (params.GetInt(1))
+						{
+							pb.setIntPref(SM_BACKUP_SESSION, (results == 1)?0:1);
+						}
+								
+						app.storage.set(SM_SHUTDOWN_PROMPT_RESULTS, results);
+					}
+				}
+
 				if (typeof(this._warnOnQuit) != "boolean") {
 					this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
 				}
