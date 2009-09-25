@@ -23,7 +23,6 @@ pref("extensions.sessionmanager.options_selected_tab", 0);
 pref("extensions.sessionmanager.overwrite", true);
 pref("extensions.sessionmanager.preselect_previous_session", false);
 pref("extensions.sessionmanager.reload", false);
-pref("extensions.sessionmanager.replace_browser_quit_prompt", false);
 pref("extensions.sessionmanager.restore_temporary", false);
 pref("extensions.sessionmanager.resume_session", "backup.session");
 pref("extensions.sessionmanager.save_closed_tabs", 2);
