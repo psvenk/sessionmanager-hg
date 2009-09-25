@@ -40,6 +40,7 @@ const report = Components.utils.reportError;
 const STARTUP_PROMPT = -11;
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
 const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
+const SM_ALREADY_SHUTDOWN = "sessionmanager.alreadyShutdown";
 const SM_BACKUP_SESSION = "extensions.sessionmanager.backup_session";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
@@ -281,7 +282,8 @@ SessionManagerHelperComponent.prototype = {
 					let watcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
 					let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
 					let app = this.getApp();
-					if (app) {
+					// if didn't already shut down
+					if (app && !app.storage.get(SM_ALREADY_SHUTDOWN, false)) {
 						let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
 
 						// Manually construct the prompt window because the promptService doesn't allow 4 button prompts
