@@ -7,6 +7,9 @@
 //    having the prompt window close. (Session Editor)
 // 5. Add sub-grouping
 // 6. Add support for hot keys for saving and restoring
+// 7. Firefox's quit dialog will still display under OS X since closing the last window displays it even though FF isn't shutting down.
+//    At least it does this on windows, I might want to check if it does on Mac.  On windows, setting SM to treat last window closing as 
+//    shutdown, bypassed the prompt in the component since FF isn't exiting.
 
 var gSessionManager = {
 	_timer : null,
@@ -510,7 +513,7 @@ var gSessionManager = {
 				}, this);
 				this.shutDown();
 				// Don't look at the session startup type if a new window is opened without shutting down the browser.
-				Application.storage.set(this.mAlreadyShutdown, true)
+				Application.storage.set(this.mAlreadyShutdown, true);
 			}
 		}
 		this.mBundle = null;
@@ -3439,6 +3442,7 @@ var gSessionManager = {
 		// handle browser reload with same session and when opening new windows
 		else if (recoverOnly) {
 			this.checkTimer();
+			Application.storage.set(this.mAlreadyShutdown, false);
 		}
 		
 		// Restore command line specified session(s) in a new window if they haven't been restored already
