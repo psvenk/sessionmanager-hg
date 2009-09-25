@@ -7,7 +7,6 @@
 //    having the prompt window close. (Session Editor)
 // 5. Add sub-grouping
 // 6. Add support for hot keys for saving and restoring
-// 7. Finish working on code that blocks the display of Firefox's Quit and Save dialog when Session Manager is set up to prompt (add cancel button)
 
 var gSessionManager = {
 	_timer : null,
@@ -48,12 +47,16 @@ var gSessionManager = {
 	mCleanBrowser: null,
 	mClosedWindowName: null,
 	
+	// Application storage names
 	mSessionCache: "sessionmanager.cache.session.",
 	mClosedWindowsCacheData: "sessionmanager.cache.closedWindows.data",
 	mClosedWindowsCacheTimestamp: "sessionmanager.cache.closedWindows.timestamp",
 	mClosedWindowsCacheLength: "sessionmanager.cache.closedWindows.length",
 	mActiveWindowSessions: "sessionmanager.activeWindowSessions",
 	mAlreadyShutdown: "sessionmanager.alreadyShutdown",
+	mShutdownPromptResults: "sessionmanager.shutdown_prompt_results",
+	
+	// Preferences
 	mSanitizePreference: "privacy.item.extensions-sessionmanager",
 	
 	getSessionStoreComponent : function() {
@@ -2637,13 +2640,16 @@ var gSessionManager = {
 		if (backup == 2)
 		{
 			var dontPrompt = { value: false };
-			var saveRestore = !(this.getPref("browser.sessionstore.resume_session_once", false, true) || this.doResumeCurrent());
-			var flags = this.mPromptService.BUTTON_TITLE_SAVE * this.mPromptService.BUTTON_POS_0 + 
-			            this.mPromptService.BUTTON_TITLE_DONT_SAVE * this.mPromptService.BUTTON_POS_1 + 
-			            (saveRestore ? (this.mPromptService.BUTTON_TITLE_IS_STRING * this.mPromptService.BUTTON_POS_2) : 0); 
-			var results = this.mPromptService.confirmEx(null, this.mTitle, this._string_preserve_session || this._string("preserve_session"), flags,
+			var results = this.mApplication.storage.get(this.mShutdownPromptResults, -1);
+			if (results == -1) {
+				var saveRestore = !(this.getPref("browser.sessionstore.resume_session_once", false, true) || this.doResumeCurrent());
+				var flags = this.mPromptService.BUTTON_TITLE_SAVE * this.mPromptService.BUTTON_POS_0 + 
+							this.mPromptService.BUTTON_TITLE_DONT_SAVE * this.mPromptService.BUTTON_POS_1 + 
+							(saveRestore ? (this.mPromptService.BUTTON_TITLE_IS_STRING * this.mPromptService.BUTTON_POS_2) : 0); 
+				results = this.mPromptService.confirmEx(null, this.mTitle, this._string_preserve_session || this._string("preserve_session"), flags,
 			              null, null, this._string_save_and_restore || this._string("save_and_restore"),
 			              this._string_prompt_not_again || this._string("prompt_not_again"), dontPrompt);
+			}
 			backup = (results == 1)?-1:1;
 			if (results == 2) {
 				if (dontPrompt.value) {
