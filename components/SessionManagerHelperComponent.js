@@ -39,11 +39,18 @@ const report = Components.utils.reportError;
 
 const STARTUP_PROMPT = -11;
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
+
+// Session Manager preferences
 const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
-const SM_ALREADY_SHUTDOWN = "sessionmanager.alreadyShutdown";
-const SM_BACKUP_SESSION = "extensions.sessionmanager.backup_session";
+const SM_ALLOW_SAVE_IN_PBM_PREFERENCE = "extensions.sessionmanager.enable_saving_in_private_browsing_mode";
+const SM_BACKUP_SESSION_PREFERENCE = "extensions.sessionmanager.backup_session";
+const SM_ENCRYPT_SESSIONS_PREFERENCE = "extensions.sessionmanager.encrypt_sessions";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
+const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "extensions.sessionmanager.shutdown_on_last_window_close";
+
+// Session Manager app storage values
+const SM_ALREADY_SHUTDOWN = "sessionmanager.alreadyShutdown";
 const SM_COMMAND_LINE_DATA = "sessionmanager.command_line_data";
 const SM_SHUTDOWN_PROMPT_RESULTS = "sessionmanager.shutdown_prompt_results";
 
@@ -209,6 +216,9 @@ SessionManagerHelperComponent.prototype = {
 			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
 			os.addObserver(this, "quit-application-requested", false);
 			os.addObserver(this, "quit-application-granted", false);
+			// The following two notifications occur when the last browser window closes, but the application isn't actually quitting.
+			os.addObserver(this, "browser-lastwindow-close-requested", false);
+			os.addObserver(this, "browser-lastwindow-close-granted", false);
 			os.addObserver(this, "sessionmanager-preference-save", false);
 			os.addObserver(this, "sessionmanager:restore-startup-preference", false);
 			os.addObserver(this, "sessionmanager:ignore-preference-changes", false);
@@ -266,16 +276,28 @@ SessionManagerHelperComponent.prototype = {
 		case "sessionmanager:ignore-preference-changes":
 			this._ignorePrefChange = (aData == "true");
 			break;
+		// quitting or closing last browser window
+		case "browser-lastwindow-close-requested":
 		case "quit-application-requested":
 			// If quit already canceled, just return
 			if (aSubject.QueryInterface(Ci.nsISupportsPRBool) && aSubject.data) return;
-		
-			let backup = pb.getIntPref(SM_BACKUP_SESSION);
-			let resume_current = (pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE) == 3) || pb.getBoolPref("browser.sessionstore.resume_session_once");
+
+			// If private browsing mode don't allow saving unless overridding
+			try {
+				let inPrivateBrowsing = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled;
+				if (inPrivateBrowsing) {
+					if (!pb.getBoolPref(SM_ALLOW_SAVE_IN_PBM_PREFERENCE) || !pb.getBoolPref(SM_ENCRYPT_SESSIONS_PREFERENCE)) {
+						return;
+					}
+				}
+			} catch(ex) {}
 			
+			let backup = pb.getIntPref(SM_BACKUP_SESSION_PREFERENCE);
+			let resume_current = (pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE) == 3) || pb.getBoolPref("browser.sessionstore.resume_session_once");
+
 			// If not restarting and backing up or browser or SM is loading a session at startup, disable FF's quit prompt
 			if ((aData != "restart") && ((backup == 2) || ((backup == 1) || pb.getIntPref(SM_STARTUP_PREFERENCE) || resume_current))) {
-				if (backup == 2) {
+				if ((backup == 2) && ((aTopic == "quit-application-requested") || pb.getBoolPref(SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE))) {
 
 					// Do session prompt here and then save the info in an Application Storage variable for use in
 					// the shutdown procsesing in sessionmanager.js
@@ -342,7 +364,7 @@ SessionManagerHelperComponent.prototype = {
 						// If checkbox checked
 						if (params.GetInt(1))
 						{
-							pb.setIntPref(SM_BACKUP_SESSION, (results == 1)?0:1);
+							pb.setIntPref(SM_BACKUP_SESSION_PREFERENCE, (results == 1)?0:1);
 						}
 								
 						app.storage.set(SM_SHUTDOWN_PROMPT_RESULTS, results);
@@ -355,12 +377,20 @@ SessionManagerHelperComponent.prototype = {
 				pb.setBoolPref("browser.warnOnQuit", false);
 			}
 			break;
+		case "browser-lastwindow-close-granted":
+			if (typeof(this._warnOnQuit) == "boolean") {
+				pb.setBoolPref("browser.warnOnQuit", this._warnOnQuit);
+			}
+			break;
 		case "quit-application-granted":
 			if (typeof(this._warnOnQuit) == "boolean") {
 				pb.setBoolPref("browser.warnOnQuit", this._warnOnQuit);
 			}
 			os.removeObserver(this, "sessionmanager-preference-save");
+			os.removeObserver(this, "sessionmanager:ignore-preference-changes");
 			os.removeObserver(this, "quit-application-requested");
+			os.removeObserver(this, "browser-lastwindow-close-requested");
+			os.removeObserver(this, "browser-lastwindow-close-granted");
 			os.removeObserver(this, aTopic);
 			
 			// Remove preference observer
