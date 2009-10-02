@@ -7,13 +7,14 @@
 //    having the prompt window close. (Session Editor)
 // 5. Add sub-grouping
 // 6. Add support for hot keys for saving and restoring
-// 7. Firefox's quit dialog will still display under OS X since closing the last window displays it even though FF isn't shutting down.
-//    At least it does this on windows, I might want to check if it does on Mac.  On windows, setting SM to treat last window closing as 
-//    shutdown, bypassed the prompt in the component since FF isn't exiting.
+// 7. Firefox's tab close confirmation will display when closing the last browser window in Firefox 3.0 and 3.5.  This will result in two 
+//    in a row for OS X since closing the last window triggers "shutdown".  Firefox 3.6 puts up the Quit prompt in this instance, which
+//    Session Manager now prevents from occuring.  Might want to "fix" FF 3.0 and 3.5 by checking for DOMWindowClosed in the component.
 
 var gSessionManager = {
 	_timer : null,
 	_win_timer : null,
+	_clear_state_timer: null,
 	
 	// Browser Components
 	mObserverService: Components.classes["@mozilla.org/observer-service;1"].getService(Components.interfaces.nsIObserverService),
@@ -46,7 +47,7 @@ var gSessionManager = {
 	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
 	mSessionRegExp: /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=([^\t|^\n|^\r]+))?(\tscreensize=(\d+)x(\d+))?/m,
 
-	mLastState: null,
+	mClosingWindowState: null,
 	mCleanBrowser: null,
 	mClosedWindowName: null,
 	
@@ -432,18 +433,17 @@ var gSessionManager = {
 	},
 	
 	// This fires only when the window is manually closed by using the "X" or via a window.close() call
-	onClose_proxy: function()
+	onClose_proxy: function(aEvent)
 	{
 		gSessionManager.log("onClose Fired", "INFO");
-		this.removeEventListener("close", gSessionManager.onClose_proxy, false);
-		// This fires before the window closes so decrement the window count
-		gSessionManager.onWindowClose(true);
+		gSessionManager.onWindowCloseRequest();
 	},
 
 	// This fires any time the window is closed.  It fires too late to use SessionStore's setWindowValue.
 	onUnload_proxy: function()
 	{
 		gSessionManager.log("onUnload Fired", "INFO");
+		this.removeEventListener("close", gSessionManager.onClose_proxy, false);
 		this.removeEventListener("unload", gSessionManager.onUnload_proxy, false);
 		gSessionManager.onUnload();
 	},
@@ -487,8 +487,7 @@ var gSessionManager = {
 			if (numWindows != 0) allWindows[0].gSessionManager.checkTimer();
 		}
 
-		// Only call onWindowClose here if shutting down since the close event doesn't fire in that case.
-		if (this.mPref__stopping) this.onWindowClose();
+		this.onWindowClose();
 						
 		// This executes whenever the last browser window is closed (either manually or via shutdown).
 		if (this.isRunning() && numWindows == 0)
@@ -560,7 +559,7 @@ var gSessionManager = {
 					if (!this.closeSession(false)) this.onWindowClose();
 				}
 				catch(ex) { this.logError(ex); }
-				this.mLastState = null;
+				this.mClosingWindowState = null;
 				this.mCleanBrowser = null;
 				this.mClosedWindowName = null;
 				this.mObserving2.forEach(function(aTopic) {
@@ -584,7 +583,7 @@ var gSessionManager = {
 					if (!this.closeSession(false,true) && this.mPref_autosave_session) {
 					    // If autostart or disabling history via options, make a real backup, otherwise make a temporary backup
 						if (this.isAutoStartPrivateBrowserMode()) {
-							this.backupCurrentSession();
+							this.backupCurrentSession(true);
 						}
 						else {
 							this.autoSaveCurrentSession(true); 
@@ -692,7 +691,7 @@ var gSessionManager = {
 			// hurry and wipe out the window session value before Session Store stops allowing 
 			// window values to be updated.
 			if (!this._restart_requested || !this.__window_session_name) {
-				this.log("Clearing window session data", "INFO");
+				this.log("observe: Clearing window session data", "INFO");
 				// this throws if it doesn't exist so try/catch it
 				try { 
 					this.mSessionStore.deleteWindowValue(window, "_sm_window_session_values");
@@ -706,9 +705,18 @@ var gSessionManager = {
 			break;
 		// timer periodic call
 		case "timer-callback":
-			// save auto-save or window session if open, but don't close it
-			this.log("Timer callback for " + ((aSubject == this._win_timer) ? "window" : "session" ) + " timer", "EXTRA");
-			this.closeSession((aSubject == this._win_timer), false, true);
+			if (aSubject == this._clear_state_timer) {
+				this.log("Timer callback to clear closing window state data", "INFO");
+				this.mClosingWindowState = null;
+				this.mCleanBrowser = null;
+				this.mClosedWindowName = null;
+				this._clear_state_timer = null;
+			}
+			else {
+				// save auto-save or window session if open, but don't close it
+				this.log("Timer callback for " + ((aSubject == this._win_timer) ? "window" : "session" ) + " timer", "EXTRA");
+				this.closeSession((aSubject == this._win_timer), false, true);
+			}
 			break;
 		}
 	},
@@ -783,10 +791,44 @@ var gSessionManager = {
 			aButton.open = true;
 		}
 	},
+	
+	// This is needed because a window close can be cancelled and we don't want to process such as closing a window
+	onWindowCloseRequest: function() {
+		this.log("onWindowClosedRequest start", "TRACE");
+		
+		// Clear any previously closing state data so we get fresh data
+		this.mClosingWindowState = null;
+		this.mCleanBrowser = null;
+		this.mClosedWindowName = null;
+		
+		try {
+			// Store closing state if it will be needed later
+			if (this.__window_session_name || !this.mUseSSClosedWindowList || (this.getBrowserWindows().length == 1)) {
+				this.log("onWindowClosedRequest saved closing state", "INFO");
+				this.mClosingWindowState = this.getSessionState(null, true, null, null, null, true); 
+				this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
+				this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+				
+				// Set up a one second timer to clear the saved data in case the window isn't actually closing
+				this._clear_state_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+				this._clear_state_timer.init(gSessionManager, 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
+			}
+		}
+		catch(ex) { 
+			this.logError(ex); 
+		}
+		this.log("onWindowClosedRequest end", "TRACE");
+	},
 
-	onWindowClose: function(aDecrementCount)
+	onWindowClose: function()
 	{
 		this.log("onWindowClosed start", "TRACE");
+		if (this._clear_state_timer) {
+			this.log("Canceling clear closing window state timer", "INFO");
+			this._clear_state_timer.cancel();
+			this._clear_state_timer = null;
+		}
+		
 		// if there is a window session save it (leave it open if browser is restarting)
 		if (this.__window_session_name) 
 		{
@@ -794,37 +836,28 @@ var gSessionManager = {
 		}
 			
 		this.log("onWindowClose: running = " + this.isRunning() + ", stopping = " + this.mPref__stopping, "DATA");
+		
+		var numWindows = this.getBrowserWindows().length;
+		this.log("onWindowClose: numWindows = " + numWindows, "DATA");
+		
 		// only save closed window if running and not shutting down 
 		if (this.isRunning() && !this.mPref__stopping)
 		{
-			// Get number of windows open after closing this one.  If called from close event, decrement count by one.
-			var numWindows = this.getBrowserWindows().length - (aDecrementCount ? 1 : 0);
-			
-			this.log("onWindowClose: numWindows = " + numWindows, "DATA");
-			// save window in closed window list if not last window, otherwise store the last window state for use later
+			// save window in closed window list if not last window
 			if (numWindows > 0)
 			{
 				if (!this.mUseSSClosedWindowList) {
-					var state = this.getSessionState(null, true, null, null, null, true);
+					var state = this.getSessionState(null, true, null, null, null, true, null, this.mClosingWindowState);
 					this.appendClosedWindow(state);
 				}
 				this.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 			}
-			else
-			{
-				// store current session data in case it's needed later
-				var name = (this.mPref__autosave_name) ? this.mPref__autosave_name : null;
-				try {
-					this.mLastState = (name) ? 
-	    	               this.getSessionState(name, null, this.getNoUndoData(), true, this.mPref__autosave_group, true, this.mPref__autosave_time) :
-	        	           this.getSessionState(null, true, null, null, null, true); 
-					this.mCleanBrowser = Array.every(gBrowser.browsers, this.isCleanBrowser);
-					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
-				}
-				catch(ex) { 
-					this.logError(ex); 
-				}
-			}
+		}
+		// Clear stored closing state if not the last window
+		if (numWindows > 0) {
+			this.mClosingWindowState = null; 
+			this.mCleanBrowser = null;
+			this.mClosedWindowName = null;
 		}
 		this.log("onWindowClosed end", "TRACE");
 	},
@@ -1087,7 +1120,8 @@ var gSessionManager = {
 			var file = this.getSessionDir(this.makeFileName(name));
 			try
 			{
-				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.getNoUndoData(), true, group, null, time));
+				// If forcing a save or not in private browsing save auto or window session.  Use stored closing window state if it exists.
+				if (aForceSave || !this.isPrivateBrowserMode()) this.writeFile(file, this.getSessionState(name, aOneWindow, this.getNoUndoData(), true, group, null, time, this.mClosingWindowState));
 			}
 			catch (ex)
 			{
@@ -2491,8 +2525,7 @@ var gSessionManager = {
 			return;
 		}
 		
-		var name = this.mClosedWindowName ? this.mClosedWindowName :
-		           content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
+		var name = this.mClosedWindowName || content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:this._string("untitled_window"));
 		var windows = this.getClosedWindows_SM();
 		
 		// encrypt state if encryption preference set
@@ -2556,7 +2589,7 @@ var gSessionManager = {
 		this.delPref("_autosave_values");
 		this.delPref("_encrypt_file");
 		this.delPref("_recovering");
-		this.mLastState = null;
+		this.mClosingWindowState = null;
 		this.mCleanBrowser = null;
 		this.mClosedWindowName = null;
 
@@ -2587,27 +2620,29 @@ var gSessionManager = {
 		}
 	},
 
-	backupCurrentSession: function()
+	backupCurrentSession: function(aEnteringPrivateBrowsingMode)
 	{
 		this.log("backupCurrentSession start", "TRACE");
 		var backup = this.mPref_backup_session;
 		var temp_backup = (this.mPref_startup > 0) && (this.mPref_resume_session == this.mBackupSessionName);
-		// If shut down in private browsing mode, use the pre-private sesssion, otherwise get the current one
-		var helper_state = (this.mShutDownInPrivateBrowsingMode || this.isPrivateBrowserMode()) ? this.mSMHelper.mBackupState : null;
 
-		this.log("backupCurrentSession: backup = " + backup + ", temp_backup = " + temp_backup);
-		this.log("helper_state = " + helper_state, "DATA");
+		this.log("backupCurrentSession: backup = " + backup + ", temp_backup = " + temp_backup, "DATA");
+
+		// Get results from prompt in component if it was displayed and set the value back to the default
+		var results = this.mApplication.storage.get(this.mShutdownPromptResults, -1);
+		this.log("backupCurrentSession: results = " + results, "DATA");
+		if (results != -1) this.mApplication.storage.set(this.mShutdownPromptResults, -1);
+		
+		// If quit was pressed, skip all the session stuff below
+		if (results == 1) backup = -1;
 		
 		// Don't save if just a blank window, if there's an error parsing data, just save
-		var state = null, lastState = null;
+		var state = null;
 		if ((backup > 0) || temp_backup) {
-			// if Last window state saved retrieve it in case the current state has been wiped and we need to use it
-			// The current state should only be wiped if the browser is set to clear the "Visited Pages" on shutdown.
-			if (this.mLastState) {
-				this.log("backupCurrentSession: mLastState exists", "INFO");
-				if (!helper_state) lastState = this.mLastState;
-				this.mLastState = null;
-			}
+			// If shut down in private browsing mode, use the pre-private sesssion, otherwise get the current one
+			var helper_state = (this.mShutDownInPrivateBrowsingMode || this.isPrivateBrowserMode()) ? this.mSMHelper.mBackupState : null;
+			this.log("backupCurrentSession: helper_state = " + helper_state, "DATA");
+		
 			try {
 				state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, this.getNoUndoData(), null, (this._string_backup_sessions || this._string("backup_sessions")), true, null, helper_state);
 			} catch(ex) {
@@ -2615,18 +2650,14 @@ var gSessionManager = {
 			}
 			try {
 				var aState = this.JSON_decode(state.split("\n")[4]);
-				// if window data has been cleared ("Visited Pages" cleared on shutdown), use lastState, if it exists.
 				this.log("backupCurrentSession: Number of Windows #1 = " + aState.windows.length, "DATA");
 				this.log(state, "STATE");
-				if (aState.windows.length == 0 && lastState) {
-					this.log("backupCurrentSession: Using saved Last State", "INFO");
-					var count = this.getCount(lastState);
-					state = state.split("\n");
-					state[3] = state[3].replace(/count=0\/0/,"count=" + count.windows + "/" + count.tabs);
-					state[4] = lastState;
-					state = state.join("\n");
-					aState = this.JSON_decode(lastState);
-					this.log(lastState, "STATE");
+				// if window data has been cleared ("Visited Pages" cleared on shutdown), use mClosingWindowState, if it exists.
+				if (aState.windows.length == 0 && this.mClosingWindowState) {
+					this.log("backupCurrentSession: Using closing Window State", "INFO");
+					state = this.getSessionState(this._string_backup_session || this._string("backup_session"), null, this.getNoUndoData(), null, (this._string_backup_sessions || this._string("backup_sessions")), true, null, this.mClosingWindowState);
+					this.log(state, "STATE");
+					aState = this.JSON_decode(state.split("\n")[4]);
 				}
 				this.log("backupCurrentSession: Number of Windows #2 = " + aState.windows.length, "DATA");
 				if (!((aState.windows.length > 1) || (aState.windows[0]._closedTabs.length > 0) || (aState.windows[0].tabs.length > 1) || 
@@ -2643,9 +2674,8 @@ var gSessionManager = {
 		if (backup == 2)
 		{
 			var dontPrompt = { value: false };
-			var results = this.mApplication.storage.get(this.mShutdownPromptResults, -1);
 			if (results == -1) {
-				var saveRestore = !(this.getPref("browser.sessionstore.resume_session_once", false, true) || this.doResumeCurrent());
+				var saveRestore = !(this.getPref("browser.sessionstore.resume_session_once", false, true) || this.doResumeCurrent() || aEnteringPrivateBrowsingMode);
 				var flags = this.mPromptService.BUTTON_TITLE_SAVE * this.mPromptService.BUTTON_POS_0 + 
 							this.mPromptService.BUTTON_TITLE_DONT_SAVE * this.mPromptService.BUTTON_POS_1 + 
 							(saveRestore ? (this.mPromptService.BUTTON_TITLE_IS_STRING * this.mPromptService.BUTTON_POS_2) : 0); 
@@ -3442,8 +3472,10 @@ var gSessionManager = {
 		// handle browser reload with same session and when opening new windows
 		else if (recoverOnly) {
 			this.checkTimer();
-			Application.storage.set(this.mAlreadyShutdown, false);
 		}
+		
+		// Not shutdown 
+		Application.storage.set(this.mAlreadyShutdown, false);
 		
 		// Restore command line specified session(s) in a new window if they haven't been restored already
 		if (first_temp_restore) {
@@ -3597,7 +3629,7 @@ var gSessionManager = {
 			}
 			if (!timerRunning) {
 				this._timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-				this._timer.init(gSessionManager, this.mPref__autosave_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
+				this._timer.init(gSessionManager, this.mPref__autosave_time * 60000, Components.interfaces.nsITimer.TYPE_REPEATING_PRECISE);
 				this.log("checkTimer: Session Timer started for " + this.mPref__autosave_time + " minutes", "INFO");
 			}
 		}
@@ -3613,7 +3645,7 @@ var gSessionManager = {
 		}
 		else if (!this._win_timer && (this.__window_session_time > 0) && this.__window_session_name) {
 			this._win_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-			this._win_timer.init(gSessionManager, this.__window_session_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
+			this._win_timer.init(gSessionManager, this.__window_session_time * 60000, Components.interfaces.nsITimer.TYPE_REPEATING_PRECISE);
 			this.log("checkWinTimer: Window Timer started for " + this.__window_session_time + " minutes", "INFO");
 		}
 	},
@@ -3654,28 +3686,9 @@ var gSessionManager = {
 	
 	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt, aAutoSaveTime, aState)
 	{
-		// Return last closed window state if it is stored.
-		if (this.mLastState) {
-			this.log("getSessionState: Returning stored state", "INFO");
-			// encrypt state if encryption preference set
-			if (!aDoNotEncrypt) {
-				var state = this.mLastState.split("\n")
-				// if there is a state[4] it's a session otherwise it's a closed window
-				if (state[4]) {
-					state[4] = this.decryptEncryptByPreference(state[4]);
-					if (!state[4]) return null;
-				}
-				else {
-					state[0] = this.decryptEncryptByPreference(state[0]);
-					if (!state[0]) return null;
-				}
-				this.mLastState = state.join("\n");
-			}
-			return this.mLastState;
-		}
-		
 		// Use passed in State if specified, otherwise grab the current one.  Used for saving old state when shut down in 
 		// private browsing mode
+		if (aState) this.log("getSessionState: Returning passed in state", "INFO");
 		try {
 			var state = (aState) ? aState : (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
 		}
