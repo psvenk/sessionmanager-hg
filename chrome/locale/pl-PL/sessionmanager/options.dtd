@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Zezwalaj na zapis w trakcie korzystania z trybu prywatnego">
 <!ENTITY allow_saving_during_pbm.label2 "Wymaga włączenia kodowania">
 <!ENTITY allow_saving_during_pbm.accesskey "K">
+<!ENTITY session_name_in_titlebar.label "nazwę aktywnej sesji do paska tytułu">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Dodaj na początku">
+<!ENTITY append.label "Dodaj na końcu">
+<!ENTITY donotadd.label "Nie dodawaj">

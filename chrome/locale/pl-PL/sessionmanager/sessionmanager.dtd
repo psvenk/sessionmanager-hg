@@ -78,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "M">
 <!ENTITY abandonWindowSession.label "Opuść okno sesji">
 <!ENTITY abandonWindowSession.accesskey "K">
+<!ENTITY load_append_window.label "Wczytaj (Dodaj do aktywnego okna)">
+<!ENTITY load_append_window.accesskey "W">
