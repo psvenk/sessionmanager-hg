@@ -43,7 +43,7 @@
 <!ENTITY name_format.caption "瀏覽頁組命名">
 <!ENTITY name_format.label "建議的瀏覽頁組命名格式：">
 <!ENTITY name_format.accesskey "F">
-<!ENTITY name_format.desc "請用 &#37;t 代表現前分頁的標題，&#37;d 代表今天的日期以及 &#37;m 代表時間；此外， &#37;#t 代表標題長度被限制為 # 個字元。">
+<!ENTITY name_format.desc "請用 ％ｔ 代表當前分頁的標題，％ｄ 代表今天的日期以及 ％ｍ 代表時間；此外， ％＃ｔ 代表標題長度被限制為 ＃ 個字元。">
 <!ENTITY sessionstore.caption "瀏覽頁組存檔">
 <!ENTITY service.caption "各項&quot;瀏覽頁組存檔&quot;設定">
 <!ENTITY service.description "除非您清楚自己在做什麼，否則不要修改下列選項！">
@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "即使在「私密瀏覽模式」中，也允許存檔">
 <!ENTITY allow_saving_during_pbm.label2 "必須有加密才能啟用">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
+<!ENTITY session_name_in_titlebar.label "當前瀏覽頁組名稱到標題欄">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "前加">
+<!ENTITY append.label "後附">
+<!ENTITY donotadd.label "不附加">

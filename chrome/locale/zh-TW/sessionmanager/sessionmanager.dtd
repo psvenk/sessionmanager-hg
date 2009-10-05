@@ -77,3 +77,5 @@
 <!ENTITY closeWindowSession.accesskey "l">
 <!ENTITY abandonWindowSession.label "不存檔關閉瀏覽視窗組">
 <!ENTITY abandonWindowSession.accesskey "b">
+<!ENTITY load_append_window.label "載入(附加到當前視窗末端)">
+<!ENTITY load_append_window.accesskey "i">
