@@ -78,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "L">
 <!ENTITY abandonWindowSession.label "창 세션을 버리기">
 <!ENTITY abandonWindowSession.accesskey "B">
+<!ENTITY load_append_window.label "불러오기 (현재 창에 붙여넣기)">
+<!ENTITY load_append_window.accesskey "i">

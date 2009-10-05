@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "사생활 보호 모드 중에 저장 허용">
 <!ENTITY allow_saving_during_pbm.label2 "활성화되려면 암호화가 필요">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
+<!ENTITY session_name_in_titlebar.label "활성 세션 이름을 제목 표시줄에 표시">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "앞에 붙이기">
+<!ENTITY append.label "뒤에 붙이기">
+<!ENTITY donotadd.label "추가하지 않음">
