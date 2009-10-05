@@ -29,7 +29,7 @@
 <!ENTITY prompt.autosave.label "Activează salvarea automată a acestei sesiuni">
 <!ENTITY prompt.tabprompt.label "Interoghează despre filele de restaurat">
 <!ENTITY load_replace.label "Încarcă sesiunea (înlocuieşte sesiunea curentă)">
-<!ENTITY load_replace.accesskey "c">
+<!ENTITY load_replace.accesskey "l">
 <!ENTITY load_append.label "Încarcă sesiunea (adaugă la sesiunea curentă)">
 <!ENTITY load_append.accesskey "A">
 <!ENTITY replace_all.label "Înlocuieşte sesiunea cu sesiunea curentă">
@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "minute (dezactivat dacă este necompletat)">
 <!ENTITY winTabTree.restoreHeader "Restaurare">
 <!ENTITY winTabTree.listHeader "Ferestre şi file">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Fereastra &#37;S">
 <!ENTITY load.label "Încarcă sesiunea...">
 <!ENTITY load.accesskey "n">
@@ -77,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "v">
 <!ENTITY abandonWindowSession.label "Abandonează sesiunea ferestrei">
 <!ENTITY abandonWindowSession.accesskey "b">
+<!ENTITY load_append_window.label "Încarcă sesiunea (adaugă la sesiunea curentă)">
+<!ENTITY load_append_window.accesskey "d">

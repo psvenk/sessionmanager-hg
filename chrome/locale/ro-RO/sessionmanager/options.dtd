@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Autorizează arhivarea la navigarea în mod privat">
 <!ENTITY allow_saving_during_pbm.label2 "Necesită activarea criptării">
 <!ENTITY allow_saving_during_pbm.accesskey "p">
+<!ENTITY session_name_in_titlebar.label "denumirea sesiunii active în bara de titlu">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Adagă ca prefix">
+<!ENTITY append.label "Adagă ca sufix">
+<!ENTITY donotadd.label "Nu adăuga">
