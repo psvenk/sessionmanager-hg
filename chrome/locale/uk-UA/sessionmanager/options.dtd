@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Дозволити збереження під час потайливого режиму">
 <!ENTITY allow_saving_during_pbm.label2 "Вимагає увімкненого кодування">
 <!ENTITY allow_saving_during_pbm.accesskey "З">
+<!ENTITY session_name_in_titlebar.label "назва активного сеансу в заголовці">
+<!ENTITY session_name_in_titlebar.accesskey "н">
+<!ENTITY prepend.label "Додати на початку">
+<!ENTITY append.label "Додати в кінці">
+<!ENTITY donotadd.label "Не додавати">
