@@ -43,7 +43,7 @@
 <!ENTITY name_format.caption "Munkamenetek nevei">
 <!ENTITY name_format.label "Munkamenetek neveinek formátuma:">
 <!ENTITY name_format.accesskey "o">
-<!ENTITY name_format.desc "Használható kapcsolók: az aktív lap neve (&#37;t), mai dátum (&#37;d), idő (&#37;m). A név hossza korlátozva lehet # karakterre (&#37;#t).">
+<!ENTITY name_format.desc "Használhatók az alábbi kapcsolók: &#37;t az aktív lap neve, &#37;d mai dátum, &#37;m az idő. A név hossza korlátozva lehet # karakterre: &#37;#t.">
 <!ENTITY sessionstore.caption "Munkamenet helyreállítása">
 <!ENTITY service.caption "A munkamenetek helyreállításának beállításai">
 <!ENTITY service.description "Ne változtassa meg ezeket a beállításokat, ha nem biztos a következményekben.">
@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Mentés engedélyezése a privát böngészés során">
 <!ENTITY allow_saving_during_pbm.label2 "Az engedélyezéshez titkosítás szükséges">
 <!ENTITY allow_saving_during_pbm.accesskey "p">
+<!ENTITY session_name_in_titlebar.label "az aktív munkamenet nevét">
+<!ENTITY session_name_in_titlebar.accesskey "k">
+<!ENTITY prepend.label "A címsáv elejére adja hozzá">
+<!ENTITY append.label "A címsáv végére adja hozzá">
+<!ENTITY donotadd.label "Ne adja hozzá a címsávhoz">
