@@ -1,6 +1,6 @@
 <!ENTITY options.title "&sessionManager; - Einstellungen">
 <!ENTITY general.caption "Allgemein">
-<!ENTITY startNend.caption "Starten & Beenden">
+<!ENTITY startNend.caption "Starten &amp; Beenden">
 <!ENTITY resume_sess.label "Beim Starten des Browsers folgende Sitzung laden:">
 <!ENTITY resume_sess.accesskey "S">
 <!ENTITY backup_sess.label "Beim Beenden:">
@@ -22,7 +22,7 @@
 <!ENTITY max_backup.label "Anzahl vorhergehender (abgestürzter) Sitzungs-Backups:">
 <!ENTITY max_backup.accesskey "K">
 <!ENTITY undoClose.caption "Wiederherstellen">
-<!ENTITY windowsNtabs.caption "Geschlossene Fenster & Tabs">
+<!ENTITY windowsNtabs.caption "Geschlossene Fenster &amp; Tabs">
 <!ENTITY max_closed.label "Maximale Anzahl wiederherstellbarer geschlossener Fenster:">
 <!ENTITY max_closed.accesskey "F">
 <!ENTITY max_tabs.label "Maximale Anzahl wiederherstellbarer Tabs (pro Fenster):">
