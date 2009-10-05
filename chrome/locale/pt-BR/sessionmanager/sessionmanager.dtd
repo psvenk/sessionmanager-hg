@@ -20,7 +20,7 @@
 <!ENTITY undoClosed.accesskey "F">
 <!ENTITY closedWindows "Janelas Fechadas:">
 <!ENTITY closedTabs "Abas Fechadas:">
-<!ENTITY clearList.label "Limpar lista de &apos;Fechadas&apos;...">
+<!ENTITY clearList.label "Limpar lista de 'Fechadas'...">
 <!ENTITY clearList.accesskey "L">
 <!ENTITY toolbar.tooltip "Salva a sessão de navegação atual...">
 <!ENTITY toolbar.undo.label "Desfazer Fechar">
@@ -78,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "l">
 <!ENTITY abandonWindowSession.label "Abandonar janela da sessão">
 <!ENTITY abandonWindowSession.accesskey "b">
+<!ENTITY load_append_window.label "Carregar (Acrescenta à janela em Uso)">
+<!ENTITY load_append_window.accesskey "i">
