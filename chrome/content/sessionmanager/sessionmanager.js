@@ -2768,7 +2768,6 @@ var gSessionManager = {
 			if (headerOnly) state = this.readFile(aFile);
 			state = state.substring(state.indexOf("[Window1]\n"), state.length);
 			state = this.JSON_encode(this.decodeOldFormat(state, true));
-			state = state.substring(1,state.length-1);
 			var countString = getCountString(this.getCount(state));
 			state = "[SessionManager v2]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
 			this.writeFile(aFile, state);
