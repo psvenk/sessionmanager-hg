@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "minutos (deshabilitado si se deja en blanco)">
 <!ENTITY winTabTree.restoreHeader "Restaurar">
 <!ENTITY winTabTree.listHeader "Ventanas y pestañas">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Ventana &#37;S">
 <!ENTITY load.label "Cargar sesión...">
 <!ENTITY load.accesskey "C">
@@ -77,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "c">
 <!ENTITY abandonWindowSession.label "Abandonar la sesión">
 <!ENTITY abandonWindowSession.accesskey "b">
+<!ENTITY load_append_window.label "Cargar (Añadir a la ventana actual)">
+<!ENTITY load_append_window.accesskey "i">

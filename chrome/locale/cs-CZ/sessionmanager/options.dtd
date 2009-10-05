@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Povolit ukládání při zapnutém Anonymním prohlížení">
 <!ENTITY allow_saving_during_pbm.label2 "Vyžaduje zapnuté šifrování">
 <!ENTITY allow_saving_during_pbm.accesskey "f">
+<!ENTITY session_name_in_titlebar.label "záhlaví okna název aktivní relace">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Zobrazit na začátku">
+<!ENTITY append.label "Zobrazit na konci">
+<!ENTITY donotadd.label "Nezobrazovat v">
