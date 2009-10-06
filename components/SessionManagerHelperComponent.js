@@ -40,11 +40,15 @@ const report = Components.utils.reportError;
 const STARTUP_PROMPT = -11;
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
 
+// Session Manager files
+const SM_BACKUP_FILE = "backup.session";
+
 // Session Manager preferences
 const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
 const SM_ALLOW_SAVE_IN_PBM_PREFERENCE = "extensions.sessionmanager.enable_saving_in_private_browsing_mode";
 const SM_BACKUP_SESSION_PREFERENCE = "extensions.sessionmanager.backup_session";
 const SM_ENCRYPT_SESSIONS_PREFERENCE = "extensions.sessionmanager.encrypt_sessions";
+const SM_RESUME_SESSION_PREFERENCE = "extensions.sessionmanager.resume_session";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
 const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "extensions.sessionmanager.shutdown_on_last_window_close";
@@ -364,6 +368,12 @@ SessionManagerHelperComponent.prototype = {
 						// If checkbox checked
 						if (params.GetInt(1))
 						{
+							if (results == 2) {
+								let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+								str.data = SM_BACKUP_FILE;
+								pb.setComplexValue(SM_RESUME_SESSION_PREFERENCE, Ci.nsISupportsString, str);
+								pb.setIntPref(SM_STARTUP_PREFERENCE, 2)
+							}
 							pb.setIntPref(SM_BACKUP_SESSION_PREFERENCE, (results == 1)?0:1);
 						}
 								
