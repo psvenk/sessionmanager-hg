@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "minuten (uitgeschakeld indien blanco)">
 <!ENTITY winTabTree.restoreHeader "Herstellen">
 <!ENTITY winTabTree.listHeader "Vensters en Tabs">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Venster &#37;S">
 <!ENTITY load.label "Sessie laden...">
 <!ENTITY load.accesskey "l">

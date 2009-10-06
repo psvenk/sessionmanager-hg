@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "minutes (désactivé si vide)">
 <!ENTITY winTabTree.restoreHeader "Rétablir">
 <!ENTITY winTabTree.listHeader "Fenêtres et onglets">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Fenêtre &#37;S">
 <!ENTITY load.label "Chargement de la session…">
 <!ENTITY load.accesskey "C">
@@ -77,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "i">
 <!ENTITY abandonWindowSession.label "Abandonner la session de la fenêtre">
 <!ENTITY abandonWindowSession.accesskey "b">
+<!ENTITY load_append_window.label "Charger (ajouter à la fenêtre courante)">
+<!ENTITY load_append_window.accesskey "t">

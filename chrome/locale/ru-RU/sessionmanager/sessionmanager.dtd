@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "минут (не работает, если поле пустое)">
 <!ENTITY winTabTree.restoreHeader "Восстановить">
 <!ENTITY winTabTree.listHeader "окна и вкладки">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "окно &#37;S">
 <!ENTITY load.label "Загрузить сессию...">
 <!ENTITY load.accesskey "З">

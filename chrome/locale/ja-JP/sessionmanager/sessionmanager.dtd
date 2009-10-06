@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "分(空白の場合は無効)">
 <!ENTITY winTabTree.restoreHeader "リストア">
 <!ENTITY winTabTree.listHeader "ウインドウとタブ">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "ウインドウ &#37;S">
 <!ENTITY load.label "セッションの読み込み...">
 <!ENTITY load.accesskey "L">
@@ -77,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "l">
 <!ENTITY abandonWindowSession.label "詳細なウィンドウセッション">
 <!ENTITY abandonWindowSession.accesskey "b">
+<!ENTITY load_append_window.label "読み込み(現在のウィンドウに追加)">
+<!ENTITY load_append_window.accesskey "i">

@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Autoriser l'enregistrement en mode de navigation privée">
 <!ENTITY allow_saving_during_pbm.label2 "Nécessite le chiffrement pour être activé">
 <!ENTITY allow_saving_during_pbm.accesskey "m">
+<!ENTITY session_name_in_titlebar.label "le nom de la session active à la barre de titre">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Ajouter au début">
+<!ENTITY append.label "Ajouter à la fin">
+<!ENTITY donotadd.label "Ne pas ajouter">

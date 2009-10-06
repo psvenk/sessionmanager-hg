@@ -54,3 +54,4 @@
 <!ENTITY change_group.accesskey "R">
 <!ENTITY group.label "Gruppe-Session(er)...">
 <!ENTITY group.accesskey "G">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->

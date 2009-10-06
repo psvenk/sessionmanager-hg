@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "プライベートブラウジング時に保存を許可する">
 <!ENTITY allow_saving_during_pbm.label2 "暗号化を有効にする必要があります">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
+<!ENTITY session_name_in_titlebar.label "タイトルバーへのアクティブなセッションの名前">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "先頭に追加">
+<!ENTITY append.label "追加">
+<!ENTITY donotadd.label "追加しない">

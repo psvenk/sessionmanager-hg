@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "分鐘(空白表示停用)">
 <!ENTITY winTabTree.restoreHeader "選取">
 <!ENTITY winTabTree.listHeader "視窗與分頁">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "視窗 &#37;S">
 <!ENTITY load.label "載入「瀏覽頁組」或分頁...">
 <!ENTITY load.accesskey "L">

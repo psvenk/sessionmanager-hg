@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "minutos (desactivado se em branco)">
 <!ENTITY winTabTree.restoreHeader "Restaurar">
 <!ENTITY winTabTree.listHeader "Janelas e separadores">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Janela &#37;S">
 <!ENTITY load.label "Carregar sessão...">
 <!ENTITY load.accesskey "C">
