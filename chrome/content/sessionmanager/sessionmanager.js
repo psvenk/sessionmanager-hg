@@ -380,7 +380,7 @@ var gSessionManager = {
 			this.setPref("version", newVersion);
 			
 			// If development version, go to development change page
-			if (/\.20[0-9][0-9][0-1][0-9][1-3][0-9]/.test(newVersion)) {
+			if (/\.20[0-9][0-9][0-1][0-9][0-3][0-9]/.test(newVersion)) {
 				this.mFirstUrl = "http://sessionmanager.mozdev.org/changelog.xhtml";
 			}
 			
