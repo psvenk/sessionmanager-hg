@@ -1513,7 +1513,7 @@ var gSessionManager = {
 			aPopup.removeChild(item);
 		}
 		
-		var defaultIcon = (this.mApplication.name == "SEAMONKEY") ? "chrome://sessionmanager/skin/bookmark-item.png" :
+		var defaultIcon = (this.mApplication.name.toUpperCase() == "SEAMONKEY") ? "chrome://sessionmanager/skin/bookmark-item.png" :
 		                                                            "chrome://sessionmanager/skin/defaultFavicon.png";
 		
 		var encrypt_okay = true;
@@ -1666,7 +1666,7 @@ var gSessionManager = {
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
 			menuitem.setAttribute("crop", "center");
 			// Removing closed tabs does not work in SeaMonkey so don't give option to do so.
-			if (this.mApplication.name != "SEAMONKEY") {
+			if (this.mApplication.name.toUpperCase() != "SEAMONKEY") {
 				menuitem.setAttribute("onclick", 'gSessionManager.clickClosedUndoMenuItem(event);');
 				menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
 			}
@@ -3521,7 +3521,7 @@ var gSessionManager = {
 
 	isCmdLineEmpty: function()
 	{
-		if (this.mApplication.name != "SEAMONKEY") {
+		if (this.mApplication.name.toUpperCase() != "SEAMONKEY") {
 			try {
 				// Use the defaultArgs, unless SessionStore was trying to resume or handle a crash.
 				// This handles the case where the browser updated and SessionStore thought it was supposed to display the update page, so make sure we don't overwrite it.

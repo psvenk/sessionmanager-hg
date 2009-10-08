@@ -168,7 +168,7 @@ gSessionManager.addSanitizeItem = function () {
 }
 
 gSessionManager.addMenuItem = function (aPaneID) {
-	var isSeaMonkey = (this.mApplication.name == "SEAMONKEY");
+	var isSeaMonkey = (this.mApplication.name.toUpperCase() == "SEAMONKEY");
 	var doc = isSeaMonkey ? document.getElementById(aPaneID) : document;
 	var prefs = doc.getElementsByTagName('preferences')[0];
 	var checkboxes = doc.getElementsByTagName('checkbox')

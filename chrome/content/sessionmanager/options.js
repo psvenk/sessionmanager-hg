@@ -41,7 +41,7 @@ gSessionManager.onLoad = function() {
 	startupSelect(_("startupOption").selectedIndex = _("extensions.sessionmanager.startup").valueFromPreferences);
 	
 	// Hide close tab restoration preferences in SeaMonkey since it doesn't work
-	if (this.mApplication.name == "SEAMONKEY") {
+	if (this.mApplication.name.toUpperCase() == "SEAMONKEY") {
 		_("save_closed_tabs").parentNode.style.visibility = "collapse";
 	}
 	
