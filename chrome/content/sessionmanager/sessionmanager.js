@@ -1230,11 +1230,13 @@ var gSessionManager = {
 		var noUndoData = this.getNoUndoData(true, aMode);
 
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
-		var TMP_SingleWindowMode = (this.mPref_append_by_default && (aMode != "newwindow")) || 
-		                           (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
+		var TMP_SingleWindowMode = (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
 		if (TMP_SingleWindowMode) this.log("Tab Mix Plus single window mode is enabled", "INFO");
+        
+        // Use only existing window if our preference to do so is set or Tab Mix Plus's single window mode is enabled
+        var singleWindowMode = (this.mPref_append_by_default && (aMode != "newwindow")) || TMP_SingleWindowMode;
 	
-		if (TMP_SingleWindowMode && (aMode == "newwindow" || (!startup && (aMode != "overwrite") && !this.mPref_overwrite)))
+		if (singleWindowMode && (aMode == "newwindow" || (!startup && (aMode != "overwrite") && !this.mPref_overwrite)))
 			aMode = "append";
 		
 		// Use specified mode or default.
@@ -1249,7 +1251,7 @@ var gSessionManager = {
 		{
 			overwriteTabs = false;
 		}
-		else if (!TMP_SingleWindowMode && (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite)))
+		else if (!singleWindowMode && (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite)))
 		{
 			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
 			var tabs = window.getBrowser();
@@ -1345,8 +1347,8 @@ var gSessionManager = {
 
 		setTimeout(function() {
 			var tabcount = gBrowser.mTabs.length;
-			var okay = gSessionManager.restoreSession((!newWindow)?(altWindow?altWindow:window):null, state, overwriteTabs, noUndoData, (overwriteTabs && !newWindow && !TMP_SingleWindowMode && !overwrite_window), 
-			                                          (TMP_SingleWindowMode || (!overwriteTabs && !startup)), startup, window_autosave_values, xDelta, yDelta);
+			var okay = gSessionManager.restoreSession((!newWindow)?(altWindow?altWindow:window):null, state, overwriteTabs, noUndoData, (overwriteTabs && !newWindow && !singleWindowMode && !overwrite_window), 
+			                                          (singleWindowMode || (!overwriteTabs && !startup)), startup, window_autosave_values, xDelta, yDelta);
 			if (okay) {
 				gSessionManager.mObserverService.notifyObservers(null, "sessionmanager:windowtabopenclose", null);
 
