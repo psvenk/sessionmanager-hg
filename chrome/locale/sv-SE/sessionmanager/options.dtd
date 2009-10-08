@@ -107,7 +107,32 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Förmarkera föregående session">
 <!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "Loggning">
+<!ENTITY enable_logging.label "Aktivera loggning">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Öppna loggfil">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Radera loggfil">
+<!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "Logga avstängningstillstånd">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "Logga spårdata">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Logga variabeldata">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Logga informationsmeddelanden">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Logga extra debuggningsdata">
+<!ENTITY log_level_extra.accesskey "e">
 <!ENTITY reload.label "Ladda om alla återställda fönster">
 <!ENTITY reload.accesskey "l">
 <!ENTITY overwrite.label "Ersätt existerande fönster">
 <!ENTITY overwrite.accesskey "p">
+<!ENTITY allow_saving_during_pbm.label "Tillåt att spara under privat surfläge">
+<!ENTITY allow_saving_during_pbm.label2 "Kräver att kryptering är aktiverad">
+<!ENTITY allow_saving_during_pbm.accesskey "S">
+<!ENTITY session_name_in_titlebar.label "namnet på aktiva sessioner till titelraden">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Lägg till före">
+<!ENTITY append.label "Lägg till efter">
+<!ENTITY donotadd.label "Lägg inte till">
