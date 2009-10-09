@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Opslaan tijdens &quot;Privé Browsen&quot; toestaan">
 <!ENTITY allow_saving_during_pbm.label2 "Hiervoor moet versleuteling ingeschakeld zijn">
 <!ENTITY allow_saving_during_pbm.accesskey "s">
+<!ENTITY session_name_in_titlebar.label "aan de titelbalk de naam van de actieve sessies toevoegen">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Vooraan">
+<!ENTITY append.label "Achteraan">
+<!ENTITY donotadd.label "Niet">
