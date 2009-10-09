@@ -874,14 +874,16 @@ var gSessionManager = {
 				var sessionTitleName = (gSessionManager.mPref__autosave_name) ? (gSessionManager._string("current_session2") + " " + gSessionManager.mPref__autosave_name) : "";
 				var title = ((windowTitleName || sessionTitleName) ? "(" : "") + windowTitleName + ((windowTitleName && sessionTitleName) ? ", " : "") + sessionTitleName + ((windowTitleName || sessionTitleName) ? ")" : "")
 				
-				// Add window and browser session titles
-				switch(gSessionManager.mPref_session_name_in_titlebar) {
-					case 0:
-						newVal = newVal + " - " + title;
-						break;
-					case 1:
-						newVal = title + " - " + newVal;
-						break;
+				if (title) {
+					// Add window and browser session titles
+					switch(gSessionManager.mPref_session_name_in_titlebar) {
+						case 0:
+							newVal = newVal + " - " + title;
+							break;
+						case 1:
+							newVal = title + " - " + newVal;
+							break;
+					}
 				}
 			} 
 			catch (ex) { 
@@ -1071,7 +1073,20 @@ var gSessionManager = {
 			var file = this.getSessionDir(aFileName || this.makeFileName(aName), !aFileName);
 			try
 			{
-				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.getNoUndoData(), values.autoSave, aGroup, null, values.autoSaveTime));
+				var oldstate = null, merge = false;
+				// If appending, get the old state and pass it to getSessionState to merge with the current state
+				if (values.append && aFileName && file.exists()) {
+					oldstate = this.readSessionFile(file);
+					if (oldstate) {
+						var matchArray = this.mSessionRegExp.exec(oldstate);
+						if (matchArray) {
+							oldstate = oldstate.split("\n")[4];
+							oldstate = this.decrypt(oldstate);
+							if (oldstate) merge = true;
+						}
+					}
+				}
+				this.writeFile(file, this.getSessionState(aName, aOneWindow, this.getNoUndoData(), values.autoSave, aGroup, null, values.autoSaveTime, oldstate, merge));
 			}
 			catch (ex)
 			{
@@ -1232,9 +1247,9 @@ var gSessionManager = {
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
 		var TMP_SingleWindowMode = (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
 		if (TMP_SingleWindowMode) this.log("Tab Mix Plus single window mode is enabled", "INFO");
-        
-        // Use only existing window if our preference to do so is set or Tab Mix Plus's single window mode is enabled
-        var singleWindowMode = (this.mPref_append_by_default && (aMode != "newwindow")) || TMP_SingleWindowMode;
+
+		// Use only existing window if our preference to do so is set or Tab Mix Plus's single window mode is enabled
+		var singleWindowMode = (this.mPref_append_by_default && (aMode != "newwindow")) || TMP_SingleWindowMode;
 	
 		if (singleWindowMode && (aMode == "newwindow" || (!startup && (aMode != "overwrite") && !this.mPref_overwrite)))
 			aMode = "append";
@@ -2077,11 +2092,13 @@ var gSessionManager = {
 
 	ioError: function(aException)
 	{
+		if (aException) this.logError(ex);
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, (this.mBundle)?this.mBundle.getFormattedString("io_error", [(aException)?aException.message:this._string("unknown_error")]):aException);
 	},
 
 	sessionError: function(aException)
 	{
+		if (aException) this.logError(ex);
 		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, (this.mBundle)?this.mBundle.getFormattedString("session_error", [(aException)?aException.message:this._string("unknown_error")]):aException);
 	},
 
@@ -2718,7 +2735,6 @@ var gSessionManager = {
 			catch (ex)
 			{
 				this.ioError(ex);
-				this.logError(ex);
 			}
 		}
 		else this.keepOldBackups(false);
@@ -3685,13 +3701,21 @@ var gSessionManager = {
 		return { windows: windows, tabs: tabs };
 	},
 	
-	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt, aAutoSaveTime, aState)
+	getSessionState: function(aName, aOneWindow, aNoUndoData, aAutoSave, aGroup, aDoNotEncrypt, aAutoSaveTime, aState, aMerge)
 	{
-		// Use passed in State if specified, otherwise grab the current one.  Used for saving old state when shut down in 
-		// private browsing mode
-		if (aState) this.log("getSessionState: Returning passed in state", "INFO");
+		// If a state is passed in either use it if aMerge is not set or merge it with the current state if aMerge is set.
+		// The passed in state is used for saving old state when shutting down in private browsing mode and when appending to sessions.
+		if (aState) this.log("getSessionState: " + (aMerge ? "Merging" : "Returning") + " passed in state", "INFO");
 		try {
-			var state = (aState) ? aState : (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
+			var state = (!aMerge && aState) ? aState : (aOneWindow)?this.mSessionStore.getWindowState(window):this.mSessionStore.getBrowserState();
+			
+			if (aMerge && aState) {
+				state = this.JSON_decode(state);
+				aState = this.JSON_decode(aState);
+				state.windows = state.windows.concat(aState.windows);
+				if (state._closedWindows && aState._closedWindows) state._closedWindows = state._closedWindows.concat(aState._closedWindows);
+				state = this.JSON_encode(state);
+			}
 		}
 		catch(ex) {
 			// Log and rethrow errors
