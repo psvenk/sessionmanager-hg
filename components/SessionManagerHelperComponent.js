@@ -301,12 +301,12 @@ SessionManagerHelperComponent.prototype = {
 
 			// If not restarting and backing up or browser or SM is loading a session at startup, disable FF's quit prompt
 			if ((aData != "restart") && ((backup == 2) || ((backup == 1) || pb.getIntPref(SM_STARTUP_PREFERENCE) || resume_current))) {
+				let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
 				if ((backup == 2) && ((aTopic == "quit-application-requested") || pb.getBoolPref(SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE))) {
 
 					// Do session prompt here and then save the info in an Application Storage variable for use in
 					// the shutdown procsesing in sessionmanager.js
 					let watcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
-					let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
 					let app = this.getApp();
 					// if didn't already shut down
 					if (app && !app.storage.get(SM_ALREADY_SHUTDOWN, false)) {
@@ -385,6 +385,9 @@ SessionManagerHelperComponent.prototype = {
 					this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
 				}
 				pb.setBoolPref("browser.warnOnQuit", false);
+				
+				// Also prevent Tab Mix Pluses quit prompt from displaying
+				window.TMP_closeWindow = function() { return true; };
 			}
 			break;
 		case "browser-lastwindow-close-granted":
@@ -395,8 +398,7 @@ SessionManagerHelperComponent.prototype = {
 			// Disable Tab Mix Plus's prompt because it is incorrectly displaying after granted notification 
 			// has fired and will screw things up if the user cancels
 			let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
-			if (window) window.TMP_closeWindow = function() { return true; };
-
+			window.TMP_closeWindow = function() { return true; };
 			break;
 		case "quit-application-granted":
 			if (typeof(this._warnOnQuit) == "boolean") {
