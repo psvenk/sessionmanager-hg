@@ -7,6 +7,7 @@ var gTabTreeBox = null;
 var gTreeSplitter = null;
 var gCtrlClickNote = null;
 var gAcceptButton = null;
+var gExtraButton = null;
 var gSessionNames = {};
 var gGroupNames = [];
 var gBackupGroupName = null;
@@ -21,6 +22,8 @@ var gWidth = 0;
 var gInvalidTime = false;
 var gAlreadyResized = false;
 var gFinishedLoading = false;
+
+var gAppendToSessionFlag = false;
 
 // Used to keep track of the accept button position change
 var gLastAcceptPosition = 0;
@@ -76,6 +79,7 @@ gSessionManager.onLoad = function() {
 	
 	gAcceptButton = document.documentElement.getButton("accept");
 	gAcceptButton.label = gParams.GetString(2) || gAcceptButton.label;
+	gExtraButton = document.documentElement.getButton("extra1");
 	
 	var sessions = null;
 	if (window.opener && window.opener.gSessionManager && window.opener.gSessionManager.getSessionsOverride) {
@@ -314,7 +318,7 @@ gSessionManager.onUnload = function() {
 	if (!gAllTabsChecked) storeSession();
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
-	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected)?32:0) | 
+	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected)?32:0) | (gAppendToSessionFlag?32:0) |
 					  ((_("radio_append_window").selected)?64:0));
 	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
 };
@@ -496,7 +500,10 @@ function onTextboxInput(aNewValue)
 	{
 		gAcceptButton.label = (newWeight && gParams.GetString(5))?gParams.GetString(5):gParams.GetString(2);
 		gAcceptButton.style.fontWeight = (newWeight)?"bold":"";
+		// Show append button if replace button is shown.
+		gExtraButton.hidden = gAcceptButton.label != gParams.GetString(5)
 	}
+	gExtraButton.disabled = gExtraButton.hidden || _("checkbox_autosave").checked;
 
 	// Highlight matching item when accept label changes to replace and copy in group value (only when saving and not replacing name)
 	if (newWeight && gParams.GetString(5) && !(gParams.GetInt(1) & 256)) {
@@ -527,8 +534,11 @@ function isAcceptable()
 	gAcceptButton.disabled = gInvalidTime || badSessionName || badGroupName || (gNeedSelection && (gSessionTree.view.selection.count == 0 || (gExistingName >= 0)));
 }
 
-function onAcceptDialog()
+function onAcceptDialog(aParam)
 {
+	// Only set to true if user clicked extra1 button
+	gAppendToSessionFlag = aParam;
+
 	gParams.SetInt(0, 1);
 	if (gNeedSelection || ((gParams.GetInt(1) & 256) && gSessionTree.view.selection.count > 0))
 	{
@@ -567,6 +577,9 @@ function onAcceptDialog()
 	}
 	gParams.SetString(6, _("text_box").value.trim());
 	gParams.SetString(7, _("group_menu_list").value.trim());
+	
+	// Click extra button doesn't close window so do that here
+	if (gAppendToSessionFlag) window.close();
 }
 
 function setDescription(aObj, aValue)

@@ -11,7 +11,9 @@
 	xhtml2:role="wairole:alert"
 	id="sessionmanagerPrompt"
 	title="&sessionManager;"
-	ondialogaccept="return onAcceptDialog();"
+	ondialogaccept="return onAcceptDialog(false);"
+	ondialogextra1="return onAcceptDialog(true);"
+	buttonlabelextra1="&prompt.append.label;"
 	style="min-width: 40em; -moz-user-focus: ignore;"
 	persist="width"
 >
