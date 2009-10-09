@@ -391,6 +391,12 @@ SessionManagerHelperComponent.prototype = {
 			if (typeof(this._warnOnQuit) == "boolean") {
 				pb.setBoolPref("browser.warnOnQuit", this._warnOnQuit);
 			}
+			
+			// Disable Tab Mix Plus's prompt because it is incorrectly displaying after granted notification 
+			// has fired and will screw things up if the user cancels
+			let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
+			if (window) window.TMP_closeWindow = function() { return true; };
+
 			break;
 		case "quit-application-granted":
 			if (typeof(this._warnOnQuit) == "boolean") {
