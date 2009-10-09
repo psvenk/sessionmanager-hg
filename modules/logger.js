@@ -101,6 +101,12 @@ loggerClass.prototype = {
 	// Utility to create an error message in the log without throwing an error.
 	//
 	logError: function(e, force) {
+		// If not an exception, just log it.
+		if (!e.message) {
+			this.log(e, force);
+			return;
+		}
+	
 		// Log Addons if haven't already and EOL character exists
 		if (!this._logged_Addons && this.mEOL) this.logExtensions();
 		
