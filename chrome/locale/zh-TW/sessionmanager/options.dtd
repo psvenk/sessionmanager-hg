@@ -131,7 +131,7 @@
 <!ENTITY allow_saving_during_pbm.label "即使在「私密瀏覽模式」中，也允許存檔">
 <!ENTITY allow_saving_during_pbm.label2 "必須有加密才能啟用">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
-<!ENTITY session_name_in_titlebar.label "當前瀏覽頁組名稱到標題欄">
+<!ENTITY session_name_in_titlebar.label "當前瀏覽頁組名稱到標題欄(僅限有設'自動存檔'者)">
 <!ENTITY session_name_in_titlebar.accesskey "n">
 <!ENTITY prepend.label "前加">
 <!ENTITY append.label "後附">
