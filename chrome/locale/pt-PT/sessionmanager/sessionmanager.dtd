@@ -78,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "h">
 <!ENTITY abandonWindowSession.label "Abandonar a sessão da janela">
 <!ENTITY abandonWindowSession.accesskey "b">
+<!ENTITY load_append_window.label "Carregar (anexar à janela actual)">
+<!ENTITY load_append_window.accesskey "x">

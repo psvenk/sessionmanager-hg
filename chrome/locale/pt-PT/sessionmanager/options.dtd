@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Permitir guardar durante o modo de navegação privado">
 <!ENTITY allow_saving_during_pbm.label2 "Necessita de cifra para ser activado">
 <!ENTITY allow_saving_during_pbm.accesskey "c">
+<!ENTITY session_name_in_titlebar.label "o nome das sessões activas na barra de titulo">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Prepend">
+<!ENTITY append.label "Anexar">
+<!ENTITY donotadd.label "Não adicionar">
