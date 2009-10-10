@@ -1,13 +1,11 @@
 // To Do:
 // 1. On crash if don't select to restore current session or select tabs, window sessions will be lost.  Should label window sessions as such in 
 //    windows list and restore said sessions if don't select tabs for that window.  Might be tricky.
-// 2. Add way of add window(s) to an existing session.
-// 3. Add way of deleting window(s) from an existing session.
-// 4. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
+// 2. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
 //    having the prompt window close. (Session Editor)
-// 5. Add sub-grouping
-// 6. Add support for hot keys for saving and restoring
-// 7. Firefox's tab close confirmation will display when closing the last browser window in Firefox 3.0 and 3.5.  This will result in two 
+// 3. Add sub-grouping
+// 4. Add support for hot keys for saving and restoring
+// 5. Firefox's tab close confirmation will display when closing the last browser window in Firefox 3.0 and 3.5.  This will result in two 
 //    in a row for OS X since closing the last window triggers "shutdown".  Firefox 3.6 puts up the Quit prompt in this instance, which
 //    Session Manager now prevents from occuring.  Might want to "fix" FF 3.0 and 3.5 by checking for DOMWindowClosed in the component.
 
