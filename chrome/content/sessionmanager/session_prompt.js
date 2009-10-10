@@ -558,7 +558,7 @@ function onAcceptDialog(aParam)
 	else if (gExistingName >= 0)
 	{
 		var dontPrompt = { value: false };
-		if (gSessionManager.getPref("no_overwrite_prompt") || gSessionManager.mPromptService.confirmEx(null, gSessionManager.mTitle, gSessionManager._string("overwrite_prompt"), gSessionManager.mPromptService.BUTTON_TITLE_YES * gSessionManager.mPromptService.BUTTON_POS_0 + gSessionManager.mPromptService.BUTTON_TITLE_NO * gSessionManager.mPromptService.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0)
+		if (gAppendToSessionFlag || gSessionManager.getPref("no_overwrite_prompt") || gSessionManager.mPromptService.confirmEx(null, gSessionManager.mTitle, gSessionManager._string("overwrite_prompt"), gSessionManager.mPromptService.BUTTON_TITLE_YES * gSessionManager.mPromptService.BUTTON_POS_0 + gSessionManager.mPromptService.BUTTON_TITLE_NO * gSessionManager.mPromptService.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0)
 		{
 			gParams.SetString(3, gSessionTreeData[gExistingName].fileName);
 			if (dontPrompt.value)
