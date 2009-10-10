@@ -432,9 +432,9 @@ function onSessionTreeSelect()
 		// save current session tree height before doing any unhiding (subtract one since one gets added for some reason)
 		var currentSessionTreeHeight = gSessionTree.treeBoxObject.height - 1;
 		
-		// hide tab tree and splitter if nothing selected or multiple selection is enabled (deleting)
+		// hide tab tree and splitter if nothing selected or multiple selection is enabled (deleting) and more than one or no session is selected
 		// hide the click note if append/replace buttons are displayed (manual load)
-		var hideTabTree = gAcceptButton.disabled || (gParams.GetInt(1) & 2);
+		var hideTabTree = gAcceptButton.disabled || ((gParams.GetInt(1) & 2) && gSessionTree.view.selection.count != 1);
 		gTreeSplitter.hidden = gTabTreeBox.hidden = hideTabTree;
 		gCtrlClickNote.hidden = hideTabTree || !(gParams.GetInt(1) & 64);
 		
@@ -442,7 +442,11 @@ function onSessionTreeSelect()
 		// resize the window based on the current persisted height of the tab tree and the
 		// current session tree height.  
 		if (!hideTabTree) {
-			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName);
+			// if deleting, change column label
+			if (gParams.GetInt(1) & 2) {
+				_("restore").setAttribute("label", gSessionManager._string("remove_session_ok"));
+			}
+			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName, (gParams.GetInt(1) & 2));
 			if (!gAlreadyResized && gFinishedLoading) {
 				gAlreadyResized = true;
 				if (gTabTree.hasAttribute("height"))

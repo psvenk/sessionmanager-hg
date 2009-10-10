@@ -41,9 +41,12 @@ const Ci = Components.interfaces;
 var gStateObject;
 var gTreeData;
 var gNoTabsChecked = false;
-var gAllTabsChecked = true;  
+var gAllTabsChecked = true;
+var gDeleting = false;
 
-function initTreeView(aFileName) {
+function initTreeView(aFileName, aDeleting) {
+  // Save deleting parameter
+  gDeleting = aDeleting;
 
   // Initialize tree data to default state
   gNoTabsChecked = false;
@@ -118,7 +121,7 @@ function initTreeView(aFileName) {
         iconURL = "moz-anno:favicon:" + iconURL;
       return {
         label: entry.title || entry.url,
-		url: entry.url,
+        url: entry.url,
         checked: true,
         src: iconURL,
         parent: winState
@@ -140,15 +143,20 @@ function initTreeView(aFileName) {
 
 function storeSession() {
   // remove all unselected tabs from the state before restoring it
+  // remove all selected tabs from state when deleting
   var ix = gStateObject.windows.length - 1;
   for (var t = gTreeData.length - 1; t >= 0; t--) {
     if (treeView.isContainer(t)) {
       if (gTreeData[t].checked === 0)
-        // this window will be restored partially
-        gStateObject.windows[ix].tabs =
+        // this window will be restored or deleted partially
+        gStateObject.windows[ix].tabs = (gDeleting) ?
+          gStateObject.windows[ix].tabs.filter(function(aTabData, aIx) !gTreeData[t].tabs[aIx].checked) :
           gStateObject.windows[ix].tabs.filter(function(aTabData, aIx) gTreeData[t].tabs[aIx].checked);
-      else if (!gTreeData[t].checked)
+      else if (!gTreeData[t].checked && !gDeleting)
         // this window won't be restored at all
+        gStateObject.windows.splice(ix, 1);
+      else if (gTreeData[t].checked && gDeleting)
+        // this window will be deleted
         gStateObject.windows.splice(ix, 1);
       ix--;
     }
@@ -169,7 +177,7 @@ function onTabTreeClick(aEvent) {
   if (col.value) {
     // restore this specific tab in the same window for middle-clicking
     // or Ctrl+clicking or Meta+clicking on a tab's title
-    if ((aEvent.button == 1 || aEvent.ctrlKey || aEvent.metaKey) && ((col.value.id == "title") || (col.value.id == "location"))) {
+    if (!gDeleting && (aEvent.button == 1 || aEvent.ctrlKey || aEvent.metaKey) && ((col.value.id == "title") || (col.value.id == "location"))) {
       if (treeView.isContainer(row.value))
         restoreSingleWindow(row.value);
       else
@@ -249,7 +257,7 @@ function tabTreeSelect(aType) {
   for each (var item in gTreeData) {
     // only act on window items
     if (item.tabs) {
-	  // if toggling and 0 ("partially checked") remain 0, otherwise toggle.  If not toggling just set/clear.
+      // if toggling and 0 ("partially checked") remain 0, otherwise toggle.  If not toggling just set/clear.
       var check = (aType == "TOGGLE") ? ((item.checked === 0) ? 0 : !item.checked) : (aType == "ALL");
       item.checked = check;
       for each (var tab in item.tabs) {

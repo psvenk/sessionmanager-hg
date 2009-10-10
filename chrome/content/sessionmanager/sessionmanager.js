@@ -935,6 +935,8 @@ var gSessionManager = {
 		closerWindow.hidden = abandonWindow.hidden = !this.__window_session_name;
 		//save.hidden = (this.getBrowserWindows().length == 1);
 		
+		get_("autosave-separator").hidden = closer.hidden && closerWindow.hidden && abandon.hidden && abandonWindow.hidden;
+		
 		// Disable saving in privacy mode
 		var inPrivateBrowsing = this.isPrivateBrowserMode();
 		this.setDisabled(save, inPrivateBrowsing);
@@ -1464,7 +1466,36 @@ var gSessionManager = {
 	{
 		if (!aSession)
 		{
-			aSession = this.selectSession(this._string("remove_session"), this._string("remove_session_ok"), { multiSelect: true, remove: true });
+			var values = { multiSelect: true, remove: true };
+			aSession = this.selectSession(this._string("remove_session"), this._string("remove_session_ok"), values);
+			
+			// If user chose to delete specific windows and tabs in a session
+			if (values.choseTabs) {
+				// Get windows and tabs that were not deleted
+				try
+				{
+					var file = this.getSessionDir(aSession);
+					if (file.exists()) {
+						var state = this.readSessionFile(file);
+						if (state) {
+							var matchArray = this.mSessionRegExp.exec(state);
+							if (matchArray) {
+								state = state.split("\n");
+								var count = this.getCount(this.mSMHelper.mSessionData);
+								state[3] = state[3].replace(/\tcount=[1-9][0-9]*\/[1-9][0-9]*/, "\tcount=" + count.windows + "/" + count.tabs);
+								state[4] = this.decryptEncryptByPreference(this.mSMHelper.mSessionData);
+								state = state.join("\n");
+								this.writeFile(file, state);
+							}
+						}
+					}
+				}
+				catch(ex) {
+					this.ioError(ex);
+				}
+				this.mSMHelper.setSessionData("");
+				aSession = null;
+			}
 		}
 		if (aSession)
 		{
