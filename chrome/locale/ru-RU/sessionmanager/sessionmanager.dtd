@@ -76,5 +76,7 @@
 <!ENTITY session_explorer.accesskey "О">
 <!ENTITY closeWindowSession.label "Сохранить сессию окна и закрыть">
 <!ENTITY closeWindowSession.accesskey "к">
-<!ENTITY abandonWindowSession.label "Покинуть сессию окна">
+<!ENTITY abandonWindowSession.label "выйти из сессии окна">
 <!ENTITY abandonWindowSession.accesskey "и">
+<!ENTITY load_append_window.label "Загрузить (Добавить к текущему окну)">
+<!ENTITY load_append_window.accesskey "щ">

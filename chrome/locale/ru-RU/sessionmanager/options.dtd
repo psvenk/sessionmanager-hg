@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Разрешить сохранение в режиме Приватного просмотра">
 <!ENTITY allow_saving_during_pbm.label2 "Необходимо, чтобы было включено шифрование">
 <!ENTITY allow_saving_during_pbm.accesskey "П">
+<!ENTITY session_name_in_titlebar.label "заголовка окна название активной сессии.">
+<!ENTITY session_name_in_titlebar.accesskey "н">
+<!ENTITY prepend.label "Добавлять в начало">
+<!ENTITY append.label "Добавлять в конец">
+<!ENTITY donotadd.label "Не добавлять в">
