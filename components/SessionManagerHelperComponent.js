@@ -489,9 +489,6 @@ SessionManagerHelperComponent.prototype = {
 		{
 			//dump("SessionManager: Removing preferences\n");
 			prefroot.deleteBranch("extensions.sessionmanager._autosave_values");
-			prefroot.deleteBranch("extensions.sessionmanager._recovering");
-			prefroot.deleteBranch("extensions.sessionmanager._encrypt_file");
-			prefroot.deleteBranch("extensions.sessionmanager._chose_tabs");
 		}
 	},
 	
