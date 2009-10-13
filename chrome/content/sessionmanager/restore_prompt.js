@@ -79,7 +79,7 @@ gSessionManager.restorePrompt = function() {
 		{
 			// Get name of chosen session
 			var chosen_name = null;
-			if (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(this.readSessionFile(this.getSessionDir(fileName), true))) {
+			if (fileName && (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(this.readSessionFile(this.getSessionDir(fileName), true)))) {
 				chosen_name = RegExp.$2;
 			}
 			
