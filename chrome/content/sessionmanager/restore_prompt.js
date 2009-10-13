@@ -4,18 +4,6 @@ gSessionManager.restorePrompt = function() {
 	this.onUnload = function() { };
 	this.onWindowClose = function() { };
 				
-	// Set to not delete stored autosave name and time by default
-	var deletePrefs = false;
-
-	// Don't try to encrypt backup file by default
-	this.delPref("_encrypt_file");
-	
-	// Don't recover by default
-	this.delPref("_recovering");
-	
-	// Default to user not selecting tabs
-	this.delPref("_chose_tabs");
-	
 	// default count variable
 	var countString = "";
 	
@@ -55,7 +43,7 @@ gSessionManager.restorePrompt = function() {
 	{
 		if (fileName)
 		{
-			this.setPref("_recovering", fileName);
+			this.mApplication.storage.set("extensions.sessionmanager._recovering", fileName);
 		}
 		else if (!this.getPref("save_window_list", false))
 		{
@@ -68,7 +56,7 @@ gSessionManager.restorePrompt = function() {
 	// actually save the crashed session
 	if (session && backupFile) {
 		this.writeFile(backupFile, session);
-		if (this.mPref_encrypt_sessions) this.setPref("_encrypt_file", backupFile.leafName);
+		if (this.mPref_encrypt_sessions) this.mApplication.storage.set("extensions.sessionmanager._encrypt_file", backupFile.leafName);
 	}
 	
 	// If user chose to prompt for tabs and selected a filename
@@ -77,9 +65,9 @@ gSessionManager.restorePrompt = function() {
 		if (fileName == "*") {
 			fileName = backupFile.leafName;
 			params.SetInt(0, 1); // don't recover the crashed session
-			this.setPref("_recovering", fileName);
+			this.mApplication.storage.set("extensions.sessionmanager._recovering", fileName);
 		}
-		this.setPref("_chose_tabs", true);
+		this.mApplication.storage.set("extensions.sessionmanager._chose_tabs", true);
 	}
 		
 	var autosave_values = this.getPref("_autosave_values", "").split("\n");
@@ -99,7 +87,7 @@ gSessionManager.restorePrompt = function() {
 			if (values.choseTabs || ((chosen_name != autosave_name) && (fileName != backupFile.leafName)))
 			{
 				// delete autosave preferences
-				deletePrefs = true;
+				this.delPref("_autosave_values");
 				
 				this.log("Saving crashed autosave session " + autosave_name, "DATA");
 				var temp_state = this.readFile(file);
@@ -122,21 +110,14 @@ gSessionManager.restorePrompt = function() {
 			else 
 			{
 				// we could delete the autosave preferences here, but it doesn't matter (actually it saves us from saving prefs.js file again)
-				this.delPref("_recovering");
+				this.mApplication.storage.set("extensions.sessionmanager._recovering", null);
 				params.SetInt(0, 0);
 			}
 		}
 	}
 	
-	// delete autosave preferences and save preference file
-	if (deletePrefs) {
-		this.delPref("_autosave_values");
-		// do this via a preference so we don't save twice in case user loads a different auto save sessions
-		this.setPref("_save_prefs", true);  
-	}
-	
 	// Don't prompt for a session again if user cancels crash prompt
-	this.setPref("_no_prompt_for_session", true);
+	this.mApplication.storage.set("extensions.sessionmanager._no_prompt_for_session", true);
 };
 		
 gSessionManager.restorePrompt();

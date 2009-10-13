@@ -276,12 +276,6 @@ var gSessionManager = {
 			// Force saving the preferences
 			this.mObserverService.notifyObservers(null,"sessionmanager-preference-save",null);
 		}
-		else if (this.getPref("_save_prefs",false)) {
-			// Save preference file if this preference is true in order to prevent problems on a crash.
-			// It is set to true if an autosave session crashed and user did not resume it.
-			this.delPref("_save_prefs");
-			this.mObserverService.notifyObservers(null,"sessionmanager-preference-save",null);
-		}
 		this.mFullyLoaded = true;
 		
 		// Watch for changes to the titlebar so we can add our sessionname after it since 
@@ -2635,8 +2629,6 @@ var gSessionManager = {
 		}
 		
 		this.delPref("_autosave_values");
-		this.delPref("_encrypt_file");
-		this.delPref("_recovering");
 		this.mClosingWindowState = null;
 		this.mCleanBrowser = null;
 		this.mClosedWindowName = null;
@@ -3454,11 +3446,11 @@ var gSessionManager = {
 	recoverSession: function()
 	{
 		var file, temp_restore = null, first_temp_restore = null, temp_restore_index = 1;
-		var recovering = this.getPref("_recovering");
+		var recovering = this.mApplication.storage.get("extensions.sessionmanager._recovering", null);
 		// Use SessionStart's value in FF3 because preference is cleared by the time we are called
 		var sessionstart = (this.mSessionStartup.sessionType != Components.interfaces.nsISessionStartup.NO_SESSION) && !this.mApplication.storage.get(this.mAlreadyShutdown, false);
-		var recoverOnly = this.isRunning() || sessionstart || this.getPref("_no_prompt_for_session", false);
-		this.delPref("_no_prompt_for_session");
+		var recoverOnly = this.isRunning() || sessionstart || this.mApplication.storage.get("extensions.sessionmanager._no_prompt_for_session", false);
+		this.mApplication.storage.set("extensions.sessionmanager._no_prompt_for_session", null);
 		this.log("recoverSession: recovering = " + recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
 		if (typeof(this._temp_restore) == "string") {
 			this.log("recoverSession: command line session data = \"" + this._temp_restore + "\"", "DATA");
@@ -3470,10 +3462,9 @@ var gSessionManager = {
 		// handle crash where user chose a specific session
 		if (recovering)
 		{
-			var choseTabs = false;
-			choseTabs = this.getPref("_chose_tabs");
-			this.delPref("_recovering");
-			this.delPref("_chose_tabs"); // delete chose tabs preference if set
+			var choseTabs = this.mApplication.storage.get("extensions.sessionmanager._chose_tabs", false);
+			this.mApplication.storage.set("extensions.sessionmanager._recovering", null);
+			this.mApplication.storage.set("extensions.sessionmanager._chose_tabs", null)
 			this.load(recovering, "startup", choseTabs);
 		}
 		else if (!recoverOnly && (this.mPref_restore_temporary || first_temp_restore || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
@@ -3539,9 +3530,9 @@ var gSessionManager = {
 		}
 		
 		// If need to encrypt backup file, do it
-		var backupFile = this.getPref("_encrypt_file");
+		var backupFile = this.mApplication.storage.get("extensions.sessionmanager._encrypt_file", false);
 		if (backupFile) {
-			this.delPref("_encrypt_file");
+			this.mApplication.storage.set("extensions.sessionmanager._encrypt_file", null);
 			var file = this.getSessionDir(backupFile);
 			var state = this.readSessionFile(file);
 			if (state) 
