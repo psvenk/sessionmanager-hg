@@ -53,7 +53,7 @@ function initTreeView(aFileName, aDeleting) {
   gAllTabsChecked = true;
   treeView.initialize();
   
-  var state = null;
+  var state = null, currentSession = false;
 
   // if chose crashed session read from sessionstore.js instead of session file
   if (aFileName == "*") {
@@ -73,6 +73,7 @@ function initTreeView(aFileName, aDeleting) {
       gSessionManager.ioError();
       return;
     }
+    currentSession = true;
   }
   else {
     state = gSessionManager.readSessionFile(gSessionManager.getSessionDir(aFileName));
@@ -100,10 +101,16 @@ function initTreeView(aFileName, aDeleting) {
   if (!gStateObject) return;
   
   gStateObject.windows.forEach(function(aWinData, aIx) {
+    var windowSessionName = null;
+    if (currentSession) {
+      windowSessionName = (aWinData.extData) ? aWinData.extData["_sm_window_session_values"] : null;
+      windowSessionName = (windowSessionName) ? windowSessionName.split("\n")[0] : null;
+    }
     var winState = {
       label: winLabel.replace("%S", (aIx + 1)),
       open: true,
       checked: true,
+      sessionName: windowSessionName,
       ix: aIx
     };
     winState.tabs = aWinData.tabs.map(function(aTabData) {
@@ -330,12 +337,18 @@ var treeView = {
   setTree: function(treeBox)         { this.treeBox = treeBox; },
   getCellText: function(idx, column) { 
     if (column.id == "location") {
+      if (gTreeData[idx].sessionName) return gTreeData[idx].sessionName;
       return gTreeData[idx].url ? gTreeData[idx].url : "";
     }
     else return gTreeData[idx].label; 
   },
   isContainer: function(idx)         { return "open" in gTreeData[idx]; },
-  getCellValue: function(idx, column){ return gTreeData[idx].checked; },
+  getCellValue: function(idx, column){ 
+    if (this.isContainer(idx) && ((column.id == "title") || (column.id == "location"))) 
+      return gTreeData[idx].sessionName;
+    else 
+      return gTreeData[idx].checked;
+  },
   isContainerOpen: function(idx)     { return gTreeData[idx].open; },
   isContainerEmpty: function(idx)    { return false; },
   isSeparator: function(idx)         { return false; },
@@ -385,8 +398,10 @@ var treeView = {
   getCellProperties: function(idx, column, prop) {
     if (column.id == "restore" && this.isContainer(idx) && gTreeData[idx].checked === 0)
       prop.AppendElement(this._getAtom("partial"));
-    if (column.id == "title")
+    if (column.id == "title") 
       prop.AppendElement(this._getAtom(this.getImageSrc(idx, column) ? "icon" : "noicon"));
+    if (this.isContainer(idx) && ((column.id == "title") || (column.id == "location")) && this.getCellValue(idx, column))
+      prop.AppendElement(this._getAtom("sessionName"));
   },
 
   getRowProperties: function(idx, prop) {},

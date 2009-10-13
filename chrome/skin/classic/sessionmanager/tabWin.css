@@ -31,3 +31,8 @@ treechildren::-moz-tree-checkbox(partial) {
 treechildren::-moz-tree-checkbox(partial, selected, focus) {
   list-style-image: url("chrome://sessionmanager/skin/cbox-check-dis-hl.gif");
 }
+
+treechildren::-moz-tree-cell-text(sessionName) {
+  font-weight: bold;
+  font-style: oblique;
+}
