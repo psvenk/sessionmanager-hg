@@ -79,6 +79,8 @@ SessionManagerHelperComponent.prototype = {
 	                    { category: "command-line-handler", entry: "sessionmanager" }],
 	_ignorePrefChange: false,
 	_warnOnQuit: null,
+	_warnOnClose: null,
+	_TMP_protectedtabs_warnOnClose: null,
 	_sessionExt: ".session",
 	mAutoPrivacy: false,
 	mBackupState: null,
@@ -381,28 +383,48 @@ SessionManagerHelperComponent.prototype = {
 					}
 				}
 
-				if (typeof(this._warnOnQuit) != "boolean") {
-					this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
+				// Disable prompt in browser
+				if (pb.getPrefType("browser.warnOnQuit") == pb.PREF_BOOL) {
+					if (typeof(this._warnOnQuit) != "boolean") {
+						this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
+					}
+					pb.setBoolPref("browser.warnOnQuit", false);
 				}
-				pb.setBoolPref("browser.warnOnQuit", false);
-				
-				// Also prevent Tab Mix Pluses quit prompt from displaying
-				window.TMP_closeWindow = function() { return true; };
+				// Disable prompt in tab mix plus if it's running
+				if (pb.getPrefType("browser.tabs.warnOnClose") == pb.PREF_BOOL) {
+					if (typeof(this._warnOnClose) != "boolean") {
+						this._warnOnClose = pb.getBoolPref("browser.tabs.warnOnClose");
+					}
+					pb.setBoolPref("browser.tabs.warnOnClose", false);
+				}
+				if (pb.getPrefType("extensions.tabmix.protectedtabs.warnOnClose") == pb.PREF_BOOL) {
+					if (typeof(this._TMP_protectedtabs_warnOnClose) != "boolean") {
+						this._TMP_protectedtabs_warnOnClose = pb.getBoolPref("extensions.tabmix.protectedtabs.warnOnClose");
+					}
+					pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", false);
+				}
 			}
 			break;
 		case "browser-lastwindow-close-granted":
 			if (typeof(this._warnOnQuit) == "boolean") {
 				pb.setBoolPref("browser.warnOnQuit", this._warnOnQuit);
 			}
-			
-			// Disable Tab Mix Plus's prompt because it is incorrectly displaying after granted notification 
-			// has fired and will screw things up if the user cancels
-			let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
-			window.TMP_closeWindow = function() { return true; };
+			if (typeof(this._warnOnClose) == "boolean") {
+				pb.setBoolPref("browser.tabs.warnOnClose", this._warnOnClose);
+			}
+			if (typeof(this._TMP_protectedtabs_warnOnClose) == "boolean") {
+				pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", this._TMP_protectedtabs_warnOnClose);
+			}
 			break;
 		case "quit-application-granted":
 			if (typeof(this._warnOnQuit) == "boolean") {
 				pb.setBoolPref("browser.warnOnQuit", this._warnOnQuit);
+			}
+			if (typeof(this._warnOnClose) == "boolean") {
+				pb.setBoolPref("browser.tabs.warnOnClose", this._warnOnClose);
+			}
+			if (typeof(this._TMP_protectedtabs_warnOnClose) == "boolean") {
+				pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", this._TMP_protectedtabs_warnOnClose);
 			}
 			os.removeObserver(this, "sessionmanager-preference-save");
 			os.removeObserver(this, "sessionmanager:ignore-preference-changes");
