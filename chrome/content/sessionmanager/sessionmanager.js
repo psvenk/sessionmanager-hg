@@ -42,7 +42,7 @@ var gSessionManager = {
 	mBackupSessionRegEx: /^backup(-[1-9](\d)*)?\.session$/,
 	mAutoSaveSessionName: "autosave.session",
 	mSessionExt: ".session",
-	mFirstUrl: "http://sessionmanager.mozdev.org/documentation.html",
+	mFirstUrl: "http://sessionmanager.mozdev.org/history.html",
 	mSessionRegExp: /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=([^\t|^\n|^\r]+))?(\tscreensize=(\d+)x(\d+))?/m,
 
 	mClosingWindowState: null,
