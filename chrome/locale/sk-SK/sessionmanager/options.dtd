@@ -107,7 +107,32 @@
 <!ENTITY last_window_shutdown.accesskey "z">
 <!ENTITY preselect_previous_session.label "Predvybrať predchádzajúcu reláciu">
 <!ENTITY preselect_previous_session.accesskey "d">
+<!ENTITY logging.caption "Zaznamenávanie">
+<!ENTITY enable_logging.label "Povoliť zaznamenávanie">
+<!ENTITY enable_logging.accesskey "z">
+<!ENTITY open_log.label "Otvoriť súbor so záznamom">
+<!ENTITY open_log.accesskey "b">
+<!ENTITY delete_log.label "Odstrániť súbor so záznamom">
+<!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "Zaznamenať stav pri ukončení">
+<!ENTITY log_level_state.accesskey "a">
+<!ENTITY log_level_trace.label "Zaznamenávať údaje o trasovaní">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Zaznamenávať údaje o premenných">
+<!ENTITY log_level_data.accesskey "m">
+<!ENTITY log_level_info.label "Zaznamenávať informačné správy">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Zaznamenávať extra údaje ladenia">
+<!ENTITY log_level_extra.accesskey "d">
 <!ENTITY reload.label "Obnoviť obsah všetkých obnovených okien">
 <!ENTITY reload.accesskey "i">
 <!ENTITY overwrite.label "Nahradiť existujúce okná">
 <!ENTITY overwrite.accesskey "h">
+<!ENTITY allow_saving_during_pbm.label "Povoliť ukladanie počas práce v režime Súkromné prehlaidanie">
+<!ENTITY allow_saving_during_pbm.label2 "Vyžaduje povolenie šifrovania">
+<!ENTITY allow_saving_during_pbm.accesskey "f">
+<!ENTITY session_name_in_titlebar.label "názov aktívnej relácie do titulku">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Pridať">
+<!ENTITY append.label "Pripojiť">
+<!ENTITY donotadd.label "Nepridávať">

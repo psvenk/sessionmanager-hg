@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "minút (vypnuté, ak je prázdne)">
 <!ENTITY winTabTree.restoreHeader "Obnoviť">
 <!ENTITY winTabTree.listHeader "Okná a karty">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Okno č. &#37;S">
 <!ENTITY load.label "Načítať reláciu...">
 <!ENTITY load.accesskey "N">
@@ -73,3 +74,9 @@
 <!ENTITY prompt.append_window.label "Pripojiť do aktuálneho okna">
 <!ENTITY session_explorer.label "Prieskumník relácií">
 <!ENTITY session_explorer.accesskey "P">
+<!ENTITY closeWindowSession.label "Uložiť a zavrieť reláciu okna">
+<!ENTITY closeWindowSession.accesskey "v">
+<!ENTITY abandonWindowSession.label "Zrušiť reláciu okna">
+<!ENTITY abandonWindowSession.accesskey "u">
+<!ENTITY load_append_window.label "Načítať (pripojiť do aktuálneho okna)">
+<!ENTITY load_append_window.accesskey "t">
