@@ -57,9 +57,9 @@
 <!ENTITY privacy.level1 "les sites non chiffrés uniquement">
 <!ENTITY privacy.level2 "aucun site">
 <!ENTITY sessiondir.caption "Emplacement des sessions enregistrées">
-<!ENTITY sessiondir.desc "L&apos;emplacement par défaut de stockage des sessions enregistrées peut être modifié ici.">
+<!ENTITY sessiondir.desc "L'emplacement par défaut de stockage des sessions enregistrées peut être modifié ici.">
 <!ENTITY encrypt.caption "Chiffrement">
-<!ENTITY encrypt.desc "Avertissement : Les données de session chiffrées ne peuvent être lues qu&apos;avec des fichiers key3.db et cert8.db identiques. De plus, si un mot de passe principal a été défini, les sessions ne peuvent ni être chiffrées, ni être déchiffrées si ce mot de passe n&apos;est pas indiqué.">
+<!ENTITY encrypt.desc "Avertissement : les données de session chiffrées ne peuvent être lues qu'avec des fichiers key3.db et cert8.db identiques. De plus, si un mot de passe principal a été défini, les sessions ne peuvent ni être chiffrées, ni être déchiffrées si ce mot de passe n'est pas indiqué.">
 <!ENTITY encrypt.label "Chiffrer la session enregistrée et les données de la fenêtre fermée">
 <!ENTITY encrypt.accesskey "e">
 <!ENTITY change_dir.label "Modifier">
@@ -72,7 +72,7 @@
 <!ENTITY lastpage.label "Afficher ma dernière page chargée">
 <!ENTITY noSession.label "Aucun">
 <!ENTITY noSession.accesskey "c">
-<!ENTITY promptSession.label "Demander l&apos;ouverture d&apos;une session">
+<!ENTITY promptSession.label "Demander l'ouverture d'une session">
 <!ENTITY promptSession.accesskey "D">
 <!ENTITY selectSession.label "Choisir une session">
 <!ENTITY selectSession.accesskey "S">
@@ -90,16 +90,16 @@
 <!ENTITY middleclick.accesskey "M">
 <!ENTITY max_display.label "Nombre maximum de sessions à afficher dans le menu">
 <!ENTITY max_display.accesskey "M">
-<!ENTITY hide_tools_menu.label "Ne pas afficher l&apos;entrée « Gestionnaire de session » dans le menu « Outils »">
+<!ENTITY hide_tools_menu.label "Ne pas afficher l'entrée « Gestionnaire de session » dans le menu « Outils »">
 <!ENTITY hide_tools_menu.accesskey "P">
 <!ENTITY disable_cache_fixer.label "Désactiver la fonctionnalité Cache Fixer">
 <!ENTITY disable_cache_fixer.accesskey "D">
 <!ENTITY encrypted_only.label "Si le chiffrement a échoué, NE PAS enregistrer les données non chiffrées.">
 <!ENTITY encrypted_only.accesskey "N">
-<!ENTITY encrypt2.desc "Avertissement : si cette option est cochée et que les données de session ou de fenêtre ne peuvent pas être chiffrées, les données seront perdues sans aucun moyen de les récupérer. Le chiffrement échoue lorsque le mot de passe principal est demandé et n&apos;est pas indiqué, veuillez donc bien y réfléchir à deux fois avant de cocher cette case.">
+<!ENTITY encrypt2.desc "Avertissement : si cette option est cochée et que les données de session ou de fenêtre ne peuvent pas être chiffrées, les données seront perdues sans aucun moyen de les récupérer. Le chiffrement échoue lorsque le mot de passe principal est demandé et n'est pas indiqué, veuillez donc bien y réfléchir à deux fois avant de cocher cette case.">
 <!ENTITY closed_window_list.label "Utiliser la liste de fenêtres fermées proposée par le navigateur">
 <!ENTITY closed_window_list.accesskey "U">
-<!ENTITY closed_windows.label "Rétablir la liste des fenêtres réouvrables :">
+<!ENTITY closed_windows.label "Rétablir la liste des fenêtres que l'on peut à nouveau ouvrir :">
 <!ENTITY closed_windows.accesskey "S">
 <!ENTITY open_as_tabs.label "Ouvrir dans des onglets dans la fenêtre courante">
 <!ENTITY open_as_tabs.accesskey "V">
