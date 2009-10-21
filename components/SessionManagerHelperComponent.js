@@ -64,6 +64,7 @@ function SessionManagerHelperComponent() {
 	try {
 		// import logger
 		Cu.import("resource://sessionmanager/modules/logger.js", this);
+		Cu.import("resource://sessionmanager/modules/utils.js", this);
 	}
 	catch (ex) {
 		report(ex);
@@ -81,7 +82,6 @@ SessionManagerHelperComponent.prototype = {
 	_warnOnQuit: null,
 	_warnOnClose: null,
 	_TMP_protectedtabs_warnOnClose: null,
-	_sessionExt: ".session",
 	mAutoPrivacy: false,
 	mBackupState: null,
 	mSessionData: null,
@@ -120,14 +120,14 @@ SessionManagerHelperComponent.prototype = {
 					}
 					else {
 						i++;
-						report("Session Manager: Command line specified session file not found or is not valid - " + name);
+						this.log("Session Manager: Command line specified session file not found or is not valid - " + name, "ERROR");
 					}
 				}
 				else i++;
 			}
 		}
 		catch (ex) {
-			report("Session Manager: Command Line Error - " + ex);
+			this.logError(ex);
 		}
 		if (found) {
 			try {
@@ -135,7 +135,7 @@ SessionManagerHelperComponent.prototype = {
 				app.storage.set(SM_COMMAND_LINE_DATA, data);
 			}
 			catch (ex) {
-				report("Session Manager: Command Line Error Setting Storage Data - " + ex);
+				this.logError(ex);
 			}
 		}
 	},
@@ -149,18 +149,6 @@ SessionManagerHelperComponent.prototype = {
 			app = Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication);
 		}
 		return app;
-	},
-	
-	log: function(aMsg, aLevel, aForce)
-	{
-		try {
-			if ((typeof(this.logger) == "function") && this.logger()) {
-				this.logger().log(aMsg, aLevel, aForce);
-			}
-		}
-		catch (ex) {
-			report(ex);
-		}
 	},
 	
 	// observer
@@ -190,7 +178,7 @@ SessionManagerHelperComponent.prototype = {
 					this.mAutoPrivacy = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).autoStarted;
 				}
 				catch(ex) { 
-					report(ex); 
+					this.logError(ex);
 				}
 				break;
 			case "exit":
@@ -208,7 +196,7 @@ SessionManagerHelperComponent.prototype = {
 			{
 				this._restoreCache();
 			}
-			catch (ex) { report(ex); }
+			catch (ex) { this.logError(ex); }
 			break;
 		case "final-ui-startup":
 			os.removeObserver(this, aTopic);
@@ -216,7 +204,7 @@ SessionManagerHelperComponent.prototype = {
 			{
 				this._handle_crash();
 			}
-			catch (ex) { report(ex); }
+			catch (ex) { this.logError(ex); }
 			
 			// stuff to handle preference file saving
 			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
@@ -246,7 +234,7 @@ SessionManagerHelperComponent.prototype = {
 					}
 				}, 1000, Ci.nsITimer.TYPE_ONE_SHOT);
 			}
-			catch (ex) { report(ex); }
+			catch (ex) { this.logError(ex); }
 			break;
 		case "sessionstore-state-read":
 			os.removeObserver(this, aTopic);
@@ -254,7 +242,7 @@ SessionManagerHelperComponent.prototype = {
 			{
 				this._check_for_crash(aSubject);
 			}
-			catch (ex) { report(ex); }
+			catch (ex) { this.logError(ex); }
 			break;
 		case "sessionmanager-preference-save":
 			// Save preference file after one 1/4 second to delay in case another preference changes at same time as first
@@ -276,7 +264,7 @@ SessionManagerHelperComponent.prototype = {
 					pb.setIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE));
 				}
 			}
-			catch (ex) { report(ex); }
+			catch (ex) { this.logError(ex); }
 			this._ignorePrefChange = false;
 			break;
 		case "sessionmanager:ignore-preference-changes":
@@ -482,7 +470,7 @@ SessionManagerHelperComponent.prototype = {
 		                 prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
 
 		//dump("no_remove = " + resuming + "\n");
-		//report("no_remove = " + resuming);
+		//this.log("no_remove = " + resuming, "DATA");
 		// Unless browser is restarting, always delete the following preferences if crash recovery is disabled in case the browser crashes
 		// otherwise bad things can happen
 		if (!no_remove)
@@ -502,7 +490,7 @@ SessionManagerHelperComponent.prototype = {
 			initialState = this.JSON_decode(aStateDataString.QueryInterface(Ci.nsISupportsString).data);
 		}
 		catch (ex) { 
-			report("The startup session file is invalid: " + ex); 
+			this.logError(ex);
 			return;
 		} 
     
@@ -510,7 +498,7 @@ SessionManagerHelperComponent.prototype = {
 			initialState && initialState.session && initialState.session.state &&
 			initialState.session.state == "running";
 		
-		//report("Last Crashed = " + lastSessionCrashed);
+		//this.log("Last Crashed = " + lastSessionCrashed, "DATA");
 		if (lastSessionCrashed) {
         	let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
         	// default to recovering
@@ -602,126 +590,7 @@ SessionManagerHelperComponent.prototype = {
 
 		// Resume listening to preference changes
 		this._ignorePrefChange = false;
-	},
-
-	// Get the profile dir
-	getProfileFile: function getProfileFile(aFileName)
-	{
-		let file = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsILocalFile).clone();
-		file.append(aFileName);
-		return file;
-	},
-	
-	// Get the user specific sessions directory
-	getUserDir: function getUserDir(aFileName)
-	{
-		let dir = null;
-		let dirname = null;
-
-		try {
-			let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-			dirname = pb.getComplexValue(SM_SESSIONS_DIR_PREFERENCE,Ci.nsISupportsString).data;
-			if (dirname) {
-				let dir = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-				dir.initWithPath(dirname);
-				if (dir.isDirectory && dir.isWritable()) {
-					dir.append(aFileName);
-				}
-				else {
-					dir = null;
-				}
-			}
-		} catch (ex) {
-			dir = null;
-		} finally {
-			return dir;
-		}
-	},
-
-	// Get the sessions dir
-	getSessionDir: function getSessionDir(aFileName, aUnique)
-	{
-		// allow overriding of location of sessions directory
-		let dir = this.getUserDir("sessions");
-			
-		// use default is not specified or not a writable directory
-		if (dir == null) {
-			dir = this.getProfileFile("sessions");
-		}
-		if (!dir.exists())
-		{
-			try {
-				dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0700);
-			}
-			catch (ex) {
-				report("Session Manager: File Error - " + ex);
-				return null;
-			}
-		}
-		if (aFileName)
-		{
-			dir.append(aFileName);
-			if (aUnique)
-			{
-				let postfix = 1, ext = "";
-				if (aFileName.slice(-this._sessionExt.length) == this._sessionExt)
-				{
-					aFileName = aFileName.slice(0, -this._sessionExt.length);
-					ext = this._sessionExt;
-				}
-				while (dir.exists())
-				{
-					dir = dir.parent;
-					dir.append(aFileName + "-" + (++postfix) + ext);
-				}
-			}
-		}
-		return dir.QueryInterface(Ci.nsILocalFile);
-	},
-	
-	// Decode JSON string to javascript object
-	JSON_decode: function sm_JSON_decode(aStr) {
-		let jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
-		try {
-			let hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
-		
-			// JSON can't parse when string is wrapped in parenthesis
-			if (hasParens) {
-				aStr = aStr.substring(1, aStr.length - 1);
-			}
-		
-			// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
-			try {
-				jsObject = JSON.parse(aStr);
-			}
-			catch (ex) {
-				if (/[\u2028\u2029]/.test(aStr)) {
-					aStr = aStr.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
-				}
-				jsObject = Cu.evalInSandbox("(" + aStr + ")", new Cu.Sandbox("about:blank"));
-			}
-		}
-		catch(ex) {
-			report("SessionManager: " + ex);
-		}
-		return jsObject;
-	},
-	
-	// Encode javascript object to JSON string - use JSON if built-in.
-	JSON_encode: function sm_JSON_encode(aObj) {
-		let jsString = null;
-		try {
-			jsString = JSON.stringify(aObj);
-			// Workaround for Firefox bug 485563
-			if (/[\u2028\u2029]/.test(jsString)) {
-				jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
-			}
-		}
-		catch(ex) {
-			report("SessionManager: " + ex);
-		}
-		return jsString;
-	},
+	}
 };
 
 // Register Component
