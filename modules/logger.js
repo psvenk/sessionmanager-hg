@@ -7,8 +7,10 @@ const ADDON_NAME = "Session Manager";
 const FILE_NAME = "sessionmanager_log.txt";
 const LOG_ENABLE_PREFERENCE_NAME = "extensions.sessionmanager.logging";
 const LOG_LEVEL_PREFERENCE_NAME = "extensions.sessionmanager.logging_level";
+const BUNDLE_URI = "chrome://sessionmanager/locale/sessionmanager.properties";
+const ERROR_STRING_NAME = "file_not_found";
 
-var EXPORTED_SYMBOLS = ["logger", "logging_level"];
+var EXPORTED_SYMBOLS = ["log", "logError", "deleteLogFile", "openLogFile", "logging_level"];
 
 // singleton
 var gLogger = null;
@@ -23,6 +25,56 @@ logging_level["EXTRA"] = 16;
 logging_level["ERROR"] = 32;
 
 var deletedLogOK = false;
+var errorString = "";
+
+// 
+// Public Logging functions
+// Get logger singleton (this will create it if it does not exist)
+//
+function log(aMessage, aLevel, aForce) {
+	try {
+		logger().log(aMessage, aLevel, aForce);
+	}
+	catch(ex) {
+		report(ex)
+	}
+}
+
+function logError(aMessage, aForce) {
+	try {
+		logger().logError(aMessage, aForce);
+	}
+	catch(ex) {
+		report(ex)
+	}
+}
+	
+function deleteLogFile(aForce) {
+	try {
+		logger().deleteLogFile(aForce);
+	}
+	catch(ex) {
+		report(ex)
+	}
+}
+
+function openLogFile() {
+	try {
+		if (!errorString) {
+			let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle(BUNDLE_URI);
+			errorString = bundle.GetStringFromName(ERROR_STRING_NAME);	
+		}
+	
+		logger().openLogFile();
+	}
+	catch(ex) {
+		report(ex)
+	}
+}
+
+//
+// Private Functions
+//
 
 // Function to create singleton of logging class
 function logger() {
@@ -112,11 +164,8 @@ loggerClass.prototype = {
 		
 		try { 
 			if (force || this.logEnabled) {
-				let consoleError = Cc['@mozilla.org/scripterror;1'].createInstance(Ci.nsIScriptError);
-				consoleError.init(e.message, e.fileName, e.lineNumber, e.lineNumber, e.columnNumber, 0, null);
-
-				this.mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + consoleError.toString());
-				this.write_log((new Date).toGMTString() + "): " + consoleError + "\n");
+				this.mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): {" + e.message + "} {" + e.location + "}");
+				this.write_log((new Date).toGMTString() + ": {" + e.message + "} {" + e.location + "}" + "\n");
 			}
 		}
 		catch (ex) {
@@ -135,7 +184,7 @@ loggerClass.prototype = {
 		try {
 			if (force || (this.logEnabled && (logging_level[level] & this.logLevel))) {
 				this.mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + aMessage);
-				this.write_log((new Date).toGMTString() + "): " + aMessage + "\n");
+				this.write_log((new Date).toGMTString() + ": " + aMessage + "\n");
 			}
 		}
 		catch (ex) { 
@@ -146,9 +195,9 @@ loggerClass.prototype = {
 	//
 	// Open Log File
 	//
-	openLogFile: function(aErrorString) {
+	openLogFile: function() {
 		if (!this.logFile.exists() || !(this.logFile instanceof Ci.nsILocalFile)) {
-			this.mPromptService.alert(null, ADDON_NAME, aErrorString);
+			this.mPromptService.alert(null, ADDON_NAME, errorString);
 			return;
 		}
 		try {
