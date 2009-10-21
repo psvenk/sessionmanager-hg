@@ -19,7 +19,6 @@ var gSessionManager = {
 	mPrefRoot: Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch2),
 	mWindowMediator: Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator),
 	mPromptService: Components.classes["@mozilla.org/embedcomp/prompt-service;1"].getService(Components.interfaces.nsIPromptService),
-	mProfileDirectory: Components.classes["@mozilla.org/file/directory_service;1"].getService(Components.interfaces.nsIProperties).get("ProfD", Components.interfaces.nsILocalFile),
 	mIOService: Components.classes["@mozilla.org/network/io-service;1"].getService(Components.interfaces.nsIIOService),
 	mSecretDecoderRing: Components.classes["@mozilla.org/security/sdr;1"].getService(Components.interfaces.nsISecretDecoderRing),
 	mNativeJSON: Components.classes["@mozilla.org/dom/json;1"].createInstance(Components.interfaces.nsIJSON),
@@ -39,11 +38,7 @@ var gSessionManager = {
 	mObserving2: ["quit-application", "private-browsing-change-granted", "sessionmanager:process-closed-window"],
 	mClosedWindowFile: "sessionmanager.dat",
 	mBackupSessionName: "backup.session",
-	mBackupSessionRegEx: /^backup(-[1-9](\d)*)?\.session$/,
-	mAutoSaveSessionName: "autosave.session",
-	mSessionExt: ".session",
 	mFirstUrl: "http://sessionmanager.mozdev.org/history.html",
-	mSessionRegExp: /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=([^\t|^\n|^\r]+))?(\tscreensize=(\d+)x(\d+))?/m,
 
 	mClosingWindowState: null,
 	mCleanBrowser: null,
@@ -82,6 +77,7 @@ var gSessionManager = {
 	{
 		// import logger function into gSessionManager
 		Components.utils.import("resource://sessionmanager/modules/logger.js", this);
+		Components.utils.import("resource://sessionmanager/modules/utils.js", this);
 	
 		// Define Constants using closure functions
 		const STARTUP_PROMPT = -11;
@@ -693,7 +689,6 @@ var gSessionManager = {
 		
 			// quit granted so stop listening for closed windows
 			this.mPref__stopping = true;
-			this._mUserDirectory = this.getUserDir("sessions");
 			break;
 		// timer periodic call
 		case "timer-callback":
@@ -1072,7 +1067,7 @@ var gSessionManager = {
 				if (values.append && aFileName && file.exists()) {
 					oldstate = this.readSessionFile(file);
 					if (oldstate) {
-						var matchArray = this.mSessionRegExp.exec(oldstate);
+						var matchArray = this.SESSION_REGEXP.exec(oldstate);
 						if (matchArray) {
 							oldstate = oldstate.split("\n")[4];
 							oldstate = this.decrypt(oldstate);
@@ -1196,7 +1191,7 @@ var gSessionManager = {
 			return;
 		}
 
-		var matchArray = this.mSessionRegExp.exec(state);
+		var matchArray = this.SESSION_REGEXP.exec(state);
 		if (!matchArray)
 		{
 			this.ioError();
@@ -1400,7 +1395,7 @@ var gSessionManager = {
 			if (newFile)
 			{
 				if (this.mPref_resume_session == file.leafName && this.mPref_resume_session != this.mBackupSessionName &&
-					this.mPref_resume_session != this.mAutoSaveSessionName)
+					this.mPref_resume_session != this.AUTO_SAVE_SESSION_NAME)
 				{
 					this.setPref("resume_session", filename);
 				}
@@ -1470,7 +1465,7 @@ var gSessionManager = {
 					if (file.exists()) {
 						var state = this.readSessionFile(file);
 						if (state) {
-							var matchArray = this.mSessionRegExp.exec(state);
+							var matchArray = this.SESSION_REGEXP.exec(state);
 							if (matchArray) {
 								state = state.split("\n");
 								var count = this.getCount(this.mSMHelper.mSessionData);
@@ -2113,18 +2108,6 @@ var gSessionManager = {
 		return null;
 	},
 
-	ioError: function(aException)
-	{
-		if (aException) this.logError(ex);
-		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, (this.mBundle)?this.mBundle.getFormattedString("io_error", [(aException)?aException.message:this._string("unknown_error")]):aException);
-	},
-
-	sessionError: function(aException)
-	{
-		if (aException) this.logError(ex);
-		this.mPromptService.alert((this.mBundle)?window:null, this.mTitle, (this.mBundle)?this.mBundle.getFormattedString("session_error", [(aException)?aException.message:this._string("unknown_error")]):aException);
-	},
-
 	openWindow: function(aChromeURL, aFeatures, aArgument, aParent)
 	{
 		if (!aArgument || typeof aArgument == "string")
@@ -2184,7 +2167,7 @@ var gSessionManager = {
 				var state = this.readSessionFile(file);
 				if (state) 
 				{
-					if (this.mSessionRegExp.test(state))
+					if (this.SESSION_REGEXP.test(state))
 					{
 						state = state.split("\n")
 					}
@@ -2303,165 +2286,6 @@ var gSessionManager = {
 				}, this);
 			}                 
 		}
-	},
-
-	getProfileFile: function(aFileName)
-	{
-		var file = this.mProfileDirectory.clone();
-		file.append(aFileName);
-		return file;
-	},
-	
-	getUserDir: function(aFileName)
-	{
-		var dir = null;
-		var dirname = this.getPref("sessions_dir", "");
-		try {
-			if (dirname) {
-				var dir = this.mComponents.classes["@mozilla.org/file/local;1"].createInstance(this.mComponents.interfaces.nsILocalFile);
-				dir.initWithPath(dirname);
-				if (dir.isDirectory && dir.isWritable()) {
-					dir.append(aFileName);
-				}
-				else {
-					dir = null;
-				}
-			}
-		} catch (ex) {
-			// handle the case on shutdown since the above will always throw an exception on shutdown
-			if (this._mUserDirectory) dir = this._mUserDirectory.clone();
-			else dir = null;
-		} finally {
-			return dir;
-		}
-	},
-
-	getSessionDir: function(aFileName, aUnique)
-	{
-		// Check for absolute path first, session names can't have \ or / in them so this will work.  Relative paths will throw though.
-		if (/[\\\/]/.test(aFileName)) {
-			var file = this.mComponents.classes["@mozilla.org/file/local;1"].createInstance(this.mComponents.interfaces.nsILocalFile);
-			try {
-				file.initWithPath(aFileName);
-			}
-			catch(ex) {
-				this.ioError(ex);
-				file = null;
-			}
-			return file;
-		}
-		else {
-			// allow overriding of location of sessions directory
-			var dir = this.getUserDir("sessions");
-			
-			// use default is not specified or not a writable directory
-			if (dir == null) {
-				dir = this.getProfileFile("sessions");
-			}
-			if (!dir.exists())
-			{
-				try {
-					dir.create(this.mComponents.interfaces.nsIFile.DIRECTORY_TYPE, 0700);
-				}
-				catch (ex) {
-					this.ioError(ex);
-					return null;
-				}
-			}
-			if (aFileName)
-			{
-				dir.append(aFileName);
-				if (aUnique)
-				{
-					var postfix = 1, ext = "";
-					if (aFileName.slice(-this.mSessionExt.length) == this.mSessionExt)
-					{
-						aFileName = aFileName.slice(0, -this.mSessionExt.length);
-						ext = this.mSessionExt;
-					}
-					while (dir.exists())
-					{
-						dir = dir.parent;
-						dir.append(aFileName + "-" + (++postfix) + ext);
-					}
-				}
-			}
-			return dir.QueryInterface(this.mComponents.interfaces.nsILocalFile);
-		}
-	},
-
-	//
-	// filter - optional regular expression. If specified, will only return sessions that match that expression
-	//
-	getSessions: function(filter)
-	{
-		var matchArray;
-		var sessions = [];
-		sessions.latestTime = sessions.latestBackUpTime = 0;
-		
-		var filesEnum = this.getSessionDir().directoryEntries.QueryInterface(this.mComponents.interfaces.nsISimpleEnumerator);
-		while (filesEnum.hasMoreElements())
-		{
-			var file = filesEnum.getNext().QueryInterface(this.mComponents.interfaces.nsIFile);
-			// don't try to read a directory
-			if (file.isDirectory()) continue;
-			var fileName = file.leafName;
-			var backupItem = (this.mBackupSessionRegEx.test(fileName) || (fileName == this.mAutoSaveSessionName));
-			var cached = this.getSessionCache(fileName) || null;
-			if (cached && cached.time == file.lastModifiedTime)
-			{
-				try {
-					if (filter && !filter.test(cached.name)) continue;
-				} catch(ex) { 
-					this.log ("getSessions: Bad Regular Expression passed to getSessions, ignoring", true); 
-				}
-				if (!backupItem && (sessions.latestTime < cached.timestamp)) 
-				{
-					sessions.latestTime = cached.timestamp;
-				}
-				else if (backupItem && (sessions.latestBackUpTime < cached.timestamp)) {
-					sessions.latestBackUpTime = cached.timestamp;
-				}
-				sessions.push({ fileName: fileName, name: cached.name, timestamp: cached.timestamp, autosave: cached.autosave, windows: cached.windows, tabs: cached.tabs, backup: backupItem, group: cached.group });
-				continue;
-			}
-			if (matchArray = this.mSessionRegExp.exec(this.readSessionFile(file, true)))
-			{
-				try {
-					if (filter && !filter.test(matchArray[1])) continue;
-				} catch(ex) { 
-					this.log ("getSessions: Bad Regular Expression passed to getSessions, ignoring", true); 
-				}
-				var timestamp = parseInt(matchArray[2]) || file.lastModifiedTime;
-				if (!backupItem && (sessions.latestTime < timestamp)) 
-				{
-					sessions.latestTime = timestamp;
-				}
-				else if (backupItem && (sessions.latestBackUpTime < timestamp)) {
-					sessions.latestBackUpTime = timestamp;
-				}
-				var group = matchArray[7] ? matchArray[7] : "";
-				sessions.push({ fileName: fileName, name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group });
-				// cache session data unless browser is shutting down
-				if (!this.mPref__stopping) this.setSessionCache(fileName, { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: file.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group });
-			}
-		}
-		
-		if (!this.mPref_session_list_order)
-		{
-			this.mPref_session_list_order = this.getPref("session_list_order", 1);
-		}
-		switch (Math.abs(this.mPref_session_list_order))
-		{
-		case 1: // alphabetically
-			sessions = sessions.sort(function(a, b) { return a.name.toLowerCase().localeCompare(b.name.toLowerCase()); });
-			break;
-		case 2: // chronologically
-			sessions = sessions.sort(function(a, b) { return a.timestamp - b.timestamp; });
-			break;
-		}
-		
-		return (this.mPref_session_list_order < 0)?sessions.reverse():sessions;
 	},
 
 	getClosedWindowsCount: function() {
@@ -2625,7 +2449,7 @@ var gSessionManager = {
 				this.keepOldBackups(false);
 			}
 			
-			this.delFile(this.getSessionDir(this.mAutoSaveSessionName), true);
+			this.delFile(this.getSessionDir(this.AUTO_SAVE_SESSION_NAME), true);
 		}
 		
 		this.delPref("_autosave_values");
@@ -2651,7 +2475,7 @@ var gSessionManager = {
 			if (aForceSave || !this.isPrivateBrowserMode()) {
 				var state = this.getSessionState(this._string("autosave_session"), null, null, null, (this._string_backup_sessions || this._string("backup_sessions")));
 				if (!state) return;
-				this.writeFile(this.getSessionDir(this.mAutoSaveSessionName), state);
+				this.writeFile(this.getSessionDir(this.AUTO_SAVE_SESSION_NAME), state);
 			}
 		}
 		catch (ex)
@@ -2812,7 +2636,7 @@ var gSessionManager = {
 			this.writeFile(aFile, state);
 		}
 		// Not latest session format
-		else if ((/^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!this.mSessionRegExp.test(state)))
+		else if ((/^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!this.SESSION_REGEXP.test(state)))
 		{
 			// This should always match, but is required to get the RegExp values set correctly.
 			// matchArray[0] - Entire 4 line header
@@ -3006,6 +2830,7 @@ var gSessionManager = {
 				if (!doNotDecode) aData = decodeURIComponent(aData);
 			}
 			catch (ex) { 
+				this.logError(ex);
 				if (!aNoError) this.cryptError(ex); 
 				// encrypted file corrupt, return false so as to not break things checking for aData.
 				if (ex.name != "NS_ERROR_NOT_AVAILABLE") { 
@@ -3056,7 +2881,7 @@ var gSessionManager = {
 				var state = this.readSessionFile(file);
 				if (state) 
 				{
-					if (this.mSessionRegExp.test(state))
+					if (this.SESSION_REGEXP.test(state))
 					{
 						state = state.split("\n")
 						state[4] = this.decryptEncryptByPreference(state[4]);
@@ -3537,7 +3362,7 @@ var gSessionManager = {
 			var state = this.readSessionFile(file);
 			if (state) 
 			{
-				if (this.mSessionRegExp.test(state))
+				if (this.SESSION_REGEXP.test(state))
 				{
 					state = state.split("\n")
 					state[4] = this.decryptEncryptByPreference(state[4]);
@@ -3902,11 +3727,6 @@ var gSessionManager = {
 		}).join("%");
 	},
 
-	makeFileName: function(aString)
-	{
-		return aString.replace(/[^\w ',;!()@&*+=~\x80-\xFE-]/g, "_").substr(0, 64) + this.mSessionExt;
-	},
-	
 	// Look for open window sessions
 	getWindowSessions: function()
 	{
@@ -3994,71 +3814,6 @@ var gSessionManager = {
 	{
 		return this.mBundle.getString(aName);
 	},
-
-	// Decode JSON string to javascript object - use JSON if built-in.
-	JSON_decode: function(aStr, noError) {
-		var jsObject = { windows: [{ tabs: [{ entries:[] }], selected:1, _closedTabs:[] }], _JSON_decode_failed:true };
-		try {
-			var hasParens = ((aStr[0] == '(') && aStr[aStr.length-1] == ')');
-		
-			// JSON can't parse when string is wrapped in parenthesis
-			if (hasParens) {
-				aStr = aStr.substring(1, aStr.length - 1);
-			}
-		
-			// Session Manager 0.6.3.5 and older had been saving non-JSON compiant data so try to use evalInSandbox if JSON parse fails
-			try {
-				jsObject = this.mNativeJSON.decode(aStr);
-			}
-			catch (ex) {
-				if (/[\u2028\u2029]/.test(aStr)) {
-					aStr = aStr.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
-				}
-				jsObject = this.mComponents.utils.evalInSandbox("(" + aStr + ")", new this.mComponents.utils.Sandbox("about:blank"));
-			}
-		}
-		catch(ex) {
-			jsObject._JSON_decode_error = ex;
-			if (!noError) this.sessionError(ex);
-		}
-		return jsObject;
-	},
-	
-	// Encode javascript object to JSON string - use JSON if built-in.
-	JSON_encode: function(aObj) {
-		var jsString = null;
-		try {
-			jsString = this.mNativeJSON.encode(aObj);
-			// Needed until Firefox bug 387859 is fixed or else Firefox won't except JSON strings with \u2028 or \u2029 characters
-			if (/[\u2028\u2029]/.test(jsString)) {
-				jsString = jsString.replace(/[\u2028\u2029]/g, function($0) {"\\u" + $0.charCodeAt(0).toString(16)});
-			}
-		}
-		catch(ex) {
-			this.sessionError(ex);
-		}
-		return jsString;
-	},
-	
-	// 
-	// Logging functions
-	// Get logger singleton (this will create it if it does not exist)
-	//
-	log: function(aMessage, aLevel, aForce) {
-		if (this.logger()) this.logger().log(aMessage, aLevel, aForce);
-	},
-
-	logError: function(aMessage, aForce) {
-		if (this.logger()) this.logger().logError(aMessage, aForce);
-	},
-	
-	deleteLogFile: function(aForce) {
-		if (this.logger()) this.logger().deleteLogFile(aForce);
-	},
-
-	openLogFile: function() {
-		if (this.logger()) this.logger().openLogFile(this._string("file_not_found"));
-	}
 };
 
 // String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
