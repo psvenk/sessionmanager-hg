@@ -2,7 +2,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 
-Cu.import("resource://sessionmanager/modules/logger.js");
+Cu.import("resource://sessionmanager/modules/logger.jsm");
 
 var EXPORTED_SYMBOLS = ["ioError", "sessionError", "makeFileName", "getProfileFile", "getSessionDir", "JSON_decode", "JSON_encode", "getSessions",
                         "SESSION_REGEXP", "AUTO_SAVE_SESSION_NAME", "SESSION_EXT", "cache"];

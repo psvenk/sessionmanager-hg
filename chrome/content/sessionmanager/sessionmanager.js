@@ -72,8 +72,8 @@ var gSessionManager = {
 	initialize: function()
 	{
 		// import logger and Util functions into gSessionManager
-		Components.utils.import("resource://sessionmanager/modules/logger.js", this);
-		Components.utils.import("resource://sessionmanager/modules/utils.js", this);
+		Components.utils.import("resource://sessionmanager/modules/logger.jsm", this);
+		Components.utils.import("resource://sessionmanager/modules/utils.jsm", this);
 	
 		// Define Constants using closure functions
 		const STARTUP_PROMPT = -11;
