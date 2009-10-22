@@ -62,8 +62,8 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 function SessionManagerHelperComponent() {
 	try {
 		// import logger
-		Cu.import("resource://sessionmanager/modules/logger.js", this);
-		Cu.import("resource://sessionmanager/modules/utils.js", this);
+		Cu.import("resource://sessionmanager/modules/logger.jsm", this);
+		Cu.import("resource://sessionmanager/modules/utils.jsm", this);
 	}
 	catch (ex) {
 		report(ex);
