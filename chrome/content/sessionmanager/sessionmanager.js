@@ -45,10 +45,6 @@ var gSessionManager = {
 	mClosedWindowName: null,
 	
 	// Application storage names
-	mSessionCache: "sessionmanager.cache.session.",
-	mClosedWindowsCacheData: "sessionmanager.cache.closedWindows.data",
-	mClosedWindowsCacheTimestamp: "sessionmanager.cache.closedWindows.timestamp",
-	mClosedWindowsCacheLength: "sessionmanager.cache.closedWindows.length",
 	mActiveWindowSessions: "sessionmanager.activeWindowSessions",
 	mAlreadyShutdown: "sessionmanager.alreadyShutdown",
 	mShutdownPromptResults: "sessionmanager.shutdown_prompt_results",
@@ -75,7 +71,7 @@ var gSessionManager = {
 	
 	initialize: function()
 	{
-		// import logger function into gSessionManager
+		// import logger and Util functions into gSessionManager
 		Components.utils.import("resource://sessionmanager/modules/logger.js", this);
 		Components.utils.import("resource://sessionmanager/modules/utils.js", this);
 	
@@ -494,7 +490,7 @@ var gSessionManager = {
 			this.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 
 			// This will run the shutdown processing if the preference is set and the last browser window is closed manually
-			if (this.mPref_shutdown_on_last_window_close && !this.mPref__stopping) {
+			if (this.mPref_shutdown_on_last_window_close && !this._stopping) {
 				this.mObserving2.forEach(function(aTopic) {
 					this.mObserverService.removeObserver(this, aTopic);
 				}, this);
@@ -688,7 +684,7 @@ var gSessionManager = {
 			}
 		
 			// quit granted so stop listening for closed windows
-			this.mPref__stopping = true;
+			this._stopping = true;
 			break;
 		// timer periodic call
 		case "timer-callback":
@@ -822,13 +818,13 @@ var gSessionManager = {
 			this.closeSession(true, false, this._restart_requested);
 		}
 			
-		this.log("onWindowClose: running = " + this.isRunning() + ", stopping = " + this.mPref__stopping, "DATA");
+		this.log("onWindowClose: running = " + this.isRunning() + ", _stopping = " + this._stopping, "DATA");
 		
 		var numWindows = this.getBrowserWindows().length;
 		this.log("onWindowClose: numWindows = " + numWindows, "DATA");
 		
 		// only save closed window if running and not shutting down 
-		if (this.isRunning() && !this.mPref__stopping)
+		if (this.isRunning() && !this._stopping)
 		{
 			// save window in closed window list if not last window
 			if (numWindows > 0)
@@ -1370,7 +1366,7 @@ var gSessionManager = {
 	rename: function(aSession)
 	{
 		var values;
-		if (aSession) values = { name: aSession, text: this.getSessionCache(aSession).name };
+		if (aSession) values = { name: aSession, text: this.cache.session[aSession].name };
 		else values = {};
 		
 		if (!this.prompt(this._string("rename_session"), this._string("rename_session_ok"), values, this._string("rename2_session")))
@@ -1390,7 +1386,7 @@ var gSessionManager = {
 			// Get original name
 			if (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(state)) oldname = RegExp.$2;
 			// remove group name if it was a backup session
-			if (this.getSessionCache(values.name).backup) state = state.replace(/\tgroup=[^\t|^\n|^\r]+/m, "");
+			if (this.cache.session[values.name].backup) state = state.replace(/\tgroup=[^\t|^\n|^\r]+/m, "");
 			this.writeFile(newFile || file, this.nameState(state, values.text));
 			if (newFile)
 			{
@@ -1493,7 +1489,7 @@ var gSessionManager = {
 					this.setPref("startup", 0);
 				}
 				// In case deleting an auto-save or window session, update browser data
-				this.updateAutoSaveSessions(this.getSessionCache(aFileName).name);
+				this.updateAutoSaveSessions(this.cache.session[aFileName].name);
 				this.delFile(this.getSessionDir(aFileName));
 			}, this);
 		}
@@ -1998,10 +1994,10 @@ var gSessionManager = {
 			group = parent.label;
 		}
 		if (aOneWindow) {
-			this.saveWindow(this.getSessionCache(session).name, session, group);
+			this.saveWindow(this.cache.session[session].name, session, group);
 		}
 		else {
-			this.save(this.getSessionCache(session).name, session, group);
+			this.save(this.cache.session[session].name, session, group);
 		}
 	},
 	
@@ -2316,20 +2312,24 @@ var gSessionManager = {
 		var data = null;
 		var file = this.getProfileFile(this.mClosedWindowFile);
 		if (!file.exists()) return (aLengthOnly ? 0 : []);
-		else if (file.lastModifiedTime > this.getClosedWindowCache(false)) {
+		else if (file.lastModifiedTime > this.cache.closedWindow.timestamp) {
 			data = this.readFile(this.getProfileFile(this.mClosedWindowFile));
-			this.setClosedWindowCache(data, file.lastModifiedTime);
-			if (aLengthOnly) return (data ? data.split("\n\n").length : 0);
+			data = data ? data.split("\n\n") : null;
+			this.cache.setClosedWindowCache(data, file.lastModifiedTime);
+			if (aLengthOnly) return (data ? data.length : 0);
 		}
 		else {
-			data = this.getClosedWindowCache(true, aLengthOnly);
-			if (aLengthOnly) return data;
+			data = this.cache.closedWindow.data;
 		}
-		
-		return (data)?data.split("\n\n").map(function(aEntry) {
-			var parts = aEntry.split("\n");
-			return { name: parts.shift(), state: parts.join("\n") };
-		}):[];
+		if (aLengthOnly) {
+			return (data ? data.length : 0);
+		}
+		else {
+			return (data)?data.map(function(aEntry) {
+				var parts = aEntry.split("\n");
+				return { name: parts.shift(), state: parts.join("\n") };
+			}):[];
+		}
 	},
 
 	// Stored closed windows into Session Store or Session Manager controller list.
@@ -2358,10 +2358,10 @@ var gSessionManager = {
 		{
 			var data = aList.map(function(aEntry) {
 				return aEntry.name + "\n" + aEntry.state
-			}).join("\n\n");
+			});
 			try {
-				this.writeFile(file, data);
-				this.setClosedWindowCache(data, file.lastModifiedTime);
+				this.writeFile(file, data.join("\n\n"));
+				this.cache.setClosedWindowCache(data, file.lastModifiedTime);
 			}
 			catch(ex) {
 				this.ioError(ex);
@@ -2372,7 +2372,7 @@ var gSessionManager = {
 		{
 			try {
 				this.delFile(file);
-				this.setClosedWindowCache(null, 0);
+				this.cache.setClosedWindowCache(null, 0);
 			}
 			catch(ex) {
 				this.ioError(ex);
@@ -3150,33 +3150,6 @@ var gSessionManager = {
 		return this.mApplication.storage.set("sessionmanager._running", aValue);
 	},
 
-	// Caching functions
-	getSessionCache: function(aName) {
-		return this.mApplication.storage.get(this.mSessionCache + aName, null);
-	},
-	
-	setSessionCache: function(aName, aData) {
-		this.mApplication.storage.set(this.mSessionCache + aName, aData);
-	},
-	
-	getClosedWindowCache: function(aData, aLengthOnly) {
-		if (aData && aLengthOnly) {
-			return this.mApplication.storage.get(this.mClosedWindowsCacheLength, 0);
-		}
-		else if (aData) {
-			return this.mApplication.storage.get(this.mClosedWindowsCacheData, null);
-		}
-		else {
-			return this.mApplication.storage.get(this.mClosedWindowsCacheTimestamp, 0);
-		}
-	},
-
-	setClosedWindowCache: function(aData, aTimestamp) {
-		this.mApplication.storage.set(this.mClosedWindowsCacheData, aData);
-		this.mApplication.storage.set(this.mClosedWindowsCacheTimestamp, (aData ? aTimestamp : 0));
-		this.mApplication.storage.set(this.mClosedWindowsCacheLength, (aData ? aData.split("\n\n").length : 0));
-	},
-	
 	// Read Autosave values from preference and store into global variables
 	getAutoSaveValues: function(aValues, aOneWindow)
 	{

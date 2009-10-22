@@ -83,7 +83,7 @@ function initTreeView(aFileName, aDeleting) {
       return;
     }
 
-    if (!gSessionManager.mSessionRegExp.test(state))
+    if (!gSessionManager.SESSION_REGEXP.test(state))
     {
       gSessionManager.sessionError();
       return;
