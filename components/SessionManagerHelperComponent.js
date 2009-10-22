@@ -50,7 +50,6 @@ const SM_BACKUP_SESSION_PREFERENCE = "extensions.sessionmanager.backup_session";
 const SM_ENCRYPT_SESSIONS_PREFERENCE = "extensions.sessionmanager.encrypt_sessions";
 const SM_RESUME_SESSION_PREFERENCE = "extensions.sessionmanager.resume_session";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
-const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
 const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "extensions.sessionmanager.shutdown_on_last_window_close";
 
 // Session Manager app storage values
