@@ -5,7 +5,7 @@ const Cu = Components.utils;
 Cu.import("resource://sessionmanager/modules/logger.js");
 
 var EXPORTED_SYMBOLS = ["ioError", "sessionError", "makeFileName", "getProfileFile", "getSessionDir", "JSON_decode", "JSON_encode", "getSessions",
-                        "SESSION_REGEXP", "AUTO_SAVE_SESSION_NAME", "SESSION_EXT"];
+                        "SESSION_REGEXP", "AUTO_SAVE_SESSION_NAME", "SESSION_EXT", "cache"];
 
 var JSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
 var Application = null;
@@ -15,7 +15,21 @@ const SESSION_EXT = ".session";
 const BACKUP_SESSION_REGEXP = /^backup(-[1-9](\d)*)?\.session$/;
 const AUTO_SAVE_SESSION_NAME = "autosave.session";
 const SESSION_REGEXP = /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=([^\t|^\n|^\r]+))?(\tscreensize=(\d+)x(\d+))?/m;
+const SM_SESSIONS_DIR_PREFERENCE = "extensions.sessionmanager.sessions_dir";
 
+//
+// Exported Variables
+//
+
+var cache = {
+	session: [],
+	closedWindow: { timestamp: 0, data: null },
+	
+	setClosedWindowCache: function(aData, aTimestamp) {
+		this.closedWindow.data = aData;
+		this.closedWindow.timestamp = (aData ? aTimestamp : 0);
+	},
+};
 
 //
 // Exported Functions
@@ -157,8 +171,6 @@ function getSessions(filter)
 	let sessions = [];
 	sessions.latestTime = sessions.latestBackUpTime = 0;
 	
-	let _stopping = Application.prefs.get("extensions.sessionmanager.session_list_order");
-		
 	let filesEnum = getSessionDir().directoryEntries.QueryInterface(Ci.nsISimpleEnumerator);
 	while (filesEnum.hasMoreElements())
 	{
@@ -167,7 +179,7 @@ function getSessions(filter)
 		if (file.isDirectory()) continue;
 		let fileName = file.leafName;
 		let backupItem = (BACKUP_SESSION_REGEXP.test(fileName) || (fileName == AUTO_SAVE_SESSION_NAME));
-		let cached = this.getSessionCache(fileName) || null;
+		let cached = cache.session[fileName] || null;
 		if (cached && cached.time == file.lastModifiedTime)
 		{
 			try {
@@ -202,8 +214,7 @@ function getSessions(filter)
 			}
 			let group = matchArray[7] ? matchArray[7] : "";
 			sessions.push({ fileName: fileName, name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group });
-			// cache session data unless browser is shutting down
-			if (!_stopping) this.setSessionCache(fileName, { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: file.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group });
+			cache.session[fileName] = { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: file.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group };
 		}
 	}
 
@@ -227,26 +238,15 @@ function getSessions(filter)
 // Private Functions and Objects
 //
 
-function init() {
-	// Get FUEL (SMILE in SeaMonkey) library
-	if (Cc["@mozilla.org/fuel/application;1"]) {
-		Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
-	} else if (Components.classes["@mozilla.org/smile/application;1"]) {
-		Application = Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication);
-	}
-}
-
 // Object to save user session directory on browser shut down
-function UserDirectory() {
-	if (!this._initialized) this._init();
-}
-UserDirectory = {
+var UserDirectory = {
 	_initialized: false,
 	_userDirectory: null,
 
-	_init: function() {
+	init: function() {
 		let os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
 		os.addObserver(this, "quit-application-granted", false);
+		this._initialized = true;
 	},
 	
 	observe: function(aSubject, aTopic, aData) {
@@ -296,4 +296,11 @@ function error(aException, aString) {
 		alert((typeof(window)=="object")?window:null, bundle.GetStringFromName("sessionManager"), bundle.formatStringFromName(aString, [(aException)?(aException.message + "\n\n" + aException.location):bundle.GetStringFromName("unknown_error")], 1));
 }
 
-init();
+
+// Get FUEL (SMILE in SeaMonkey) library
+if (Cc["@mozilla.org/fuel/application;1"]) {
+	Application = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
+} else if (Components.classes["@mozilla.org/smile/application;1"]) {
+	Application = Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication);
+}
+UserDirectory.init();
