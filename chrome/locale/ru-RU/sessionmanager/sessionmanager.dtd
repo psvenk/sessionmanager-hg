@@ -66,7 +66,7 @@
 <!ENTITY load.accesskey "З">
 <!ENTITY prompt.append.label "Добавить к сессии">
 <!ENTITY prompt.replace.label "Заменить сессию">
-<!ENTITY ctrl_click_note.label "Внимание: щелчок по вкладке с нажатой клавишей <Ctrl> добавит вкладку к содержимому существующего окна.">
+<!ENTITY ctrl_click_note.label "Внимание: щелчок по вкладке с нажатой клавишей &lt;Ctrl&gt; добавит вкладку к содержимому существующего окна.">
 <!ENTITY select_all.label "Выбрать все">
 <!ENTITY select_none.label "Ничего не выбирать">
 <!ENTITY toggle_selection.label "Переключить выбор">
