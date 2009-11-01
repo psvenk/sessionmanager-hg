@@ -78,3 +78,5 @@
 <!ENTITY closeWindowSession.accesskey "i">
 <!ENTITY abandonWindowSession.label "Fenster-Sitzung verlassen">
 <!ENTITY abandonWindowSession.accesskey "v">
+<!ENTITY load_append_window.label "Sitzung laden (Zu aktuellem Fenster hinzufügen)">
+<!ENTITY load_append_window.accesskey "f">

@@ -14,11 +14,11 @@
 <!ENTITY autosave_session.accesskey "a">
 <!ENTITY restoring.caption "Sitzungs-Wiederherstellung">
 <!ENTITY sessionList.caption "Sitzungs-Liste">
-<!ENTITY orderList.label "Die Sitzungen folgendermaßen sortieren:">
+<!ENTITY orderList.label "Sortierreihenfolge der Sitzungen:">
 <!ENTITY orderList.accesskey "D">
 <!ENTITY orderList.label1 "alphabetisch">
-<!ENTITY orderList.label2 "älteste bis neueste">
-<!ENTITY orderList.label_2 "neueste bis älteste">
+<!ENTITY orderList.label2 "nach Alter (absteigend)">
+<!ENTITY orderList.label_2 "nach Alter (aufsteigend)">
 <!ENTITY max_backup.label "Anzahl vorhergehender (abgestürzter) Sitzungs-Backups:">
 <!ENTITY max_backup.accesskey "K">
 <!ENTITY undoClose.caption "Wiederherstellen">
@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Sichern im Privaten Modus erlauben">
 <!ENTITY allow_saving_during_pbm.label2 "Erfordert aktivierte Verschlüsselung, siehe &quot;Erweitert&quot;">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
+<!ENTITY session_name_in_titlebar.label "Namen der aktiven Sitzung in der Titelzeile anzeigen">
+<!ENTITY session_name_in_titlebar.accesskey "N">
+<!ENTITY prepend.label "Voranstellen">
+<!ENTITY append.label "Anfügen">
+<!ENTITY donotadd.label "Nicht hinzufügen">
