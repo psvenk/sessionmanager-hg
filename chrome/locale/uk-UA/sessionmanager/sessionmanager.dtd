@@ -14,7 +14,7 @@
 <!ENTITY remove.accesskey "В">
 <!ENTITY openFolder.label "Відкрити теку сеансу">
 <!ENTITY openFolder.accesskey "Т">
-<!ENTITY options.label "Налаштування Менеджера Сесій">
+<!ENTITY options.label "Налаштування Менеджера Сеансів">
 <!ENTITY options.accesskey "Н">
 <!ENTITY undoClosed.label "Перевідкрити закриті...">
 <!ENTITY undoClosed.accesskey "С">
@@ -22,29 +22,29 @@
 <!ENTITY closedTabs "Закриті вкладки:">
 <!ENTITY clearList.label "Очистити список закритих...">
 <!ENTITY clearList.accesskey "С">
-<!ENTITY toolbar.tooltip "Зберегти поточну сеанс перегляду...">
+<!ENTITY toolbar.tooltip "Зберегти поточний сеанс перегляду...">
 <!ENTITY toolbar.undo.label "Відмінити закриття">
 <!ENTITY toolbar.undo.tooltip "Перевідкрити нещодавно закриті вкладки">
 <!ENTITY prompt.ignore.label "Не показувати цей діалог знову">
-<!ENTITY prompt.autosave.label "Зробити це авто-збереженою сесією">
+<!ENTITY prompt.autosave.label "Зробити це авто-збереженим сеансом">
 <!ENTITY prompt.tabprompt.label "Запит на вкладки при відновленні">
-<!ENTITY load_replace.label "Завантажити (Замінити поточну сеанс)">
+<!ENTITY load_replace.label "Завантажити (Замінити поточний сеанс)">
 <!ENTITY load_replace.accesskey "З">
 <!ENTITY load_append.label "Завантажити (Додати до поточного сеансу)">
 <!ENTITY load_append.accesskey "Д">
 <!ENTITY replace_all.label "Замінити сеанс поточним сеансом">
-<!ENTITY replace_all.accesskey "М">
+<!ENTITY replace_all.accesskey "п">
 <!ENTITY replace_window.label "Замінити сеанс поточним вікном">
-<!ENTITY replace_window.accesskey "В">
+<!ENTITY replace_window.accesskey "в">
 <!ENTITY remove_one.label "Вилучити сеанс...">
 <!ENTITY set_startup.label "Встановити як сеанс для старту">
-<!ENTITY set_startup.accesskey "П">
+<!ENTITY set_startup.accesskey "с">
 <!ENTITY openSessionManagerSidebar.commandkey "S">
 <!ENTITY session_name.label "Назва">
 <!ENTITY session_windows.label "Вікна">
 <!ENTITY session_tabs.label "Вкладки">
 <!ENTITY backup_sessions.label "Збережені сеанси">
-<!ENTITY backup_sessions.accesskey "А">
+<!ENTITY backup_sessions.accesskey "б">
 <!ENTITY remove_item.label "Вилучити запис">
 <!ENTITY remove_item.accesskey "В">
 <!ENTITY session_group.label "Група">
@@ -63,7 +63,7 @@
 <!--   LOCALIZATION NOTE: &#37;S will be replaced with a number.   -->
 <!ENTITY winTabTree.windowLabel "Вікно &#37;S">
 <!ENTITY load.label "Завантажити сеанс...">
-<!ENTITY load.accesskey "З">
+<!ENTITY load.accesskey "а">
 <!ENTITY prompt.append.label "Додати до сеансу">
 <!ENTITY prompt.replace.label "Замістити сеанс">
 <!ENTITY ctrl_click_note.label "Зауважте: клацання по вкладці з натисненою клавішею CTRL відкриє цю вкладку в існуючому вікні">
@@ -76,7 +76,7 @@
 <!ENTITY session_explorer.accesskey "П">
 <!ENTITY closeWindowSession.label "Зберегти й закрити вікно сеансу">
 <!ENTITY closeWindowSession.accesskey "і">
-<!ENTITY abandonWindowSession.label "Полишити вікно сеансу">
-<!ENTITY abandonWindowSession.accesskey "п">
+<!ENTITY abandonWindowSession.label "Покинути вікно сеансу">
+<!ENTITY abandonWindowSession.accesskey "П">
 <!ENTITY load_append_window.label "Завантажити (Додати до поточного вікна)">
-<!ENTITY load_append_window.accesskey "п">
+<!ENTITY load_append_window.accesskey "З">

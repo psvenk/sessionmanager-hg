@@ -6,7 +6,7 @@
 <!ENTITY backup_sess.label "При закритті">
 <!ENTITY backup_sess.accesskey "з">
 <!ENTITY backup_session.label0 "відкинути поточний сеанс">
-<!ENTITY backup_session.label1 "зберегти поточну сеанс">
+<!ENTITY backup_session.label1 "зберегти поточний сеанс">
 <!ENTITY backup_session.label2 "запит на збереження поточного сеансу">
 <!ENTITY crashrecovery.label "Увімкнути відновлення у разі відмови">
 <!ENTITY crashrecovery.accesskey "в">
@@ -29,9 +29,9 @@
 <!ENTITY max_tabs.accesskey "в">
 <!ENTITY submenu.label "Список всіх закритих вікон й вкладок в підменю">
 <!ENTITY submenu.accesskey "с">
-<!ENTITY persistence.caption "Постійність">
+<!ENTITY persistence.caption "Відновлення">
 <!ENTITY closed_tabs.label "Відновлювати список закритих вкладок (якщо можливо) для всіх вікон:">
-<!ENTITY closed_tabs.accesskey "е">
+<!ENTITY closed_tabs.accesskey "і">
 <!ENTITY closed_tabs.label0 "ніколи">
 <!ENTITY closed_tabs.label1 "при старті">
 <!ENTITY closed_tabs.label2 "завжди">
@@ -50,9 +50,9 @@
 <!ENTITY interval.label "Мінімальний часовий інтервал між двома збереженнями станів (в секундах):">
 <!ENTITY interval.accesskey "і">
 <!ENTITY postdata.label "Максимальний обсяг POSTDATA до збереження (в байтах; -1 для всього):">
-<!ENTITY postdata.accesskey "х">
+<!ENTITY postdata.accesskey "о">
 <!ENTITY privacy.label "Зберігати вразливі дані (дані форм, POSTDATA та куки) для">
-<!ENTITY privacy.accesskey "п">
+<!ENTITY privacy.accesskey "в">
 <!ENTITY privacy.level0 "всіх сайтів">
 <!ENTITY privacy.level1 "лише для незашифрованих сайтів">
 <!ENTITY privacy.level2 "жодних сайтів">
@@ -80,9 +80,9 @@
 <!ENTITY cookies.accesskey "З">
 <!ENTITY sessionImport.caption "Імпортувати сеанси з...">
 <!ENTITY importSS.label "Зберігач сеансів">
-<!ENTITY importSS.accesskey "і">
+<!ENTITY importSS.accesskey "З">
 <!ENTITY importTMP.label "Tab Mix Plus">
-<!ENTITY importTMP.accesskey "і">
+<!ENTITY importTMP.accesskey "T">
 <!ENTITY apply.label "Застосувати">
 <!ENTITY save_and_restore.caption "Збереження й відновлення">
 <!ENTITY display.caption "Відображення">
