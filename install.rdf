@@ -68,7 +68,6 @@
     <em:translator >Natanael_L01 (Swedish)</em:translator >
     <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
     <em:translator >Cătălin Zamfirescu (Romanian)</em:translator >
-	<em:translator >dplanella (Catalan)</em:translator >
 	<em:translator >Zhouck (Ukrainian)</em:translator >
 	<em:translator >3kornepenal (Serbian)</em:translator >
     <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -78,47 +77,6 @@
     <em:iconURL>chrome://sessionmanager/skin/icon.png</em:iconURL>  
 	
     <!-- Localizations -->
-    <em:localized>
-      <Description>
-        <em:locale>ca</em:locale>
-        <em:name>Session Manager</em:name>
-        <em:description>Saves and restores the state of all windows.</em:description>
-        <em:creator>Morac</em:creator>
-        <em:contributor>zeniko (Original Author)</em:contributor>
-        <em:contributor>Danil Ivanov (Cache Fixer)</em:contributor>
-        <em:contributor>dougeeebear (Session Manager icon)</em:contributor>
-        <em:contributor>Icon Design at ReadyIcons.com (options icons)</em:contributor>
-        <em:translator >BabelZilla translators:</em:translator >
-        <em:translator >Andrea (Italian)</em:translator >
-        <em:translator >Rick Cart (Chinese [zh-CN])</em:translator >
-        <em:translator >Teboga (Portuguese - Brazillian)</em:translator >
-        <em:translator >jojaba (French)</em:translator >
-        <em:translator >Edgaras JanuÅ¡auskas, garas (Lithuanian)</em:translator >
-        <em:translator >Proyecto Nave, chuzo (Spanish)</em:translator >
-        <em:translator >Leszek (teo) Å»yczkowski (Polish)</em:translator >
-        <em:translator >Haebaru (Japanese)</em:translator >
-        <em:translator >stoneflash (Russian)</em:translator >
-        <em:translator >JW_00000 (Dutch)</em:translator >
-        <em:translator >Ossipoff (Danish)</em:translator >
-        <em:translator >SerdarSahin (Turkish)</em:translator >
-        <em:translator >Wladow (Slovak)</em:translator >
-        <em:translator >Team erweiterungen.de, ReinekeFux (German)</em:translator >
-        <em:translator >Mikes Kaszmán István (Hungarian)</em:translator >
-        <em:translator >Kape123 (Serbian)</em:translator >
-        <em:translator >lloco (Portuguese)</em:translator >
-        <em:translator >PetrTwo (Czech)</em:translator >
-        <em:translator >Kenmooda (Finish)</em:translator >
-        <em:translator >Ivan Jonoski (Macedonian)</em:translator >
-        <em:translator >Elapsem (Korean)</em:translator >
-        <em:translator >Natanael_L01 (Swedish)</em:translator >
-        <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
-        <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
-		<em:translator >Zhouck (Ukrainian)</em:translator >
-		<em:translator >3kornepenal (Serbian)</em:translator >
-        <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
-      </Description>
-    </em:localized>
     <em:localized>
       <Description>
         <em:locale>cs-CZ</em:locale>
@@ -154,7 +112,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -195,7 +152,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -236,7 +192,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -277,7 +232,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -318,7 +272,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -359,7 +312,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -400,7 +352,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -441,7 +392,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -482,7 +432,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -523,7 +472,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -564,7 +512,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -605,7 +552,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -646,7 +592,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -687,7 +632,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -728,7 +672,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -769,7 +712,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -810,7 +752,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -851,7 +792,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -892,7 +832,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -933,7 +872,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -974,7 +912,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -1015,7 +952,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -1056,7 +992,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -1097,7 +1032,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -1138,7 +1072,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
@@ -1179,7 +1112,6 @@
         <em:translator >Natanael_L01 (Swedish)</em:translator >
         <em:translator >Tsprajna (Chinese [zh-TW])</em:translator >
         <em:translator >x10firefox (Romanian)</em:translator >
-		<em:translator >dplanella (Catalan)</em:translator >
 		<em:translator >Zhouck (Ukrainian)</em:translator >
 		<em:translator >3kornepenal (Serbian)</em:translator >
         <em:homepageURL>http://sessionmanager.mozdev.org/</em:homepageURL>
