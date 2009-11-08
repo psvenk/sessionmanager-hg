@@ -182,8 +182,12 @@ with (com.morac) {
 			// The window value is also cleared on a "quit-application-granted", but that doesn't fire when the last browser window is manually closed.
 			window.addEventListener("close", this.onClose_proxy, false);		
 			window.addEventListener("unload", this.onUnload_proxy, false);
-				
-			gSessionManager.mEOL = this.getEOL();
+
+			// Make sure the EOL character is set
+			if (!gSessionManager.mEOL_Set) {
+				gSessionManager.mEOL = /win|os[\/_]?2/i.test(navigator.platform)?"\r\n":/mac/i.test(navigator.platform)?"\r":"\n";
+				gSessionManager.mEOL_Set = true;
+			}
 			
 			// Fix tooltips for toolbar buttons
 			let buttons = [document.getElementById("sessionmanager-toolbar"), document.getElementById("sessionmanager-undo")];
@@ -293,10 +297,11 @@ with (com.morac) {
 			
 			// Put up one time message after upgrade if it needs to be displayed
 			if (gSessionManager._displayUpdateMessage) {
-				gSessionManager._displayUpdateMessage = null;
+				let url = gSessionManager._displayUpdateMessage;
+				delete(gSessionManager._displayUpdateMessage);
 				setTimeout(function() {
 					let tBrowser = getBrowser();
-					tBrowser.selectedTab = tBrowser.addTab(gSessionManager._displayUpdateMessage);
+					tBrowser.selectedTab = tBrowser.addTab(url);
 				},100);
 			}
 			
@@ -658,10 +663,6 @@ with (com.morac) {
 			SessionStore.undoCloseTab(window, aIndex || 0);
 			// Only need to check for empty close tab list if possibly re-opening last closed tabs
 			if (!aIndex) this.updateUndoButton();
-		},
-	
-		getEOL: function() 	{
-			return /win|os[\/_]?2/i.test(navigator.platform)?"\r\n":/mac/i.test(navigator.platform)?"\r":"\n";
 		},
 	}
 	

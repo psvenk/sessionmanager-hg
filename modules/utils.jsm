@@ -72,7 +72,8 @@ var gSessionManager = {
 	_temp_restore: null,
 	
 	// EOL character - this will get overwritten when a window is open, but set something here to prevent breaking session files
-	//mEOL: "\n",
+	mEOL_Set: false,
+	mEOL: "\n",
 	
 	// Timers
 	_timer : null,
