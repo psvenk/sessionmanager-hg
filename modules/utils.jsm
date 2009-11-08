@@ -1577,6 +1577,7 @@ var gSessionManager = {
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
 						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) |
 						  ((aValues.append_replace)?64:0) | ((aValues.preselect)?128:0) | ((aValues.allowNamedReplace)?256:0));
+		params.SetInt(2, ((aValues.selectAll)?1:0));
 		
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, this.getMostRecentWindow());
 		
