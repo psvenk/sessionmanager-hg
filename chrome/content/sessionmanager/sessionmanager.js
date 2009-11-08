@@ -170,12 +170,6 @@ with (com.morac) {
 		onLoad: function() {
 			log("onLoad start, window = " + document.title, "TRACE");
 			
-			// Hook into Tab Mix Plus
-			if (typeof(convertSession) == "object" && typeof(convertSession.doConvert) == "function") {
-				convertSession.doConvert = this.doTMPConvert;
-				convertSession.convertFile = this.doTMPConvertFile;
-			}
-		
 			// The close event fires when the window is either manually closed or when the window.close() function is called.  It does not fire on shutdown or when
 			// windows close from loading sessions.  The unload event fires any time the window is closed, but fires too late to use SessionStore's setWindowValue.
 			// We need to listen to both of them so that the window session window value can be cleared when the window is closed manually.
@@ -189,6 +183,12 @@ with (com.morac) {
 				gSessionManager.mEOL_Set = true;
 			}
 			
+			// Hook into Tab Mix Plus to handle session conversion
+			if (typeof(convertSession) == "object" && typeof(convertSession.doConvert) == "function") {
+				convertSession.doConvert = this.doTMPConvert;
+				convertSession.convertFile = this.doTMPConvertFile;
+			}
+		
 			// Fix tooltips for toolbar buttons
 			let buttons = [document.getElementById("sessionmanager-toolbar"), document.getElementById("sessionmanager-undo")];
 			for (let i=0; i < buttons.length; i++) {
@@ -638,20 +638,17 @@ with (com.morac) {
 		// Over TMP's conversion functionality since it won't work any more, plus my method is more elegant
 		doTMPConvert: function(aSession)
 		{
-			Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader).loadSubScript("chrome://sessionmanager/content/sessionconvert.js");
-			delete(gSessionSaverConverter);
-			gConvertTMPSession.init(true);
-			gConvertTMPSession.doConvert(aSession);
-			gConvertTMPSession.cleanup();
-			delete(gConvertTMPSession);
+			gSessionManagerWindowObject.doTMPConvertFile(null, true);
 		},
 		
-		doTMPConvertFile: function(aFileUri)
+		doTMPConvertFile: function(aFileUri, aSilent)
 		{
 			Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader).loadSubScript("chrome://sessionmanager/content/sessionconvert.js");
 			delete(gSessionSaverConverter);
 			gConvertTMPSession.init(true);
-			gConvertTMPSession.convertFile(aFileUri);
+			if (!gConvertTMPSession.convertFile(aFileUri, aSilent) && !aSilent) {
+				gConvertTMPSession._prompt.alert(null, gSessionManager._string("sessionManager"), gSessionManager._string("ss_none"));
+			}
 			gConvertTMPSession.cleanup();
 			delete(gConvertTMPSession);
 		},

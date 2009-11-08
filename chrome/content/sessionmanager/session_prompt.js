@@ -49,6 +49,9 @@ var sortedBy = 0;
 // 256 = allow name replace  - true if double clicking a session name on save will replace existing session, but use default session name.
 //                                  (This is currently only settable via a userChrome.js script).
 
+// GetInt 2 bit values
+// 1   = select all          - true if all multiple items should be selected on initial prompt, false otherwise
+
 // GetString values
 // 1 = Session Label         - Label at top of window
 // 2 = Accept Label          - Okay Button label for normal accept
@@ -212,6 +215,8 @@ onLoad = function(aEvent) {
 	
 	// select passed in item (if any)
 	if (selected != undefined) gSessionTree.view.selection.select(selected);
+	
+	if ((gParams.GetInt(2) & 1)) gSessionTree.view.selection.selectAll()
 
 	// If there is a text box label, enable text boxes
 	if (gParams.GetString(4))

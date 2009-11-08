@@ -24,6 +24,9 @@ with (com.morac) {
 		sessionList: null,
 		sessions: null,
 		
+		// Only preselect all for initial conversion
+		selectAll: true,
+		
 		exportFileExt: "ssv", exportFileMask: "*.ssv",
 		prefBranch:      'sessionsaver.',
 		prefBranchStatic:      'static.', // all manually captured sessions
@@ -70,6 +73,7 @@ with (com.morac) {
 				if ((this.Branch.getPrefType("SM_Converted") == 128) && 
 					 this.Branch.getBoolPref("SM_Converted")) {
 					skip = true;
+					this.selectAll = false;
 					if (this.confirm(gSessionManager._string("ss_convert_again"))) okay = false;
 					
 				}
@@ -206,7 +210,7 @@ with (com.morac) {
 			}
 			
 			var sessions = gSessionManager.selectSession(gSessionManager._string("ss_select"), gSessionManager._string("ss_convert"), 
-														 { multiSelect: true }, function() { return gSessionSaverConverter.sessionList;});
+														 { multiSelect: true, selectAll: this.selectAll }, function() { return gSessionSaverConverter.sessionList;});
 			if (sessions) {
 				sessions = sessions.split("\n");
 				sessions.forEach(function (aSession) {
@@ -478,6 +482,9 @@ with (com.morac) {
 	com.morac.gConvertTMPSession = {
 		
 		sessionList: null,
+		
+		// Only preselect all for initial conversion
+		selectAll: true,
 
 		init: function(aSetupOnly) {
 			this.RDFService = Components.classes["@mozilla.org/rdf/rdf-service;1"].getService(Components.interfaces.nsIRDFService);
@@ -569,7 +576,7 @@ with (com.morac) {
 										null, null, null, null, {});
 		},
 		
-		convertFile: function (aFileUri) {
+		convertFile: function (aFileUri, aInitialConvert) {
 			var sessions;
 			var tmpDATASource;
 			if (aFileUri) {
@@ -591,12 +598,15 @@ with (com.morac) {
 				return false;
 			}
 			var rv = 0;
-			if(this.SessionManager.nodeHasArc("rdf:gSessionManager", "status")) {
-				rv = this.confirm(gSessionManager._string("ss_convert_again"));
-			}
-			else {
-				this.SessionManager.setLiteral("rdf:gSessionManager", "status", "converted");
-				this.SessionManager.saveStateDelayed();
+			if (!aInitialConvert) {
+				if(this.SessionManager.nodeHasArc("rdf:gSessionManager", "status")) {
+					this.selectAll = false;
+					rv = this.confirm(gSessionManager._string("ss_convert_again"));
+				}
+				else {
+					this.SessionManager.setLiteral("rdf:gSessionManager", "status", "converted");
+					this.SessionManager.saveStateDelayed();
+				}
 			}
 			if (rv == 0) {
 				try {
@@ -632,7 +642,7 @@ with (com.morac) {
 			}
 			var sessionsToConvert = gSessionManager.selectSession(gSessionManager._string("ss_select"), 
 																  gSessionManager._string("ss_convert"), 
-																  { multiSelect: true }, 
+																  { multiSelect: true, selectAll: this.selectAll }, 
 																  function() { return gConvertTMPSession.sessionList;}
 																 );   
 			delete this.sessionList;
