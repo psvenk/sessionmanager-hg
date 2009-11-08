@@ -1,3 +1,5 @@
+Components.utils.import("resource://sessionmanager/modules/utils.jsm");
+
 function dumpnl(msg) {
 	dump(msg + "\n");
 }
@@ -235,7 +237,6 @@ function onCancel() {
 //
 
 function onCmdOpen(mode) {
-	var gSessionManager = window.opener.gSessionManager; 
 	gSessionManager.load(getSelectedSession().fileName, mode);
 }
 
@@ -245,9 +246,8 @@ function onCmdRenameOK() {
 		"rename '" + getSelectedSession().fileName + "' -> '" +
 		new_name + "'"
 	);
-	var gSessionManager = window.opener.gSessionManager;
 	gSessionManager.renameSession(getSelectedSession().fileName, new_name);
-	sessionTreeView.setData(window.opener.gSessionManager.getSessions());
+	sessionTreeView.setData(gSessionManager.getSessions());
 
 	// select the renamed row again
 	var r = sessionTreeView.getRowWhere(
@@ -264,9 +264,8 @@ function onCmdRename(label) {
 
 function onCmdDelete() {
 	dumpnl("delete " + getSelectedSession().fileName);
-	var gSessionManager = window.opener.gSessionManager;
 	gSessionManager.remove(getSelectedSession().fileName);
-	sessionTreeView.setData(window.opener.gSessionManager.getSessions());
+	sessionTreeView.setData(gSessionManager.getSessions());
 	document.getElementById("sessiontree").focus();
 }
 
@@ -275,7 +274,7 @@ function onCmdSaveOK() {
 }
 
 function onCmdSave() {
-	var name = window.opener.gSessionManager.getFormattedName(
+	var name = gSessionManager.getFormattedName(
 		window.opener.content.document.title || "about:blank",
 		new Date()
 	);
@@ -287,7 +286,7 @@ function onCmdSaveWindowOK() {
 }
 
 function onCmdSaveWindow() {
-	var name = window.opener.gSessionManager.getFormattedName(
+	var name = gSessionManager.getFormattedName(
 		window.opener.content.document.title || "about:blank",
 		new Date()
 	);
@@ -295,7 +294,7 @@ function onCmdSaveWindow() {
 }
 
 function onCmdOpenFolder() {
-	window.opener.gSessionManager.openFolder();
+	gSessionManager.openFolder();
 }
 
 function isColumnCropped(tree, col) {
@@ -352,7 +351,7 @@ function autoFitColumn(tree, col) {
 function onLoad() {
 	window.addEventListener("unload", onUnload, false);
 
-	sessionTreeView.setData(window.opener.gSessionManager.getSessions());
+	sessionTreeView.setData(gSessionManager.getSessions());
 	document.getElementById("sessiontree").view = sessionTreeView;
 	var tree = document.getElementById("sessiontree");
 

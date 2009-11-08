@@ -37,7 +37,9 @@ const Ci = Components.interfaces;
 const Cu = Components.utils;
 const report = Components.utils.reportError;
 
-const STARTUP_PROMPT = -11;
+const Application = Cc["@mozilla.org/fuel/application;1"] ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
+                    (Cc["@mozilla.org/smile/application;1"] ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
+
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
 
 // Session Manager files
@@ -52,20 +54,14 @@ const SM_RESUME_SESSION_PREFERENCE = "extensions.sessionmanager.resume_session";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "extensions.sessionmanager.shutdown_on_last_window_close";
 
-// Session Manager app storage values
-const SM_ALREADY_SHUTDOWN = "sessionmanager.alreadyShutdown";
-const SM_COMMAND_LINE_DATA = "sessionmanager.command_line_data";
-const SM_SHUTDOWN_PROMPT_RESULTS = "sessionmanager.shutdown_prompt_results";
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 function SessionManagerHelperComponent() {
 	try {
-		// import logger
-		Cu.import("resource://sessionmanager/modules/logger.jsm", this);
-		Cu.import("resource://sessionmanager/modules/utils.jsm", this);
+		Cu.import("resource://sessionmanager/modules/logger.jsm");
+		Cu.import("resource://sessionmanager/modules/utils.jsm");
 	}
-	catch (ex) {
+	catch(ex) {
 		report(ex);
 	}
 }
@@ -81,12 +77,9 @@ SessionManagerHelperComponent.prototype = {
 	_warnOnQuit: null,
 	_warnOnClose: null,
 	_TMP_protectedtabs_warnOnClose: null,
-	mAutoPrivacy: false,
-	mBackupState: null,
-	mSessionData: null,
 	
 	// interfaces supported
-	QueryInterface: XPCOMUtils.generateQI([Ci.nsISessionManangerHelperComponent, Ci.nsIObserver, Ci.nsICommandLineHandler]),
+	QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver, Ci.nsICommandLineHandler]),
 
 	/* nsICommandLineHandler */
 	handle : function clh_handle(cmdLine)
@@ -109,7 +102,7 @@ SessionManagerHelperComponent.prototype = {
 						file = null;
 					}
 					if (!file) {
-						file = this.getSessionDir(name);
+						file = gSessionManager.getSessionDir(name);
 					}
 					if (file && file.exists() && file.isFile()) {
 						cmdLine.removeArguments(i,i);
@@ -119,35 +112,18 @@ SessionManagerHelperComponent.prototype = {
 					}
 					else {
 						i++;
-						this.log("Session Manager: Command line specified session file not found or is not valid - " + name, "ERROR");
+						log("Session Manager: Command line specified session file not found or is not valid - " + name, "ERROR");
 					}
 				}
 				else i++;
 			}
 		}
 		catch (ex) {
-			this.logError(ex);
+			logError(ex);
 		}
 		if (found) {
-			try {
-				let app = this.getApp();
-				app.storage.set(SM_COMMAND_LINE_DATA, data);
-			}
-			catch (ex) {
-				this.logError(ex);
-			}
+			gSessionManager._temp_restore = data;
 		}
-	},
-	
-	// Get FUEL or SMILE application service
-	getApp: function() {
-		let app = null;
-		if (Cc["@mozilla.org/fuel/application;1"]) {
-			app = Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication);
-		} else if (Cc["@mozilla.org/smile/application;1"]) {
-			app = Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication);
-		}
-		return app;
 	},
 	
 	// observer
@@ -157,34 +133,57 @@ SessionManagerHelperComponent.prototype = {
 		let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 		
 		//dump(aTopic + "\n");
-		this.log("SessionManagerHelperComponent observer: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
+		log("SessionManagerHelperComponent observer: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
 		switch (aTopic)
 		{
 		case "app-startup":
-			os.addObserver(this, "private-browsing-change-granted", false);
 			os.addObserver(this, "profile-after-change", false);
 			os.addObserver(this, "final-ui-startup", false);
 			os.addObserver(this, "sessionstore-state-read", false);
 			os.addObserver(this, "sessionstore-windows-restored", false);
 			os.addObserver(this, "profile-change-teardown", false);
+			os.addObserver(this, "private-browsing-change-granted", false);
 			break;
 		case "private-browsing-change-granted":
 			switch(aData) {
 			case "enter":
 				try {
 					let ss = Cc["@mozilla.org/browser/sessionstore;1"] || Cc["@mozilla.org/suite/sessionstore;1"];
-					this.mBackupState = ss.getService(Ci.nsISessionStore).getBrowserState();
-					this.mAutoPrivacy = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).autoStarted;
+					gSessionManager.mBackupState = ss.getService(Ci.nsISessionStore).getBrowserState();
+					gSessionManager.mAutoPrivacy = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).autoStarted;
+					log("SessionManagerHelperComponent: observer autoStarted = " + gSessionManager.mAutoPrivacy);
 				}
 				catch(ex) { 
-					this.logError(ex);
+					logError(ex);
 				}
+				
+				// Only save if entering private browsing mode manually (i.e. not automatically on browser startup)
+				// Use the mTimer variable since it isn't set until final-ui-startup.
+				if (this.mTimer) {
+					// Close current autosave session or make an autosave backup (if not already in private browsing mode)
+					if (!gSessionManager.closeSession(false,true) && gSessionManager.mPref_autosave_session) {
+						// If autostart or disabling history via options, make a real backup, otherwise make a temporary backup
+						if (gSessionManager.isAutoStartPrivateBrowserMode()) {
+							gSessionManager.backupCurrentSession(true);
+						}
+						else {
+							gSessionManager.autoSaveCurrentSession(true); 
+						}
+					}
+				}
+				
 				break;
 			case "exit":
+				// If browser not shutting down, clear the backup state otherwise set mShutDownInPrivateBrowsingMode flag
 				aSubject.QueryInterface(Ci.nsISupportsPRBool);
-				// If browser not shutting down, clear the backup state otherwise leave it to be read by sessionmanager.js
-				if (!aSubject.data) {
-					this.mBackupState = null;
+				if (aSubject.data) {
+					if (!gSessionManager.mPref_enable_saving_in_private_browsing_mode || !gSessionManager.mPref_encrypt_sessions) {
+						gSessionManager.mShutDownInPrivateBrowsingMode = true;
+						log("SessionManagerHelperComponent: observer mShutDownInPrivateBrowsingMode = " + gSessionManager.mShutDownInPrivateBrowsingMode, "DATA");
+					}
+				}
+				else {
+					gSessionManager.mBackupState = null;
 				}
 				break;
 			}
@@ -194,8 +193,11 @@ SessionManagerHelperComponent.prototype = {
 			try
 			{
 				this._restoreCache();
+				
+				// Call the gSessionManager Module's initialize procedure
+				gSessionManager.initialize();
 			}
-			catch (ex) { this.logError(ex); }
+			catch (ex) { logError(ex); }
 			break;
 		case "final-ui-startup":
 			os.removeObserver(this, aTopic);
@@ -203,7 +205,7 @@ SessionManagerHelperComponent.prototype = {
 			{
 				this._handle_crash();
 			}
-			catch (ex) { this.logError(ex); }
+			catch (ex) { logError(ex); }
 			
 			// stuff to handle preference file saving
 			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
@@ -233,7 +235,7 @@ SessionManagerHelperComponent.prototype = {
 					}
 				}, 1000, Ci.nsITimer.TYPE_ONE_SHOT);
 			}
-			catch (ex) { this.logError(ex); }
+			catch (ex) { logError(ex); }
 			break;
 		case "sessionstore-state-read":
 			os.removeObserver(this, aTopic);
@@ -241,7 +243,7 @@ SessionManagerHelperComponent.prototype = {
 			{
 				this._check_for_crash(aSubject);
 			}
-			catch (ex) { this.logError(ex); }
+			catch (ex) { logError(ex); }
 			break;
 		case "sessionmanager-preference-save":
 			// Save preference file after one 1/4 second to delay in case another preference changes at same time as first
@@ -263,7 +265,7 @@ SessionManagerHelperComponent.prototype = {
 					pb.setIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE));
 				}
 			}
-			catch (ex) { this.logError(ex); }
+			catch (ex) { logError(ex); }
 			this._ignorePrefChange = false;
 			break;
 		case "sessionmanager:ignore-preference-changes":
@@ -288,17 +290,17 @@ SessionManagerHelperComponent.prototype = {
 			let backup = pb.getIntPref(SM_BACKUP_SESSION_PREFERENCE);
 			let resume_current = (pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE) == 3) || pb.getBoolPref("browser.sessionstore.resume_session_once");
 
-			// If not restarting and backing up or browser or SM is loading a session at startup, disable FF's quit prompt
-			if ((aData != "restart") && ((backup == 2) || ((backup == 1) || pb.getIntPref(SM_STARTUP_PREFERENCE) || resume_current))) {
+			// If not restarting and set to prompt, disable FF's quit prompt
+			if ((aData != "restart") && (backup == 2)) {
 				let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
 				if ((backup == 2) && ((aTopic == "quit-application-requested") || pb.getBoolPref(SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE))) {
 
 					// Do session prompt here and then save the info in an Application Storage variable for use in
 					// the shutdown procsesing in sessionmanager.js
 					let watcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
-					let app = this.getApp();
 					// if didn't already shut down
-					if (app && !app.storage.get(SM_ALREADY_SHUTDOWN, false)) {
+					log("gSessionManager.mAlreadyShutdown = " + gSessionManager.mAlreadyShutdown, "DATA");
+					if (!gSessionManager.mAlreadyShutdown) {
 						let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
 
 						// Manually construct the prompt window because the promptService doesn't allow 4 button prompts
@@ -366,29 +368,29 @@ SessionManagerHelperComponent.prototype = {
 							pb.setIntPref(SM_BACKUP_SESSION_PREFERENCE, (results == 1)?0:1);
 						}
 								
-						app.storage.set(SM_SHUTDOWN_PROMPT_RESULTS, results);
+						gSessionManager.mShutdownPromptResults = results;
+						
+						// Disable prompt in browser
+						if (pb.getPrefType("browser.warnOnQuit") == pb.PREF_BOOL) {
+							if (typeof(this._warnOnQuit) != "boolean") {
+								this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
+							}
+							pb.setBoolPref("browser.warnOnQuit", false);
+						}
+						// Disable prompt in tab mix plus if it's running
+						if (pb.getPrefType("browser.tabs.warnOnClose") == pb.PREF_BOOL) {
+							if (typeof(this._warnOnClose) != "boolean") {
+								this._warnOnClose = pb.getBoolPref("browser.tabs.warnOnClose");
+							}
+							pb.setBoolPref("browser.tabs.warnOnClose", false);
+						}
+						if (pb.getPrefType("extensions.tabmix.protectedtabs.warnOnClose") == pb.PREF_BOOL) {
+							if (typeof(this._TMP_protectedtabs_warnOnClose) != "boolean") {
+								this._TMP_protectedtabs_warnOnClose = pb.getBoolPref("extensions.tabmix.protectedtabs.warnOnClose");
+							}
+							pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", false);
+						}
 					}
-				}
-
-				// Disable prompt in browser
-				if (pb.getPrefType("browser.warnOnQuit") == pb.PREF_BOOL) {
-					if (typeof(this._warnOnQuit) != "boolean") {
-						this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
-					}
-					pb.setBoolPref("browser.warnOnQuit", false);
-				}
-				// Disable prompt in tab mix plus if it's running
-				if (pb.getPrefType("browser.tabs.warnOnClose") == pb.PREF_BOOL) {
-					if (typeof(this._warnOnClose) != "boolean") {
-						this._warnOnClose = pb.getBoolPref("browser.tabs.warnOnClose");
-					}
-					pb.setBoolPref("browser.tabs.warnOnClose", false);
-				}
-				if (pb.getPrefType("extensions.tabmix.protectedtabs.warnOnClose") == pb.PREF_BOOL) {
-					if (typeof(this._TMP_protectedtabs_warnOnClose) != "boolean") {
-						this._TMP_protectedtabs_warnOnClose = pb.getBoolPref("extensions.tabmix.protectedtabs.warnOnClose");
-					}
-					pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", false);
 				}
 			}
 			break;
@@ -447,14 +449,6 @@ SessionManagerHelperComponent.prototype = {
 		}
 	},
 
-	/* ........ public methods ............... */
-
-	// this will save the passed in session data into the mSessionData variable
-	setSessionData: function sm_setSessionData(aState) 
-	{
-		this.mSessionData = aState;
-	},
-
 	/* ........ private methods .............. */
 
 	// this will remove certain preferences in the case where user turned off crash recovery in the browser and browser is not restarting
@@ -469,7 +463,7 @@ SessionManagerHelperComponent.prototype = {
 		                 prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
 
 		//dump("no_remove = " + resuming + "\n");
-		//this.log("no_remove = " + resuming, "DATA");
+		//log("no_remove = " + resuming, "DATA");
 		// Unless browser is restarting, always delete the following preferences if crash recovery is disabled in case the browser crashes
 		// otherwise bad things can happen
 		if (!no_remove)
@@ -486,10 +480,10 @@ SessionManagerHelperComponent.prototype = {
 		let initialState;
 		try {
 			// parse the session state into JS objects
-			initialState = this.JSON_decode(aStateDataString.QueryInterface(Ci.nsISupportsString).data);
+			initialState = gSessionManager.JSON_decode(aStateDataString.QueryInterface(Ci.nsISupportsString).data);
 		}
 		catch (ex) { 
-			this.logError(ex);
+			logError(ex);
 			return;
 		} 
     
@@ -497,7 +491,7 @@ SessionManagerHelperComponent.prototype = {
 			initialState && initialState.session && initialState.session.state &&
 			initialState.session.state == "running";
 		
-		//this.log("Last Crashed = " + lastSessionCrashed, "DATA");
+		//log("Last Crashed = " + lastSessionCrashed, "DATA");
 		if (lastSessionCrashed) {
         	let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
         	// default to recovering
@@ -509,7 +503,7 @@ SessionManagerHelperComponent.prototype = {
 	        	// don't prompt for tabs if checkbox not checked
 	        	delete(initialState.session.lastUpdate);
 	        	delete(initialState.session.recentCrashes);
-	        	aStateDataString.QueryInterface(Ci.nsISupportsString).data = this.JSON_encode(initialState);
+	        	aStateDataString.QueryInterface(Ci.nsISupportsString).data = gSessionManager.JSON_encode(initialState);
         	}
     	}
     	initialState = null;

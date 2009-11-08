@@ -1,3 +1,6 @@
+Components.utils.import("resource://sessionmanager/modules/logger.jsm");
+Components.utils.import("resource://sessionmanager/modules/utils.jsm");
+
 var gParams = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
 var gSessionTree = null;
 var gTextBox = null;
@@ -70,10 +73,10 @@ var sortedBy = 0;
 // 6 = Session Name
 // 7 = Group Name
 
-gSessionManager._onLoad = gSessionManager.onLoad;
-gSessionManager.onLoad = function() {
-	this._onLoad(true);
-	
+onLoad = function(aEvent) {
+	this.removeEventListener("load", onLoad, false);
+	this.addEventListener("unload", onUnload, false);			
+
 	_("mac_title").hidden = !/mac/i.test(navigator.platform);
 	setDescription(_("session_label"), gParams.GetString(1));
 	
@@ -82,16 +85,16 @@ gSessionManager.onLoad = function() {
 	gExtraButton = document.documentElement.getButton("extra1");
 	
 	var sessions = null;
-	if (window.opener && window.opener.gSessionManager && window.opener.gSessionManager.getSessionsOverride) {
-		if (typeof window.opener.gSessionManager.getSessionsOverride == "function") {
+	if (gSessionManager.getSessionsOverride) {
+		if (typeof gSessionManager.getSessionsOverride == "function") {
 			try {
-				sessions = window.opener.gSessionManager.getSessionsOverride();
+				sessions = gSessionManager.getSessionsOverride();
 			} catch (ex) { 
-				this.log("Override function error. " + ex, "ERROR", true);
+				log("Override function error. " + ex, "ERROR", true);
 			}
 		}
 		else {
-			this.log("Passed override function parameter is not a function.", "ERROR", true);
+			log("Passed override function parameter is not a function.", "ERROR", true);
 		}
 		if (!sessions || !_isValidSessionList(sessions)) {
 			window.close();
@@ -99,12 +102,12 @@ gSessionManager.onLoad = function() {
 		}
 	}
 	else {
-		sessions = this.getSessions();
+		sessions = gSessionManager.getSessions();
 	}
 	
 	if (gParams.GetInt(1) & 1) // add a "virtual" current session
 	{
-		sessions.unshift({ name: this._string("current_session"), fileName: "*" });
+		sessions.unshift({ name: gSessionManager._string("current_session"), fileName: "*" });
 	}
 	
 	gTabTree = _("tabTree");
@@ -114,9 +117,11 @@ gSessionManager.onLoad = function() {
 	gSessionTree = _("session_tree");
 	gSessionTree.selType = (gParams.GetInt(1) & 2)?"multiple":"single";
 	
-	// Do not allow overwriting of open window or browser sessions
-	gBannedNames = this.getWindowSessions();
-	var currentSession = this.getPref("_autosave_values", "").split("\n")[0];
+	// Do not allow overwriting of open window or browser sessions (clone it so we don't overwrite the global variable)
+	for (let i in gSessionManager.mActiveWindowSessions) {
+		gBannedNames[i] = gSessionManager.mActiveWindowSessions[i];
+	}
+	var currentSession = gSessionManager.getPref("_autosave_values", "").split("\n")[0];
 	if (currentSession) gBannedNames[currentSession.trim().toLowerCase()] = true;
 	
 	// hide/show the "Don't show [...] again" checkbox
@@ -128,15 +133,15 @@ gSessionManager.onLoad = function() {
 	
 	// hide/show the append/replace radio buttons
 	_("radio_append_replace").hidden = !(gParams.GetInt(1) & 64);
-	_("radio_append_replace").selectedIndex = this.getPref("overwrite", false) ? 1 : (this.getPref("append_by_default", false) ? 2 : 0);
+	_("radio_append_replace").selectedIndex = gSessionManager.getPref("overwrite", false) ? 1 : (gSessionManager.getPref("append_by_default", false) ? 2 : 0);
 	if (window.opener && typeof(window.opener.gSingleWindowMode) != "undefined" && window.opener.gSingleWindowMode) {
 		if (!_("radio_append_replace").selectedIndex) _("radio_append_replace").selectedIndex = 2;
 		_("radio_append").hidden = true;
 	}
 
-	gBackupGroupName = this._string("backup_sessions");
-	gBackupNames[this._string("backup_session").trim().toLowerCase()] = true;
-	gBackupNames[this._string("autosave_session").trim().toLowerCase()] = true;
+	gBackupGroupName = gSessionManager._string("backup_sessions");
+	gBackupNames[gSessionManager._string("backup_session").trim().toLowerCase()] = true;
+	gBackupNames[gSessionManager._string("autosave_session").trim().toLowerCase()] = true;
 	
 	var deleting = (gParams.GetInt(1) & 16);
 	var saving = (gParams.GetInt(1) & 8);
@@ -150,7 +155,7 @@ gSessionManager.onLoad = function() {
 		// ban backup session names
 		if (aSession.backup) gBackupNames[trimName] = true;
 		// Don't display loaded sessions in list for load or save or backup items in list for save or grouping
-		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && (saving || loading))))
+		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && (saving || loading || (gParams.GetInt(1) & 1)))))
 		{
 			// get window and tab counts and group name for crashed session
 			if (aSession.fileName == "*") {
@@ -283,9 +288,9 @@ gSessionManager.onLoad = function() {
 	gFinishedLoading = true;
 };
 
-gSessionManager.onWindowClose = function() {};
-
-gSessionManager.onUnload = function() {
+onUnload = function(aEvent) {
+	this.removeEventListener("unload", onUnload, false);
+	
 	function persist(aObj, aAttr, aValue)
 	{
 		aObj.setAttribute(aAttr, aValue);
@@ -318,7 +323,7 @@ gSessionManager.onUnload = function() {
 	if (!gAllTabsChecked) storeSession();
 	
 	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
-	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected)?32:0) | (gAppendToSessionFlag?32:0) |
+	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected && !_("radio_append_replace").hidden)?32:0) | (gAppendToSessionFlag?32:0) |
 					  ((_("radio_append_window").selected)?64:0));
 	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
 };
@@ -332,7 +337,8 @@ function onSessionTreeClick(aEvent)
 					if (gTextBox && !(gParams.GetInt(1) & 256)) onTextboxInput(gSessionTreeData[gSessionTree.currentIndex].name);
 					break;
 				case "dblclick":
-					gAcceptButton.doCommand();
+					if (!(gParams.GetInt(1) & 16)) 
+						gAcceptButton.doCommand();
 					break;
 			}
 		}
@@ -432,9 +438,9 @@ function onSessionTreeSelect()
 		// save current session tree height before doing any unhiding (subtract one since one gets added for some reason)
 		var currentSessionTreeHeight = gSessionTree.treeBoxObject.height - 1;
 		
-		// hide tab tree and splitter if nothing selected or multiple selection is enabled (deleting) and more than one or no session is selected
+		// hide tab tree and splitter if more or less than one item is selected or muliple selection is enabled, but not deleting (used for converting sessions)
 		// hide the click note if append/replace buttons are displayed (manual load)
-		var hideTabTree = gAcceptButton.disabled || ((gParams.GetInt(1) & 2) && gSessionTree.view.selection.count != 1);
+		var hideTabTree = (gSessionTree.view.selection.count != 1) || ((gParams.GetInt(1) & 2) && !(gParams.GetInt(1) & 16));
 		gTreeSplitter.hidden = gTabTreeBox.hidden = hideTabTree;
 		gCtrlClickNote.hidden = hideTabTree || !(gParams.GetInt(1) & 64);
 		
@@ -443,10 +449,10 @@ function onSessionTreeSelect()
 		// current session tree height.  
 		if (!hideTabTree) {
 			// if deleting, change column label
-			if (gParams.GetInt(1) & 2) {
+			if (gParams.GetInt(1) & 16) {
 				_("restore").setAttribute("label", gSessionManager._string("remove_session_ok"));
 			}
-			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName, (gParams.GetInt(1) & 2));
+			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName, (gParams.GetInt(1) & 16));
 			if (!gAlreadyResized && gFinishedLoading) {
 				gAlreadyResized = true;
 				if (gTabTree.hasAttribute("height"))
@@ -540,6 +546,17 @@ function isAcceptable()
 
 function onAcceptDialog(aParam)
 {
+	// Put up warning prompt if deleting
+	if (gParams.GetInt(1) & 16) {
+		var dontPrompt = { value: false };
+		if (gSessionManager.getPref("no_delete_prompt") || PROMPT_SERVICE.confirmEx(window, gSessionManager.mTitle, gSessionManager._string("delete_confirm"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0) {
+			if (dontPrompt.value) {
+				gSessionManager.setPref("no_delete_prompt", true);
+			}
+		}
+		else return false;
+	}
+
 	// Only set to true if user clicked extra1 button
 	gAppendToSessionFlag = aParam;
 
@@ -562,7 +579,8 @@ function onAcceptDialog(aParam)
 	else if (gExistingName >= 0)
 	{
 		var dontPrompt = { value: false };
-		if (gAppendToSessionFlag || gSessionManager.getPref("no_overwrite_prompt") || gSessionManager.mPromptService.confirmEx(null, gSessionManager.mTitle, gSessionManager._string("overwrite_prompt"), gSessionManager.mPromptService.BUTTON_TITLE_YES * gSessionManager.mPromptService.BUTTON_POS_0 + gSessionManager.mPromptService.BUTTON_TITLE_NO * gSessionManager.mPromptService.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0)
+		if (gAppendToSessionFlag || gSessionManager.getPref("no_overwrite_prompt") || 
+		    PROMPT_SERVICE.confirmEx(null, gSessionManager.mTitle, gSessionManager._string("overwrite_prompt"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0)
 		{
 			gParams.SetString(3, gSessionTreeData[gExistingName].fileName);
 			if (dontPrompt.value)
@@ -602,7 +620,7 @@ function _isValidSessionList(aSessions)
 {
 	if (aSessions==null || typeof(aSessions)!="object" || typeof(aSessions.length)!="number" || 
 	    aSessions.length == 0 || !aSessions[0].name) {
-		this.log("Override function returned an invalid session list.", "ERROR", true);
+		log("Override function returned an invalid session list.", "ERROR", true);
 		return false;
 	}
 	return true;
@@ -611,17 +629,18 @@ function _isValidSessionList(aSessions)
 function _save_every_update()
 {
 	var checked = _('checkbox_autosave').checked;
+	var save_every_height = null;
 	
 	_('save_every').hidden = !checked;
 	
 	// resize window
 	if (checked) {
-		this._save_every_height = parseInt(window.getComputedStyle(_('save_every'), "").height);
-		if (isNaN(this._save_every_height)) this._save_every_height = 0;
-		window.innerHeight += this._save_every_height;
+		save_every_height = parseInt(window.getComputedStyle(_('save_every'), "").height);
+		if (isNaN(save_every_height)) save_every_height = 0;
+		window.innerHeight += save_every_height;
 	}
 	else {
-		if (this._save_every_height) window.innerHeight -= this._save_every_height;
+		if (save_every_height) window.innerHeight -= save_every_height;
 	}
 }
 
@@ -744,3 +763,12 @@ var sessionTreeView = {
 	performActionOnRow: function(action, index) { },
 	getColumnProperties: function(column, prop) { }
 };
+
+// String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
+if (typeof(String.trim) != "function") {
+	String.prototype.trim = function() {
+		return this.replace(/^\s+|\s+$/g, "");
+	};
+}
+
+window.addEventListener("load", onLoad, false);

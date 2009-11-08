@@ -1,21 +1,17 @@
-gSessionManager._onLoad = gSessionManager.onLoad;
-gSessionManager.onLoad = function() {
-	this._onLoad(true);
+onLoad = function() {
+	this.removeEventListener("load", onLoad, false);
+	this.addEventListener("unload", onUnload, false);
 	
 	// for updating session list
-	document.getElementById('session_tree').view = this.treeView;	
+	document.getElementById('session_tree').view = treeView;	
 		
 	// update list on notification
-	gSessionManager.mObserverService.addObserver(gSessionManager, "sessionmanager-list-update", false);
+	//OBSERVER_SERVICE.addObserver(gSessionManager, "sessionmanager-list-update", false);
 }	
 
-gSessionManager.onUnload = function() {
-	window.removeEventListener("unload", gSessionManager.onUnload, false);
-	gSessionManager.mObserverService.removeObserver(gSessionManager, "sessionmanager-list-update");
-	gSessionManager.treeView = null;
-}
-
-gSessionManager.onWindowClose = function() {
+onUnload = function() {
+	this.removeEventListener("unload", onUnload, false);
+	//OBSERVER_SERVICE.removeObserver(gSessionManager, "sessionmanager-list-update");
 }
 
 var treeView = {
@@ -164,3 +160,12 @@ var treeView = {
 		//this.gSessionManager.load(filename, (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");
 	}
 }
+
+// String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
+if (typeof(String.trim) != "function") {
+	String.prototype.trim = function() {
+		return this.replace(/^\s+|\s+$/g, "");
+	};
+}
+
+window.addEventListener("load", onLoad, false);

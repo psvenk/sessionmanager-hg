@@ -14,15 +14,14 @@
  <overlay id="sessionManager-sanitize-ui" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
 	<script type="application/x-javascript" src="chrome://browser/content/sanitize.js"/>
-	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/preferencesOverlay.js"/>
 	<script type="application/x-javascript">
-		gSessionManager.sanitizeLabel = {
+		com.morac.gSessionManager_preferencesOverlay.sanitizeLabel = {
 			label: "&sanitizer.label;",
 			accesskey: "&sanitizer.accesskey;"
 		}
-		window.addEventListener('load', gSessionManager.addSanitizeItem, true);
-		gSessionManager.addMenuItem();
+		window.addEventListener('load', com.morac.gSessionManager_preferencesOverlay.addSanitizeItem, true);
+		com.morac.gSessionManager_preferencesOverlay.addMenuItem();
 	</script>
 
  </overlay>

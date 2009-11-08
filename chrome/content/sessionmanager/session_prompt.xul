@@ -17,12 +17,10 @@
 	style="min-width: 40em; -moz-user-focus: ignore;"
 	persist="width"
 >
-	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionbrowser.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/session_prompt.js"/>
 	
 	<stringbundleset id="stringbundleset">
-		<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
 		<stringbundle id="bundle_brand" src="chrome://branding/locale/brand.properties"/>
 	</stringbundleset>
 	

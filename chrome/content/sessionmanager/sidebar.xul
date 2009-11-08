@@ -8,7 +8,6 @@
 <page id="sbSessionManager" title="&sessionManager;"
       xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" >
 
-	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/sidebar.js"/>
 
 	<stringbundleset id="stringbundleset">

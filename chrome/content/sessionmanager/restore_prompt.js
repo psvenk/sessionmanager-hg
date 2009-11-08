@@ -1,9 +1,12 @@
-gSessionManager.restorePrompt = function() {
-	this.onLoad(true);
-	this.onLoad = function() { };
-	this.onUnload = function() { };
-	this.onWindowClose = function() { };
-				
+Components.utils.import("resource://sessionmanager/modules/logger.jsm");
+Components.utils.import("resource://sessionmanager/modules/utils.jsm");
+
+restorePrompt = function() {
+	log("restorePrompt start", "INFO");
+	
+	// Make sure the EOL character is set or session files will get corrupted when written
+	gSessionManager.mEOL = /win|os[\/_]?2/i.test(navigator.platform)?"\r\n":/mac/i.test(navigator.platform)?"\r":"\n";
+	
 	// default count variable
 	var countString = "";
 	
@@ -11,26 +14,26 @@ gSessionManager.restorePrompt = function() {
 	var	screensize = screen.width + "x" + screen.height;
 			
 	// Get count from crashed session and prepare to save it.  Don't save it yet or it will show up in selection list.
-	var file = this.getProfileFile("sessionstore.js");
+	var file = gSessionManager.getProfileFile("sessionstore.js");
 	
 	// If file does not exist, try looking for SeaMonkey's sessionstore file
 	if (!file.exists()) {
-		file = this.getProfileFile("sessionstore.json");
+		file = gSessionManager.getProfileFile("sessionstore.json");
 	}
 	
 	if (file.exists())
 	{
 		try {
-			var name = this.getFormattedName("", new Date(file.lastModifiedTime), this._string("crashed_session"));
-			state = this.readFile(file);
-			count = this.getCount(state);
-			session = this.nameState(state, name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + "\tgroup=" + this._string("backup_sessions") + "\tscreensize=" + screensize);
-			backupFile = this.getSessionDir(this.mBackupSessionName, true);
+			var name = gSessionManager.getFormattedName("", new Date(file.lastModifiedTime), gSessionManager._string("crashed_session"));
+			state = gSessionManager.readFile(file);
+			count = gSessionManager.getCount(state);
+			session = gSessionManager.nameState(state, name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + "\tgroup=" + gSessionManager._string("backup_sessions") + "\tscreensize=" + screensize);
+			backupFile = gSessionManager.getSessionDir(BACKUP_SESSION_FILENAME, true);
 			
 			if (count.windows && count.tabs) countString = count.windows + "," + count.tabs;
 		}
 		catch(ex) { 
-			this.logError(ex); 
+			logError(ex); 
 		}
 	}
 	
@@ -38,26 +41,30 @@ gSessionManager.restorePrompt = function() {
 	params.SetInt(0, 0);
 			
 	var values = { name: "*", addCurrentSession: true, ignorable: false, count: countString }
-	var fileName = (location.search != "?cancel")?(this.prompt(this._string("recover_session"), this._string("recover_session_ok"), values)?values.name:""):"";
+	var fileName = (location.search != "?cancel")?(gSessionManager.prompt(gSessionManager._string("recover_session"), gSessionManager._string("recover_session_ok"), values)?values.name:""):"";
 	if (fileName != "*")
 	{
 		if (fileName)
 		{
-			this.mApplication.storage.set("extensions.sessionmanager._recovering", fileName);
+			gSessionManager._recovering =  fileName;
 		}
-		else if (!this.getPref("save_window_list", false))
+		else if (!gSessionManager.getPref("save_window_list", false))
 		{
-			this.clearUndoData("window", true);
+			gSessionManager.clearUndoData("window", true);
 		}
 		params.SetInt(0, 1); // don't recover the crashed session
 	}
 	
-	this.mPref_encrypt_sessions = this.getPref("encrypt_sessions", false);
+	log("restorePrompt: _recovering = " + gSessionManager._recovering, "DATA");
+	
+	gSessionManager.mPref_encrypt_sessions = gSessionManager.getPref("encrypt_sessions", false);
 	// actually save the crashed session
 	if (session && backupFile) {
-		this.writeFile(backupFile, session);
-		if (this.mPref_encrypt_sessions) this.mApplication.storage.set("extensions.sessionmanager._encrypt_file", backupFile.leafName);
+		gSessionManager.writeFile(backupFile, session);
+		if (gSessionManager.mPref_encrypt_sessions) gSessionManager._encrypt_file = backupFile.leafName;
 	}
+	
+	log("restorePrompt: _encrypt_file = " + gSessionManager._encrypt_file, "DATA");
 	
 	// If user chose to prompt for tabs and selected a filename
 	if (fileName && values.choseTabs) {
@@ -65,12 +72,14 @@ gSessionManager.restorePrompt = function() {
 		if (fileName == "*") {
 			fileName = backupFile.leafName;
 			params.SetInt(0, 1); // don't recover the crashed session
-			this.mApplication.storage.set("extensions.sessionmanager._recovering", fileName);
+			gSessionManager._recovering = fileName;
 		}
-		this.mApplication.storage.set("extensions.sessionmanager._chose_tabs", true);
+		gSessionManager._chose_tabs = true;
 	}
 		
-	var autosave_values = this.getPref("_autosave_values", "").split("\n");
+	log("restorePrompt: _chose_tabs = " + gSessionManager._chose_tabs, "DATA");
+		
+	var autosave_values = gSessionManager.getPref("_autosave_values", "").split("\n");
 	var autosave_name = autosave_values[0];
 	if (autosave_name)
 	{
@@ -79,7 +88,7 @@ gSessionManager.restorePrompt = function() {
 		{
 			// Get name of chosen session
 			var chosen_name = null;
-			if (fileName && (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(this.readSessionFile(this.getSessionDir(fileName), true)))) {
+			if (fileName && (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(gSessionManager.readSessionFile(gSessionManager.getSessionDir(fileName), true)))) {
 				chosen_name = RegExp.$2;
 			}
 			
@@ -87,38 +96,42 @@ gSessionManager.restorePrompt = function() {
 			if (values.choseTabs || ((chosen_name != autosave_name) && (fileName != backupFile.leafName)))
 			{
 				// delete autosave preferences
-				this.delPref("_autosave_values");
+				gSessionManager.delPref("_autosave_values");
+
+				// Clear any stored auto save session preferences
+				gSessionManager.getAutoSaveValues();
 				
-				this.log("Saving crashed autosave session " + autosave_name, "DATA");
-				var temp_state = this.readFile(file);
+				log("Saving crashed autosave session " + autosave_name, "DATA");
+				var temp_state = gSessionManager.readFile(file);
 				// encrypt if encryption enabled
-				if (this.mPref_encrypt_sessions) {
-					this.mPref_encrypted_only = this.getPref("encrypted_only", false);
-					temp_state = this.decryptEncryptByPreference(temp_state);
+				if (gSessionManager.mPref_encrypt_sessions) {
+					gSessionManager.mPref_encrypted_only = gSessionManager.getPref("encrypted_only", false);
+					temp_state = gSessionManager.decryptEncryptByPreference(temp_state);
 				}
 				
 				if (temp_state) {
 					var autosave_time = isNaN(autosave_values[2]) ? 0 : autosave_values[2];
-					var autosave_state = this.nameState(temp_state, autosave_name + 
+					var autosave_state = gSessionManager.nameState(temp_state, autosave_name + 
 					                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=session/" + autosave_time +
 										 "\tcount=" + count.windows + "/" + count.tabs + 
 										 (autosave_values[1] ? ("\tgroup=" + autosave_values[1]) : ""));
-					this.writeFile(this.getSessionDir(this.makeFileName(autosave_name)), autosave_state);
+					gSessionManager.writeFile(gSessionManager.getSessionDir(gSessionManager.makeFileName(autosave_name)), autosave_state);
 				}
 			}
 			// choose to recover autosave session so just recover last session
 			else 
 			{
 				// we could delete the autosave preferences here, but it doesn't matter (actually it saves us from saving prefs.js file again)
-				this.mApplication.storage.set("extensions.sessionmanager._recovering", null);
+				gSessionManager._recovering =  null;
 				params.SetInt(0, 0);
 			}
 		}
 	}
 	
 	// Don't prompt for a session again if user cancels crash prompt
-	this.mApplication.storage.set("extensions.sessionmanager._no_prompt_for_session", true);
+	gSessionManager._no_prompt_for_session = true;
+	log("restorePrompt end", "INFO");
 };
 		
-gSessionManager.restorePrompt();
+restorePrompt();
 window.close();

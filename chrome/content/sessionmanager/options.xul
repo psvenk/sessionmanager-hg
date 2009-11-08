@@ -169,8 +169,8 @@
 		<groupbox>
 			<caption label="&sessionImport.caption;"/>
 			<hbox>
-				<button label="&importTMP.label;" accesskey="&importTMP.accesskey;" oncommand="gConvertTMPSession.init();"/>
-				<button label="&importSS.label;" accesskey="&importSS.accesskey;" oncommand="gSessionSaverConverter.init();"/>
+				<button label="&importTMP.label;" accesskey="&importTMP.accesskey;" oncommand="com.morac.gConvertTMPSession.init();"/>
+				<button label="&importSS.label;" accesskey="&importSS.accesskey;" oncommand="com.morac.gSessionSaverConverter.init();"/>
 			</hbox>
 		</groupbox>
 	</prefpane>
@@ -250,7 +250,7 @@
 			<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="extensions.sessionmanager.save_window_list"/>
 		</groupbox>
 		<hbox pack="end">
-			<button	pack="end" label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
+			<button	id="clear_undo_button" pack="end" label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
 		</hbox>
 	</prefpane>
 
@@ -348,8 +348,8 @@
 			<caption label="&logging.caption;"/>
 			<hbox>
 				<checkbox label="&enable_logging.label;" accesskey="&enable_logging.accesskey;" preference="extensions.sessionmanager.logging"/>
-				<button label="&open_log.label;" accesskey="&open_log.accesskey;" oncommand="gSessionManager.openLogFile(gSessionManager._string('file_not_found'));"/>
-				<button label="&delete_log.label;" accesskey="&delete_log.accesskey;" oncommand="gSessionManager.deleteLogFile(true);"/>
+				<button label="&open_log.label;" accesskey="&open_log.accesskey;" oncommand="com.morac.openLogFile();"/>
+				<button label="&delete_log.label;" accesskey="&delete_log.accesskey;" oncommand="com.morac.deleteLogFile(true);"/>
 			</hbox>
 			<vbox>
 				<checkbox class="logLevel" label="&log_level_state.label;" accesskey="&log_level_state.accesskey;" _logLevel="STATE" oncommand="logLevelUpdate();"/>
@@ -365,7 +365,6 @@
 		<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
 	</stringbundleset>
 
-	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/options.js"/>
 
 	<preferences>

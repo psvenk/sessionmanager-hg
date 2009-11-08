@@ -3,10 +3,5 @@
 <!DOCTYPE dialog>
 
 <dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
-	<stringbundleset id="stringbundleset">
-		<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
-	</stringbundleset>
-	
-	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionmanager.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/restore_prompt.js"/>
 </dialog>

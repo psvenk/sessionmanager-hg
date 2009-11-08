@@ -35,6 +35,8 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
+Components.utils.import("resource://sessionmanager/modules/utils.jsm");
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
@@ -83,7 +85,7 @@ function initTreeView(aFileName, aDeleting) {
       return;
     }
 
-    if (!gSessionManager.SESSION_REGEXP.test(state))
+    if (!SESSION_REGEXP.test(state))
     {
       gSessionManager.sessionError();
       return;
@@ -168,10 +170,7 @@ function storeSession() {
       ix--;
     }
   }
-  var stateString = gSessionManager.JSON_encode(gStateObject);
-  
-  var smHelper = Cc["@morac/sessionmanager-helper;1"].getService(Ci.nsISessionManangerHelperComponent);
-  smHelper.setSessionData(gSessionManager.JSON_encode(gStateObject));
+  gSessionManager.mSessionData = gSessionManager.JSON_encode(gStateObject);
 }
 
 function onTabTreeClick(aEvent) {
