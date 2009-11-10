@@ -262,6 +262,9 @@ function preferenceChanged(event) {
 }
 
 function initialize() {
+	// Only initialize in the main thread
+	if (!Cc["@mozilla.org/thread-manager;1"].getService().isMainThread) return;
+
 	var enabledPref = Application.prefs.get(LOG_ENABLE_PREFERENCE_NAME);
 	var levelPref = Application.prefs.get(LOG_LEVEL_PREFERENCE_NAME);
 	
