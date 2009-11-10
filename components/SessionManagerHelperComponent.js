@@ -56,6 +56,43 @@ const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "extensions.sessionmanager.
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
+// A thread used to load the session files in the background so they will 
+// be cached when the user goes to use them.
+var backgroundThread = function(threadID) {
+  this.threadID = threadID;
+};
+
+backgroundThread.prototype = {
+  run: function() {
+    try {
+		gSessionManager.getSessions();
+		log("backgroundThread: Background Session Load Complete", "TRACE");
+    } catch(err) {
+		logError(err);
+    }
+  },
+  
+  QueryInterface: function(iid) {
+    if (iid.equals(Components.interfaces.nsIRunnable) ||
+        iid.equals(Components.interfaces.nsISupports)) {
+            return this;
+    }
+    throw Components.results.NS_ERROR_NO_INTERFACE;
+  }
+};
+
+// Session Manager's helper component.  It handles the following:
+// 1. Searching command line arguments for sessions to load
+// 2. Restoring the cache if cache fixer is enabled
+// 3. Clearing autosave preference on a crash if crash recovery is disabled
+// 4. Putting up the crash prompt in Firefox 3.5+ and SeaMonkey 2.0+
+// 5. Handle saving session data when entering private browsing mode.
+// 6. Kick off the initial window restored processing when SessionStore restores all windows at startup
+// 7. Force saving of the preference file upon notification
+// 8. Handles syncing the Firefox and Session Manager startup preferences.  
+// 9. Handles saving and restoring browser startup preference at startup and shutdown (if need be).
+// 10. Handles displaying the Session Manager shut down prompt and overriding the browser and Tab Mix Plus's prompts.
+//
 function SessionManagerHelperComponent() {
 	try {
 		Cu.import("resource://sessionmanager/modules/logger.jsm");
@@ -64,7 +101,7 @@ function SessionManagerHelperComponent() {
 	catch(ex) {
 		report(ex);
 	}
-}
+};
 
 SessionManagerHelperComponent.prototype = {
 	// registration details
@@ -73,6 +110,8 @@ SessionManagerHelperComponent.prototype = {
 	contractID:       "@morac/sessionmanager-helper;1",
 	_xpcom_categories: [{ category: "app-startup", service: true },
 	                    { category: "command-line-handler", entry: "sessionmanager" }],
+						
+	// State variables
 	_ignorePrefChange: false,
 	_warnOnQuit: null,
 	_warnOnClose: null,
@@ -145,48 +184,7 @@ SessionManagerHelperComponent.prototype = {
 			os.addObserver(this, "private-browsing-change-granted", false);
 			break;
 		case "private-browsing-change-granted":
-			switch(aData) {
-			case "enter":
-				try {
-					let ss = Cc["@mozilla.org/browser/sessionstore;1"] || Cc["@mozilla.org/suite/sessionstore;1"];
-					gSessionManager.mBackupState = ss.getService(Ci.nsISessionStore).getBrowserState();
-					gSessionManager.mAutoPrivacy = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).autoStarted;
-					log("SessionManagerHelperComponent: observer autoStarted = " + gSessionManager.mAutoPrivacy);
-				}
-				catch(ex) { 
-					logError(ex);
-				}
-				
-				// Only save if entering private browsing mode manually (i.e. not automatically on browser startup)
-				// Use the mTimer variable since it isn't set until final-ui-startup.
-				if (this.mTimer) {
-					// Close current autosave session or make an autosave backup (if not already in private browsing mode)
-					if (!gSessionManager.closeSession(false,true) && gSessionManager.mPref_autosave_session) {
-						// If autostart or disabling history via options, make a real backup, otherwise make a temporary backup
-						if (gSessionManager.isAutoStartPrivateBrowserMode()) {
-							gSessionManager.backupCurrentSession(true);
-						}
-						else {
-							gSessionManager.autoSaveCurrentSession(true); 
-						}
-					}
-				}
-				
-				break;
-			case "exit":
-				// If browser not shutting down, clear the backup state otherwise set mShutDownInPrivateBrowsingMode flag
-				aSubject.QueryInterface(Ci.nsISupportsPRBool);
-				if (aSubject.data) {
-					if (!gSessionManager.mPref_enable_saving_in_private_browsing_mode || !gSessionManager.mPref_encrypt_sessions) {
-						gSessionManager.mShutDownInPrivateBrowsingMode = true;
-						log("SessionManagerHelperComponent: observer mShutDownInPrivateBrowsingMode = " + gSessionManager.mShutDownInPrivateBrowsingMode, "DATA");
-					}
-				}
-				else {
-					gSessionManager.mBackupState = null;
-				}
-				break;
-			}
+			this.handlePrivacyChange(aSubject, aData);
 			break;
 		case "profile-after-change":
 			os.removeObserver(this, aTopic);
@@ -220,6 +218,13 @@ SessionManagerHelperComponent.prototype = {
 			
 			// Observe startup preference
 			pb.addObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this, false);
+			
+			// Cache the sessions in the background so they are ready when the user opens the menu
+			let background = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
+			background.dispatch(new backgroundThread(1), background.DISPATCH_NORMAL);
+			// This processes any pending events on the thread before shutting down, so it will run once.
+			background.shutdown();
+
 			break;
 		case "sessionstore-windows-restored":
 			os.removeObserver(this, aTopic);
@@ -274,125 +279,7 @@ SessionManagerHelperComponent.prototype = {
 		// quitting or closing last browser window
 		case "browser-lastwindow-close-requested":
 		case "quit-application-requested":
-			// If quit already canceled, just return
-			if (aSubject.QueryInterface(Ci.nsISupportsPRBool) && aSubject.data) return;
-
-			// If private browsing mode don't allow saving unless overridding
-			try {
-				let inPrivateBrowsing = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled;
-				if (inPrivateBrowsing) {
-					if (!pb.getBoolPref(SM_ALLOW_SAVE_IN_PBM_PREFERENCE) || !pb.getBoolPref(SM_ENCRYPT_SESSIONS_PREFERENCE)) {
-						return;
-					}
-				}
-			} catch(ex) {}
-			
-			let backup = pb.getIntPref(SM_BACKUP_SESSION_PREFERENCE);
-			let resume_current = (pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE) == 3) || pb.getBoolPref("browser.sessionstore.resume_session_once");
-
-			// If not restarting and set to prompt, disable FF's quit prompt
-			if ((aData != "restart") && (backup == 2)) {
-				let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
-				if ((backup == 2) && ((aTopic == "quit-application-requested") || pb.getBoolPref(SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE))) {
-
-					// Do session prompt here and then save the info in an Application Storage variable for use in
-					// the shutdown procsesing in sessionmanager.js
-					let watcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
-					// if didn't already shut down
-					log("gSessionManager.mAlreadyShutdown = " + gSessionManager.mAlreadyShutdown, "DATA");
-					if (!gSessionManager.mAlreadyShutdown) {
-						let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
-
-						// Manually construct the prompt window because the promptService doesn't allow 4 button prompts
-						let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
-						params.SetInt(0, 1); 												// Set default to cancel
-						params.SetString(0, bundle.GetStringFromName("preserve_session"));	// dialog text
-						params.SetString(1, bundle.GetStringFromName("prompt_not_again"));	// checkbox text
-						params.SetString(12, bundle.GetStringFromName("sessionManager"));	// title
-						
-						// buttons are tricky because they don't display in order
-						// if there are 4 buttons they display as 11, 8, 10, 9
-						// if there are 3 buttons they display as 8, 10, 9
-						// A button always returns it's string number - 8, eg: 10 returns 2.
-						// So we need to tweak things when displaying 3 or 4 buttons.
-						
-						if (resume_current) {
-							params.SetInt(2, 3);												// Display 3 buttons
-							params.SetString(8, bundle.GetStringFromName("save_quit"));			// first button text (returns 0)
-							params.SetString(10, bundle.GetStringFromName("quit"));				// second button text (returns 2)
-							params.SetString(9, bundle.GetStringFromName("cancel"));			// third button text (returns 1)
-						}
-						else {
-							params.SetInt(2, 4);												// Display 4 buttons
-							params.SetString(11, bundle.GetStringFromName("save_quit"));		// first button text (returns 3)
-							params.SetString(8, bundle.GetStringFromName("quit"));				// second button text (returns 0)
-							params.SetString(10, bundle.GetStringFromName("save_and_restore"));	// third button text (returns 2)
-							params.SetString(9, bundle.GetStringFromName("cancel"));			// fourth button text (returns 1)
-						}
-						
-						watcher.openWindow(window, "chrome://global/content/commonDialog.xul", "_blank", "centerscreen,chrome,modal,titlebar", params);
-						let results = params.GetInt(0);
-							
-						// If cancel pressed, cancel shutdown and return;
-						if (results == 1) {
-							aSubject.QueryInterface(Ci.nsISupportsPRBool);
-							aSubject.data = true;
-							return;
-						}
-						
-						// At this point the results value doesn't match what the
-						// backupCurrentSession function in sessionmanager.js expects which is
-						// the Save & Quit to be 0, Quit to be 1 and Save & Restore to be 2, so tweak the values here.
-						switch (results) {
-							// Save & Quit when four buttons displayed
-							case 3:
-								results = 0;
-								break;
-							// Quit (4 buttons) or Save & Quit (3 buttons)
-							case 0:
-								results = resume_current ? 0 : 1;
-								break;
-							case 2:
-								results = resume_current ? 1 : 2;
-						}
-						
-						// If checkbox checked
-						if (params.GetInt(1))
-						{
-							if (results == 2) {
-								let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-								str.data = SM_BACKUP_FILE;
-								pb.setComplexValue(SM_RESUME_SESSION_PREFERENCE, Ci.nsISupportsString, str);
-								pb.setIntPref(SM_STARTUP_PREFERENCE, 2)
-							}
-							pb.setIntPref(SM_BACKUP_SESSION_PREFERENCE, (results == 1)?0:1);
-						}
-								
-						gSessionManager.mShutdownPromptResults = results;
-						
-						// Disable prompt in browser
-						if (pb.getPrefType("browser.warnOnQuit") == pb.PREF_BOOL) {
-							if (typeof(this._warnOnQuit) != "boolean") {
-								this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
-							}
-							pb.setBoolPref("browser.warnOnQuit", false);
-						}
-						// Disable prompt in tab mix plus if it's running
-						if (pb.getPrefType("browser.tabs.warnOnClose") == pb.PREF_BOOL) {
-							if (typeof(this._warnOnClose) != "boolean") {
-								this._warnOnClose = pb.getBoolPref("browser.tabs.warnOnClose");
-							}
-							pb.setBoolPref("browser.tabs.warnOnClose", false);
-						}
-						if (pb.getPrefType("extensions.tabmix.protectedtabs.warnOnClose") == pb.PREF_BOOL) {
-							if (typeof(this._TMP_protectedtabs_warnOnClose) != "boolean") {
-								this._TMP_protectedtabs_warnOnClose = pb.getBoolPref("extensions.tabmix.protectedtabs.warnOnClose");
-							}
-							pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", false);
-						}
-					}
-				}
-			}
+			this.handleQuitApplicationRequest(aSubject, aTopic, aData, pb);
 			break;
 		case "browser-lastwindow-close-granted":
 			if (typeof(this._warnOnQuit) == "boolean") {
@@ -583,10 +470,179 @@ SessionManagerHelperComponent.prototype = {
 
 		// Resume listening to preference changes
 		this._ignorePrefChange = false;
+	},
+	
+	handlePrivacyChange: function sm_handlePrivacyChange(aSubject, aData)
+	{
+		switch(aData) {
+		case "enter":
+			try {
+				let ss = Cc["@mozilla.org/browser/sessionstore;1"] || Cc["@mozilla.org/suite/sessionstore;1"];
+				gSessionManager.mBackupState = ss.getService(Ci.nsISessionStore).getBrowserState();
+				gSessionManager.mAutoPrivacy = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).autoStarted;
+				log("SessionManagerHelperComponent: observer autoStarted = " + gSessionManager.mAutoPrivacy);
+			}
+			catch(ex) { 
+				logError(ex);
+			}
+			
+			// Only save if entering private browsing mode manually (i.e. not automatically on browser startup)
+			// Use the mTimer variable since it isn't set until final-ui-startup.
+			if (this.mTimer) {
+				// Close current autosave session or make an autosave backup (if not already in private browsing mode)
+				if (!gSessionManager.closeSession(false,true) && gSessionManager.mPref_autosave_session) {
+					// If autostart or disabling history via options, make a real backup, otherwise make a temporary backup
+					if (gSessionManager.isAutoStartPrivateBrowserMode()) {
+						gSessionManager.backupCurrentSession(true);
+					}
+					else {
+						gSessionManager.autoSaveCurrentSession(true); 
+					}
+				}
+			}
+			
+			break;
+		case "exit":
+			// If browser not shutting down, clear the backup state otherwise set mShutDownInPrivateBrowsingMode flag
+			aSubject.QueryInterface(Ci.nsISupportsPRBool);
+			if (aSubject.data) {
+				if (!gSessionManager.mPref_enable_saving_in_private_browsing_mode || !gSessionManager.mPref_encrypt_sessions) {
+					gSessionManager.mShutDownInPrivateBrowsingMode = true;
+					log("SessionManagerHelperComponent: observer mShutDownInPrivateBrowsingMode = " + gSessionManager.mShutDownInPrivateBrowsingMode, "DATA");
+				}
+			}
+			else {
+				gSessionManager.mBackupState = null;
+			}
+			break;
+		}
+	},
+	
+	handleQuitApplicationRequest: function(aSubject, aTopic, aData, pb)
+	{
+		// If quit already canceled, just return
+		if (aSubject.QueryInterface(Ci.nsISupportsPRBool) && aSubject.data) return;
+
+		// If private browsing mode don't allow saving unless overridding
+		try {
+			let inPrivateBrowsing = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled;
+			if (inPrivateBrowsing) {
+				if (!pb.getBoolPref(SM_ALLOW_SAVE_IN_PBM_PREFERENCE) || !pb.getBoolPref(SM_ENCRYPT_SESSIONS_PREFERENCE)) {
+					return;
+				}
+			}
+		} catch(ex) {}
+		
+		let backup = pb.getIntPref(SM_BACKUP_SESSION_PREFERENCE);
+		let resume_current = (pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE) == 3) || pb.getBoolPref("browser.sessionstore.resume_session_once");
+
+		// If not restarting and set to prompt, disable FF's quit prompt
+		if ((aData != "restart") && (backup == 2)) {
+			let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
+			if ((backup == 2) && ((aTopic == "quit-application-requested") || pb.getBoolPref(SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE))) {
+
+				// Do session prompt here and then save the info in an Application Storage variable for use in
+				// the shutdown procsesing in sessionmanager.js
+				let watcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
+				// if didn't already shut down
+				log("gSessionManager.mAlreadyShutdown = " + gSessionManager.mAlreadyShutdown, "DATA");
+				if (!gSessionManager.mAlreadyShutdown) {
+					let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+
+					// Manually construct the prompt window because the promptService doesn't allow 4 button prompts
+					let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
+					params.SetInt(0, 1); 												// Set default to cancel
+					params.SetString(0, bundle.GetStringFromName("preserve_session"));	// dialog text
+					params.SetString(1, bundle.GetStringFromName("prompt_not_again"));	// checkbox text
+					params.SetString(12, bundle.GetStringFromName("sessionManager"));	// title
+					
+					// buttons are tricky because they don't display in order
+					// if there are 4 buttons they display as 11, 8, 10, 9
+					// if there are 3 buttons they display as 8, 10, 9
+					// A button always returns it's string number - 8, eg: 10 returns 2.
+					// So we need to tweak things when displaying 3 or 4 buttons.
+					
+					if (resume_current) {
+						params.SetInt(2, 3);												// Display 3 buttons
+						params.SetString(8, bundle.GetStringFromName("save_quit"));			// first button text (returns 0)
+						params.SetString(10, bundle.GetStringFromName("quit"));				// second button text (returns 2)
+						params.SetString(9, bundle.GetStringFromName("cancel"));			// third button text (returns 1)
+					}
+					else {
+						params.SetInt(2, 4);												// Display 4 buttons
+						params.SetString(11, bundle.GetStringFromName("save_quit"));		// first button text (returns 3)
+						params.SetString(8, bundle.GetStringFromName("quit"));				// second button text (returns 0)
+						params.SetString(10, bundle.GetStringFromName("save_and_restore"));	// third button text (returns 2)
+						params.SetString(9, bundle.GetStringFromName("cancel"));			// fourth button text (returns 1)
+					}
+					
+					watcher.openWindow(window, "chrome://global/content/commonDialog.xul", "_blank", "centerscreen,chrome,modal,titlebar", params);
+					let results = params.GetInt(0);
+						
+					// If cancel pressed, cancel shutdown and return;
+					if (results == 1) {
+						aSubject.QueryInterface(Ci.nsISupportsPRBool);
+						aSubject.data = true;
+						return;
+					}
+					
+					// At this point the results value doesn't match what the
+					// backupCurrentSession function in sessionmanager.js expects which is
+					// the Save & Quit to be 0, Quit to be 1 and Save & Restore to be 2, so tweak the values here.
+					switch (results) {
+						// Save & Quit when four buttons displayed
+						case 3:
+							results = 0;
+							break;
+						// Quit (4 buttons) or Save & Quit (3 buttons)
+						case 0:
+							results = resume_current ? 0 : 1;
+							break;
+						case 2:
+							results = resume_current ? 1 : 2;
+					}
+					
+					// If checkbox checked
+					if (params.GetInt(1))
+					{
+						if (results == 2) {
+							let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+							str.data = SM_BACKUP_FILE;
+							pb.setComplexValue(SM_RESUME_SESSION_PREFERENCE, Ci.nsISupportsString, str);
+							pb.setIntPref(SM_STARTUP_PREFERENCE, 2)
+						}
+						pb.setIntPref(SM_BACKUP_SESSION_PREFERENCE, (results == 1)?0:1);
+					}
+							
+					gSessionManager.mShutdownPromptResults = results;
+					
+					// Disable prompt in browser
+					if (pb.getPrefType("browser.warnOnQuit") == pb.PREF_BOOL) {
+						if (typeof(this._warnOnQuit) != "boolean") {
+							this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
+						}
+						pb.setBoolPref("browser.warnOnQuit", false);
+					}
+					// Disable prompt in tab mix plus if it's running
+					if (pb.getPrefType("browser.tabs.warnOnClose") == pb.PREF_BOOL) {
+						if (typeof(this._warnOnClose) != "boolean") {
+							this._warnOnClose = pb.getBoolPref("browser.tabs.warnOnClose");
+						}
+						pb.setBoolPref("browser.tabs.warnOnClose", false);
+					}
+					if (pb.getPrefType("extensions.tabmix.protectedtabs.warnOnClose") == pb.PREF_BOOL) {
+						if (typeof(this._TMP_protectedtabs_warnOnClose) != "boolean") {
+							this._TMP_protectedtabs_warnOnClose = pb.getBoolPref("extensions.tabmix.protectedtabs.warnOnClose");
+						}
+						pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", false);
+					}
+				}
+			}
+		}
 	}
 };
 
 // Register Component
 function NSGetModule(compMgr, fileSpec) {
   return XPCOMUtils.generateModule([SessionManagerHelperComponent]);
-}
+};
