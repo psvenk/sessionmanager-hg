@@ -107,7 +107,32 @@
 <!ENTITY last_window_shutdown.accesskey "Т">
 <!ENTITY preselect_previous_session.label "Изберете ја предходната сесија">
 <!ENTITY preselect_previous_session.accesskey "з">
+<!ENTITY logging.caption "Евидентирање">
+<!ENTITY enable_logging.label "Вклучи го Евидентирањето">
+<!ENTITY enable_logging.accesskey "и">
+<!ENTITY open_log.label "Отвори ја датотеката на дневникот">
+<!ENTITY open_log.accesskey "о">
+<!ENTITY delete_log.label "Избриши ја датотеката на дневникот">
+<!ENTITY delete_log.accesskey "з">
+<!ENTITY log_level_state.label "Евидентирај го исклучувањето">
+<!ENTITY log_level_state.accesskey "с">
+<!ENTITY log_level_trace.label "Евидентирај ги трагите на податоците">
+<!ENTITY log_level_trace.accesskey "т">
+<!ENTITY log_level_data.label "Евидентирај ги променливите податоци">
+<!ENTITY log_level_data.accesskey "п">
+<!ENTITY log_level_info.label "Евидентирај ги информативните пораки">
+<!ENTITY log_level_info.accesskey "и">
+<!ENTITY log_level_extra.label "Евидентирај ги додатните податоци од чистењето">
+<!ENTITY log_level_extra.accesskey "о">
 <!ENTITY reload.label "Превчитај ги сите обновени прозорци">
 <!ENTITY reload.accesskey "е">
 <!ENTITY overwrite.label "Замени ги постоечките прозорци">
 <!ENTITY overwrite.accesskey "а">
+<!ENTITY allow_saving_during_pbm.label "Дозволи зачувување за време на Приватен режим на прелистување">
+<!ENTITY allow_saving_during_pbm.label2 "Потребно е да се вклучи енкрипцијата">
+<!ENTITY allow_saving_during_pbm.accesskey "з">
+<!ENTITY session_name_in_titlebar.label "имињата на активните сесии во насловната лента">
+<!ENTITY session_name_in_titlebar.accesskey "м">
+<!ENTITY prepend.label "Вметни">
+<!ENTITY append.label "Додај">
+<!ENTITY donotadd.label "Не додавај">

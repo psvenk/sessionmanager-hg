@@ -74,3 +74,9 @@
 <!ENTITY prompt.append_window.label "Додај во тековниот прозорец">
 <!ENTITY session_explorer.label "Истражувач на Сесијата">
 <!ENTITY session_explorer.accesskey "С">
+<!ENTITY closeWindowSession.label "Зачувај ја и Затвори ја сесијата на прозорецот">
+<!ENTITY closeWindowSession.accesskey "т">
+<!ENTITY abandonWindowSession.label "Напушти ја сесијата на прозорецот">
+<!ENTITY abandonWindowSession.accesskey "у">
+<!ENTITY load_append_window.label "Вчитај (Додај ја на тековниот прозорец)">
+<!ENTITY load_append_window.accesskey "ј">
