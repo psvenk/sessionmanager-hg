@@ -107,8 +107,8 @@
 <!ENTITY last_window_shutdown.accesskey "T">
 <!ENTITY preselect_previous_session.label "Présélectionner la session précédente">
 <!ENTITY preselect_previous_session.accesskey "R">
-<!ENTITY logging.caption "Connexion">
-<!ENTITY enable_logging.label "Activer la connexion">
+<!ENTITY logging.caption "Journal">
+<!ENTITY enable_logging.label "Activer le journal">
 <!ENTITY enable_logging.accesskey "A">
 <!ENTITY open_log.label "Ouvrir le fichier journal">
 <!ENTITY open_log.accesskey "O">
