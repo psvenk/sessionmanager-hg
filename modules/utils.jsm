@@ -202,15 +202,8 @@ var gSessionManager = {
 					
 					// if any closed windows
 					if (windows.length) {
-						let encrypt_okay = false;
-						while (!encrypt_okay) {
-							try {
-								// force a master password prompt so we don't waste time if user cancels it
-								SECRET_DECODER_RING_SERVICE.encryptString("");
-								encrypt_okay = true;
-							}
-							catch(ex) {};
-						}
+						// force a master password prompt so we don't waste time if user cancels it
+						while (!this.enterMasterPassword());
 
 						windows.forEach(function(aWindow) {
 							aWindow.state = this.decrypt(aWindow.state, true, true);
@@ -1043,14 +1036,9 @@ var gSessionManager = {
 		
 		let encrypt_okay = true;
 		// make sure user enters master password if using sessionmanager.dat
-		if (!this.mUseSSClosedWindowList && this.mPref_encrypt_sessions) {
-			try { 
-				SECRET_DECODER_RING_SERVICE.encryptString("");
-			}
-			catch(ex) {
-				encrypt_okay = false;
-				this.cryptError(this._string("decrypt_fail2"));
-			}
+		if (!this.mUseSSClosedWindowList && this.mPref_encrypt_sessions && !this.enterMasterPassword()) {
+			encrypt_okay = false;
+			this.cryptError(this._string("decrypt_fail2"));
 		}
 		
 		let number_closed_windows = 0;
@@ -2474,6 +2462,32 @@ var gSessionManager = {
 
 /* ........ Encryption functions .............. */
 
+	// return TRUE if master password is set
+	isMasterPasswordSet: function() 
+	{
+		let slot = Cc["@mozilla.org/security/pkcs11moduledb;1"].getService(Ci.nsIPKCS11ModuleDB).findSlotByName("");
+		return (slot && (slot.status == Ci.nsIPKCS11Slot.SLOT_NOT_LOGGED_IN || slot.status == Ci.nsIPKCS11Slot.SLOT_LOGGED_IN));
+	},
+
+	// return TRUE if a user has set the firefox master password and has not yet logged in.
+	isMasterPasswordRequired: function() 
+	{
+		let slot = Cc["@mozilla.org/security/pkcs11moduledb;1"].getService(Ci.nsIPKCS11ModuleDB).findSlotByName("");
+		return (slot && slot.status == Ci.nsIPKCS11Slot.SLOT_NOT_LOGGED_IN);
+	},
+	
+	enterMasterPassword: function() 
+	{
+		//encrypting a string should open the enter master password dialog if master password is set
+		try {
+			SECRET_DECODER_RING_SERVICE.encryptString("dummy");
+			return true;
+		}
+		catch(ex) {
+			return false;
+		}
+	},
+
 	cryptError: function(aException, notSaved)
 	{
 		let text;
@@ -2546,9 +2560,8 @@ var gSessionManager = {
 
 	encryptionChange: function()
 	{
-		try {
-			// force a master password prompt so we don't waste time if user cancels it
-			SECRET_DECODER_RING_SERVICE.encryptString("");
+		// force a master password prompt so we don't waste time if user cancels it
+		if (this.enterMasterPassword()) {
 			
 			let sessions = this.getSessions();
 			sessions.forEach(function(aSession) {
@@ -2575,7 +2588,7 @@ var gSessionManager = {
 			}
 		}
 		// failed to encrypt/decrypt so revert setting
-		catch (ex) {
+		else {
 			this.setPref("encrypt_sessions",!this.mPref_encrypt_sessions);
 			this.cryptError(this._string("change_encryption_fail"));
 		}
