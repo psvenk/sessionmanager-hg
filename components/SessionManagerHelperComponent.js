@@ -35,6 +35,7 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
+const Cr = Components.results;
 const report = Components.utils.reportError;
 
 const Application = Cc["@mozilla.org/fuel/application;1"] ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
@@ -56,29 +57,51 @@ const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "extensions.sessionmanager.
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
-// A thread used to load the session files in the background so they will 
-// be cached when the user goes to use them.
-var backgroundThread = function(threadID) {
-  this.threadID = threadID;
+// Thread variables/constants
+const main = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).currentThread;
+var sessionLoadThread = null;
+
+// Main Thread called when finished loading sessions
+var mainThread = {
+	run: function() {
+		try {
+			sessionLoadThread.shutdown();
+			delete(sessionLoadThread);
+			log("SessionManagerHelperComponent mainThread: Background Session Thread destroyed from mainThread", "TRACE");
+		} catch(err) {
+			logError(err);
+		}
+	},
+  
+	QueryInterface: function(iid) {
+		if (iid.equals(Ci.nsIRunnable) || iid.equals(Ci.nsISupports)) {
+			return this;
+		}
+		throw Cr.NS_ERROR_NO_INTERFACE;
+	}
 };
 
-backgroundThread.prototype = {
-  run: function() {
-    try {
-		gSessionManager.getSessions();
-		log("backgroundThread: Background Session Load Complete", "TRACE");
-    } catch(err) {
-		logError(err);
-    }
-  },
+// A thread used to load the session files in the background so they will 
+// be cached when the user goes to use them.
+var backgroundThread = {
+	run: function() {
+		//perform work here that doesn't touch the DOM or anything else that isn't thread safe
+		try {
+			gSessionManager.getSessions();
+			log("SessionManagerHelperComponent backgroundThread: Background Session Load Complete", "TRACE");
+		} catch(err) {
+			logError(err);
+		}
+		// kick off current thread to terminate this thread
+		main.dispatch(mainThread, main.DISPATCH_NORMAL);
+	},
   
-  QueryInterface: function(iid) {
-    if (iid.equals(Components.interfaces.nsIRunnable) ||
-        iid.equals(Components.interfaces.nsISupports)) {
-            return this;
-    }
-    throw Components.results.NS_ERROR_NO_INTERFACE;
-  }
+	QueryInterface: function(iid) {
+		if (iid.equals(Ci.nsIRunnable) || iid.equals(Ci.nsISupports)) {
+			return this;
+		}
+		throw Cr.NS_ERROR_NO_INTERFACE;
+	}
 };
 
 // Session Manager's helper component.  It handles the following:
@@ -96,7 +119,7 @@ backgroundThread.prototype = {
 function SessionManagerHelperComponent() {
 	try {
 		Cu.import("resource://sessionmanager/modules/logger.jsm");
-		Cu.import("resource://sessionmanager/modules/utils.jsm");
+		Cu.import("resource://sessionmanager/modules/session_manager.jsm");
 	}
 	catch(ex) {
 		report(ex);
@@ -151,7 +174,7 @@ SessionManagerHelperComponent.prototype = {
 					}
 					else {
 						i++;
-						log("Session Manager: Command line specified session file not found or is not valid - " + name, "ERROR");
+						log("SessionManagerHelperComponent: Command line specified session file not found or is not valid - " + name, "ERROR");
 					}
 				}
 				else i++;
@@ -220,11 +243,8 @@ SessionManagerHelperComponent.prototype = {
 			pb.addObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this, false);
 			
 			// Cache the sessions in the background so they are ready when the user opens the menu
-			let background = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
-			background.dispatch(new backgroundThread(1), background.DISPATCH_NORMAL);
-			// This processes any pending events on the thread before shutting down, so it will run once.
-			background.shutdown();
-
+			sessionLoadThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
+			sessionLoadThread.dispatch(backgroundThread, sessionLoadThread.DISPATCH_NORMAL);
 			break;
 		case "sessionstore-windows-restored":
 			os.removeObserver(this, aTopic);
@@ -350,7 +370,7 @@ SessionManagerHelperComponent.prototype = {
 		                 prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
 
 		//dump("no_remove = " + resuming + "\n");
-		//log("no_remove = " + resuming, "DATA");
+		//log("SessionManagerHelperComponent:handle_crash: no_remove = " + resuming, "DATA");
 		// Unless browser is restarting, always delete the following preferences if crash recovery is disabled in case the browser crashes
 		// otherwise bad things can happen
 		if (!no_remove)
@@ -378,7 +398,7 @@ SessionManagerHelperComponent.prototype = {
 			initialState && initialState.session && initialState.session.state &&
 			initialState.session.state == "running";
 		
-		//log("Last Crashed = " + lastSessionCrashed, "DATA");
+		//log("SessionManagerHelperComponent:_check_for_crash: Last Crashed = " + lastSessionCrashed, "DATA");
 		if (lastSessionCrashed) {
         	let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
         	// default to recovering
@@ -545,7 +565,7 @@ SessionManagerHelperComponent.prototype = {
 				// the shutdown procsesing in sessionmanager.js
 				let watcher = Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher);
 				// if didn't already shut down
-				log("gSessionManager.mAlreadyShutdown = " + gSessionManager.mAlreadyShutdown, "DATA");
+				log("SessionManagerHelperComponent gSessionManager.mAlreadyShutdown = " + gSessionManager.mAlreadyShutdown, "DATA");
 				if (!gSessionManager.mAlreadyShutdown) {
 					let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
 
