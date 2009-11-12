@@ -2,8 +2,8 @@
 if(!com) var com={};
 if(!com.morac) com.morac={};
 
-// import the utils.jsm into the namespace
-Components.utils.import("resource://sessionmanager/modules/utils.jsm", com.morac);
+// import the session_manager.jsm into the namespace
+Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac);
 
 // use the namespace
 with (com.morac) {

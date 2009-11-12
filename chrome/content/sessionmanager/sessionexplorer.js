@@ -1,4 +1,4 @@
-Components.utils.import("resource://sessionmanager/modules/utils.jsm");
+Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
 
 function dumpnl(msg) {
 	dump(msg + "\n");

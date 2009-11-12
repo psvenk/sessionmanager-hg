@@ -35,7 +35,7 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-Components.utils.import("resource://sessionmanager/modules/utils.jsm");
+Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;

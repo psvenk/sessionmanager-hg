@@ -1,5 +1,5 @@
 Components.utils.import("resource://sessionmanager/modules/logger.jsm");
-Components.utils.import("resource://sessionmanager/modules/utils.jsm");
+Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
 
 var gParams = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
 var gSessionTree = null;
