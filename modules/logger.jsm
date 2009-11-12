@@ -61,10 +61,11 @@ function logError(e, force) {
 	// Log Addons if haven't already and EOL character exists
 	if (!_logged_Addons && _EOL) logExtensions();
 		
+	let location = e.stack || e.location || (e.fileName + ":" + e.lineNumber);
 	try { 
 		if (force || _logEnabled) {
-			mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): {" + e.message + "} {" + e.location + "}");
-			write_log((new Date).toGMTString() + ": {" + e.message + "} {" + e.location + "}" + "\n");
+			mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): {" + e.message + "} {" + location + "}");
+			if (_logEnabled) write_log((new Date).toGMTString() + ": {" + e.message + "} {" + e.location + "}" + "\n");
 		}
 	}
 	catch (ex) {
@@ -91,7 +92,7 @@ function log(aMessage, level, force) {
 	try {
 		if (force || (_logEnabled && (logging_level[level] & _logLevel))) {
 			mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + aMessage);
-			write_log((new Date).toGMTString() + ": " + aMessage + "\n");
+			if (_logEnabled) write_log((new Date).toGMTString() + ": " + aMessage + "\n");
 		}
 	}
 	catch (ex) { 
