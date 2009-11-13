@@ -11,10 +11,12 @@ const Ci = Components.interfaces
 const report = Components.utils.reportError;
 
 // Get and store services
-var mPromptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
-var mConsoleService = Cc['@mozilla.org/consoleservice;1'].getService(Ci.nsIConsoleService);
-var Application = (Cc["@mozilla.org/fuel/application;1"]) ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
-                   ((Cc["@mozilla.org/smile/application;1"]) ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
+const mPromptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
+const mConsoleService = Cc['@mozilla.org/consoleservice;1'].getService(Ci.nsIConsoleService);
+const mObserverService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
+const mPreferenceBranch = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const Application = (Cc["@mozilla.org/fuel/application;1"]) ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
+                    ((Cc["@mozilla.org/smile/application;1"]) ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
 
 var EXPORTED_SYMBOLS = ["log", "logError", "deleteLogFile", "openLogFile", "logging_level"];
 
@@ -36,6 +38,9 @@ var _logEnabled = false;		// Set to true if logging is enabled
 var _logLevel = 0;				// Set to the current logging level (see above)
 var _printedHeader = false;		// Printed header to log file
 
+// Message buffer to store logged events prior to initialization
+var buffer = [];
+
 // 
 // Public Logging functions
 //
@@ -50,14 +55,6 @@ function logError(e, force) {
 		return;
 	}
 	
-	// Initialize if not already done
-	if (!_initialized) {
-		initialize();
-	
-		// If couldn't initialize preferences, return
-		if (!_initialized) return;
-	}
-	
 	// Log Addons if haven't already and EOL character exists
 	if (!_logged_Addons && _EOL) logExtensions();
 		
@@ -66,6 +63,9 @@ function logError(e, force) {
 		if (force || _logEnabled) {
 			mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): {" + e.message + "} {" + location + "}");
 			if (_logEnabled) write_log((new Date).toGMTString() + ": {" + e.message + "} {" + e.location + "}" + "\n");
+		}
+		else if (!_initialized) {
+			buffer.push({ functionName: "logError", args: arguments});
 		}
 	}
 	catch (ex) {
@@ -77,14 +77,6 @@ function logError(e, force) {
 // Log info messages
 //
 function log(aMessage, level, force) {
-	// Initialize if not already done
-	if (!_initialized) {
-		initialize();
-	
-		// If couldn't initialize preferences, return
-		if (!_initialized) return;
-	}
-
 	// Log Addons if haven't already and EOL character exists
 	if (!_logged_Addons && _EOL) logExtensions();
 
@@ -93,6 +85,9 @@ function log(aMessage, level, force) {
 		if (force || (_logEnabled && (logging_level[level] & _logLevel))) {
 			mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + aMessage);
 			if (_logEnabled) write_log((new Date).toGMTString() + ": " + aMessage + "\n");
+		}
+		else if (!_initialized) {
+			buffer.push({ functionName: "log", args: arguments});
 		}
 	}
 	catch (ex) { 
@@ -248,41 +243,71 @@ function logExtensions() {
 	}
 }
 
-// Handle logging preference changes
-function preferenceChanged(event) {
-	if (event.type == "change") {
-		switch (event.data) {
-			case LOG_ENABLE_PREFERENCE_NAME:
-				_logEnabled = Application.prefs.get(LOG_ENABLE_PREFERENCE_NAME).value;
-				break;
-			case LOG_LEVEL_PREFERENCE_NAME:
-				_logLevel = Application.prefs.get(LOG_LEVEL_PREFERENCE_NAME).value;
-				break;
+function logStoredBuffer() {
+	let item;
+	while (item = buffer.shift()) {
+		switch (item.functionName) {
+		case "log":
+			logError(item.args[0], item.args[1], item.args[2]);
+			break;
+		case "logError":
+			logError(item.args[0], item.args[1]);
+			break;
+		}
+	}
+	delete buffer;
+}
+
+// Can't use FUEL/SMILE to listen for preference changes because of bug 488587 so just use an observer
+var observer = {
+	observe: function(aSubject, aTopic, aData) {
+		switch (aTopic)
+		{
+		case "nsPref:changed":
+			switch(aData) 
+			{
+				case LOG_ENABLE_PREFERENCE_NAME:
+					_logEnabled = Application.prefs.get(LOG_ENABLE_PREFERENCE_NAME).value;
+					break;
+				case LOG_LEVEL_PREFERENCE_NAME:
+					_logLevel = Application.prefs.get(LOG_LEVEL_PREFERENCE_NAME).value;
+					break;
+			}
+			break;
+		case "profile-after-change":
+			mObserverService.removeObserver(this, "profile-after-change");
+			mObserverService.addObserver(this, "profile-change-teardown", false);
+			
+			// Can't use FUEL/SMILE to listen for preference changes because of bug 488587 so just use an observer
+			// only need to register LOG_ENABLE_PREFERENCE_NAME because "*.logging" is in "*.logging_level" so it gets both of them
+			mPreferenceBranch.addObserver(LOG_ENABLE_PREFERENCE_NAME, this, false);
+			
+			_logEnabled = Application.prefs.get(LOG_ENABLE_PREFERENCE_NAME).value;
+			_logLevel = Application.prefs.get(LOG_LEVEL_PREFERENCE_NAME).value;
+			
+			// Do a conditional delete of the log file each time the application starts
+			deleteLogFile();
+			
+			// Set to initialized and log any stored log events if the log is enabled
+			_initialized = true;
+			if (_logEnabled) {
+				logExtensions();
+				logStoredBuffer();
+			}
+			else {
+				delete(buffer);
+			}
+			break;
+		case "profile-after-change":
+			// remove observers
+			mObserverService.removeObserver(this, "profile-change-teardown");
+			mPreferenceBranch.removeObserver(LOG_ENABLE_PREFERENCE_NAME, this);
 		}
 	}
 }
 
-function initialize() {
-	// Only initialize in the main thread
-	if (!Cc["@mozilla.org/thread-manager;1"].getService().isMainThread) return;
-
-	var enabledPref = Application.prefs.get(LOG_ENABLE_PREFERENCE_NAME);
-	var levelPref = Application.prefs.get(LOG_LEVEL_PREFERENCE_NAME);
-	
-	if (enabledPref) {
-		_logEnabled = enabledPref.value;
-		enabledPref.events.addListener("change", preferenceChanged);
-	}
-	if (levelPref) {
-		_logLevel = levelPref.value;
-		levelPref.events.addListener("change", preferenceChanged);
-	}
-	
-	// If preferences exist
-	if (enabledPref && levelPref) {
-		// Do a conditional delete of the log file each time the application starts
-		deleteLogFile();
-	
-		_initialized = true;
-	}
-}
+// Initialize on the "profile do change" notification because if we initialized prior to that, not only will the log
+// file fail to delete, but it will actually break the Fuel Application component's preference observer so preference changes will
+// stop working.  We use the "profile do change" notification so we can be initialzed before the Session Manager component which does logging
+// on the "profile after change" notificaiton.
+mObserverService.addObserver(observer, "profile-after-change", false);
