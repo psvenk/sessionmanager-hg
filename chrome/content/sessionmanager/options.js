@@ -272,6 +272,7 @@ with (com.morac) {
 			prefs[i].valueFromPreferences = prefs[i].value;
 		}
 		setStartValue();
+		setLogLevel();
 		
 		// Disable Apply Button
 		_("sessionmanagerOptions").getButton("extra1").disabled = true;
