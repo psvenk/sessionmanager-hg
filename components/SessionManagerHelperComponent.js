@@ -343,6 +343,7 @@ SessionManagerHelperComponent.prototype = {
 			else if (pb.prefHasUserValue(OLD_BROWSER_STARTUP_PAGE_PREFERENCE)) {
 				pb.clearUserPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE);
 			}
+			pb.removeObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this);
 			break;
 		case "nsPref:changed":
 			switch(aData) 
