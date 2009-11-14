@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "Gizli Tarama Modunda kaydetmeye izin ver">
 <!ENTITY allow_saving_during_pbm.label2 "Şifrelemenin aktif olması gerekir">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
+<!ENTITY session_name_in_titlebar.label "Etkin oturumları Durum çubuğunda göster">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Prepend?">
+<!ENTITY append.label "Ekle">
+<!ENTITY donotadd.label "Ekleme">
