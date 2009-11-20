@@ -3428,7 +3428,9 @@ var gSessionManager = {
 
 		// if only one window, don't allow toolbars to be hidden
 		if (aReplacingWindow && (aState.windows.length == 1) && aState.windows[0].hidden) {
-			delete (aState.windows[0].hidden);
+			delete aState.windows[0].hidden;
+			// Since nothing is hidden in the first window, it cannot be a popup (see Firefox bug 519099)
+			delete aState.windows[0].isPopup;
 		}
 		return this.JSON_encode(aState);
 	},
