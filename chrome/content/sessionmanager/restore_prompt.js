@@ -27,7 +27,7 @@ restorePrompt = function() {
 			var name = gSessionManager.getFormattedName("", new Date(file.lastModifiedTime), gSessionManager._string("crashed_session"));
 			state = gSessionManager.readFile(file);
 			count = gSessionManager.getCount(state);
-			session = gSessionManager.nameState(state, name + "\ntimestamp=" + file.lastModifiedTime + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + "\tgroup=" + gSessionManager._string("backup_sessions") + "\tscreensize=" + screensize);
+			session = gSessionManager.nameState("timestamp=" + file.lastModifiedTime + "\nautosave=false\tcount=" + count.windows + "/" + count.tabs + "\tgroup=" + gSessionManager._string("backup_sessions") + "\tscreensize=" + screensize + "\n" + state, name);
 			backupFile = gSessionManager.getSessionDir(BACKUP_SESSION_FILENAME, true);
 			
 			if (count.windows && count.tabs) countString = count.windows + "," + count.tabs;
@@ -111,10 +111,9 @@ restorePrompt = function() {
 				
 				if (temp_state) {
 					var autosave_time = isNaN(autosave_values[2]) ? 0 : autosave_values[2];
-					var autosave_state = gSessionManager.nameState(temp_state, autosave_name + 
-					                     "\ntimestamp=" + file.lastModifiedTime + "\nautosave=session/" + autosave_time +
-										 "\tcount=" + count.windows + "/" + count.tabs + 
-										 (autosave_values[1] ? ("\tgroup=" + autosave_values[1]) : ""));
+					var autosave_state = gSessionManager.nameState("timestamp=" + file.lastModifiedTime + "\nautosave=session/" + autosave_time +
+					                                               "\tcount=" + count.windows + "/" + count.tabs + (autosave_values[1] ? ("\tgroup=" + autosave_values[1]) : "") +
+					                                               "\tscreensize=" + screensize + "\n" + temp_state, autosave_name);
 					gSessionManager.writeFile(gSessionManager.getSessionDir(gSessionManager.makeFileName(autosave_name)), autosave_state);
 				}
 			}
