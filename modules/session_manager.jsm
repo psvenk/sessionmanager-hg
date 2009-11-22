@@ -3308,10 +3308,9 @@ var gSessionManager = {
 			height = window.screen.height;
 		}
 		
-		return (aName != null)?this.nameState(("[SessionManager v2]\nname=" + (new Date()).toString() + "\ntimestamp=" + Date.now() + 
-				"\nautosave=" + ((aAutoSave)?aWindow?("window/" + aAutoSaveTime):("session/" + aAutoSaveTime):"false") + "\tcount=" + count.windows + "/" + count.tabs + 
-				(aGroup? ("\tgroup=" + aGroup.replace(/\t/g, " ")) : "") + "\tscreensize=" + (this._screen_width || width) + "x" + (this._screen_height || height) + 
-				"\n" + state + "\n").replace(/\n\[/g, "\n$&"), aName.replace(/\t/g, " ") || ""):state;
+		return (aName != null)?this.nameState("timestamp=" + Date.now() + "\nautosave=" + ((aAutoSave)?aWindow?("window/" + aAutoSaveTime):("session/" + aAutoSaveTime):"false") +
+		                                      "\tcount=" + count.windows + "/" + count.tabs + (aGroup? ("\tgroup=" + aGroup.replace(/\t/g, " ")) : "") +
+		                                      "\tscreensize=" + (this._screen_width || width) + "x" + (this._screen_height || height) + "\n" + state, aName || "") : state;
 	},
 
 	restoreSession: function(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup, aWindowSessionValues, xDelta, yDelta)
