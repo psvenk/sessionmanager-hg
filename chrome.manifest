@@ -3,6 +3,7 @@ content	sessionmanager	jar:chrome/sessionmanager.jar!/content/sessionmanager/
 skin	sessionmanager	classic/1.0	jar:chrome/sessionmanager.jar!/skin/classic/sessionmanager/
 
 locale	sessionmanager	en-US	jar:chrome/sessionmanager.jar!/locale/en-US/sessionmanager/
+locale	sessionmanager	ca		jar:chrome/sessionmanager.jar!/locale/ca/sessionmanager/
 locale	sessionmanager	cs-CZ	jar:chrome/sessionmanager.jar!/locale/cs-CZ/sessionmanager/
 locale	sessionmanager	da-DK	jar:chrome/sessionmanager.jar!/locale/da-DK/sessionmanager/
 locale	sessionmanager	de-DE	jar:chrome/sessionmanager.jar!/locale/de-DE/sessionmanager/
@@ -22,7 +23,6 @@ locale	sessionmanager	pl-PL	jar:chrome/sessionmanager.jar!/locale/pl-PL/sessionm
 locale	sessionmanager	ro-RO	jar:chrome/sessionmanager.jar!/locale/ro-RO/sessionmanager/
 locale	sessionmanager	ru-RU	jar:chrome/sessionmanager.jar!/locale/ru-RU/sessionmanager/
 locale	sessionmanager	sk-SK	jar:chrome/sessionmanager.jar!/locale/sk-SK/sessionmanager/
-locale	sessionmanager	sr-RS	jar:chrome/sessionmanager.jar!/locale/sr-RS/sessionmanager/
 locale	sessionmanager	sv-SE	jar:chrome/sessionmanager.jar!/locale/sv-SE/sessionmanager/
 locale	sessionmanager	tr-TR	jar:chrome/sessionmanager.jar!/locale/tr-TR/sessionmanager/
 locale	sessionmanager	uk-UA	jar:chrome/sessionmanager.jar!/locale/uk-UA/sessionmanager/
