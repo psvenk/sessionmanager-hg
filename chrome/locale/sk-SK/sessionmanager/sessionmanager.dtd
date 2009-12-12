@@ -60,7 +60,6 @@
 <!ENTITY prompt.save_every2.label "minút (vypnuté, ak je prázdne)">
 <!ENTITY winTabTree.restoreHeader "Obnoviť">
 <!ENTITY winTabTree.listHeader "Okná a karty">
-<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Okno č. &#37;S">
 <!ENTITY load.label "Načítať reláciu...">
 <!ENTITY load.accesskey "N">

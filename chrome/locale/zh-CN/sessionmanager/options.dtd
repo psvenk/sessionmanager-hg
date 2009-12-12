@@ -131,3 +131,8 @@
 <!ENTITY allow_saving_during_pbm.label "在私隐浏览模式时允许保存">
 <!ENTITY allow_saving_during_pbm.label2 "要求启用加密">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
+<!ENTITY session_name_in_titlebar.label "标题栏显示已激活会话的名称">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "追加">
+<!ENTITY append.label "添加">
+<!ENTITY donotadd.label "不添加">

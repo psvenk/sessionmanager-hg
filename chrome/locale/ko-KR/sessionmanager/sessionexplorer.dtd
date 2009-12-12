@@ -1,42 +1,42 @@
-<!ENTITY session_open.label "¿­±â">
+<!ENTITY session_open.label "ì—´ê¸°">
 <!ENTITY session_open.accesskey "O">
-<!ENTITY session_open.tooltip "¼±ÅÃÇÑ ¼¼¼Ç ¿­±â">
-<!ENTITY session_open_overwrite.label "¿­±â (µ¤¾î¾²±â)">
+<!ENTITY session_open.tooltip "ì„ íƒí•œ ì„¸ì…˜ ì—´ê¸°">
+<!ENTITY session_open_overwrite.label "ì—´ê¸° (ë®ì–´ì“°ê¸°)">
 <!ENTITY session_open_overwrite.accesskey "V">
-<!ENTITY session_open_overwrite.tooltip "¼±ÅÃÇÑ ¼¼¼ÇÀ» ¿­±î¿ä ???">
-<!ENTITY session_open_newwindow.label "¿­±â (»õ Ã¢)">
+<!ENTITY session_open_overwrite.tooltip "ì„ íƒí•œ ì„¸ì…˜ì„ ì—´ê¹Œìš” ???">
+<!ENTITY session_open_newwindow.label "ì—´ê¸° (ìƒˆ ì°½)">
 <!ENTITY session_open_newwindow.accesskey "N">
-<!ENTITY session_open_newwindow.tooltip "¼±ÅÃÇÑ ¼¼¼ÇÀ» ¿­±î¿ä ???">
-<!ENTITY session_open_append.label "¿­±â (ºÙ¿©³Ö±â)">
+<!ENTITY session_open_newwindow.tooltip "ì„ íƒí•œ ì„¸ì…˜ì„ ì—´ê¹Œìš” ???">
+<!ENTITY session_open_append.label "ì—´ê¸° (ë¶™ì—¬ë„£ê¸°)">
 <!ENTITY session_open_append.accesskey "A">
-<!ENTITY session_open_append.tooltip "¼±ÅÃÇÑ ¼¼¼Ç ¿­±â">
-<!ENTITY session_rename.label "ÀÌ¸§ ¹Ù²Ù±â...">
+<!ENTITY session_open_append.tooltip "ì„ íƒí•œ ì„¸ì…˜ ì—´ê¸°">
+<!ENTITY session_rename.label "ì´ë¦„ ë°”ê¾¸ê¸°...">
 <!ENTITY session_rename.accesskey "R">
-<!ENTITY session_rename.tooltip "¼±ÅÃÇÑ ¼¼¼Ç ÀÌ¸§ ¹Ù²Ù±â">
-<!ENTITY session_rename_ok.label "ÀÌ¸§ ¹Ù²Ù±â">
-<!ENTITY session_delete.label "»èÁ¦">
+<!ENTITY session_rename.tooltip "ì„ íƒí•œ ì„¸ì…˜ ì´ë¦„ ë°”ê¾¸ê¸°">
+<!ENTITY session_rename_ok.label "ì´ë¦„ ë°”ê¾¸ê¸°">
+<!ENTITY session_delete.label "ì‚­ì œ">
 <!ENTITY session_delete.accesskey "D">
-<!ENTITY session_delete.tooltip "¼±ÅÃÇÑ ¼¼¼Ç »èÁ¦">
-<!ENTITY session_save.label "ÀúÀå...">
+<!ENTITY session_delete.tooltip "ì„ íƒí•œ ì„¸ì…˜ ì‚­ì œ">
+<!ENTITY session_save.label "ì €ìž¥...">
 <!ENTITY session_save.accesskey "S">
-<!ENTITY session_save.tooltip "»õ ¼¼¼Ç¿¡ ÇöÀç Ã¢ ÀúÀå">
-<!ENTITY session_save_ok.label "ÀúÀå">
-<!ENTITY session_save_w.label "Ã¢ ÀúÀå...">
+<!ENTITY session_save.tooltip "ìƒˆ ì„¸ì…˜ì— í˜„ìž¬ ì°½ ì €ìž¥">
+<!ENTITY session_save_ok.label "ì €ìž¥">
+<!ENTITY session_save_w.label "ì°½ ì €ìž¥...">
 <!ENTITY session_save_w.accesskey "W">
-<!ENTITY session_save_w.tooltip "ÇöÀç Ã¢À» »õ ¼¼¼Ç¿¡ ÀúÀå">
-<!ENTITY session_save_w_ok.label "Ã¢ ÀúÀå">
-<!ENTITY session_open_folder.label "Æú´õ ¿­±â">
+<!ENTITY session_save_w.tooltip "í˜„ìž¬ ì°½ì„ ìƒˆ ì„¸ì…˜ì— ì €ìž¥">
+<!ENTITY session_save_w_ok.label "ì°½ ì €ìž¥">
+<!ENTITY session_open_folder.label "í´ë” ì—´ê¸°">
 <!ENTITY session_open_folder.accesskey "F">
-<!ENTITY session_open_folder.tooltip "¼¼¼Ç °ü¸®ÀÚ Æú´õ ¿­±â">
+<!ENTITY session_open_folder.tooltip "ì„¸ì…˜ ê´€ë¦¬ìž í´ë” ì—´ê¸°">
 <!ENTITY column_autosave.label "A">
-<!ENTITY column_autosave.tooltip "¼¼¼Ç ÀÚµ¿ ÀúÀå">
+<!ENTITY column_autosave.tooltip "ì„¸ì…˜ ìžë™ ì €ìž¥">
 <!ENTITY column_windows.label "W">
-<!ENTITY column_windows.tooltip "Ã¢">
+<!ENTITY column_windows.tooltip "ì°½">
 <!ENTITY column_tabs.label "T">
-<!ENTITY column_tabs.tooltip "ÅÇ">
-<!ENTITY column_time.label "½Ã°£">
-<!ENTITY column_time.tooltip "Å¸ÀÓ½ºÅÆÇÁ">
-<!ENTITY column_name.label "ÀÌ¸§">
-<!ENTITY cancel.label "Ãë¼Ò">
-<!ENTITY done.label "¿Ï·á">
-<!ENTITY done.tooltip "¼¼¼Ç Å½»ö±â Ã¢ ´Ý±â">
+<!ENTITY column_tabs.tooltip "íƒ­">
+<!ENTITY column_time.label "ì‹œê°„">
+<!ENTITY column_time.tooltip "íƒ€ìž„ìŠ¤íƒ¬í”„">
+<!ENTITY column_name.label "ì´ë¦„">
+<!ENTITY cancel.label "ì·¨ì†Œ">
+<!ENTITY done.label "ì™„ë£Œ">
+<!ENTITY done.tooltip "ì„¸ì…˜ íƒìƒ‰ê¸° ì°½ ë‹«ê¸°">
