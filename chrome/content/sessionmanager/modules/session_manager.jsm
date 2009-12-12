@@ -8,6 +8,8 @@
 // 5. Firefox's tab close confirmation will display when closing the last browser window in Firefox 3.0 and 3.5.  This will result in two 
 //    in a row for OS X since closing the last window triggers "shutdown".  Firefox 3.6 puts up the Quit prompt in this instance, which
 //    Session Manager now prevents from occuring.  Might want to "fix" FF 3.0 and 3.5 by checking for DOMWindowClosed in the component.
+// 6. Allow searching sessions for names, URLs, etc.  This would either need to be done in a background thread or the data would need to 
+//    be cached during idle time (see NSIIdleService).
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
