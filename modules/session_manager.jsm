@@ -2204,7 +2204,7 @@ var gSessionManager = {
 	{
 		log("backupCurrentSession start", "TRACE");
 		let backup = this.mPref_backup_session;
-		let temp_backup = (this.mPref_startup > 0) && (this.mPref_resume_session == BACKUP_SESSION_FILENAME);
+		let temp_backup = (this.mPref_startup == 2) && (this.mPref_resume_session == BACKUP_SESSION_FILENAME);
 
 		log("backupCurrentSession: backup = " + backup + ", temp_backup = " + temp_backup, "DATA");
 
@@ -2303,7 +2303,7 @@ var gSessionManager = {
 
 	keepOldBackups: function(backingUp)
 	{
-		if (!backingUp) this.mPref_max_backup_keep = this.mPref_max_backup_keep + 1; 
+		if (!backingUp && (this.mPref_max_backup_keep > 0)) this.mPref_max_backup_keep = this.mPref_max_backup_keep + 1; 
 		let backup = this.getSessionDir(BACKUP_SESSION_FILENAME);
 		if (backup.exists() && this.mPref_max_backup_keep)
 		{
