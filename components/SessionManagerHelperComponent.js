@@ -243,11 +243,23 @@ SessionManagerHelperComponent.prototype = {
 			pb.addObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this, false);
 			
 			// Cache the sessions in the background so they are ready when the user opens the menu
-			// Don't do this in Firefox 3 since it will cause a hang or crash - See Firefox bug 466850 - https://bugzilla.mozilla.org/show_bug.cgi?id=466850
-			if ((Application.id != "{ec8030f7-c20a-464f-9b0e-13a3a9e97384}") || (Application.version > "3.1")) {
-				sessionLoadThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
-				sessionLoadThread.dispatch(backgroundThread, sessionLoadThread.DISPATCH_NORMAL);
-			}
+			sessionLoadThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
+			try {
+				// Firefox 3 will hang if this is done here (see Firefox bug 466850) so instead do it when 
+				// the first browser window is opened
+				if (Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator).
+						compare(Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).platformVersion,"1.9.1a1pre") < 0) {
+					os.addObserver(this, "domwindowopened", false);
+				}
+				else {
+					sessionLoadThread.dispatch(backgroundThread, sessionLoadThread.DISPATCH_NORMAL);
+				}
+			} 
+			catch (ex) { logError(ex); }
+			break;
+		case "domwindowopened":
+			os.removeObserver(this, aTopic);
+			sessionLoadThread.dispatch(backgroundThread, sessionLoadThread.DISPATCH_NORMAL);
 			break;
 		case "sessionstore-windows-restored":
 			os.removeObserver(this, aTopic);
