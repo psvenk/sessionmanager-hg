@@ -315,12 +315,9 @@ onUnload = function(aEvent) {
 			var tweak = gTabTreeBox.hidden ? 1 : 0;
 			persist(gSessionTree, "height", gSessionTree.treeBoxObject.height - tweak);
 		}
-		// persist tab tree height if it has a height, subtract 13 from the clicknoteHeight because it overcalculates by 13.
+		// persist tab tree height if it has a height
 		if (gTabTree && gTabTree.treeBoxObject.height > 0) {
 			persist(gTabTree, "height", gTabTree.treeBoxObject.height);
-			var clickNoteHeight = parseInt(window.getComputedStyle(gCtrlClickNote, null).height);
-			clickNoteHeight = isNaN(clickNoteHeight) ? 0 : clickNoteHeight - 13;
-			persist(gTabTree, "height", gTabTree.treeBoxObject.height + clickNoteHeight);
 		}
 	}
 	//dump(gSessionTree.getAttribute("height") + " " + gTabTree.getAttribute("height") + "\n");
