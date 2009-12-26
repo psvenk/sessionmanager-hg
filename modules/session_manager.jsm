@@ -290,7 +290,7 @@ var gSessionManager = {
 			// Set flag to display message on update if preference set to true
 			if (this.getPref("update_message", true)) {
 				// If development version, go to development change page
-				let dev_version = (/\.20[0-9][0-9][0-1][0-9][0-3][0-9]/.test(newVersion));
+				let dev_version = (/pre\d*/.test(newVersion));
 				this._displayUpdateMessage = dev_version ? FIRST_URL_DEV : FIRST_URL;
 			}
 		}
