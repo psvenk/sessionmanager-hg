@@ -3466,7 +3466,7 @@ var gSessionManager = {
 	{
 		// Make sure we don't replace spaces with _ in filename since tabs become spaces
 		aString = aString.replace(/\t/g, " ");
-		return aString.replace(/[^\w ',;!()@&*+=~\x80-\xFE-]/g, "_").substr(0, 64) + SESSION_EXT;
+		return aString.replace(/[^\w ',;!()@&+=~\x80-\xFE-]/g, "_").substr(0, 64) + SESSION_EXT;
 	},
 	
 	getMostRecentWindow: function(aType)
