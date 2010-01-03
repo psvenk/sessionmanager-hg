@@ -3278,7 +3278,18 @@ var gSessionManager = {
 		if (aState) log("getSessionState: " + (aMerge ? "Merging" : "Returning") + " passed in state", "INFO");
 		let state;
 		try {
-			state = (!aMerge && aState) ? aState : (aWindow)?SessionStore.getWindowState(aWindow):SessionStore.getBrowserState();
+			try {
+				state = (!aMerge && aState) ? aState : (aWindow)?SessionStore.getWindowState(aWindow):SessionStore.getBrowserState();
+			}
+			catch(ex) {
+				// If this exception is a "this._prefBranch is undefined" then force SessionStore to initialize and try again
+				// otherwise just re-throw
+				if (ex.message.indexOf("this._prefBranch is undefined") != -1) {
+					SessionStore.init(aWindow);
+					state = (!aMerge && aState) ? aState : (aWindow)?SessionStore.getWindowState(aWindow):SessionStore.getBrowserState();
+				}
+				else throw(ex);
+			}
 			
 			if (aMerge && aState) {
 				state = this.JSON_decode(state);
@@ -3341,12 +3352,34 @@ var gSessionManager = {
 
 		if (aEntireSession)
 		{
-			SessionStore.setBrowserState(aState);
+			try {
+				SessionStore.setBrowserState(aState);
+			}
+			catch(ex) {
+				// If this exception is a "this._prefBranch is undefined" then force SessionStore to initialize and try again
+				// otherwise just re-throw
+				if (ex.message.indexOf("this._prefBranch is undefined") != -1) {
+					SessionStore.init(aWindow);
+					SessionStore.setBrowserState(aState);
+				}
+				else throw(ex);
+			}
 		}
 		else
 		{
 			if (aOneWindow) aState = this.makeOneWindow(aState);
-			SessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
+			try {
+				SessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
+			}
+			catch(ex) {
+				// If this exception is a "this._prefBranch is undefined" then force SessionStore to initialize and try again
+				// otherwise just re-throw
+				if (ex.message.indexOf("this._prefBranch is undefined") != -1) {
+					SessionStore.init(aWindow);
+					SessionStore.setWindowState(aWindow, aState, aReplaceTabs || false);
+				}
+				else throw(ex);
+			}
 		}
 		
 		// Store autosave values into window value and also into window variables
