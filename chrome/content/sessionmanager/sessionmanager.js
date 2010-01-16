@@ -75,6 +75,7 @@ with (com.morac) {
 				if (window_values) gSessionManager.getAutoSaveValues(window_values, window);
 				log("observe: Restore new window done, window session = " + this.__window_session_name, "DATA");
 				this._backup_window_sesion_data = null;
+				this.updateUndoButton();
 				break;
 			case "sessionmanager:update-undo-button":
 				// only update all windows if window state changed.
