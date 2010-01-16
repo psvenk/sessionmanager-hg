@@ -753,7 +753,8 @@ var gSessionManager = {
 		let noUndoData = this.getNoUndoData(true, aMode);
 
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
-		let TMP_SingleWindowMode = (typeof(gSingleWindowMode) != "undefined" && gSingleWindowMode);
+		let browser = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow("navigator:browser");
+		let TMP_SingleWindowMode = (browser && typeof(browser.gSingleWindowMode) != "undefined" && browser.gSingleWindowMode);
 		if (TMP_SingleWindowMode) log("Tab Mix Plus single window mode is enabled", "INFO");
 
 		// Use only existing window if our preference to do so is set or Tab Mix Plus's single window mode is enabled
