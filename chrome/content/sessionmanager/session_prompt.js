@@ -29,10 +29,7 @@ var gFinishedLoading = false;
 var gAppendToSessionFlag = false;
 
 // Used to keep track of the accept button position change
-var gLastAcceptPosition = 0;
-var gLastGoodHeight = 0;
-var gOldLastGoodHeight = 0;
-var gHeightBeforeCollapse = 0;
+var gAcceptPositionDifference = 0;
 var gTimerId = null;
 
 var sortedBy = 0;
@@ -466,6 +463,15 @@ function onSessionTreeSelect()
 				// The following line keeps the window width from increasing when sizeToContent is called.
 				_("sessionmanagerPrompt").width = window.innerWidth - 1;
 				window.sizeToContent();
+				
+				// Make sure window height isn't larger than screen height
+				if (window.screen.availHeight < window.outerHeight) {
+					window.outerHeight = window.screen.availHeight;
+				}
+				// Make sure the bottom of the window is visible by moving the window up if necessary
+				if (window.screenY + window.outerHeight > window.screen.availHeight) {
+					window.screenY = window.screen.availHeight - window.outerHeight;
+				}
 			}
 		}
 	}
@@ -657,31 +663,17 @@ function isNumber(aTextBox)
 // if the accept button is no longer moving when resizing, the window is too small so make it bigger.
 function resize(aEvent, aString)
 {
-	// when collapsing a tree save old good height (if not already saved) and then restore it when opening a tree
-	if (aString == "collapsed") {
-		if (!gHeightBeforeCollapse) gHeightBeforeCollapse = gOldLastGoodHeight;
-		return;
+	var currentAcceptPositionDifference = window.outerHeight - gAcceptButton.boxObject.y;
+	if (!gAcceptPositionDifference) {
+		gAcceptPositionDifference = currentAcceptPositionDifference;
 	}
-	else if (aString == "open") {
-		gOldLastGoodHeight = gHeightBeforeCollapse;
-		gHeightBeforeCollapse = 0;
-	}
-
-	var currentAcceptPosition = gAcceptButton.boxObject.y + gAcceptButton.boxObject.height;
-	// only restore window height if accept button didn't move and window was shrunk or tree splitter was opened
-	if (((currentAcceptPosition == gLastAcceptPosition) || (aString == "open")) && (window.outerHeight < gOldLastGoodHeight)) {
+	else if (currentAcceptPositionDifference != gAcceptPositionDifference) {
 		if (gTimerId) {
 			clearTimeout(gTimerId);
 			delete gTimerId;
 		}
-		gTimerId = setTimeout(function() {window.resizeTo(window.outerWidth,gOldLastGoodHeight);}, 100);
+		gTimerId = setTimeout(function() {window.resizeTo(window.outerWidth,window.outerHeight + gAcceptPositionDifference - currentAcceptPositionDifference);}, 100);
 	}
-	else {
-		// Save last good height and use that in case current accept position is the smallest
-		gOldLastGoodHeight = gLastGoodHeight;
-		gLastGoodHeight = window.outerHeight;
-	}
-	gLastAcceptPosition = currentAcceptPosition;
 }
 
 // Tree controller
