@@ -196,7 +196,9 @@ onLoad = function(aEvent) {
 			
 			// Build group menu list
 			if (aSession.group && !aSession.backup) {
-				var regExp = new RegExp("^" + aSession.group + "|," + aSession.group + "$|," + aSession.group + ",");
+				// Don't treat special chars in group as regular expression characters
+				let groupRegExp = aSession.group.replace(/([\(\)\[\]\^\$\*\+\|\.\\\/])/g,"\\$1");
+				let regExp = new RegExp("^" + groupRegExp + "|," + groupRegExp + "$|," + groupRegExp + ",");
 				if (!regExp.test(gGroupNames.toString())) {
 					gGroupNames[groupCount++] = aSession.group.trim();
 				}
