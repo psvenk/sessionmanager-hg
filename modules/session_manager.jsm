@@ -10,6 +10,7 @@
 //    Session Manager now prevents from occuring.  Might want to "fix" FF 3.0 and 3.5 by checking for DOMWindowClosed in the component.
 // 6. Allow searching sessions for names, URLs, etc.  This would either need to be done in a background thread or the data would need to 
 //    be cached during idle time (see NSIIdleService).
+// 7. Add a reset warning option to reset the warning that people made "not show again".
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -25,7 +26,7 @@ Cu.import("resource://sessionmanager/modules/password_manager.jsm");
 const SESSION_EXT = ".session";
 const BACKUP_SESSION_REGEXP = /^backup(-[1-9](\d)*)?\.session$/;
 const AUTO_SAVE_SESSION_NAME = "autosave.session";
-const SESSION_REGEXP = /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=([^\t|^\n|^\r]+))?(\tscreensize=(\d+)x(\d+))?/m;
+const SESSION_REGEXP = /^\[SessionManager v2\]\nname=(.*)\ntimestamp=(\d+)\nautosave=(false|session\/?\d*|window\/?\d*)\tcount=([1-9][0-9]*)\/([1-9][0-9]*)(\tgroup=([^\t\n\r]+))?(\tscreensize=(\d+)x(\d+))?/m;
 const CLOSED_WINDOW_FILE = "sessionmanager.dat";
 const BACKUP_SESSION_FILENAME = "backup.session";
 const FIRST_URL = "http://sessionmanager.mozdev.org/history.html";
@@ -912,7 +913,7 @@ var gSessionManager = {
 			// Get original name
 			if (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(state)) oldname = RegExp.$2;
 			// remove group name if it was a backup session
-			if (this.mSessionCache[values.name].backup) state = state.replace(/\tgroup=[^\t|^\n|^\r]+/m, "");
+			if (this.mSessionCache[values.name].backup) state = state.replace(/\tgroup=[^\t\n\r]+/m, "");
 			this.writeFile(newFile || file, this.nameState(state, values.text));
 			if (newFile)
 			{
@@ -953,7 +954,7 @@ var gSessionManager = {
 					let file = this.getSessionDir(aFileName);
 					if (!file || !file.exists()) throw new Error(this._string("file_not_found"));
 					let state = this.readSessionFile(file);
-					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=[^\t|^\n|^\r]+)?/m, function($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group.replace(/\t/g, " ")) : ""); });
+					state = state.replace(/(\tcount=\d+\/\d+)(\tgroup=[^\t\n\r]+)?/m, function($0, $1) { return $1 + (values.group ? ("\tgroup=" + values.group.replace(/\t/g, " ")) : ""); });
 					this.writeFile(file, state);
 
 					// Grouped active session
@@ -1224,8 +1225,8 @@ var gSessionManager = {
 			menuitem.addEventListener("DOMMenuItemInactive",  function(event) { document.getElementById("statusbar-display").setAttribute("label",''); }, false); 
 			menuitem.setAttribute("oncommand", 'undoCloseTab(' + aIx + ');');
 			menuitem.setAttribute("crop", "center");
-			// Removing closed tabs does not work in SeaMonkey so don't give option to do so.
-			if (Application.name.toUpperCase() != "SEAMONKEY") {
+			// Removing closed tabs does not work in SeaMonkey 2.0.x or lower so don't give option to do so.
+			if ((Application.name.toUpperCase() != "SEAMONKEY") || (VERSION_COMPARE_SERVICE.compare(Application.version, "2.1a1pre") >= 0)) {
 				menuitem.setAttribute("onclick", 'com.morac.gSessionManager.clickClosedUndoMenuItem(event);');
 				menuitem.setAttribute("contextmenu", "sessionmanager-undo-ContextMenu");
 			}
@@ -2367,7 +2368,7 @@ var gSessionManager = {
 			// matchArray[9] - Screen size string and, if no group string, any invalid count string before (if either exists)
 			// matchArray[10] - Invalid count string (if it exists)
 			// matchArray[11] - Screen size string (if it exists)
-			let matchArray = /(^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window\/?\d*)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=[^\t|^\n|^\r]+[\n]?))?((\t.*)?(\tscreensize=\d+x\d+[\n]?))?/m.exec(state)
+			let matchArray = /(^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window\/?\d*)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=[^\t\n\r]+[\n]?))?((\t.*)?(\tscreensize=\d+x\d+[\n]?))?/m.exec(state)
 			if (matchArray)
 			{	
 				// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
