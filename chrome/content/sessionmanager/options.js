@@ -50,8 +50,8 @@ with (com.morac) {
 		_("generalPrefsTab").selectedIndex = _("extensions.sessionmanager.options_selected_tab").valueFromPreferences;
 		startupSelect(_("startupOption").selectedIndex = _("extensions.sessionmanager.startup").valueFromPreferences);
 		
-		// Hide close tab restoration preferences in SeaMonkey since it doesn't work
-		if (Application.name.toUpperCase() == "SEAMONKEY") {
+		// Hide close tab restoration preferences in SeaMonkey 2.0.x since it doesn't work
+		if ((Application.name.toUpperCase() == "SEAMONKEY") && (VERSION_COMPARE_SERVICE.compare(Application.version, "2.1a1pre") < 0)) {
 			_("save_closed_tabs").parentNode.style.visibility = "collapse";
 		}
 		
