@@ -51,6 +51,7 @@ const IO_SERVICE = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOSe
 const SECRET_DECODER_RING_SERVICE = Cc["@mozilla.org/security/sdr;1"].getService(Ci.nsISecretDecoderRing);
 const NATIVE_JSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
 const VERSION_COMPARE_SERVICE = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+const SCREEN_MANAGER = Cc["@mozilla.org/gfx/screenmanager;1"].getService(Ci.nsIScreenManager);
 
 const Application = Cc["@mozilla.org/fuel/application;1"] ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
                     (Cc["@mozilla.org/smile/application;1"] ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
@@ -741,8 +742,8 @@ var gSessionManager = {
 		
 		let sessionWidth = parseInt(matchArray[9]);
 		let sessionHeight = parseInt(matchArray[10]);
-		let xDelta = (!sessionWidth || isNaN(sessionWidth)) ? 1 : (aWindow.screen.width / sessionWidth);
-		let yDelta = (!sessionHeight || isNaN(sessionHeight)) ? 1 : (aWindow.screen.height / sessionHeight);
+		let xDelta = (!sessionWidth || isNaN(sessionWidth) || (SCREEN_MANAGER.numberOfScreens > 1)) ? 1 : (aWindow.screen.width / sessionWidth);
+		let yDelta = (!sessionHeight || isNaN(sessionHeight) || (SCREEN_MANAGER.numberOfScreens > 1)) ? 1 : (aWindow.screen.height / sessionHeight);
 		log("xDelta = " + xDelta + ", yDelta = " + yDelta, "DATA");
 			
 		state = (aChoseTabs && chosenState) ? chosenState : state.split("\n")[4];
@@ -754,7 +755,7 @@ var gSessionManager = {
 		let noUndoData = this.getNoUndoData(true, aMode);
 
 		// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
-		let browser = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow("navigator:browser");
+		let browser = this.getMostRecentWindow("navigator:browser");
 		let TMP_SingleWindowMode = (browser && typeof(browser.gSingleWindowMode) != "undefined" && browser.gSingleWindowMode);
 		if (TMP_SingleWindowMode) log("Tab Mix Plus single window mode is enabled", "INFO");
 
