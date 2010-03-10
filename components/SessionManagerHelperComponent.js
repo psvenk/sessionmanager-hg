@@ -242,23 +242,16 @@ SessionManagerHelperComponent.prototype = {
 			// Observe startup preference
 			pb.addObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this, false);
 			
-			// Cache the sessions in the background so they are ready when the user opens the menu
-			sessionLoadThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
-			try {
-				// Firefox 3 will hang if this is done here (see Firefox bug 466850) so instead do it when 
-				// the first browser window is opened
-				if (Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator).
-						compare(Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).platformVersion,"1.9.1a1pre") < 0) {
-					os.addObserver(this, "domwindowopened", false);
-				}
-				else {
-					sessionLoadThread.dispatch(backgroundThread, sessionLoadThread.DISPATCH_NORMAL);
-				}
-			} 
-			catch (ex) { logError(ex); }
+			// Firefox 3 will hang if this is done here (see Firefox bug 466850).
+			// In Firefox 3.7 it causes an abort for some reason (see Firefox bug 549743).
+			// It probably causes memory leaks in Firefox 3.5 and 3.6 so don't run the background thread here,
+			// instead do it when the first browser window is opened as that seems to work.
+			os.addObserver(this, "domwindowopened", false);
 			break;
 		case "domwindowopened":
 			os.removeObserver(this, aTopic);
+			// Cache the sessions in the background so they are ready when the user opens the menu
+			sessionLoadThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
 			sessionLoadThread.dispatch(backgroundThread, sessionLoadThread.DISPATCH_NORMAL);
 			break;
 		case "sessionstore-windows-restored":
