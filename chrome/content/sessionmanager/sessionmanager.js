@@ -520,10 +520,11 @@ with (com.morac) {
 		// or Tab Mix Plus are not installed.
 		watchForMiddleMouseClicks: function() 
 		{
+			var tabBar = gBrowser.mStrip || gBrowser.mTabContainer;
 			if (gSessionManager.mPref_click_restore_tab && (typeof(tabClicking) == "undefined") && (typeof(TM_checkClick) == "undefined")) {
-				gBrowser.mStrip.addEventListener("click", this.onTabBarClick, false);
+				tabBar.addEventListener("click", this.onTabBarClick, false);
 			}
-			else gBrowser.mStrip.removeEventListener("click", this.onTabBarClick, false);
+			else tabBar.removeEventListener("click", this.onTabBarClick, false);
 		},
 
 		onToolbarClick: function(aEvent, aButton)
