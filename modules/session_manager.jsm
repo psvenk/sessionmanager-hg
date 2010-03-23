@@ -11,6 +11,8 @@
 // 6. Allow searching sessions for names, URLs, etc.  This would either need to be done in a background thread or the data would need to 
 //    be cached during idle time (see NSIIdleService).
 // 7. Add a reset warning option to reset the warning that people made "not show again".
+// 8. Allow users to choose which windows to save when saving a session.
+// 9. Allow users to remove a window from an auto-save session so that it won't be saved automatically.
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -99,6 +101,9 @@ var gSessionManager = {
 	
 	// Timers
 	_timer : null,
+	
+	// Session Prompt Data
+	sessionPromptData: null,
 	
 	// Shared data
 	_displayUpdateMessage: null,
@@ -1621,7 +1626,21 @@ var gSessionManager = {
 						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) |
 						  ((aValues.append_replace)?64:0) | ((aValues.preselect)?128:0) | ((aValues.allowNamedReplace)?256:0));
 		params.SetInt(2, ((aValues.selectAll)?1:0));
+/*		
+		this.sessionPromptData = {};
+		this.sessionPromptData.sessionLabel = aSessionLabel;
+		this.sessionPromptData.acceptLabel = aAcceptLabel;
+		this.sessionPromptData.textLabel = aTextLabel;
+		this.sessionPromptData.acceptExistingLabel = aAcceptExistingLabel;
+		this.sessionPromptData.values = aValues;
 		
+		let dialog = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow("SessionManager:SessionPrompt");
+		if (dialog)
+		{
+			dialog.focus();
+			return;
+		}
+*/
 		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, this.getMostRecentWindow());
 		
 		aValues.name = params.GetString(3);
@@ -2347,6 +2366,7 @@ var gSessionManager = {
 			let name = RegExp.$1 || this._string("untitled_window");
 			let timestamp = parseInt(RegExp.$2) || aFile.lastModifiedTime;
 			if (headerOnly) state = this.readFile(aFile);
+			headerOnly = false;
 			state = state.substring(state.indexOf("[Window1]\n"), state.length);
 			state = this.JSON_encode(this.decodeOldFormat(state, true));
 			let countString = getCountString(this.getCount(state));
@@ -2377,6 +2397,7 @@ var gSessionManager = {
 				
 				// read entire file if only read header
 				if (headerOnly) state = this.readFile(aFile);
+				headerOnly = false;
 
 				if (goodSession)
 				{
@@ -2432,6 +2453,21 @@ var gSessionManager = {
 					state = newstate.join("\n");
 					this.writeFile(aFile, state);
 					state = this.readSessionFile(aFile,headerOnly);
+				}
+			}
+		}
+		
+		// Convert from Firefox 2/3 format to 3.5+ format if running Firefox 3.7 or later since
+		// Firefox will no longer read older session formats
+		if (VERSION_COMPARE_SERVICE.compare(this.mPlatformVersion,"1.9.3a1pre") >= 0) {
+			if ((/,\s?\"(xultab|text|ownerURI|postdata)\"\s?:/m).test(state)) {
+				try {
+					// read entire file if only read header
+					if (headerOnly) state = this.readFile(aFile);
+					state = this.convertToLatestSessionFormat(aFile, state);
+				}
+				catch(ex) { 
+					logError(ex); 
 				}
 			}
 		}
@@ -2605,7 +2641,7 @@ var gSessionManager = {
 				run: function() {
 					try {
 						encrypt_thread.shutdown();
-						delete(encrypt_thread);
+						delete encrypt_thread;
 						log("mainThread: Background Encryption Thread destroyed from mainThread", "TRACE");
 					} catch(err) {
 						logError(err);
@@ -2694,6 +2730,158 @@ var gSessionManager = {
 	},
 
 /* ........ Conversion functions .............. */
+
+	convertEntryToLatestSessionFormat: function(aEntry)
+	{
+		// Convert Postdata
+		if (aEntry.postdata) {
+			aEntry.postdata_b64 = btoa(aEntry.postdata);
+		}
+		delete aEntry.postdata;
+	
+		// Convert owner
+		if (aEntry.ownerURI) {
+			let uriObj = IO_SERVICE.newURI(aEntry.ownerURI, null, null);
+			let owner = Cc["@mozilla.org/scriptsecuritymanager;1"].getService(Ci.nsIScriptSecurityManager).getCodebasePrincipal(uriObj);
+			try {
+				let binaryStream = Cc["@mozilla.org/binaryoutputstream;1"].
+								   createInstance(Ci.nsIObjectOutputStream);
+				let pipe = Cc["@mozilla.org/pipe;1"].createInstance(Ci.nsIPipe);
+				pipe.init(false, false, 0, 0xffffffff, null);
+				binaryStream.setOutputStream(pipe.outputStream);
+				binaryStream.writeCompoundObject(owner, Ci.nsISupports, true);
+				binaryStream.close();
+
+				// Now we want to read the data from the pipe's input end and encode it.
+				let scriptableStream = Cc["@mozilla.org/binaryinputstream;1"].createInstance(Ci.nsIBinaryInputStream);
+				scriptableStream.setInputStream(pipe.inputStream);
+				let ownerBytes = scriptableStream.readByteArray(scriptableStream.available());
+				// We can stop doing base64 encoding once our serialization into JSON
+				// is guaranteed to handle all chars in strings, including embedded
+				// nulls.
+				aEntry.owner_b64 = btoa(String.fromCharCode.apply(null, ownerBytes));
+			}
+			catch (ex) { logError(ex); }
+		}
+		delete aEntry.ownerURI;
+	
+		// convert children
+		if (aEntry.children) {
+			for (var i = 0; i < aEntry.children.length; i++) {
+				//XXXzpao Wallpaper patch for bug 514751
+				if (!aEntry.children[i].url)
+					continue;
+				aEntry.children[i] = this.convertEntryToLatestSessionFormat(aEntry.children[i]);
+			}
+		}
+		
+		return aEntry;
+	},
+	
+	convertTabToLatestSessionFormat: function(aTab)
+	{
+		// Convert XULTAB to attributes
+		if (aTab.xultab) {
+			if (!aTab.attributes) aTab.attributes = {};
+			// convert attributes from the legacy Firefox 2.0/3.0 format
+			aTab.xultab.split(" ").forEach(function(aAttr) {
+				if (/^([^\s=]+)=(.*)/.test(aAttr)) {
+					aTab.attributes[RegExp.$1] = RegExp.$2;
+				}
+			}, this);
+		}
+		delete aTab.xultab;
+
+		// Convert text data
+		if (aTab.text) {
+			if (!aTab.formdata) aTab.formdata = {};
+			let textArray = aTab.text ? aTab.text.split(" ") : [];
+			textArray.forEach(function(aTextEntry) {
+				if (/^((?:\d+\|)*)(#?)([^\s=]+)=(.*)$/.test(aTextEntry)) {
+					let key = RegExp.$2 ? "#" + RegExp.$3 : "//*[@name='" + RegExp.$3 + "']";
+					aTab.formdata[key] = RegExp.$4;
+				}
+			});
+		}
+		delete aTab.text;
+		
+		// Loop and convert entries
+		aTab.entries.forEach(function(aEntry) {
+			aEntry = this.convertEntryToLatestSessionFormat(aEntry);
+		}, this);
+		
+		return aTab;
+	},
+	
+	convertWindowToLatestSessionFormat: function(aWindow)
+	{
+		// Loop tabs
+		aWindow.tabs.forEach(function(aTab) {
+			aTab = this.convertTabToLatestSessionFormat(aTab);
+		}, this);
+		
+		// Loop closed tabs
+		if (aWindow._closedTabs) {
+			aWindow._closedTabs.forEach(function(aTab) {
+				aTab.state = this.convertTabToLatestSessionFormat(aTab.state);
+			}, this);
+		}
+		return aWindow;
+	},
+
+	convertToLatestSessionFormat: function(aFile, aState)
+	{
+		log("Converting " + aFile.leafName + " to latest format", "TRACE");
+		
+		let state = aState.split("\n");
+		// decrypt if encrypted, do not decode if in old format since old format was not encoded
+		state[4] = this.decrypt(state[4], true);
+		
+		// convert to object
+		state[4] = this.JSON_decode(state[4], true);
+		
+		// Loop and convert windows
+		state[4].windows.forEach(function(aWindow) {
+			aWindow = this.convertWindowToLatestSessionFormat(aWindow);
+		}, this);
+
+		// Loop and convert closed windows
+		if (state[4]._closedWindows) {
+			state[4]._closedWindows.forEach(function(aWindow) {
+				aWindow = this.convertWindowToLatestSessionFormat(aWindow);
+			}, this);
+		}
+		
+		// replace state
+		state[4] = this.JSON_encode(state[4]);
+		state[4] = this.decryptEncryptByPreference(state[4], true);
+		state = state.join("\n");
+		
+		// Make a backup of old session in case something goes wrong
+		try {
+			if (aFile.exists()) 
+			{
+				let newFile = aFile.clone();
+				
+				let dir = this.getSessionDir();
+				dir.append("Old_Format_Sessions");
+		
+				if (!dir.exists()) {
+					dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0700);
+				}
+		
+				newFile.moveTo(dir, null);
+			}
+		}	
+		catch (ex) { 
+			logError(ex); 
+		}
+		
+		// Save session
+		this.writeFile(aFile, state);
+
+		return state;
+	},
 
 	decodeOldFormat: function(aIniString, moveClosedTabs)
 	{
@@ -3408,7 +3596,7 @@ var gSessionManager = {
 			// take off first window
 			let firstWindow = aState.windows.shift();
 			// make sure toolbars are not hidden on the window
-			delete(firstWindow.hidden);
+			delete firstWindow.hidden;
 			// Move tabs to first window
 			aState.windows.forEach(function(aWindow) {
 				while (aWindow.tabs.length > 0)
@@ -3439,7 +3627,7 @@ var gSessionManager = {
 		
 		let fixWindow = function(aWindow) {
 			// Strip out cookies if user doesn't want to save them
-			if (aSaving && !this.mPref_save_cookies) delete(aWindow.cookies);
+			if (aSaving && !this.mPref_save_cookies) delete aWindow.cookies;
 
 			// remove closed tabs			
 			if (aNoUndoData && aNoUndoData.tabs) aWindow._closedTabs = [];
