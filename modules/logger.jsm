@@ -60,12 +60,12 @@ function logError(e, force) {
 		
 	let location = e.stack || e.location || (e.fileName + ":" + e.lineNumber);
 	try { 
-		if (force || _logEnabled) {
+		if (!_initialized) {
+			buffer.push({ functionName: "logError", args: arguments});
+		}
+		else if (force || _logEnabled) {
 			mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): {" + e.message + "} {" + location + "}");
 			if (_logEnabled) write_log((new Date).toGMTString() + ": {" + e.message + "} {" + e.location + "}" + "\n");
-		}
-		else if (!_initialized) {
-			buffer.push({ functionName: "logError", args: arguments});
 		}
 	}
 	catch (ex) {
@@ -82,12 +82,12 @@ function log(aMessage, level, force) {
 
 	if (!level) level = "INFO";
 	try {
-		if (force || (_logEnabled && (logging_level[level] & _logLevel))) {
+		if (!_initialized) {
+			buffer.push({ functionName: "log", args: arguments});
+		}
+		else if (force || (_logEnabled && (logging_level[level] & _logLevel))) {
 			mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + aMessage);
 			if (_logEnabled) write_log((new Date).toGMTString() + ": " + aMessage + "\n");
-		}
-		else if (!_initialized) {
-			buffer.push({ functionName: "log", args: arguments});
 		}
 	}
 	catch (ex) { 
@@ -184,8 +184,8 @@ function write_log(aMessage) {
 		if (!setLogFile()) return;
 	}
 	
-	// If EOL character isn't stored, try to get it
-	if (!_EOL) {
+	// If EOL character isn't stored, try to get it if running in main thread (will cause abort if not in main thread)
+	if (!_EOL && Cc["@mozilla.org/thread-manager;1"].getService().isMainThread) {
 		// Try to get the most recent window to find the platform
 		let recentWindow = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow(null);
 		let platform = (recentWindow ? recentWindow.navigator.platform : null);
@@ -248,7 +248,7 @@ function logStoredBuffer() {
 	while (item = buffer.shift()) {
 		switch (item.functionName) {
 		case "log":
-			logError(item.args[0], item.args[1], item.args[2]);
+			log(item.args[0], item.args[1], item.args[2]);
 			break;
 		case "logError":
 			logError(item.args[0], item.args[1]);
@@ -274,8 +274,8 @@ var observer = {
 					break;
 			}
 			break;
-		case "profile-after-change":
-			mObserverService.removeObserver(this, "profile-after-change");
+		case "final-ui-startup":
+			mObserverService.removeObserver(this, "final-ui-startup");
 			mObserverService.addObserver(this, "profile-change-teardown", false);
 			
 			// Can't use FUEL/SMILE to listen for preference changes because of bug 488587 so just use an observer
@@ -298,7 +298,7 @@ var observer = {
 				delete(buffer);
 			}
 			break;
-		case "profile-after-change":
+		case "profile-change-teardown":
 			// remove observers
 			mObserverService.removeObserver(this, "profile-change-teardown");
 			mPreferenceBranch.removeObserver(LOG_ENABLE_PREFERENCE_NAME, this);
@@ -306,8 +306,7 @@ var observer = {
 	}
 }
 
-// Initialize on the "profile do change" notification because if we initialized prior to that, not only will the log
-// file fail to delete, but it will actually break the Fuel Application component's preference observer so preference changes will
-// stop working.  We use the "profile do change" notification so we can be initialzed before the Session Manager component which does logging
-// on the "profile after change" notificaiton.
-mObserverService.addObserver(observer, "profile-after-change", false);
+// Initialize on the "final-ui-startup" notification because if we initialized prior to that a number of bad things will happen,
+// including, the log file failing to delete and the Fuel Application component's preference observer not working.  Also the EOL 
+// can't get set until a window is available and the log is buffered at start up so we might as well wait anyway.
+mObserverService.addObserver(observer, "final-ui-startup", false);
