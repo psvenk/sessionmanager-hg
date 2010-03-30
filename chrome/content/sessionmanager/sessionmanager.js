@@ -40,10 +40,10 @@ with (com.morac) {
 					break;
 				case "reload":
 					if (gSessionManager.mPref_reload) {
-						gBrowser.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
+						gBrowser.tabContainer.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 					}
 					else {
-						gBrowser.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
+						gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 					}
 					break;
 				case "max_closed_undo":
@@ -219,11 +219,10 @@ with (com.morac) {
 			WIN_OBSERVING2.forEach(function(aTopic) {
 				OBSERVER_SERVICE.addObserver(this, aTopic, false);
 			}, this);
-				
-			gBrowser.addEventListener("TabClose", this.onTabOpenClose, false);
-			gBrowser.addEventListener("TabOpen", this.onTabOpenClose, false)
+			gBrowser.tabContainer.addEventListener("TabClose", this.onTabOpenClose, false);
+			gBrowser.tabContainer.addEventListener("TabOpen", this.onTabOpenClose, false)
 			if (gSessionManager.mPref_reload) {
-				gBrowser.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
+				gBrowser.tabContainer.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			}
 					
 			// Hide Session Manager toolbar item if option requested
@@ -336,12 +335,12 @@ with (com.morac) {
 				OBSERVER_SERVICE.removeObserver(this, aTopic);
 			}, this);
 			
-			gBrowser.removeEventListener("TabClose", this.onTabOpenClose, false);
-			gBrowser.removeEventListener("TabOpen", this.onTabOpenClose, false);
+			gBrowser.tabContainer.removeEventListener("TabClose", this.onTabOpenClose, false);
+			gBrowser.tabContainer.removeEventListener("TabOpen", this.onTabOpenClose, false);
 			if (gSessionManager.mPref_reload) {
-				gBrowser.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
+				gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			}
-			gBrowser.mStrip.removeEventListener("click", this.onTabBarClick, false);
+			gBrowser.tabContainer.removeEventListener("click", this.onTabBarClick, false);
 			
 			// stop watching for titlebar changes
 			gBrowser.ownerDocument.unwatch("title");
@@ -520,7 +519,7 @@ with (com.morac) {
 		// or Tab Mix Plus are not installed.
 		watchForMiddleMouseClicks: function() 
 		{
-			var tabBar = gBrowser.mStrip || gBrowser.mTabContainer;
+			var tabBar = gBrowser.tabContainer;
 			if (gSessionManager.mPref_click_restore_tab && (typeof(tabClicking) == "undefined") && (typeof(TM_checkClick) == "undefined")) {
 				tabBar.addEventListener("click", this.onTabBarClick, false);
 			}
