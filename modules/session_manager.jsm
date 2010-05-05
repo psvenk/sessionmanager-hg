@@ -1,18 +1,20 @@
 // To Do:
-// 1. On crash if don't select to restore current session or select tabs, window sessions will be lost.  Should label window sessions as such in 
-//    windows list and restore said sessions if don't select tabs for that window.  Might be tricky.
-// 2. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
-//    having the prompt window close. (Session Editor)
-// 3. Add sub-grouping
-// 4. Add support for hot keys for saving and restoring
-// 5. Firefox's tab close confirmation will display when closing the last browser window in Firefox 3.0 and 3.5.  This will result in two 
+// 1. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
+//    having the prompt window close. (Session Editor).
+// 2. Add sub-grouping
+// 3. Add support for hot keys for saving and restoring
+// 4. Firefox's tab close confirmation will display when closing the last browser window in Firefox 3.0 and 3.5.  This will result in two 
 //    in a row for OS X since closing the last window triggers "shutdown".  Firefox 3.6 puts up the Quit prompt in this instance, which
 //    Session Manager now prevents from occuring.  Might want to "fix" FF 3.0 and 3.5 by checking for DOMWindowClosed in the component.
-// 6. Allow searching sessions for names, URLs, etc.  This would either need to be done in a background thread or the data would need to 
+// 5. Allow searching sessions for names, URLs, etc.  This would either need to be done in a background thread or the data would need to 
 //    be cached during idle time (see NSIIdleService).
-// 7. Add a reset warning option to reset the warning that people made "not show again".
-// 8. Allow users to choose which windows to save when saving a session.
-// 9. Allow users to remove a window from an auto-save session so that it won't be saved automatically.
+// 6. Add a reset warning option to reset the warning that people made "not show again".
+// 7. Allow users to choose which windows to save when saving a session.
+// 8. Allow users to remove a window from an auto-save session so that it won't be saved automatically.
+// 9. Fix it so "private" attribute gets set on XUL toolbar button 
+// 10. Change window params to gSessionManager variables when opening the session prompt window in non-modal mode (not on crash
+//     restore or session prompt).  Also allow user to change "modes" while prompt is open.  Add ability to choose which window to save.
+// 11. Added "window session" name(s) to session prompt windows in case of crash and previous session.
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -41,7 +43,7 @@ const OBSERVING = ["browser:purge-session-history", "quit-application-requested"
 
 // Observers to register for per window.  WIN_OBSERVING2 is for notifications that won't be removed for the last window closed
 const WIN_OBSERVING = ["sessionmanager:update-undo-button", "sessionmanager:updatetitlebar", "sessionmanager:initial-windows-restored",
-                       "sessionmanager:close-windowsession", "sessionmanager:nsPref:changed", "browser:purge-session-history"];
+                       "sessionmanager:close-windowsession", "sessionmanager:nsPref:changed", "browser:purge-session-history", "private-browsing"];
 const WIN_OBSERVING2 = ["sessionmanager:process-closed-window", "quit-application-granted"];
 
 // Services that will always exist, save a pointer to them so they are available during shut down.
@@ -94,6 +96,8 @@ var gSessionManager = {
 	_no_prompt_for_session: false,
 	_recovering: null,
 	_temp_restore: null,
+	_number_of_windows: 0,
+	_crash_session_filename: null,
 	
 	// EOL character - this will get overwritten when a window is open, but set something here to prevent breaking session files
 	mEOL_Set: false,
@@ -106,6 +110,7 @@ var gSessionManager = {
 	sessionPromptData: null,
 	
 	// Shared data
+	_countWindows: true,
 	_displayUpdateMessage: null,
 	mActiveWindowSessions: [],
 	mAlreadyShutdown: false,
@@ -173,7 +178,6 @@ var gSessionManager = {
 		this.mPref_backup_on_restart = this.getPref("backup_on_restart", false);
 		this.mPref_backup_session = this.getPref("backup_session", 1);
 		this.mPref_click_restore_tab = this.getPref("click_restore_tab", true);
-		this.mPref_enable_saving_in_private_browsing_mode = this.getPref("enable_saving_in_private_browsing_mode", false);
 		this.mPref_encrypt_sessions = this.getPref("encrypt_sessions", false);
 		this.mPref_encrypted_only = this.getPref("encrypted_only", false);
 		this.mPref_hide_tools_menu = this.getPref("hide_tools_menu", false);
@@ -782,7 +786,7 @@ var gSessionManager = {
 		{
 			overwriteTabs = false;
 		}
-		else if (!singleWindowMode && (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite)))
+		else if (!singleWindowMode && !overwrite_window && (aMode == "newwindow" || (aMode != "overwrite" && !this.mPref_overwrite)))
 		{
 			// if there is only a blank window with no closed tabs, just use that instead of opening a new window
 			let tabs = aWindow.getBrowser();
@@ -881,7 +885,7 @@ var gSessionManager = {
 		aWindow.setTimeout(function() {
 			let tabcount = aWindow.gBrowser.mTabs.length;
 			let okay = gSessionManager.restoreSession((!newWindow)?(altWindow?altWindow:aWindow):null, state, overwriteTabs, noUndoData, (overwriteTabs && !newWindow && !singleWindowMode && !overwrite_window), 
-			                                          (singleWindowMode || (!overwriteTabs && !startup)), startup, window_autosave_values, xDelta, yDelta);
+			                                          (singleWindowMode || (!overwriteTabs && !startup)), startup, window_autosave_values, xDelta, yDelta, aFileName);
 			if (okay) {
 				OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-undo-button", null);
 
@@ -1625,8 +1629,8 @@ var gSessionManager = {
 		params.SetInt(1, ((aValues.addCurrentSession)?1:0) | ((aValues.multiSelect)?2:0) | ((aValues.ignorable)?4:0) | 
 						  ((aValues.autoSaveable)?8:0) | ((aValues.remove)?16:0) | ((aValues.grouping)?32:0) |
 						  ((aValues.append_replace)?64:0) | ((aValues.preselect)?128:0) | ((aValues.allowNamedReplace)?256:0));
-		params.SetInt(2, ((aValues.selectAll)?1:0));
-/*		
+		params.SetInt(2, ((aValues.selectAll)?1:0) | ((aValues.startupPrompt)?2:0));
+		
 		this.sessionPromptData = {};
 		this.sessionPromptData.sessionLabel = aSessionLabel;
 		this.sessionPromptData.acceptLabel = aAcceptLabel;
@@ -1640,8 +1644,8 @@ var gSessionManager = {
 			dialog.focus();
 			return;
 		}
-*/
-		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", params, this.getMostRecentWindow());
+		this.openWindow("chrome://sessionmanager/content/session_prompt.xul", "chrome,titlebar,centerscreen,modal,resizable,dialog=yes", 
+		                params, (!aValues.no_parent_window ? this.getMostRecentWindow("navigator:browser") : null));
 		
 		aValues.name = params.GetString(3);
 		aValues.text = params.GetString(6);
@@ -1851,6 +1855,52 @@ var gSessionManager = {
 		mDBConn.close();
 	},
 
+	// Used to save window sessions that were open when browser crashed
+	saveCrashedWindowSessions: function()
+	{
+		// Don't save if in private browsing mode
+		if (this._crash_session_filename && !this.isPrivateBrowserMode()) {
+			let file = this.getSessionDir(this._crash_session_filename);
+			if (file) {
+				let crashed_session = this.readSessionFile(file);
+				if (crashed_session) {
+					crashed_session = this.decrypt(crashed_session, true);
+					if (crashed_session) {
+						crashed_session = this.JSON_decode(crashed_session.split("\n")[4], true);
+						if (!crashed_session._JSON_decode_failed) {
+							// Save each window session found in crashed file
+							crashed_session.windows.forEach(function(aWindow) {
+								if (aWindow.extData && aWindow.extData._sm_window_session_values) {
+									// read window session data and save it and the window into the window session file		
+									let window_session_data = aWindow.extData._sm_window_session_values.split("\n");
+									this.saveWindowSession(window_session_data, aWindow);
+								}
+							}, this);
+						}
+					}
+				}
+			}
+		}
+	},
+	
+	saveWindowSession: function(aWindowSessionData, aWindowState)
+	{
+		log("saveWindowSession: Saving Window Session: " + aWindowSessionData[0] + ", " + aWindowSessionData[1] + ", " + aWindowSessionData[2], "DATA");
+		if (aWindowSessionData[0]) {
+			let file = this.getSessionDir(this.makeFileName(aWindowSessionData[0]));
+			
+			try
+			{
+				let window_session = this.JSON_encode({ windows:[ aWindowState ] });
+				this.writeFile(file, this.getSessionState(aWindowSessionData[0], null, this.getNoUndoData(), true, aWindowSessionData[1], null, aWindowSessionData[2], window_session));
+			}
+			catch (ex)
+			{
+				this.ioError(ex);
+			}
+		}
+	},
+	
 	sanitize: function(aPrefName)
 	{
 		log("sanitize - aPrefName = " + aPrefName, "DATA");
@@ -3258,7 +3308,7 @@ var gSessionManager = {
 		// handle crash where user chose a specific session
 		if (this._recovering)
 		{
-			let recovering = this._recovering;
+			let recovering = this._crash_session_filename = this._recovering;
 			let choseTabs = this._chose_tabs;
 			this._recovering = null;
 			this._chose_tabs = false;
@@ -3267,7 +3317,7 @@ var gSessionManager = {
 		else if (!recoverOnly && (this.mPref_restore_temporary || first_temp_restore || (this.mPref_startup == 1) || ((this.mPref_startup == 2) && this.mPref_resume_session)) && this.getSessions().length > 0)
 		{
 			// allow prompting for tabs in Firefox 3.5
-			let values = { ignorable: true, preselect: this.mPref_preselect_previous_session };
+			let values = { ignorable: true, preselect: this.mPref_preselect_previous_session, no_parent_window: true, startupPrompt: true };
 			
 			// Order preference:
 			// 1. Temporary backup session
@@ -3398,12 +3448,7 @@ var gSessionManager = {
 	{
 		// Private Browsing Mode is only available in Firefox 3.5 and above
 		if (PrivateBrowsing) {
-			if (this.mPref_enable_saving_in_private_browsing_mode && this.mPref_encrypt_sessions) {
-				return false;
-			}
-			else {
-				return PrivateBrowsing.privateBrowsingEnabled;
-			}
+			return PrivateBrowsing.privateBrowsingEnabled;
 		}
 		else {
 			return false;
@@ -3504,8 +3549,8 @@ var gSessionManager = {
 			state = this.decryptEncryptByPreference(state); 
 			if (!state) return null;
 		}
-		
-		let window = this.getMostRecentWindow();
+
+		let window = aWindow || this.getMostRecentWindow();
 		let width = null;
 		let height = null;
 		if (window) {
@@ -3518,11 +3563,12 @@ var gSessionManager = {
 		                                      "\tscreensize=" + (this._screen_width || width) + "x" + (this._screen_height || height) + "\n" + state, aName || "") : state;
 	},
 
-	restoreSession: function(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup, aWindowSessionValues, xDelta, yDelta)
+	restoreSession: function(aWindow, aState, aReplaceTabs, aNoUndoData, aEntireSession, aOneWindow, aStartup, aWindowSessionValues, xDelta, yDelta, aFileName)
 	{
 		log("restoreSession: aWindow = " + aWindow + ", aReplaceTabs = " + aReplaceTabs + ", aNoUndoData = " + (aNoUndoData ? NATIVE_JSON.encode(aNoUndoData) : "undefined") + 
 		         ", aEntireSession = " + aEntireSession + ", aOneWindow = " + aOneWindow + ", aStartup = " + aStartup + 
-				 ", aWindowSessionValues = " + (aWindowSessionValues ? ("\"" + aWindowSessionValues.split("\n").join(", ") + "\"") : "undefined") + ", xDelta = " + xDelta + ", yDelta = " + yDelta, "DATA");
+				 ", aWindowSessionValues = " + (aWindowSessionValues ? ("\"" + aWindowSessionValues.split("\n").join(", ") + "\"") : "undefined") + ", xDelta = " + xDelta + 
+				 ", yDelta = " + yDelta + ", aFileName = " + aFileName, "DATA");
 		// decrypt state if encrypted
 		aState = this.decrypt(aState);
 		if (!aState) return false;
@@ -3532,7 +3578,7 @@ var gSessionManager = {
 			aWindow = this.openWindow(this.getPref("browser.chromeURL", null, true), "chrome,all,dialog=no");
 			aWindow.__SM_restore = function() {
 				this.removeEventListener("load", this.__SM_restore, true);
-				gSessionManager.restoreSession(this, aState, aReplaceTabs, aNoUndoData, null, null, null, aWindowSessionValues, xDelta, yDelta);
+				gSessionManager.restoreSession(this, aState, aReplaceTabs, aNoUndoData, null, null, null, aWindowSessionValues, xDelta, yDelta, aFileName);
 				delete this.__SM_restore;
 			};
 			aWindow.addEventListener("load", aWindow.__SM_restore, true);
@@ -3574,8 +3620,23 @@ var gSessionManager = {
 		}
 		
 		// Store autosave values into window value and also into window variables
-		if (!aWindow.com.morac.gSessionManagerWindowObject.__window_session_name) this.getAutoSaveValues(aWindowSessionValues, aWindow);
+		if (!aWindow.com.morac.gSessionManagerWindowObject.__window_session_name) {
+			// Backup _sm_window_session_values first in case we want to restore window sessions from non-window session.
+			// For example, in the case of loading the backup session at startup.
+			aWindow.com.morac.gSessionManagerWindowObject._backup_window_sesion_data = SessionStore.getWindowValue(aWindow,"_sm_window_session_values");
+			log("restoreSession: Removed window session name from window: " + aWindow.com.morac.gSessionManagerWindowObject._backup_window_sesion_data, "DATA");
+			this.getAutoSaveValues(aWindowSessionValues, aWindow);
+		}
 		log("restoreSession: restore done, window_name  = " + aWindow.com.morac.gSessionManagerWindowObject.__window_session_name, "DATA");
+		// On Startup, if restoring backup session tell Session Manager Component the number of windows being restored.  
+		// Subtract one since the current window counts as #1.
+		if (aStartup && (aFileName == this._crash_session_filename || aFileName == BACKUP_SESSION_FILENAME)) {
+			this._countWindows = true;
+			// if recovering from crash, sessionstore:windows-restored notification is ignored so sessionmanager window count will already be one so don't subract anything.
+			let tweaker = this._crash_session_filename ? 0 : 1;
+			OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:windows-restored", this._number_of_windows - tweaker);
+		}
+		
 		return true;
 	},
 
@@ -3658,6 +3719,10 @@ var gSessionManager = {
 			// Since nothing is hidden in the first window, it cannot be a popup (see Firefox bug 519099)
 			delete aState.windows[0].isPopup;
 		}
+		
+		// save number of windows
+		this._number_of_windows = aState.windows.length;
+		
 		return this.JSON_encode(aState);
 	},
 
@@ -3695,7 +3760,13 @@ var gSessionManager = {
 	
 	getMostRecentWindow: function(aType)
 	{
-		let window = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow(aType ? aType : null);
+		let window = null;
+		if (Cc["@mozilla.org/thread-manager;1"].getService().isMainThread) {
+			window = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow(aType ? aType : null);
+		}
+		else {
+			log("Sanity Check Failure: getMostRecentWindow() called from background thread - this would have caused a crash.");
+		}
 		return window;
 	},
 	
