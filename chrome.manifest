@@ -1,6 +1,7 @@
 resource sessionmanager ./
 content	sessionmanager	jar:chrome/sessionmanager.jar!/content/sessionmanager/
 skin	sessionmanager	classic/1.0	jar:chrome/sessionmanager.jar!/skin/classic/sessionmanager/
+skin	sessionmanager	modern/1.0	chrome/skin/modern/sessionmanager/
 
 locale	sessionmanager	en-US	jar:chrome/sessionmanager.jar!/locale/en-US/sessionmanager/
 locale	sessionmanager	ca		jar:chrome/sessionmanager.jar!/locale/ca/sessionmanager/
@@ -28,6 +29,9 @@ locale	sessionmanager	tr-TR	jar:chrome/sessionmanager.jar!/locale/tr-TR/sessionm
 locale	sessionmanager	uk-UA	jar:chrome/sessionmanager.jar!/locale/uk-UA/sessionmanager/
 locale	sessionmanager	zh-CN	jar:chrome/sessionmanager.jar!/locale/zh-CN/sessionmanager/
 locale	sessionmanager	zh-TW	jar:chrome/sessionmanager.jar!/locale/zh-TW/sessionmanager/
+
+# Shared
+overlay chrome://mozapps/content/extensions/extensions.xul		chrome://sessionmanager/content/donate.xul
 
 # Firefox
 overlay	chrome://browser/content/preferences/preferences.xul	chrome://sessionmanager/content/preferencesOverlay.xul	application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
