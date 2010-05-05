@@ -55,19 +55,40 @@ const SM_RESUME_SESSION_PREFERENCE = "extensions.sessionmanager.resume_session";
 const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
 const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "extensions.sessionmanager.shutdown_on_last_window_close";
 
+// Thread Constants
+const LOAD_SESSIONS = "load_sessions";
+const SAVE_CRASHED_WINDOW_SESSIONS = "save_crashed_window_sessions";
+
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // Thread variables/constants
 const main = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).currentThread;
 var sessionLoadThread = null;
+var saveCrashedWindowSessionsThread = null;
 
-// Main Thread called when finished loading sessions
-var mainThread = {
+// Main Thread - Called when finished loading sessions or saving crashed window sessions
+var mainThread = function(threadID) {
+  this.threadID = threadID;
+};
+
+mainThread.prototype = {
 	run: function() {
 		try {
-			sessionLoadThread.shutdown();
-			delete(sessionLoadThread);
-			log("SessionManagerHelperComponent mainThread: Background Session Thread destroyed from mainThread", "TRACE");
+			switch(this.threadID) 
+			{
+			case LOAD_SESSIONS:
+				sessionLoadThread.shutdown();
+				delete(sessionLoadThread);
+				log("SessionManagerHelperComponent mainThread: Background Session Thread destroyed from mainThread", "TRACE");
+				break;
+			case SAVE_CRASHED_WINDOW_SESSIONS:
+				saveCrashedWindowSessionsThread.shutdown();
+				delete(saveCrashedWindowSessionsThread);
+				gSessionManager._screen_width = null;
+				gSessionManager._screen_height = null;
+				log("SessionManagerHelperComponent mainThread: Background Window Crash Session Thread destroyed from mainThread", "TRACE");
+				break;
+			}
 		} catch(err) {
 			logError(err);
 		}
@@ -82,18 +103,31 @@ var mainThread = {
 };
 
 // A thread used to load the session files in the background so they will 
-// be cached when the user goes to use them.
-var backgroundThread = {
+// be cached when the user goes to use them or to save window sessions on a crash.
+var backgroundThread = function(threadID) {
+  this.threadID = threadID;
+};
+
+backgroundThread.prototype = {
 	run: function() {
 		//perform work here that doesn't touch the DOM or anything else that isn't thread safe
 		try {
-			gSessionManager.getSessions();
-			log("SessionManagerHelperComponent backgroundThread: Background Session Load Complete", "TRACE");
+			switch(this.threadID) 
+			{
+			case LOAD_SESSIONS:
+				gSessionManager.getSessions();
+				log("SessionManagerHelperComponent backgroundThread: Background Session Load Complete.", "TRACE");
+				break;
+			case SAVE_CRASHED_WINDOW_SESSIONS:
+				gSessionManager.saveCrashedWindowSessions();
+				log("SessionManagerHelperComponent windowSessionSaveThread: Open Window Sessions at time of crash saved.", "TRACE");
+				break;
+			}
 		} catch(err) {
 			logError(err);
 		}
 		// kick off current thread to terminate this thread
-		main.dispatch(mainThread, main.DISPATCH_NORMAL);
+		main.dispatch(new mainThread(this.threadID), main.DISPATCH_NORMAL);
 	},
   
 	QueryInterface: function(iid) {
@@ -138,6 +172,8 @@ SessionManagerHelperComponent.prototype = {
 	_ignorePrefChange: false,
 	_warnOnQuit: null,
 	_warnOnClose: null,
+	_sessionStore_windows_restored: 0,
+	_sessionManager_windows_loaded: 0,
 	_TMP_protectedtabs_warnOnClose: null,
 	
 	// interfaces supported
@@ -205,6 +241,8 @@ SessionManagerHelperComponent.prototype = {
 			os.addObserver(this, "sessionstore-windows-restored", false);
 			os.addObserver(this, "profile-change-teardown", false);
 			os.addObserver(this, "private-browsing-change-granted", false);
+			os.addObserver(this, "sessionmanager:windows-restored", false);
+			os.addObserver(this, "sessionmanager:window-loaded", false);
 			break;
 		case "private-browsing-change-granted":
 			this.handlePrivacyChange(aSubject, aData);
@@ -244,23 +282,37 @@ SessionManagerHelperComponent.prototype = {
 			
 			// Cache the sessions in the background so they are ready when the user opens the menu
 			sessionLoadThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
-			sessionLoadThread.dispatch(backgroundThread, sessionLoadThread.DISPATCH_NORMAL);
+			sessionLoadThread.dispatch(new backgroundThread(LOAD_SESSIONS), sessionLoadThread.DISPATCH_NORMAL);
+			break;
+		case "sessionmanager:window-loaded":
+			// When Session Manager has finished processing the "onLoad" event for the same number of windows that
+			// SessionStore reported was restored, then tell all the browser widnows that the initial session has been restored.
+			this._sessionManager_windows_loaded = this._sessionManager_windows_loaded + 1;
+			this._check_for_window_restore_complete();
 			break;
 		case "sessionstore-windows-restored":
+			// Currently this is only called once per browsing session, but unregister it anyway just in case
 			os.removeObserver(this, aTopic);
-			try 
+			
+			// only process if Session Manager isn't loading crashed session
+			if (!gSessionManager._crash_session_filename) 
 			{
-				// Tell the browser windows that the initial session has been restored
-				// Do this here so we don't have to add an observer to every window that opens which is
-				// pointless since this only fires at browser startup. Delay a second to allow windows to load
-				let timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-				timer.initWithCallback({
-					notify:function (aTimer) { 
-						Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService).notifyObservers(null, "sessionmanager:initial-windows-restored", null); 
-					}
-				}, 1000, Ci.nsITimer.TYPE_ONE_SHOT);
+				// Get how many windows SessionStore restored so Session Manager knows how many loaded windows to wait for before
+				// processing the initial restore.  Every window except last one will "load" before this notification occurs so 
+				// check for restored equals loaded here as well.
+				try {
+					// On initial SessionStore load, the number of restored windows will be equal to the number of browser windows
+					this._sessionStore_windows_restored = gSessionManager.getBrowserWindows().length;
+					this._check_for_window_restore_complete();
+				}
+				catch (ex) { logError(ex); }
 			}
-			catch (ex) { logError(ex); }
+			break;
+		case "sessionmanager:windows-restored":
+			os.removeObserver(this, aTopic);
+			
+			this._sessionStore_windows_restored = aData;
+			this._check_for_window_restore_complete();
 			break;
 		case "sessionstore-state-read":
 			os.removeObserver(this, aTopic);
@@ -358,6 +410,31 @@ SessionManagerHelperComponent.prototype = {
 	},
 
 	/* ........ private methods .............. */
+	
+	// This will send out notifications to Session Manager windows when the number of loaded windows equals the number of
+	// restored windows
+	_check_for_window_restore_complete: function sm_check_for_window_restore_complete()
+	{
+		log("_check_for_window_restore_complete: SessionStore windows restored = " + this._sessionStore_windows_restored + ", SessionManager windows loaded = " + this._sessionManager_windows_loaded, "DATA");
+		if (this._sessionManager_windows_loaded == this._sessionStore_windows_restored) {
+			// Stop counting loaded windows and reset count
+			gSessionManager._countWindows = false;
+			this._sessionManager_windows_loaded = this._sessionStore_windows_restored = 0;
+			Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService).notifyObservers(null, "sessionmanager:initial-windows-restored", null); 
+			
+			// Save window sessions from crashed session in the background
+			if (gSessionManager._crash_session_filename) {
+				let window = gSessionManager.getMostRecentWindow();
+				if (window) {
+					gSessionManager._screen_width = window.screen.width;
+					gSessionManager._screen_height = window.screen.height;
+				}
+			
+				saveCrashedWindowSessionsThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
+				saveCrashedWindowSessionsThread.dispatch(new backgroundThread(SAVE_CRASHED_WINDOW_SESSIONS), saveCrashedWindowSessionsThread.DISPATCH_NORMAL);
+			}
+		}
+	},
 
 	// this will remove certain preferences in the case where user turned off crash recovery in the browser and browser is not restarting
 	_handle_crash: function sm_handle_crash()
