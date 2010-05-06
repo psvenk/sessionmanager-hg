@@ -98,7 +98,11 @@ with (com.morac) {
 					this.mCleanBrowser = null;
 					this.mClosedWindowName = null;
 					WIN_OBSERVING2.forEach(function(aTopic) {
-						OBSERVER_SERVICE.removeObserver(this, aTopic);
+						// This will throw an error for if observers already removed so catch
+						try {
+							OBSERVER_SERVICE.removeObserver(this, aTopic);
+						}
+						catch(ex) {}
 					}, this);
 					log("observe: done processing closed window", "INFO");
 				}
@@ -112,12 +116,20 @@ with (com.morac) {
 			case "quit-application-granted":
 				// Since we are quiting don't listen for any more notifications on last window
 				WIN_OBSERVING2.forEach(function(aTopic) {
-					OBSERVER_SERVICE.removeObserver(this, aTopic);
+					// This will throw an error for if observers already removed so catch
+					try {
+						OBSERVER_SERVICE.removeObserver(this, aTopic);
+					}
+					catch(ex) {}
 				}, this);
 				
 				// Copy window state to module
 				gSessionManager.mClosingWindowState = this.mClosingWindowState;
 				
+				// Not doing the following because I want to keep the window session values in
+				// backup sessions.  Currently the code won't restore window sessions unless the backup
+				// session is loaded at startup anyway so it's okay that we don't clear out the values at shutdown.
+/*				
 				// If not restarting or if this window doesn't have a window session open, 
 				// hurry and wipe out the window session value before Session Store stops allowing 
 				// window values to be updated.
@@ -129,6 +141,7 @@ with (com.morac) {
 					}
 					catch(ex) {}
 				}
+*/					
 				break;
 			// timer periodic call
 			case "timer-callback":
@@ -143,6 +156,16 @@ with (com.morac) {
 					// save window session if open, but don't close it
 					log("Timer callback for window timer", "EXTRA");
 					gSessionManager.closeSession(window, false, true);
+				}
+				break;
+			case "private-browsing":
+				// TODO: This isn't working because the private attribute isn't inherited by the actual XUL button
+				var button = document.getElementById("sessionmanager-toolbar");
+				if (button) {
+					if (aData == "enter") 
+						button.setAttribute("private", "true"); 
+					else 
+						button.removeAttribute("private"); 
 				}
 				break;
 			}
@@ -228,6 +251,13 @@ with (com.morac) {
 			// Hide Session Manager toolbar item if option requested
 			this.showHideToolsMenu();
 			
+			// If in private browsing mode gray out session manager toolbar icon
+			if (gSessionManager.isPrivateBrowserMode()) {
+				var button = document.getElementById("sessionmanager-toolbar");
+				// TODO: This isn't working because the private attribute isn't inherited by the actual XUL button
+				if (button) button.setAttribute("private", "true"); 
+			}
+			
 			// Undo close tab if middle click on tab bar - only do this if Tab Clicking Options
 			// or Tab Mix Plus are not installed.
 			this.watchForMiddleMouseClicks();
@@ -290,7 +320,8 @@ with (com.morac) {
 			try {
 				if (!this.__window_session_name) {
 					// Backup _sm_window_session_values first in case this is actually a restart or crash restore 
-					this._backup_window_sesion_data = SessionStore.getWindowValue(window,"_sm_window_session_values");
+					if (!this._backup_window_sesion_data) this._backup_window_sesion_data = SessionStore.getWindowValue(window,"_sm_window_session_values");
+					log("onLoad: Removed window session name from window: " + this._backup_window_sesion_data, "DATA");
 					if (this._backup_window_sesion_data) gSessionManager.getAutoSaveValues(null, window);
 				}
 			} catch(ex) {}
@@ -303,6 +334,11 @@ with (com.morac) {
 					let tBrowser = getBrowser();
 					tBrowser.selectedTab = tBrowser.addTab(url);
 				},100);
+			}
+			
+			// Keep track of opening windows on browser startup
+			if (gSessionManager._countWindows) {
+				OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:window-loaded", null);
 			}
 			
 			log("onLoad end", "TRACE");
@@ -349,7 +385,11 @@ with (com.morac) {
 			// until after shutdown is run, but since browser is closing anyway, who cares?
 			if (numWindows != 0) {
 				WIN_OBSERVING2.forEach(function(aTopic) {
-					OBSERVER_SERVICE.removeObserver(this, aTopic);
+					// This will throw an error for if observers already removed so catch
+					try {
+						OBSERVER_SERVICE.removeObserver(this, aTopic);
+					}
+					catch(ex) {}
 				}, this);
 			}
 			
@@ -373,7 +413,11 @@ with (com.morac) {
 				// This will run the shutdown processing if the preference is set and the last browser window is closed manually
 				if (gSessionManager.mPref_shutdown_on_last_window_close && !gSessionManager._stopping) {
 					WIN_OBSERVING2.forEach(function(aTopic) {
-						OBSERVER_SERVICE.removeObserver(this, aTopic);
+						// This will throw an error for if observers already removed so catch
+						try {
+							OBSERVER_SERVICE.removeObserver(this, aTopic);
+						}
+						catch(ex) {}
 					}, this);
 					gSessionManager.shutDown();
 					// Don't look at the session startup type if a new window is opened without shutting down the browser.
@@ -385,7 +429,7 @@ with (com.morac) {
 
 		// This is needed because a window close can be cancelled and we don't want to process such as closing a window
 		onWindowCloseRequest: function() {
-			log("onWindowClosedRequest start", "TRACE");
+			log("onWindowCloseRequest start", "TRACE");
 			
 			// Clear any previously closing state data so we get fresh data
 			this.mClosingWindowState = null;
@@ -395,7 +439,7 @@ with (com.morac) {
 			try {
 				// Store closing state if it will be needed later
 				if (this.__window_session_name || !gSessionManager.mUseSSClosedWindowList || (gSessionManager.getBrowserWindows().length == 1)) {
-					log("onWindowClosedRequest saved closing state", "INFO");
+					log("onWindowCloseRequest saved closing state", "INFO");
 					this.mClosingWindowState = gSessionManager.getSessionState(null, window, null, null, null, true); 
 					this.mCleanBrowser = Array.every(gBrowser.browsers, gSessionManager.isCleanBrowser);
 					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:gSessionManager._string("untitled_window"));
@@ -408,12 +452,12 @@ with (com.morac) {
 			catch(ex) { 
 				logError(ex); 
 			}
-			log("onWindowClosedRequest end", "TRACE");
+			log("onWindowCloseRequest end", "TRACE");
 		},
 
 		onWindowClose: function()
 		{
-			log("onWindowClosed start", "TRACE");
+			log("onWindowClose start", "TRACE");
 			if (this._clear_state_timer) {
 				log("Canceling clear closing window state timer", "INFO");
 				this._clear_state_timer.cancel();
@@ -450,7 +494,7 @@ with (com.morac) {
 				this.mCleanBrowser = null;
 				this.mClosedWindowName = null;
 			}
-			log("onWindowClosed end", "TRACE");
+			log("onWindowClose end", "TRACE");
 		},
 		
 /* ........ Tab Listeners .............. */
