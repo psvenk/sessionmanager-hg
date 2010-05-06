@@ -48,6 +48,7 @@ var sortedBy = 0;
 
 // GetInt 2 bit values
 // 1   = select all          - true if all multiple items should be selected on initial prompt, false otherwise
+// 2   = startup prompt      - true if displayed when browser is first starting up, but not recovering from crash
 
 // GetString values
 // 1 = Session Label         - Label at top of window
@@ -77,6 +78,64 @@ onLoad = function(aEvent) {
 	this.removeEventListener("load", onLoad, false);
 	this.addEventListener("unload", onUnload, false);			
 
+	// Disable saving in privacy mode
+	let inPrivateBrowsing = gSessionManager.isPrivateBrowserMode();
+	gSessionManager.setDisabled(_("save"), inPrivateBrowsing);
+	gSessionManager.setDisabled(_("saveWin"), inPrivateBrowsing);
+	
+	_("actionButton").label = "Bob";
+	
+	// Display the window
+	drawWindow();
+	
+	// watch for resize to prevent user from shrinking window so small it hides dialog buttons.
+	window.onresize = resize;
+	
+	gFinishedLoading = true;
+};
+
+onUnload = function(aEvent) {
+	this.removeEventListener("unload", onUnload, false);
+	
+	function persist(aObj, aAttr, aValue)
+	{
+		aObj.setAttribute(aAttr, aValue);
+		document.persist(aObj.id, aAttr);
+	}
+	
+	if (window.opener)
+	{
+		persist(document.documentElement, "screenX", window.screenX - window.opener.screenX);
+		persist(document.documentElement, "screenY", window.screenY - window.opener.screenY);
+		log("onUnload: screenX = " + window.screenX + ", opener.screenX = " + window.opener.screenX, "DATA");
+		log("onUnload: screenY = " + window.screenY + ", opener.screenY = " + window.opener.screenY, "DATA");
+	}
+	
+	// only persist tree heights is neither is collapsed to prevent "giant" trees
+	if (gTreeSplitter.getAttribute("state") != "collapsed") {
+		// persist session tree height if it has a height, subtract one if tab Tree is hidden because one is added if it is
+		if (gSessionTree && gSessionTree.treeBoxObject.height > 0) {
+			var tweak = gTabTreeBox.hidden ? 1 : 0;
+			persist(gSessionTree, "height", gSessionTree.treeBoxObject.height - tweak);
+			log("onUnload: persist session tree height = " + gSessionTree.treeBoxObject.height + ", tweak = " + tweak, "DATA");
+		}
+		// persist tab tree height if it has a height
+		if (gTabTree && gTabTree.treeBoxObject.height > 0) {
+			persist(gTabTree, "height", gTabTree.treeBoxObject.height);
+			log("onUnload: persist tab tree height = " + gTabTree.treeBoxObject.height, "DATA");
+		}
+	}
+	log("onUnload: session tree height = " + gSessionTree.getAttribute("height") + ", tab tree height = " + gTabTree.getAttribute("height"), "DATA");
+	
+	if (!gAllTabsChecked) storeSession();
+	
+	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
+	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected && !_("radio_append_replace").hidden)?32:0) | (gAppendToSessionFlag?32:0) |
+					  ((_("radio_append_window").selected)?64:0));
+	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
+};
+
+function drawWindow() {
 	_("mac_title").hidden = !/mac/i.test(navigator.platform);
 	setDescription(_("session_label"), gParams.GetString(1));
 	
@@ -104,6 +163,12 @@ onLoad = function(aEvent) {
 	else {
 		sessions = gSessionManager.getSessions();
 	}
+
+	// Disable non-saving menuitems if no sessions
+	gSessionManager.setDisabled(_("load"), !sessions.length);
+	gSessionManager.setDisabled(_("rename"), !sessions.length);
+	gSessionManager.setDisabled(_("remove"), !sessions.length);
+	gSessionManager.setDisabled(_("group"), !sessions.length);
 	
 	if (gParams.GetInt(1) & 1) // add a "virtual" current session
 	{
@@ -146,7 +211,7 @@ onLoad = function(aEvent) {
 	var deleting = (gParams.GetInt(1) & 16);
 	var saving = (gParams.GetInt(1) & 8);
 	var grouping = (gParams.GetInt(1) & 32);
-	var loading = (gParams.GetInt(1) & 64);
+	var loading = (gParams.GetInt(1) & 64);  // not true for crash or start session prompt
 	var preselect = (gParams.GetInt(1) & 128);
 	var groupCount = 0;
 	var selected;
@@ -267,66 +332,28 @@ onLoad = function(aEvent) {
 	{
 		gSessionTree.height = gSessionTree.getAttribute("height");
 	}
+	
+	// This is never true when running under windows
 	if (!window.opener)
 	{
+		log("drawWindow: Clearing screenX and screenY", "INFO");
 		document.title += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 		document.documentElement.removeAttribute("screenX");
 		document.documentElement.removeAttribute("screenY");
-
+		
 		// Move window so that the bottom part can be displayed when prompting for a session that
-		// does not select the session by default
-		if (!gParams.GetString(3)) {
-			setTimeout( function() {
-				var tabHeight = gTabTree.getAttribute("height");
-				var adjustHeight = window.screen.availHeight - tabHeight - window.outerHeight - window.screenY - 54;
-				if ((window.screenY + adjustHeight) < 0) adjustHeight = -window.screenY;
-				if (adjustHeight < 0) window.moveBy(0, adjustHeight);
-			},0);
+		// does not select the session by default (DON'T THINK I NEED THIS)
+/*		
+		if (!preselect) {
+			var tabHeight = gTabTree.getAttribute("height");
+			var adjustHeight = window.screen.availHeight - tabHeight - window.outerHeight - window.screenY - 54;
+			log("drawWindow: window.screen.availHeight = " + window.screen.availHeight + ", tabHeight = " + tabHeight + ", window.outerHeight = " + window.outerHeight + ", window.screenY = " + window.screenY + ", adjustHeight = " + adjustHeight , "DATA");
+			if ((window.screenY + adjustHeight) < 0) adjustHeight = -window.screenY;
+			if (adjustHeight < 0) window.moveBy(0, adjustHeight);
 		}
+*/		
 	}
 	window.sizeToContent();
-	
-	// watch for resize to prevent user from shrinking window so small it hides dialog buttons.
-	window.onresize = resize;
-	
-	gFinishedLoading = true;
-};
-
-onUnload = function(aEvent) {
-	this.removeEventListener("unload", onUnload, false);
-	
-	function persist(aObj, aAttr, aValue)
-	{
-		aObj.setAttribute(aAttr, aValue);
-		document.persist(aObj.id, aAttr);
-	}
-	
-	if (window.opener)
-	{
-		persist(document.documentElement, "screenX", window.screenX - window.opener.screenX);
-		persist(document.documentElement, "screenY", window.screenY - window.opener.screenY);
-	}
-	
-	// only persist tree heights is neither is collapsed to prevent "giant" trees
-	if (gTreeSplitter.getAttribute("state") != "collapsed") {
-		// persist session tree height if it has a height, subtract one if tab Tree is hidden because one is added if it is
-		if (gSessionTree && gSessionTree.treeBoxObject.height > 0) {
-			var tweak = gTabTreeBox.hidden ? 1 : 0;
-			persist(gSessionTree, "height", gSessionTree.treeBoxObject.height - tweak);
-		}
-		// persist tab tree height if it has a height
-		if (gTabTree && gTabTree.treeBoxObject.height > 0) {
-			persist(gTabTree, "height", gTabTree.treeBoxObject.height);
-		}
-	}
-	//dump(gSessionTree.getAttribute("height") + " " + gTabTree.getAttribute("height") + "\n");
-	
-	if (!gAllTabsChecked) storeSession();
-	
-	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
-	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected && !_("radio_append_replace").hidden)?32:0) | (gAppendToSessionFlag?32:0) |
-					  ((_("radio_append_window").selected)?64:0));
-	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
 };
 
 function onSessionTreeClick(aEvent)
@@ -453,7 +480,7 @@ function onSessionTreeSelect()
 			if (gParams.GetInt(1) & 16) {
 				_("restore").setAttribute("label", gSessionManager._string("remove_session_ok"));
 			}
-			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName, (gParams.GetInt(1) & 16));
+			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName, (gParams.GetInt(1) & 16), (gParams.GetInt(2) & 2));
 			if (!gAlreadyResized && gFinishedLoading) {
 				gAlreadyResized = true;
 				if (gTabTree.hasAttribute("height"))
@@ -466,6 +493,8 @@ function onSessionTreeSelect()
 				_("sessionmanagerPrompt").width = window.innerWidth - 1;
 				window.sizeToContent();
 				
+				log("onSessionTreeSelect: window.screenY = " + window.screenY + ", window.screen.availHeight = " + window.screen.availHeight + ", window.outerHeight = " + window.outerHeight, "DATA");
+
 				// Make sure window height isn't larger than screen height
 				if (window.screen.availHeight < window.outerHeight) {
 					window.outerHeight = window.screen.availHeight;
