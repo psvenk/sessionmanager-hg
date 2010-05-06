@@ -46,7 +46,7 @@ var gNoTabsChecked = false;
 var gAllTabsChecked = true;
 var gDeleting = false;
 
-function initTreeView(aFileName, aDeleting) {
+function initTreeView(aFileName, aDeleting, aStartupPrompt) {
   // Save deleting parameter
   gDeleting = aDeleting;
 
@@ -104,7 +104,7 @@ function initTreeView(aFileName, aDeleting) {
   
   gStateObject.windows.forEach(function(aWinData, aIx) {
     var windowSessionName = null;
-    if (currentSession) {
+    if (currentSession || (aStartupPrompt && aFileName == BACKUP_SESSION_FILENAME)) {
       windowSessionName = (aWinData.extData) ? aWinData.extData["_sm_window_session_values"] : null;
       windowSessionName = (windowSessionName) ? windowSessionName.split("\n")[0] : null;
     }
