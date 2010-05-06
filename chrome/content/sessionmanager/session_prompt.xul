@@ -16,6 +16,7 @@
 	buttonlabelextra1="&prompt.append.label;"
 	style="min-width: 40em; -moz-user-focus: ignore;"
 	persist="width"
+	windowtype="SessionManager:SessionPrompt"
 >
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionbrowser.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/session_prompt.js"/>
@@ -23,7 +24,20 @@
 	<stringbundleset id="stringbundleset">
 		<stringbundle id="bundle_brand" src="chrome://branding/locale/brand.properties"/>
 	</stringbundleset>
-	
+
+	<hbox collapsed="true">
+		<button type="menu" id="actionButton" label="">
+			<menupopup id="actionButtonPopup">
+				<menuitem id="load" label="&load.label;" accesskey="&load.accesskey;" oncommand="com.morac.gSessionManager.load(window);"/>
+				<menuitem id="save" label="&save.label;" accesskey="&save.accesskey;" oncommand="com.morac.gSessionManager.save(window);"/>
+				<menuitem id="saveWin" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="com.morac.gSessionManager.saveWindow(window);"/>
+				<menuitem id="rename" label="&rename.label;" accesskey="&rename.accesskey;" oncommand="com.morac.gSessionManager.rename();"/>
+				<menuitem id="remove" label="&remove.label;" accesskey="&remove.accesskey;" oncommand="com.morac.gSessionManager.remove();"/>
+				<menuitem id="group" label="&group.label;" accesskey="&group.accesskey;" oncommand="com.morac.gSessionManager.group();"/>
+			</menupopup>
+		</button>
+	</hbox>
+
 	<hbox flex="1">
 		<vbox flex="1">
 			<label id="mac_title" value="&sessionManager;" class="dialogTitle" hidden="true"/>
