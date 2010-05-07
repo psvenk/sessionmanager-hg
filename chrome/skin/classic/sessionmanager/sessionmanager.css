@@ -24,12 +24,8 @@
 	-moz-image-region: rect(0px, 48px, 24px, 24px);
 }
 /* Note that in Firefox 3.7 and above, setting the disabled attribute will automatically /*
-/* gray out an icon, but we need to do it ourself for Firefox 3.0 to 3.6 */
+/* fade out an icon, but we need to do it ourself for Firefox 3.0 to 3.6 */
 #sessionmanager-undo[disabled="true"] {
-	background-color: transparent;
-	z-index: 100;
-	filter: alpha(opacity=20);
-	-moz-opacity: 0.2;
 	opacity: 0.2;
 }
 
@@ -50,12 +46,8 @@ toolbar[iconsize="small"] #sessionmanager-toolbar {
 	-moz-image-region: rect(15px, 72px, 31px, 56px);
 }
 
-/* Gray out Session Manager button when in private browsing mode */
-#sessionmanager-toolbar[private="true"]{
-	background-color: #000000;
-	z-index: 100;
-	filter: alpha(opacity=20);
-	-moz-opacity: 0.2;
+/* Fade out Session Manager button when in private browsing mode */
+#sessionmanager-toolbar[private="true"] toolbarbutton {
 	opacity: 0.2;
 }
 
