@@ -106,7 +106,7 @@ function initTreeView(aFileName, aDeleting, aStartupPrompt) {
     var windowSessionName = null;
     if (currentSession || (aStartupPrompt && aFileName == BACKUP_SESSION_FILENAME)) {
       windowSessionName = (aWinData.extData) ? aWinData.extData["_sm_window_session_values"] : null;
-      windowSessionName = (windowSessionName) ? windowSessionName.split("\n")[0] : null;
+      windowSessionName = (windowSessionName) ? (gSessionManager._string("window_session") + "   " + windowSessionName.split("\n")[0]) : null;
     }
     var winState = {
       label: winLabel.replace("%S", (aIx + 1)),
