@@ -14,7 +14,8 @@
 // 9. Fix it so "private" attribute gets set on XUL toolbar button 
 // 10. Change window params to gSessionManager variables when opening the session prompt window in non-modal mode (not on crash
 //     restore or session prompt).  Also allow user to change "modes" while prompt is open.  Add ability to choose which window to save.
-// 11. Added "window session" name(s) to session prompt windows in case of crash and previous session.
+// 11. Add ability to import/export settings.
+// 12. Add ability to import/export sessions.
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -1892,7 +1893,7 @@ var gSessionManager = {
 			try
 			{
 				let window_session = this.JSON_encode({ windows:[ aWindowState ] });
-				this.writeFile(file, this.getSessionState(aWindowSessionData[0], null, this.getNoUndoData(), true, aWindowSessionData[1], null, aWindowSessionData[2], window_session));
+				this.writeFile(file, this.getSessionState(aWindowSessionData[0], true, this.getNoUndoData(), true, aWindowSessionData[1], null, aWindowSessionData[2], window_session));
 			}
 			catch (ex)
 			{
@@ -3553,7 +3554,7 @@ var gSessionManager = {
 		let window = aWindow || this.getMostRecentWindow();
 		let width = null;
 		let height = null;
-		if (window) {
+		if (window && (typeof(window) == "object")) {
 			width = window.screen.width;
 			height = window.screen.height;
 		}
@@ -3765,7 +3766,7 @@ var gSessionManager = {
 			window = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow(aType ? aType : null);
 		}
 		else {
-			log("Sanity Check Failure: getMostRecentWindow() called from background thread - this would have caused a crash.");
+			log("Sanity Check Failure: getMostRecentWindow() called from background thread - this would have caused a crash.", "EXTRA");
 		}
 		return window;
 	},
