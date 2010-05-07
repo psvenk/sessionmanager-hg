@@ -1,15 +1,16 @@
 <?xml version="1.0"?>
 
-<overlay id="addonDonateOverlay"
+<overlay id="sessionManagerAddonDonateOverlay"
 		 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 		 
-<script src="donate.js" />
+	<script src="chrome://sessionmanager/content/donate.js" />
 		 	
 	<window id="extensionsManager">
-		<spacer id="donateSpacer" flex="1" hidden="true"/>
-		<hbox id="db_donateContainer" hidden="true">
-			<label id="db_donateTextNode1" value="Support this add-on:" style="margin-left:3px;"/>
-			<label id="db_donateTextNode2" value="Contribute" onclick="link('https://addons.mozilla.org/en-US/firefox/addons/contribute/2324?source=addon-detail')" style="text-decoration:underline; cursor:pointer; margin-left:0px;"/>
+		<spacer id="session_manager_donateSpacer" class="session_manager_donate" flex="1" hidden="true"/>
+		<hbox id="session_manager_donateContainer" class="session_manager_donate" hidden="true">
+			<label id="session_manager_donateTextNode1" value="Support this add-on:" />
+			<label id="session_manager_donateTextNode2" value="Contribute" style="text-decoration:underline; cursor:pointer;"
+			       onclick="gSessionManagerDonate.link('https://addons.mozilla.org/en-US/firefox/addons/contribute/2324?source=addon-detail')" />
 		</hbox>
 	</window>
 	
