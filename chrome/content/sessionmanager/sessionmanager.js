@@ -159,7 +159,6 @@ with (com.morac) {
 				}
 				break;
 			case "private-browsing":
-				// TODO: This isn't working because the private attribute isn't inherited by the actual XUL button
 				var button = document.getElementById("sessionmanager-toolbar");
 				if (button) {
 					if (aData == "enter") 
@@ -254,7 +253,6 @@ with (com.morac) {
 			// If in private browsing mode gray out session manager toolbar icon
 			if (gSessionManager.isPrivateBrowserMode()) {
 				var button = document.getElementById("sessionmanager-toolbar");
-				// TODO: This isn't working because the private attribute isn't inherited by the actual XUL button
 				if (button) button.setAttribute("private", "true"); 
 			}
 			
