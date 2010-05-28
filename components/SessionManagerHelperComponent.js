@@ -41,19 +41,21 @@ const report = Components.utils.reportError;
 const Application = Cc["@mozilla.org/fuel/application;1"] ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
                     (Cc["@mozilla.org/smile/application;1"] ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
 
+// Browser preferences
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
+const BROWSER_WARN_ON_QUIT = "browser.warnOnQuit";
+const BROWSER_TABS_WARN_ON_CLOSE = "browser.tabs.warnOnClose";
 
-// Session Manager files
-const SM_BACKUP_FILE = "backup.session";
+// Tab Mix Plus preference
+const TMP_PROTECTED_TABS_WARN_ON_CLOSE = "extensions.tabmix.protectedtabs.warnOnClose";
 
 // Session Manager preferences
-const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "extensions.sessionmanager.old_startup_page";
-const SM_ALLOW_SAVE_IN_PBM_PREFERENCE = "extensions.sessionmanager.enable_saving_in_private_browsing_mode";
-const SM_BACKUP_SESSION_PREFERENCE = "extensions.sessionmanager.backup_session";
-const SM_ENCRYPT_SESSIONS_PREFERENCE = "extensions.sessionmanager.encrypt_sessions";
-const SM_RESUME_SESSION_PREFERENCE = "extensions.sessionmanager.resume_session";
-const SM_STARTUP_PREFERENCE = "extensions.sessionmanager.startup";
-const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "extensions.sessionmanager.shutdown_on_last_window_close";
+const OLD_BROWSER_STARTUP_PAGE_PREFERENCE = "old_startup_page";
+const SM_BACKUP_SESSION_PREFERENCE = "backup_session";
+const SM_ENCRYPT_SESSIONS_PREFERENCE = "encrypt_sessions";
+const SM_RESUME_SESSION_PREFERENCE = "resume_session";
+const SM_STARTUP_PREFERENCE = "startup";
+const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "shutdown_on_last_window_close";
 
 // Thread Constants
 const LOAD_SESSIONS = "load_sessions";
@@ -153,6 +155,7 @@ backgroundThread.prototype = {
 function SessionManagerHelperComponent() {
 	try {
 		Cu.import("resource://sessionmanager/modules/logger.jsm");
+		Cu.import("resource://sessionmanager/modules/preference_manager.jsm");
 		Cu.import("resource://sessionmanager/modules/session_manager.jsm");
 	}
 	catch(ex) {
@@ -228,7 +231,6 @@ SessionManagerHelperComponent.prototype = {
 	observe: function(aSubject, aTopic, aData)
 	{
 		let os = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
-		let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 		
 		//dump(aTopic + "\n");
 		log("SessionManagerHelperComponent observer: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
@@ -251,6 +253,9 @@ SessionManagerHelperComponent.prototype = {
 			os.removeObserver(this, aTopic);
 			try
 			{
+				// Call the gPreferenceManager Module's initialize procedure
+				gPreferenceManager.initialize();
+				
 				this._restoreCache();
 				
 				// Call the gSessionManager Module's initialize procedure
@@ -270,15 +275,20 @@ SessionManagerHelperComponent.prototype = {
 			this.mTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
 			os.addObserver(this, "quit-application-requested", false);
 			os.addObserver(this, "quit-application-granted", false);
-			// The following two notifications occur when the last browser window closes, but the application isn't actually quitting.
+			// The following two notifications, added in Firefox 3.6, occur when the last browser window closes, but the application isn't actually quitting.  
 			os.addObserver(this, "browser-lastwindow-close-requested", false);
 			os.addObserver(this, "browser-lastwindow-close-granted", false);
 			os.addObserver(this, "sessionmanager-preference-save", false);
 			os.addObserver(this, "sessionmanager:restore-startup-preference", false);
 			os.addObserver(this, "sessionmanager:ignore-preference-changes", false);
 			
+			// Check for updated version here in Firefox 4.0 or above because Application.getExtensions returns null prior to now.
+			if (!Application.extensions) {
+				Application.getExtensions(gSessionManager.getExtensionsCallback);
+			}
+			
 			// Observe startup preference
-			pb.addObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this, false);
+			gPreferenceManager.observe(BROWSER_STARTUP_PAGE_PREFERENCE, this, false, true);
 			
 			// Cache the sessions in the background so they are ready when the user opens the menu
 			sessionLoadThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
@@ -335,11 +345,11 @@ SessionManagerHelperComponent.prototype = {
 			try 
 			{
 				// Restore browser startup preference if Session Manager previously saved it, otherwise backup current browser startup preference
-				if (pb.prefHasUserValue(OLD_BROWSER_STARTUP_PAGE_PREFERENCE)) {
-					pb.setIntPref(BROWSER_STARTUP_PAGE_PREFERENCE, pb.getIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE));
+				if (gPreferenceManager.has(OLD_BROWSER_STARTUP_PAGE_PREFERENCE)) {
+					gPreferenceManager.set(BROWSER_STARTUP_PAGE_PREFERENCE, gPreferenceManager.get(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, 1), true);
 				}
 				else {
-					pb.setIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE));
+					gPreferenceManager.set(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, gPreferenceManager.get(BROWSER_STARTUP_PAGE_PREFERENCE, 1, true));
 				}
 			}
 			catch (ex) { logError(ex); }
@@ -351,28 +361,28 @@ SessionManagerHelperComponent.prototype = {
 		// quitting or closing last browser window
 		case "browser-lastwindow-close-requested":
 		case "quit-application-requested":
-			this.handleQuitApplicationRequest(aSubject, aTopic, aData, pb);
+			this.handleQuitApplicationRequest(aSubject, aTopic, aData);
 			break;
 		case "browser-lastwindow-close-granted":
 			if (typeof(this._warnOnQuit) == "boolean") {
-				pb.setBoolPref("browser.warnOnQuit", this._warnOnQuit);
+				gPreferenceManager.set(BROWSER_WARN_ON_QUIT, this._warnOnQuit, true);
 			}
 			if (typeof(this._warnOnClose) == "boolean") {
-				pb.setBoolPref("browser.tabs.warnOnClose", this._warnOnClose);
+				gPreferenceManager.set(BROWSER_TABS_WARN_ON_CLOSE, this._warnOnClose, true);
 			}
 			if (typeof(this._TMP_protectedtabs_warnOnClose) == "boolean") {
-				pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", this._TMP_protectedtabs_warnOnClose);
+				gPreferenceManager.set(TMP_PROTECTED_TABS_WARN_ON_CLOSE, this._TMP_protectedtabs_warnOnClose, true);
 			}
 			break;
 		case "quit-application-granted":
 			if (typeof(this._warnOnQuit) == "boolean") {
-				pb.setBoolPref("browser.warnOnQuit", this._warnOnQuit);
+				gPreferenceManager.set(BROWSER_WARN_ON_QUIT, this._warnOnQuit, true);
 			}
 			if (typeof(this._warnOnClose) == "boolean") {
-				pb.setBoolPref("browser.tabs.warnOnClose", this._warnOnClose);
+				gPreferenceManager.set(BROWSER_TABS_WARN_ON_CLOSE, this._warnOnClose, true);
 			}
 			if (typeof(this._TMP_protectedtabs_warnOnClose) == "boolean") {
-				pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", this._TMP_protectedtabs_warnOnClose);
+				gPreferenceManager.set(TMP_PROTECTED_TABS_WARN_ON_CLOSE, this._TMP_protectedtabs_warnOnClose, true);
 			}
 			os.removeObserver(this, "sessionmanager-preference-save");
 			os.removeObserver(this, "sessionmanager:ignore-preference-changes");
@@ -382,20 +392,19 @@ SessionManagerHelperComponent.prototype = {
 			os.removeObserver(this, aTopic);
 			
 			// Remove preference observer
-			pb.removeObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this);
+			gPreferenceManager.unobserve(BROWSER_STARTUP_PAGE_PREFERENCE, this, true);
 			break;
 		case "profile-change-teardown":
-			let page = pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE);
+			let page = gPreferenceManager.get(BROWSER_STARTUP_PAGE_PREFERENCE, 1, true);
 			// If Session Manager is handling startup, save the current startup preference and then set it to home page
 			// otherwise clear the saved startup preference
-			if ((page == 3) && pb.getIntPref(SM_STARTUP_PREFERENCE)) {
-				pb.setIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, page);
-				pb.clearUserPref(BROWSER_STARTUP_PAGE_PREFERENCE);
+			if ((page == 3) && gPreferenceManager.get(SM_STARTUP_PREFERENCE)) {
+				gPreferenceManager.set(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, page);
+				gPreferenceManager.delete(BROWSER_STARTUP_PAGE_PREFERENCE, true);
 			}
-			else if (pb.prefHasUserValue(OLD_BROWSER_STARTUP_PAGE_PREFERENCE)) {
-				pb.clearUserPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE);
+			else if (gPreferenceManager.has(OLD_BROWSER_STARTUP_PAGE_PREFERENCE)) {
+				gPreferenceManager.delete(OLD_BROWSER_STARTUP_PAGE_PREFERENCE);
 			}
-			pb.removeObserver(BROWSER_STARTUP_PAGE_PREFERENCE, this);
 			break;
 		case "nsPref:changed":
 			switch(aData) 
@@ -439,13 +448,12 @@ SessionManagerHelperComponent.prototype = {
 	// this will remove certain preferences in the case where user turned off crash recovery in the browser and browser is not restarting
 	_handle_crash: function sm_handle_crash()
 	{
-		let prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
 		let sessionStartup = Cc["@mozilla.org/browser/sessionstartup;1"] || Cc["@mozilla.org/suite/sessionstartup;1"];
 		if (sessionStartup) sessionStartup = sessionStartup.getService(Ci.nsISessionStartup);
 		// This will only be set to true, if crash recovery is turned off and browser is not restarting
 		let no_remove = (sessionStartup && sessionStartup.sessionType && (sessionStartup.sessionType != Ci.nsISessionStartup.NO_SESSION)) ||
-		                 prefroot.getBoolPref("browser.sessionstore.resume_session_once") || 
-		                 prefroot.getBoolPref("browser.sessionstore.resume_from_crash");
+		                 gPreferenceManager.get("browser.sessionstore.resume_session_once", false, true) || 
+		                 gPreferenceManager.get("browser.sessionstore.resume_from_crash", false, true);
 
 		//dump("no_remove = " + resuming + "\n");
 		//log("SessionManagerHelperComponent:handle_crash: no_remove = " + resuming, "DATA");
@@ -454,7 +462,7 @@ SessionManagerHelperComponent.prototype = {
 		if (!no_remove)
 		{
 			//dump("SessionManager: Removing preferences\n");
-			prefroot.deleteBranch("extensions.sessionmanager._autosave_values");
+			gPreferenceManager.delete("_autosave_values");
 		}
 	},
 	
@@ -500,15 +508,14 @@ SessionManagerHelperComponent.prototype = {
     	let cache = null;
 		try 
 		{
-			let prefroot = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-			let disabled = prefroot.getBoolPref("extensions.sessionmanager.disable_cache_fixer");
+			let disabled = gPreferenceManager.get("disable_cache_fixer");
 			if (disabled)
 			{
 				let consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
   				consoleService.logStringMessage("SessionManager: Cache Fixer disabled");
 				return;
 			}
-			let pd_path = prefroot.getComplexValue("browser.cache.disk.parent_directory",Ci.nsISupportsString).data;
+			let pd_path = gPreferenceManager.get("browser.cache.disk.parent_directory", null, true);
 			cache = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
 			cache.initWithPath(pd_path);
 		}
@@ -547,10 +554,7 @@ SessionManagerHelperComponent.prototype = {
 	// Make sure that the browser and Session Manager are on the same page with regards to the startup preferences
 	_synchStartup: function sm_synchStartup()
 	{
-		let pb = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch);
-		let browser_startup = pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE);
-		let sm_startup = pb.getIntPref(SM_STARTUP_PREFERENCE);
-		//dump("page:" + browser_startup + ", startup:" + sm_startup + "\n");
+		let browser_startup = gPreferenceManager.get(BROWSER_STARTUP_PAGE_PREFERENCE, 1, true);
 
 		// Ignore any preference changes made in this function
 		this._ignorePrefChange = true;
@@ -558,12 +562,12 @@ SessionManagerHelperComponent.prototype = {
 		// If browser handling startup, disable Session Manager startup and backup startup page
 		// otherwise set Session Manager to handle startup and restore browser startup setting
 		if (browser_startup > STARTUP_PROMPT) {
-			pb.setIntPref(SM_STARTUP_PREFERENCE, 0);
-			pb.setIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, browser_startup);
+			gPreferenceManager.set(SM_STARTUP_PREFERENCE, 0);
+			gPreferenceManager.set(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, browser_startup);
 		}
 		else {
-			pb.setIntPref(SM_STARTUP_PREFERENCE, (browser_startup == STARTUP_PROMPT) ? 1 : 2);
-			pb.setIntPref(BROWSER_STARTUP_PAGE_PREFERENCE, pb.getIntPref(OLD_BROWSER_STARTUP_PAGE_PREFERENCE));
+			gPreferenceManager.set(SM_STARTUP_PREFERENCE, (browser_startup == STARTUP_PROMPT) ? 1 : 2);
+			gPreferenceManager.set(BROWSER_STARTUP_PAGE_PREFERENCE, gPreferenceManager.get(OLD_BROWSER_STARTUP_PAGE_PREFERENCE, 1), true);
 		}
 
 		// Resume listening to preference changes
@@ -616,28 +620,23 @@ SessionManagerHelperComponent.prototype = {
 		}
 	},
 	
-	handleQuitApplicationRequest: function(aSubject, aTopic, aData, pb)
+	handleQuitApplicationRequest: function(aSubject, aTopic, aData)
 	{
 		// If quit already canceled, just return
 		if (aSubject.QueryInterface(Ci.nsISupportsPRBool) && aSubject.data) return;
 
-		// If private browsing mode don't allow saving unless overridding
+		// If private browsing mode don't allow saving
 		try {
-			let inPrivateBrowsing = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled;
-			if (inPrivateBrowsing) {
-				if (!pb.getBoolPref(SM_ALLOW_SAVE_IN_PBM_PREFERENCE) || !pb.getBoolPref(SM_ENCRYPT_SESSIONS_PREFERENCE)) {
-					return;
-				}
-			}
+			if (Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled) return;
 		} catch(ex) {}
 		
-		let backup = pb.getIntPref(SM_BACKUP_SESSION_PREFERENCE);
-		let resume_current = (pb.getIntPref(BROWSER_STARTUP_PAGE_PREFERENCE) == 3) || pb.getBoolPref("browser.sessionstore.resume_session_once");
+		let backup = gPreferenceManager.get(SM_BACKUP_SESSION_PREFERENCE);
+		let resume_current = (gPreferenceManager.get(BROWSER_STARTUP_PAGE_PREFERENCE, 1, true) == 3) || gPreferenceManager.get("browser.sessionstore.resume_session_once", false, true);
 
 		// If not restarting and set to prompt, disable FF's quit prompt
 		if ((aData != "restart") && (backup == 2)) {
 			let window = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator).getMostRecentWindow("navigator:browser");
-			if ((backup == 2) && ((aTopic == "quit-application-requested") || pb.getBoolPref(SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE))) {
+			if ((backup == 2) && ((aTopic == "quit-application-requested") || gPreferenceManager.get(SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE))) {
 
 				// Do session prompt here and then save the info in an Application Storage variable for use in
 				// the shutdown procsesing in sessionmanager.js
@@ -704,35 +703,36 @@ SessionManagerHelperComponent.prototype = {
 					if (params.GetInt(1))
 					{
 						if (results == 2) {
-							let str = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-							str.data = SM_BACKUP_FILE;
-							pb.setComplexValue(SM_RESUME_SESSION_PREFERENCE, Ci.nsISupportsString, str);
-							pb.setIntPref(SM_STARTUP_PREFERENCE, 2)
+							gPreferenceManager.set(SM_RESUME_SESSION_PREFERENCE, BACKUP_SESSION_FILENAME);
+							gPreferenceManager.set(SM_STARTUP_PREFERENCE, 2)
 						}
-						pb.setIntPref(SM_BACKUP_SESSION_PREFERENCE, (results == 1)?0:1);
+						gPreferenceManager.set(SM_BACKUP_SESSION_PREFERENCE, (results == 1)?0:1);
 					}
 							
 					gSessionManager.mShutdownPromptResults = results;
 					
 					// Disable prompt in browser
-					if (pb.getPrefType("browser.warnOnQuit") == pb.PREF_BOOL) {
+					let prefValue = gPreferenceManager.get(BROWSER_WARN_ON_QUIT, null, true);
+					if (typeof(prefValue) == "boolean") {
 						if (typeof(this._warnOnQuit) != "boolean") {
-							this._warnOnQuit = pb.getBoolPref("browser.warnOnQuit");
+							this._warnOnQuit = prefValue;
 						}
-						pb.setBoolPref("browser.warnOnQuit", false);
+						gPreferenceManager.set(BROWSER_WARN_ON_QUIT, false, true);
 					}
 					// Disable prompt in tab mix plus if it's running
-					if (pb.getPrefType("browser.tabs.warnOnClose") == pb.PREF_BOOL) {
+					prefValue = gPreferenceManager.get(BROWSER_TABS_WARN_ON_CLOSE, null, true);
+					if (typeof(prefValue) == "boolean") {
 						if (typeof(this._warnOnClose) != "boolean") {
-							this._warnOnClose = pb.getBoolPref("browser.tabs.warnOnClose");
+							this._warnOnClose = prefValue;
 						}
-						pb.setBoolPref("browser.tabs.warnOnClose", false);
+						gPreferenceManager.set(BROWSER_TABS_WARN_ON_CLOSE, false, true);
 					}
-					if (pb.getPrefType("extensions.tabmix.protectedtabs.warnOnClose") == pb.PREF_BOOL) {
+					prefValue = gPreferenceManager.get(TMP_PROTECTED_TABS_WARN_ON_CLOSE, null, true);
+					if (typeof(prefValue) == "boolean") {
 						if (typeof(this._TMP_protectedtabs_warnOnClose) != "boolean") {
-							this._TMP_protectedtabs_warnOnClose = pb.getBoolPref("extensions.tabmix.protectedtabs.warnOnClose");
+							this._TMP_protectedtabs_warnOnClose = prefValue;
 						}
-						pb.setBoolPref("extensions.tabmix.protectedtabs.warnOnClose", false);
+						gPreferenceManager.set(TMP_PROTECTED_TABS_WARN_ON_CLOSE, false, true);
 					}
 				}
 			}
