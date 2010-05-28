@@ -1,8 +1,8 @@
 // Configuration Constant Settings - addon specific
 const ADDON_NAME = "Session Manager";
 const FILE_NAME = "sessionmanager_log.txt";
-const LOG_ENABLE_PREFERENCE_NAME = "extensions.sessionmanager.logging";
-const LOG_LEVEL_PREFERENCE_NAME = "extensions.sessionmanager.logging_level";
+const LOG_ENABLE_PREFERENCE_NAME = "extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging";
+const LOG_LEVEL_PREFERENCE_NAME = "extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging_level";
 const BUNDLE_URI = "chrome://sessionmanager/locale/sessionmanager.properties";
 const ERROR_STRING_NAME = "file_not_found";
 
@@ -30,7 +30,8 @@ logging_level["EXTRA"] = 16;
 logging_level["ERROR"] = 32;
 
 // private variables
-var _EOL = null;				// End of Line character - set once a window exists
+var _os = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
+var _EOL = /win|os[\/_]?2/i.test(_os)?"\r\n":/mac|darwin/i.test(_os)?"\r":"\n";
 var _initialized = false;		// Logger module initialized
 var _logFile = null;			// Current log file
 var _logged_Addons = false;		// Set to true, when the current enabled add-ons have been logged (once per browsing session)
@@ -55,8 +56,8 @@ function logError(e, force) {
 		return;
 	}
 	
-	// Log Addons if haven't already and EOL character exists
-	if (!_logged_Addons && _EOL) logExtensions();
+	// Log Addons if haven't already
+	if (!_logged_Addons) logExtensions();
 		
 	let location = e.stack || e.location || (e.fileName + ":" + e.lineNumber);
 	try { 
@@ -77,8 +78,8 @@ function logError(e, force) {
 // Log info messages
 //
 function log(aMessage, level, force) {
-	// Log Addons if haven't already and EOL character exists
-	if (!_logged_Addons && _EOL) logExtensions();
+	// Log Addons if haven't already
+	if (!_logged_Addons) logExtensions();
 
 	if (!level) level = "INFO";
 	try {
@@ -184,18 +185,6 @@ function write_log(aMessage) {
 		if (!setLogFile()) return;
 	}
 	
-	// If EOL character isn't stored, try to get it if running in main thread (will cause abort if not in main thread)
-	if (!_EOL && Cc["@mozilla.org/thread-manager;1"].getService().isMainThread) {
-		// Try to get the most recent window to find the platform
-		let recentWindow = Components.classes["@mozilla.org/appshell/window-mediator;1"].getService(Components.interfaces.nsIWindowMediator).getMostRecentWindow(null);
-		let platform = (recentWindow ? recentWindow.navigator.platform : null);
-
-		if (platform) {
-			// Set EOL character
-			_EOL = /win|os[\/_]?2/i.test(platform)?"\r\n":/mac/i.test(platform)?"\r":"\n";
-		}
-	}
-	
 	try {
 		let stream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
 		// ioFlags: write only, create file, append;	Permission: read/write owner
@@ -204,13 +193,12 @@ function write_log(aMessage) {
 		cvstream.init(stream, "UTF-8", 0, Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
 
 		if (!_printedHeader) {
-			let EOL = (_EOL ? _EOL : "\n");
-			cvstream.writeString(EOL + "*************************************************" + EOL);
-			cvstream.writeString("******** B R O W S E R   S T A R T U P **********" + EOL);
-			cvstream.writeString("*************************************************" + EOL);
+			cvstream.writeString(_EOL + "*************************************************" + _EOL);
+			cvstream.writeString("******** B R O W S E R   S T A R T U P **********" + _EOL);
+			cvstream.writeString("*************************************************" + _EOL);
 			_printedHeader = true;
 		}
-		cvstream.writeString(aMessage.replace(/[\n$]/g, (_EOL ? _EOL : "\n")));
+		cvstream.writeString(aMessage.replace(/[\n$]/g, _EOL));
 		cvstream.flush();
 		cvstream.close();
 	}
@@ -222,17 +210,28 @@ function write_log(aMessage) {
 //
 // Log Extensions - Also log browser version
 //
-function logExtensions() {
+function logExtensions(extensions) {
 	if (!_logEnabled) return;
 	_logged_Addons = true;
 
 	if (!Application) return;
 		
-	// Log browser version
+	// Firefox 4.0 changes method for getting extensions to a callback function.  Use this function as the callback
+	// function and check the parameter since it will be set if called back or null if called internally.
+	if (!extensions && (typeof(Application.getExtensions) == "function")) {
+		Application.getExtensions(logExtensions);
+		return false;
+	}
+	extensions = extensions ? extensions.all : Application.extensions.all;
+
+	// Set to initialized.  Do this here so the addons are always logged first
+	_initialized = true;
+	
+	// Log OS and browser version
+	log("OS = " + _os, "INFO");
 	log("Browser = " + Application.id + " - " + Application.name + " " + Application.version, "INFO");
 	
 	// Log Addons
-	let extensions = Application.extensions.all;
 	if (extensions.length) {
 		log("Extensions installed and enabled:");
 		for (let i=0; i<extensions.length; i++) {
@@ -241,21 +240,26 @@ function logExtensions() {
 			}
 		}
 	}
+
+	// Log anything stored in the buffer
+	logStoredBuffer();
 }
 
 function logStoredBuffer() {
-	let item;
-	while (item = buffer.shift()) {
-		switch (item.functionName) {
-		case "log":
-			log(item.args[0], item.args[1], item.args[2]);
-			break;
-		case "logError":
-			logError(item.args[0], item.args[1]);
-			break;
+	if (buffer) {
+		let item;
+		while (item = buffer.shift()) {
+			switch (item.functionName) {
+			case "log":
+				log(item.args[0], item.args[1], item.args[2]);
+				break;
+			case "logError":
+				logError(item.args[0], item.args[1]);
+				break;
+			}
 		}
+		delete buffer;
 	}
-	delete buffer;
 }
 
 // Can't use FUEL/SMILE to listen for preference changes because of bug 488587 so just use an observer
@@ -288,13 +292,12 @@ var observer = {
 			// Do a conditional delete of the log file each time the application starts
 			deleteLogFile();
 			
-			// Set to initialized and log any stored log events if the log is enabled
-			_initialized = true;
 			if (_logEnabled) {
 				logExtensions();
-				logStoredBuffer();
 			}
 			else {
+				// Set to initialized so we don't buffer any more
+				_initialized = true;
 				delete(buffer);
 			}
 			break;
@@ -307,6 +310,5 @@ var observer = {
 }
 
 // Initialize on the "final-ui-startup" notification because if we initialized prior to that a number of bad things will happen,
-// including, the log file failing to delete and the Fuel Application component's preference observer not working.  Also the EOL 
-// can't get set until a window is available and the log is buffered at start up so we might as well wait anyway.
+// including, the log file failing to delete and the Fuel Application component's preference observer not working.
 mObserverService.addObserver(observer, "final-ui-startup", false);
