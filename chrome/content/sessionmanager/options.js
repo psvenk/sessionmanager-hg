@@ -4,6 +4,7 @@ if(!com.morac) com.morac={};
 
 // import into the namespace
 Components.utils.import("resource://sessionmanager/modules/logger.jsm", com.morac);
+Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm", com.morac);
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac);
 
 // use the namespace
@@ -15,7 +16,7 @@ with (com.morac) {
 		this.addEventListener("unload", onUnload, false);			
 
 		// If instant Apply is on, hide the apply button
-		if (gSessionManager.getPref("browser.preferences.instantApply", false, true)) {
+		if (gPreferenceManager.get("browser.preferences.instantApply", false, true)) {
 			_("sessionmanagerOptions").getButton("extra1").style.visibility = "collapse";
 		}
 		
@@ -33,22 +34,22 @@ with (com.morac) {
 			}
 		}, this);
 		// if no restore value, select previous browser session
-		resume_session.value = _("extensions.sessionmanager.resume_session").value || BACKUP_SESSION_FILENAME;
+		resume_session.value = _("preference.resume_session").value || BACKUP_SESSION_FILENAME;
 		
 		// current load session no longer there
 		if (resume_session.selectedIndex == -1) {
 			resume_session.value ="";
-			_("extensions.sessionmanager.resume_session").valueFromPreferences = resume_session.value;
+			_("preference.resume_session").valueFromPreferences = resume_session.value;
 			// change option to none if select session was selected
 			if (_("startupOption").selectedIndex==2) {
 				_("startupOption").selectedIndex = 0;
-				_("extensions.sessionmanager.startup").valueFromPreferences = _("startupOption").selectedIndex;
+				_("preference.startup").valueFromPreferences = _("startupOption").selectedIndex;
 			}
 		}
 		
 		// Restore selected indexes and hide/show menus for startup options
-		_("generalPrefsTab").selectedIndex = _("extensions.sessionmanager.options_selected_tab").valueFromPreferences;
-		startupSelect(_("startupOption").selectedIndex = _("extensions.sessionmanager.startup").valueFromPreferences);
+		_("generalPrefsTab").selectedIndex = _("preference.options_selected_tab").valueFromPreferences;
+		startupSelect(_("startupOption").selectedIndex = _("preference.startup").valueFromPreferences);
 		
 		// Hide close tab restoration preferences in SeaMonkey 2.0.x since it doesn't work
 		if ((Application.name.toUpperCase() == "SEAMONKEY") && (VERSION_COMPARE_SERVICE.compare(Application.version, "2.1a1pre") < 0)) {
@@ -59,11 +60,11 @@ with (com.morac) {
 		if (typeof(SessionStore.getClosedWindowCount) != "function") {
 			_("closed_window_list").style.visibility = "collapse";
 		}
-		checkClosedWindowList(_("extensions.sessionmanager.use_SS_closed_window_list").valueFromPreferences);
+		checkClosedWindowList(_("preference.use_SS_closed_window_list").valueFromPreferences);
 		
 		// Change overwrite label to tabs if append to window as tab preference set
 		originalOverwriteLabel = _("overwrite").label;
-		changeOverwriteLabel(_("extensions.sessionmanager.append_by_default").valueFromPreferences);
+		changeOverwriteLabel(_("preference.append_by_default").valueFromPreferences);
 		
 		// Hide mid-click preference if Tab Mix Plus or Tab Clicking Options is enabled
 		var browser = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow("navigator:browser");
@@ -92,7 +93,7 @@ with (com.morac) {
 
 	var onUnload = function(aEvent) {
 		this.removeEventListener("unload", onUnload, false);
-		_("extensions.sessionmanager.options_selected_tab").valueFromPreferences = _("generalPrefsTab").selectedIndex;
+		_("preference.options_selected_tab").valueFromPreferences = _("generalPrefsTab").selectedIndex;
 		setLogLevel();
 	};
 
@@ -102,7 +103,7 @@ with (com.morac) {
 	{
 		switch (aID) {
 			case "max_closed":
-				var value = _("extensions.sessionmanager.max_closed_undo").value;
+				var value = _("preference.max_closed_undo").value;
 				_disable(_("save_window_list"), value == 0);
 				return value;
 				break;
@@ -158,7 +159,7 @@ with (com.morac) {
 
 	function logLevelUpdate() {
 		// If instant apply on, apply immediately
-		if (gSessionManager.getPref("browser.preferences.instantApply", false, true)) {
+		if (gPreferenceManager.get("browser.preferences.instantApply", false, true)) {
 			setLogLevel();
 		}
 		else enableApply();
@@ -171,11 +172,11 @@ with (com.morac) {
 			logLevel = logLevel | (logCB[i].checked ? logging_level[logCB[i].getAttribute("_logLevel")] : 0);
 		};
 		
-		_("extensions.sessionmanager.logging_level").valueFromPreferences = logLevel;
+		_("preference.logging_level").valueFromPreferences = logLevel;
 	}
 
 	function readLogLevel() {
-		var logLevel = _("extensions.sessionmanager.logging_level").valueFromPreferences;
+		var logLevel = _("preference.logging_level").valueFromPreferences;
 		var logCB = document.getElementsByAttribute("class", "logLevel");
 		for (var i=0; i < logCB.length; i++) {
 			logCB[i].checked = ((logLevel & logging_level[logCB[i].getAttribute("_logLevel")]) > 0);
@@ -195,12 +196,12 @@ with (com.morac) {
 		filepicker.appendFilters(nsIFilePicker.filterAll);
 		var ret = filepicker.show();
 		if (ret == nsIFilePicker.returnOK) {
-			_("extensions.sessionmanager.sessions_dir").value = filepicker.file.path;
+			_("preference.sessions_dir").value = filepicker.file.path;
 		}
 	} 	 
 
 	function defaultSessionDir() {
-		_("extensions.sessionmanager.sessions_dir").value = '';
+		_("preference.sessions_dir").value = '';
 	}
 
 	function checkEncryption(aState) {
@@ -215,14 +216,14 @@ with (com.morac) {
 		_("encrypted_only").hidden = !aState;
 		
 		// When animating preferences the window can get cut off so just refresh the window size here
-		if (aState && gSessionManager.getPref("browser.preferences.animateFadeIn", false, true))
+		if (aState && gPreferenceManager.get("browser.preferences.animateFadeIn", false, true))
 			window.sizeToContent();
 		
 		return aState;
 	}
 
 	function checkEncryptOnly(aState) {
-		if (aState && !_("extensions.sessionmanager.encrypted_only").valueFromPreferences) {
+		if (aState && !_("preference.encrypted_only").valueFromPreferences) {
 			if (!PROMPT_SERVICE.confirm(window, gSessionManager.mTitle, gSessionManager._string("encrypt_only_confirm"))) {
 				aState = false;
 			}
@@ -253,13 +254,13 @@ with (com.morac) {
 		//if (index == 1) _("resume_session").style.visibility = "hidden";
 		
 		// If instant apply on, apply immediately
-		if (gSessionManager.getPref("browser.preferences.instantApply", false, true)) {
+		if (gPreferenceManager.get("browser.preferences.instantApply", false, true)) {
 			setStartValue();
 		}
 	}
 
 	function setStartValue() {
-		_("extensions.sessionmanager.startup").valueFromPreferences = _("startupOption").selectedIndex;
+		_("preference.startup").valueFromPreferences = _("startupOption").selectedIndex;
 	}
 
 	function savePrefs() {
@@ -370,7 +371,7 @@ with (com.morac) {
 		// The exception to this is if the largest pane is already selected when the preference window is opened.  In
 		// this case the window inner height must be correct as well as the context-box height (if animation is disabled).
 		var currentPane = _("sessionmanagerOptions").currentPane;
-		var animate = gSessionManager.getPref("browser.preferences.animateFadeIn", false, true);
+		var animate = gPreferenceManager.get("browser.preferences.animateFadeIn", false, true);
 
 		// When not animating, the largest pane's content height is not correct when it is opened first so update it.
 		// Also the window needs to be resized to take into account the changes to the description height.
