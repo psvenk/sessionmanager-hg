@@ -23,21 +23,21 @@
 	<prefpane id="mainPrefPane" label="&general.caption;" helpURI="" helpTopic="prefs-main">
 		<preferences>
 			<preference id="browser.startup.page" name="browser.startup.page" type="int"/>
-			<preference id="extensions.sessionmanager.append_by_default" name="extensions.sessionmanager.append_by_default" type="bool"/>
-			<preference id="extensions.sessionmanager.autosave_session" name="extensions.sessionmanager.autosave_session" type="bool"/>
-			<preference id="extensions.sessionmanager.backup_session" name="extensions.sessionmanager.backup_session" type="int"/>
-			<preference id="extensions.sessionmanager.hide_tools_menu" name="extensions.sessionmanager.hide_tools_menu" type="bool"/>
-			<preference id="extensions.sessionmanager.max_backup_keep" name="extensions.sessionmanager.max_backup_keep" type="int"/>
-			<preference id="extensions.sessionmanager.max_display" name="extensions.sessionmanager.max_display" type="int"/>
-			<preference id="extensions.sessionmanager.name_format" name="extensions.sessionmanager.name_format" type="string"/>
-			<preference id="extensions.sessionmanager.overwrite" name="extensions.sessionmanager.overwrite" type="bool"/>
-			<preference id="extensions.sessionmanager.preselect_previous_session" name="extensions.sessionmanager.preselect_previous_session" type="bool"/>
-			<preference id="extensions.sessionmanager.reload" name="extensions.sessionmanager.reload" type="bool"/>
-			<preference id="extensions.sessionmanager.resume_session" name="extensions.sessionmanager.resume_session" type="string"/>
-			<preference id="extensions.sessionmanager.save_cookies" name="extensions.sessionmanager.save_cookies" type="bool"/>
-			<preference id="extensions.sessionmanager.session_list_order" name="extensions.sessionmanager.session_list_order" type="int"/>
-			<preference id="extensions.sessionmanager.session_name_in_titlebar" name="extensions.sessionmanager.session_name_in_titlebar" type="int"/>
-			<preference id="extensions.sessionmanager.shutdown_on_last_window_close" name="extensions.sessionmanager.shutdown_on_last_window_close" type="bool"/>
+			<preference id="preference.append_by_default" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.append_by_default" type="bool"/>
+			<preference id="preference.autosave_session" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.autosave_session" type="bool"/>
+			<preference id="preference.backup_session" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.backup_session" type="int"/>
+			<preference id="preference.hide_tools_menu" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.hide_tools_menu" type="bool"/>
+			<preference id="preference.max_backup_keep" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.max_backup_keep" type="int"/>
+			<preference id="preference.max_display" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.max_display" type="int"/>
+			<preference id="preference.name_format" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.name_format" type="string"/>
+			<preference id="preference.overwrite" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.overwrite" type="bool"/>
+			<preference id="preference.preselect_previous_session" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.preselect_previous_session" type="bool"/>
+			<preference id="preference.reload" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.reload" type="bool"/>
+			<preference id="preference.resume_session" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.resume_session" type="string"/>
+			<preference id="preference.save_cookies" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.save_cookies" type="bool"/>
+			<preference id="preference.session_list_order" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.session_list_order" type="int"/>
+			<preference id="preference.session_name_in_titlebar" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.session_name_in_titlebar" type="int"/>
+			<preference id="preference.shutdown_on_last_window_close" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.shutdown_on_last_window_close" type="bool"/>
 		</preferences>
 
 		<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionconvert.js"/>	
@@ -65,10 +65,10 @@
 						</hbox>
 						<hbox>
 							<checkbox id="preselect" label="&preselect_previous_session.label;" accesskey="&preselect_previous_session.accesskey;" 
-							          preference="extensions.sessionmanager.preselect_previous_session"/>
+							          preference="preference.preselect_previous_session"/>
 						</hbox>
 						<hbox pack="end">
-							<menulist id="resume_session" preference="extensions.sessionmanager.resume_session">
+							<menulist id="resume_session" preference="preference.resume_session">
 								<menupopup>
 								</menupopup>
 							</menulist>
@@ -76,7 +76,7 @@
 						<separator style="height: 1.0em;" orient="vertical"/>
 						<hbox align="center">
 							<label value="&backup_sess.label;" accesskey="&backup_sess.accesskey;" control="backup_session"/>
-							<menulist id="backup_session" preference="extensions.sessionmanager.backup_session">
+							<menulist id="backup_session" preference="preference.backup_session">
 								<menupopup>
 									<menuitem value="1" label="&backup_session.label1;"/>
 									<menuitem value="0" label="&backup_session.label0;"/>
@@ -86,18 +86,18 @@
 						</hbox>
 						<separator style="height: 0.5em;" orient="vertical"/>
 						<checkbox label="&last_window_shutdown.label;" accesskey="&last_window_shutdown.accesskey;" 
-						          preference="extensions.sessionmanager.shutdown_on_last_window_close"/>
+						          preference="preference.shutdown_on_last_window_close"/>
 					</groupbox>
 				</tabpanel>
 				<tabpanel orient="vertical">
 					<groupbox>
 						<caption label="&saving.caption;"/>
 						<vbox align="left">
-							<checkbox label="&cookies.label;" accesskey="&cookies.accesskey;" preference="extensions.sessionmanager.save_cookies"/>
+							<checkbox label="&cookies.label;" accesskey="&cookies.accesskey;" preference="preference.save_cookies"/>
 						</vbox>
 						<hbox align="center">
 							<label value="&max_backup.label;" accesskey="&max_backup.accesskey;" control="max_backup_keep"/>
-							<textbox id="max_backup_keep" preference="extensions.sessionmanager.max_backup_keep" size="1" maxlength="5"/>
+							<textbox id="max_backup_keep" preference="preference.max_backup_keep" size="1" maxlength="5"/>
 						</hbox>
 					</groupbox>
 					<groupbox>
@@ -109,13 +109,13 @@
 							</columns>
 							<rows>
 								<row>
-									<checkbox id="overwrite" label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="extensions.sessionmanager.overwrite"/>
+									<checkbox id="overwrite" label="&overwrite.label;" accesskey="&overwrite.accesskey;" preference="preference.overwrite"/>
 									<checkbox id="open_as_tabs" label="&open_as_tabs.label;" accesskey="&open_as_tabs.accesskey;" 
-									          preference="extensions.sessionmanager.append_by_default" oncommand="changeOverwriteLabel(this.checked);"/>
+									          preference="preference.append_by_default" oncommand="changeOverwriteLabel(this.checked);"/>
 								</row>
 								<row>
-									<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="extensions.sessionmanager.reload"/>
-									<checkbox label="&autosave_session.label;" accesskey="&autosave_session.accesskey;" preference="extensions.sessionmanager.autosave_session"/>
+									<checkbox label="&reload.label;" accesskey="&reload.accesskey;" preference="preference.reload"/>
+									<checkbox label="&autosave_session.label;" accesskey="&autosave_session.accesskey;" preference="preference.autosave_session"/>
 								</row>
 							</rows>
 						</grid>
@@ -126,7 +126,7 @@
 						<caption label="&sessionList.caption;"/>
 						<hbox align="center">
 							<label value="&orderList.label;" accesskey="&orderList.accesskey;" control="session_list_order"/>
-							<menulist id="session_list_order" preference="extensions.sessionmanager.session_list_order">
+							<menulist id="session_list_order" preference="preference.session_list_order">
 								<menupopup>
 									<menuitem value="1" label="&orderList.label1;"/>
 									<menuitem value="-2" label="&orderList.label_2;"/>
@@ -136,19 +136,19 @@
 						</hbox>
 						<hbox align="center">
 							<label value="&max_display.label;" accesskey="&max_display.accesskey;" control="max_display"/>
-							<textbox id="max_display" width="30px" preference="extensions.sessionmanager.max_display"/>
+							<textbox id="max_display" width="30px" preference="preference.max_display"/>
 						</hbox>
 					</groupbox>
 					<groupbox>
 						<caption label="&name_format.caption;"/>
 						<hbox align="center">
 							<label value="&name_format.label;" accesskey="&name_format.accesskey;" control="name_format"/>
-							<textbox id="name_format" preference="extensions.sessionmanager.name_format"/>
+							<textbox id="name_format" preference="preference.name_format"/>
 						</hbox>
 						<description id="name_describe" style="width: 5em;">&name_format.desc;</description>
 						<separator style="height: 0.5em;" orient="vertical"/>
 						<hbox align="center">
-							<menulist id="session_name_in_titlebar" preference="extensions.sessionmanager.session_name_in_titlebar">
+							<menulist id="session_name_in_titlebar" preference="preference.session_name_in_titlebar">
 								<menupopup>
 									<menuitem value="0" label="&append.label;"/>
 									<menuitem value="1" label="&prepend.label;"/>
@@ -159,7 +159,7 @@
 						</hbox>
 					</groupbox>
 					<checkbox id="hide_tools_menu" label="&hide_tools_menu.label;" 
-					          accesskey="&hide_tools_menu.accesskey;" preference="extensions.sessionmanager.hide_tools_menu"/>
+					          accesskey="&hide_tools_menu.accesskey;" preference="preference.hide_tools_menu"/>
 				</tabpanel>
 			</tabpanels>
 		</tabbox>
@@ -179,13 +179,13 @@
 		<preferences>
 			<preference id="browser.sessionstore.max_tabs_undo" name="browser.sessionstore.max_tabs_undo" type="int"/>
 			<preference id="browser.sessionstore.max_windows_undo" name="browser.sessionstore.max_windows_undo" type="int"/>
-			<preference id="extensions.sessionmanager.click_restore_tab" name="extensions.sessionmanager.click_restore_tab" type="bool"/>
-			<preference id="extensions.sessionmanager.max_closed_undo" name="extensions.sessionmanager.max_closed_undo" type="int"/>
-			<preference id="extensions.sessionmanager.save_closed_tabs" name="extensions.sessionmanager.save_closed_tabs" type="int"/>
-			<preference id="extensions.sessionmanager.save_closed_windows" name="extensions.sessionmanager.save_closed_windows" type="int"/>
-			<preference id="extensions.sessionmanager.save_window_list" name="extensions.sessionmanager.save_window_list" type="bool"/>
-			<preference id="extensions.sessionmanager.submenus" name="extensions.sessionmanager.submenus" type="bool"/>
-			<preference id="extensions.sessionmanager.use_SS_closed_window_list" name="extensions.sessionmanager.use_SS_closed_window_list" type="bool"/>
+			<preference id="preference.click_restore_tab" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.click_restore_tab" type="bool"/>
+			<preference id="preference.max_closed_undo" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.max_closed_undo" type="int"/>
+			<preference id="preference.save_closed_tabs" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.save_closed_tabs" type="int"/>
+			<preference id="preference.save_closed_windows" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.save_closed_windows" type="int"/>
+			<preference id="preference.save_window_list" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.save_window_list" type="bool"/>
+			<preference id="preference.submenus" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.submenus" type="bool"/>
+			<preference id="preference.use_SS_closed_window_list" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.use_SS_closed_window_list" type="bool"/>
 		</preferences>
 
 		<groupbox>
@@ -199,7 +199,7 @@
 					<row align="center">
 						<label value="&max_closed.label;" accesskey="&max_closed.accesskey;" control="max_closed"/>
 						<hbox>
-							<textbox id="max_closed" preference="extensions.sessionmanager.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo(this.id);"/>
+							<textbox id="max_closed" preference="preference.max_closed_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo(this.id);"/>
 							<textbox id="max_closed_SS" preference="browser.sessionstore.max_windows_undo" size="1" maxlength="5" onsyncfrompreference="return readMaxClosedUndo(this.id);"/>
 						</hbox>
 					</row>
@@ -209,10 +209,10 @@
 					</row>
 				</rows>
 			</grid>
-			<checkbox label="&submenu.label;" accesskey="&submenu.accesskey;" preference="extensions.sessionmanager.submenus"/>
-			<checkbox id="midClickPref" label="&middleclick.label;" accesskey="&middleclick.accesskey;" preference="extensions.sessionmanager.click_restore_tab"/>
+			<checkbox label="&submenu.label;" accesskey="&submenu.accesskey;" preference="preference.submenus"/>
+			<checkbox id="midClickPref" label="&middleclick.label;" accesskey="&middleclick.accesskey;" preference="preference.click_restore_tab"/>
 			<checkbox id="closed_window_list" label="&closed_window_list.label;" accesskey="&closed_window_list.accesskey;" 
-			          preference="extensions.sessionmanager.use_SS_closed_window_list" oncommand="checkClosedWindowList(this.checked)"/>
+			          preference="preference.use_SS_closed_window_list" oncommand="checkClosedWindowList(this.checked)"/>
 		</groupbox>
 		<groupbox>
 			<caption label="&persistence.caption;"/>
@@ -224,7 +224,7 @@
 				<rows>
 					<row align="center">
 						<label value="&closed_tabs.label;" accesskey="&closed_tabs.accesskey;" control="save_closed_tabs"/>
-						<menulist id="save_closed_tabs" preference="extensions.sessionmanager.save_closed_tabs">
+						<menulist id="save_closed_tabs" preference="preference.save_closed_tabs">
 							<menupopup>
 								<menuitem value="1" label="&closed_tabs.label1;"/>
 								<menuitem value="2" label="&closed_tabs.label2;"/>
@@ -234,7 +234,7 @@
 					</row>
 					<row id="closed_windows_menu" align="center">
 						<label value="&closed_windows.label;" accesskey="&closed_windows.accesskey;" control="save_closed_windows"/>
-						<menulist id="save_closed_windows" preference="extensions.sessionmanager.save_closed_windows">
+						<menulist id="save_closed_windows" preference="preference.save_closed_windows">
 							<menupopup>
 								<menuitem value="1" label="&closed_tabs.label1;"/>
 								<menuitem value="2" label="&closed_tabs.label2;"/>
@@ -244,7 +244,7 @@
 					</row>
 				</rows>
 			</grid>
-			<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="extensions.sessionmanager.save_window_list"/>
+			<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="preference.save_window_list"/>
 		</groupbox>
 		<hbox pack="end">
 			<button	id="clear_undo_button" pack="end" label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
@@ -256,16 +256,16 @@
 	<!-- ****************************************** -->
 	<prefpane id="advancedPrefPane" label="&advanced.caption;" helpURI="" helpTopic="prefs-advanced">
 		<preferences>
-			<preference id="extensions.sessionmanager.disable_cache_fixer" name="extensions.sessionmanager.disable_cache_fixer" type="bool"/>
-			<preference id="extensions.sessionmanager.sessions_dir" name="extensions.sessionmanager.sessions_dir" type="string"/>
-			<preference id="extensions.sessionmanager.encrypt_sessions" name="extensions.sessionmanager.encrypt_sessions" type="bool"/>
-			<preference id="extensions.sessionmanager.encrypted_only" name="extensions.sessionmanager.encrypted_only" type="bool"/>
+			<preference id="preference.disable_cache_fixer" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.disable_cache_fixer" type="bool"/>
+			<preference id="preference.sessions_dir" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.sessions_dir" type="string"/>
+			<preference id="preference.encrypt_sessions" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.encrypt_sessions" type="bool"/>
+			<preference id="preference.encrypted_only" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.encrypted_only" type="bool"/>
 		</preferences>
 
 		<groupbox>
 			<caption label="&sessiondir.caption;"/>
 			<description>&sessiondir.desc;</description>
-			<textbox preference="extensions.sessionmanager.sessions_dir" id="sessions_dir" readonly="true"/>
+			<textbox preference="preference.sessions_dir" id="sessions_dir" readonly="true"/>
 			<hbox pack="end">
 				<button label="&change_dir.label;" accesskey="&change_dir.accesskey;" oncommand="selectSessionDir();"/>
 				<button label="&default_dir.label;" accesskey="&default_dir.accesskey;" oncommand="defaultSessionDir();"/>
@@ -273,19 +273,19 @@
 		</groupbox>
 		<groupbox>
 			<caption label="&encrypt.caption;"/>
-			<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" preference="extensions.sessionmanager.encrypt_sessions" 
+			<checkbox label="&encrypt.label;" accesskey="&encrypt.accesskey;" preference="preference.encrypt_sessions" 
 			          id="encrypt_sessions" oncommand="this.checked = checkEncryption(this.checked);"/>
 			<separator style="height: 0.5em;" orient="vertical"/>
 			<description style="width: 26em; color:red;" class="indent">&encrypt.desc;</description>
 			<vbox id="encrypted_only">
 				<checkbox label="&encrypted_only.label;" accesskey="&encrypted_only.accesskey;" 
-				          preference="extensions.sessionmanager.encrypted_only" oncommand="this.checked = checkEncryptOnly(this.checked)"/>
+				          preference="preference.encrypted_only" oncommand="this.checked = checkEncryptOnly(this.checked)"/>
 				<separator style="height: 0.5em;" orient="vertical"/>
 				<description style="width: 26em; color:red;" class="indent">&encrypt2.desc;</description>
 			</vbox>
 		</groupbox>
 		<checkbox label="&disable_cache_fixer.label;" accesskey="&disable_cache_fixer.accesskey;" 
-		          preference="extensions.sessionmanager.disable_cache_fixer"/>
+		          preference="preference.disable_cache_fixer"/>
 	</prefpane>
 
 	<!-- ********************************************** -->
@@ -338,13 +338,13 @@
 	<!-- ******************************************* -->
 	<prefpane id="loggingPrefPane" label="&logging.caption;" helpURI="" helpTopic="prefs-logging">
 		<preferences>
-			<preference id="extensions.sessionmanager.logging" name="extensions.sessionmanager.logging" type="bool"/>
-			<preference id="extensions.sessionmanager.logging_level" name="extensions.sessionmanager.logging_level" type="int"/>
+			<preference id="preference.logging" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging" type="bool"/>
+			<preference id="preference.logging_level" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging_level" type="int"/>
 		</preferences>
 		<groupbox>
 			<caption label="&logging.caption;"/>
 			<hbox>
-				<checkbox label="&enable_logging.label;" accesskey="&enable_logging.accesskey;" preference="extensions.sessionmanager.logging"/>
+				<checkbox label="&enable_logging.label;" accesskey="&enable_logging.accesskey;" preference="preference.logging"/>
 				<button label="&open_log.label;" accesskey="&open_log.accesskey;" oncommand="com.morac.openLogFile();"/>
 				<button label="&delete_log.label;" accesskey="&delete_log.accesskey;" oncommand="com.morac.deleteLogFile(true);"/>
 			</hbox>
@@ -365,8 +365,8 @@
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/options.js"/>
 
 	<preferences>
-		<preference id="extensions.sessionmanager.options_selected_tab" name="extensions.sessionmanager.options_selected_tab" type="int"/>
-		<preference id="extensions.sessionmanager.startup" name="extensions.sessionmanager.startup" type="int"/>
+		<preference id="preference.options_selected_tab" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.options_selected_tab" type="int"/>
+		<preference id="preference.startup" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.startup" type="int"/>
 	</preferences>
 
 </prefwindow>
