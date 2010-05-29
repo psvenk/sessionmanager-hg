@@ -1,9 +1,23 @@
 var gSessionManagerDonate = {
 	startup: function() {
-		db_gExtensionsView = document.getElementById("extensionsView");
+		window.removeEventListener("load", gSessionManagerDonate.startup, true);
+		window.addEventListener("unload", gSessionManagerDonate.cleanup, false);
+		var db_gExtensionsView = document.getElementById("extensionsView");
 		db_gExtensionsView.addEventListener("select", gSessionManagerDonate.doIt, false);
+		gSessionManagerDonate.doIt();
+	},
+	
+	cleanup: function() {
+		window.removeEventListener("unload", gSessionManagerDonate.cleanup, false);
+		var db_gExtensionsView = document.getElementById("extensionsView");
+		db_gExtensionsView.removeEventListener("select", gSessionManagerDonate.doIt, false);
 	},
 
+	// Use a proxy since adding the doIt function as an event results in XUL elements leaking briefly.
+	doIt_proxy: function() {
+		gSessionManagerDonate.doIt();
+	},
+	
 	doIt: function() {
 		var myext = document.getElementById("urn:mozilla:item:{1280606b-2510-4fe0-97ef-9b5a22eafe30}");
 		var db_donateContainer = document.getElementById("session_manager_donateContainer");
@@ -37,10 +51,10 @@ var gSessionManagerDonate = {
 		}
 		else {
 			var content = win.document.getElementById("content");
-			content.selectedTab = content.addTab(url);	
+			content.selectedTab = content.addTab(url);
 		}
 	}
 }
 
-window.addEventListener("load", gSessionManagerDonate.startup, true);
+window.addEventListener("load", gSessionManagerDonate.startup, false);
 
