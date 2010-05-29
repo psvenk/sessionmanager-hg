@@ -2,7 +2,8 @@
 if(!com) var com={};
 if(!com.morac) com.morac={};
 
-// import the session_manager.jsm into the namespace
+// import into the namespace
+Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm", com.morac);
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac);
 
 // use the namespace
@@ -62,7 +63,7 @@ with (com.morac) {
 			var startMenu = document.getElementById("browserStartupPage") || document.getElementById("startupPage");
 			var height = 0;
 			if (startMenu) {
-				var startup = gSessionManager.getPref("startup", 0, false);
+				var startup = gPreferenceManager.get("startup", 0);
 				var menuitem = startMenu.appendItem(gSessionManager._string("startup_load"), STARTUP_LOAD);
 				height = height + parseInt(window.getComputedStyle(menuitem, null).height);
 				menuitem = startMenu.appendItem(gSessionManager._string("startup_prompt"), STARTUP_PROMPT);
@@ -278,7 +279,7 @@ with (com.morac) {
 			
 			// Make it so the check box won't be checked the next time the user manually goes to clear 
 			// recent history in Mozilla 1.9.1 and above
-			gSessionManager.setPref("privacy.cpd.extensions-sessionmanager", false, true);
+			gPreferenceManager.set("privacy.cpd.extensions-sessionmanager", false, true);
 		}
 	}
 
