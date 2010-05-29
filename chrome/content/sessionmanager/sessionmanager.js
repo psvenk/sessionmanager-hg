@@ -4,6 +4,7 @@ if(!com.morac) com.morac={};
 
 // import the session_manager.jsm into the namespace
 Components.utils.import("resource://sessionmanager/modules/logger.jsm", com.morac);
+Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm");
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac);
 
 // use the namespace
@@ -200,12 +201,6 @@ with (com.morac) {
 			window.addEventListener("close", this.onClose_proxy, false);		
 			window.addEventListener("unload", this.onUnload_proxy, false);
 
-			// Make sure the EOL character is set
-			if (!gSessionManager.mEOL_Set) {
-				gSessionManager.mEOL = /win|os[\/_]?2/i.test(navigator.platform)?"\r\n":/mac/i.test(navigator.platform)?"\r":"\n";
-				gSessionManager.mEOL_Set = true;
-			}
-			
 			// Hook into Tab Mix Plus to handle session conversion
 			if (typeof(convertSession) == "object" && typeof(convertSession.doConvert) == "function") {
 				convertSession.doConvert = this.doTMPConvert;
@@ -221,12 +216,12 @@ with (com.morac) {
 
 			// If the shutdown on last window closed preference is not set, set it based on the O/S.
 			// Enable for Macs, disable for everything else
-			if (!PREF_ROOT_SERVICE.prefHasUserValue("extensions.sessionmanager.shutdown_on_last_window_close")) {
+			if (!gPreferenceManager.has("shutdown_on_last_window_close")) {
 				if (/mac/i.test(navigator.platform)) {
-					gSessionManager.setPref("extensions.sessionmanager.shutdown_on_last_window_close", true, true);
+					gPreferenceManager.set("shutdown_on_last_window_close", true);
 				}
 				else {
-					gSessionManager.setPref("extensions.sessionmanager.shutdown_on_last_window_close", false, true);
+					gPreferenceManager.set("shutdown_on_last_window_close", false);
 				}
 			}
 		
@@ -279,14 +274,14 @@ with (com.morac) {
 			
 				// If backup file is temporary, then delete it
 				try {
-					if (gSessionManager.getPref("backup_temporary", true)) {
-						gSessionManager.setPref("backup_temporary", false)
+					if (gPreferenceManager.get("backup_temporary", true)) {
+						gPreferenceManager.set("backup_temporary", false)
 						gSessionManager.delFile(gSessionManager.getSessionDir(BACKUP_SESSION_FILENAME));
 					}
 				} catch (ex) { logError(ex); }
 
 				// If we did a temporary restore, set it to false			
-				if (gSessionManager.mPref_restore_temporary) gSessionManager.setPref("restore_temporary", false)
+				if (gSessionManager.mPref_restore_temporary) gPreferenceManager.set("restore_temporary", false)
 
 				// Force saving the preferences
 				OBSERVER_SERVICE.notifyObservers(null,"sessionmanager-preference-save",null);
@@ -339,6 +334,9 @@ with (com.morac) {
 				OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:window-loaded", null);
 			}
 			
+			// Detect page loads for session prompt
+			gBrowser.addEventListener("load", gSessionManagerWindowObject.onPageLoad, true);
+			
 			log("onLoad end", "TRACE");
 		},
 
@@ -355,7 +353,10 @@ with (com.morac) {
 			log("onUnload Fired", "INFO");
 			this.removeEventListener("close", gSessionManagerWindowObject.onClose_proxy, false);
 			this.removeEventListener("unload", gSessionManagerWindowObject.onUnload_proxy, false);
-			gSessionManagerWindowObject.onUnload(this);
+			gSessionManagerWindowObject.onUnload();
+			
+			// Update tab tree if it's open
+			OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-tab-tree", null);
 		},
 
 		onUnload: function()
@@ -375,9 +376,11 @@ with (com.morac) {
 				gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			}
 			gBrowser.tabContainer.removeEventListener("click", this.onTabBarClick, false);
+			gBrowser.removeEventListener("load", gSessionManagerWindowObject.onPageLoad, true);
 			
 			// stop watching for titlebar changes
 			gBrowser.ownerDocument.unwatch("title");
+
 			
 			// Last window closing will leaks briefly since mObserving2 observers are not removed from it 
 			// until after shutdown is run, but since browser is closing anyway, who cares?
@@ -425,6 +428,11 @@ with (com.morac) {
 			log("onUnload end", "TRACE");
 		},
 
+		onPageLoad: function() {
+			// Update tab tree if it's open
+			OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-tab-tree", null);
+		},
+		
 		// This is needed because a window close can be cancelled and we don't want to process such as closing a window
 		onWindowCloseRequest: function() {
 			log("onWindowCloseRequest start", "TRACE");
@@ -501,11 +509,19 @@ with (com.morac) {
 		{
 			// Give browser a chance to update count closed tab count.  Only SeaMonkey currently needs this, but it doesn't hurt Firefox.
 			setTimeout(gSessionManagerWindowObject.updateUndoButton, 0);
+			
+			// Update tab tree when tab is closed. The onPageLoad function will update when a tab is opened.
+			if (aEvent.type == "TabClose") OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-tab-tree", null);
 		},
 
+		onTabRestoring_proxy: function(aEvent)
+		{
+			gSessionManagerWindowObject.onTabRestoring(aEvent);
+		},
+		
 		// This is to try and prevent tabs that are closed during the restore preocess from actually reloading.  
 		// It not 100% fool-proof, but it's better than nothing.
-		onTabRestoring_proxy: function(aEvent)
+		onTabRestoring: function(aEvent)
 		{
 			// If tab reloading enabled and not offline
 			if (gSessionManager.mPref_reload && !IO_SERVICE.offline) 
@@ -523,7 +539,7 @@ with (com.morac) {
 					let current_time = new Date();
 					current_time = current_time.getTime();
 					
-					log("onTabRestoring_proxy: Tab age is " + ((current_time - tab_time)/1000) + " seconds.", "EXTRA");
+					log("onTabRestoring: Tab age is " + ((current_time - tab_time)/1000) + " seconds.", "EXTRA");
 					
 					// Don't reload a tab older than the specified preference (defaults to 1 minute)
 					if (current_time - tab_time < gSessionManager.mPref_reload_timeout) 
