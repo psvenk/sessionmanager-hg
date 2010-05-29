@@ -1,793 +1,1089 @@
+// Create a namespace so as not to polute the global namespace
+if(!com) var com={};
+if(!com.morac) com.morac={};
+
 Components.utils.import("resource://sessionmanager/modules/logger.jsm");
+Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm");
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
 
-var gParams = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
-var gSessionTree = null;
-var gTextBox = null;
-var ggMenuList = null;
-var gTabTree = null;
-var gTabTreeBox = null;
-var gTreeSplitter = null;
-var gCtrlClickNote = null;
-var gAcceptButton = null;
-var gExtraButton = null;
-var gSessionNames = {};
-var gGroupNames = [];
-var gBackupGroupName = null;
-var gBannedNames = [];
-var gBackupNames = [];
-var gSessionTreeData = [];
-var gOriginalSessionTreeData;
-// gExistingName is the index of the item with the name in the text field.  -1 means no match
-var gExistingName = -1;
-var gNeedSelection = false;
-var gWidth = 0;
-var gInvalidTime = false;
-var gAlreadyResized = false;
-var gFinishedLoading = false;
+// use the namespace
+with (com.morac) {
+	com.morac.gSessionManagerSessionPrompt = {
 
-var gAppendToSessionFlag = false;
-
-// Used to keep track of the accept button position change
-var gAcceptPositionDifference = 0;
-var gTimerId = null;
-
-var sortedBy = 0;
-
-// GetInt 1 bit values
-// 1   = add current session - used when recovering from crash
-// 2   = multiselect enable  - true if allowed to choose multiple sessions (used for deleting)
-// 4   = ignorable           - Displays ignore checkbox
-// 8   = autosaveable        - Displays autosave checkbox
-// 16  = remove              - true if deleting session(s)
-// 32  = grouping            - true if changing grouping
-// 64  = append/replace      - true if displaying the append/replace radio group, false otherwise
-// 128 = preselect           - true if preselecting last backup session
-// 256 = allow name replace  - true if double clicking a session name on save will replace existing session, but use default session name.
-//                                  (This is currently only settable via a userChrome.js script).
-
-// GetInt 2 bit values
-// 1   = select all          - true if all multiple items should be selected on initial prompt, false otherwise
-// 2   = startup prompt      - true if displayed when browser is first starting up, but not recovering from crash
-
-// GetString values
-// 1 = Session Label         - Label at top of window
-// 2 = Accept Label          - Okay Button label for normal accept
-// 3 = Session Filename      - filename of session save file
-// 4 = Text Label            - Label above text box
-// 5 = Accept Existing Label - Okay button label when overwriting existing session
-// 6 = Default Session Name  - Comes from page title
-// 7 = Count String          - Count String for current crashed session
-
-// SetInt 0 bit values
-// 1 = Accept button pressed
-
-// SetInt 1 bit values
-// 4  = ignore               - ignore checkbox checked
-// 8  = autosave             - autosave checkbox checked
-// 16 = tabprompt            - tabprompt checbox checked
-// 32 = append flag          - true if append session, false if not
-// 64 = append window flag   - true if append to window, false if not
-
-// SetString values
-// 3 = Session Filename
-// 6 = Session Name
-// 7 = Group Name
-
-onLoad = function(aEvent) {
-	this.removeEventListener("load", onLoad, false);
-	this.addEventListener("unload", onUnload, false);			
-
-	// Disable saving in privacy mode
-	let inPrivateBrowsing = gSessionManager.isPrivateBrowserMode();
-	gSessionManager.setDisabled(_("save"), inPrivateBrowsing);
-	gSessionManager.setDisabled(_("saveWin"), inPrivateBrowsing);
-	
-	_("actionButton").label = "Bob";
-	
-	// Display the window
-	drawWindow();
-	
-	// watch for resize to prevent user from shrinking window so small it hides dialog buttons.
-	window.onresize = resize;
-	
-	gFinishedLoading = true;
-};
-
-onUnload = function(aEvent) {
-	this.removeEventListener("unload", onUnload, false);
-	
-	function persist(aObj, aAttr, aValue)
-	{
-		aObj.setAttribute(aAttr, aValue);
-		document.persist(aObj.id, aAttr);
-	}
-	
-	if (window.opener)
-	{
-		persist(document.documentElement, "screenX", window.screenX - window.opener.screenX);
-		persist(document.documentElement, "screenY", window.screenY - window.opener.screenY);
-		log("onUnload: screenX = " + window.screenX + ", opener.screenX = " + window.opener.screenX, "DATA");
-		log("onUnload: screenY = " + window.screenY + ", opener.screenY = " + window.opener.screenY, "DATA");
-	}
-	
-	// only persist tree heights is neither is collapsed to prevent "giant" trees
-	if (gTreeSplitter.getAttribute("state") != "collapsed") {
-		// persist session tree height if it has a height, subtract one if tab Tree is hidden because one is added if it is
-		if (gSessionTree && gSessionTree.treeBoxObject.height > 0) {
-			var tweak = gTabTreeBox.hidden ? 1 : 0;
-			persist(gSessionTree, "height", gSessionTree.treeBoxObject.height - tweak);
-			log("onUnload: persist session tree height = " + gSessionTree.treeBoxObject.height + ", tweak = " + tweak, "DATA");
-		}
-		// persist tab tree height if it has a height
-		if (gTabTree && gTabTree.treeBoxObject.height > 0) {
-			persist(gTabTree, "height", gTabTree.treeBoxObject.height);
-			log("onUnload: persist tab tree height = " + gTabTree.treeBoxObject.height, "DATA");
-		}
-	}
-	log("onUnload: session tree height = " + gSessionTree.getAttribute("height") + ", tab tree height = " + gTabTree.getAttribute("height"), "DATA");
-	
-	if (!gAllTabsChecked) storeSession();
-	
-	gParams.SetInt(1, ((_("checkbox_ignore").checked)?4:0) | ((_("checkbox_autosave").checked)?8:0) |
-	                  ((!gAllTabsChecked)?16:0) | ((_("radio_append").selected && !_("radio_append_replace").hidden)?32:0) | (gAppendToSessionFlag?32:0) |
-					  ((_("radio_append_window").selected)?64:0));
-	if (_("checkbox_autosave").checked) gParams.SetInt(2, parseInt(_("autosave_time").value.trim()));
-};
-
-function drawWindow() {
-	_("mac_title").hidden = !/mac/i.test(navigator.platform);
-	setDescription(_("session_label"), gParams.GetString(1));
-	
-	gAcceptButton = document.documentElement.getButton("accept");
-	gAcceptButton.label = gParams.GetString(2) || gAcceptButton.label;
-	gExtraButton = document.documentElement.getButton("extra1");
-	
-	var sessions = null;
-	if (gSessionManager.getSessionsOverride) {
-		if (typeof gSessionManager.getSessionsOverride == "function") {
-			try {
-				sessions = gSessionManager.getSessionsOverride();
-			} catch (ex) { 
-				log("Override function error. " + ex, "ERROR", true);
-			}
-		}
-		else {
-			log("Passed override function parameter is not a function.", "ERROR", true);
-		}
-		if (!sessions || !_isValidSessionList(sessions)) {
-			window.close();
-			return;
-		}
-	}
-	else {
-		sessions = gSessionManager.getSessions();
-	}
-
-	// Disable non-saving menuitems if no sessions
-	gSessionManager.setDisabled(_("load"), !sessions.length);
-	gSessionManager.setDisabled(_("rename"), !sessions.length);
-	gSessionManager.setDisabled(_("remove"), !sessions.length);
-	gSessionManager.setDisabled(_("group"), !sessions.length);
-	
-	if (gParams.GetInt(1) & 1) // add a "virtual" current session
-	{
-		sessions.unshift({ name: gSessionManager._string("current_session"), fileName: "*" });
-	}
-	
-	gTabTree = _("tabTree");
-	gTabTreeBox = _("tabTreeBox");
-	gTreeSplitter = _("tree_splitter");
-	gCtrlClickNote = _("ctrl_click_note");
-	gSessionTree = _("session_tree");
-	gSessionTree.selType = (gParams.GetInt(1) & 2)?"multiple":"single";
-	
-	// Do not allow overwriting of open window or browser sessions (clone it so we don't overwrite the global variable)
-	for (let i in gSessionManager.mActiveWindowSessions) {
-		gBannedNames[i] = gSessionManager.mActiveWindowSessions[i];
-	}
-	var currentSession = gSessionManager.getPref("_autosave_values", "").split("\n")[0];
-	if (currentSession) gBannedNames[currentSession.trim().toLowerCase()] = true;
-	
-	// hide/show the "Don't show [...] again" checkbox
-	_("checkbox_ignore").hidden = !(gParams.GetInt(1) & 4);
-
-	// hide/show the Autosave checkboxes
-	_("checkbox_autosave").hidden = !(gParams.GetInt(1) & 8);
-	_("save_every").hidden = _("checkbox_autosave").hidden || !_("checkbox_autosave").checked;
-	
-	// hide/show the append/replace radio buttons
-	_("radio_append_replace").hidden = !(gParams.GetInt(1) & 64);
-	_("radio_append_replace").selectedIndex = gSessionManager.getPref("overwrite", false) ? 1 : (gSessionManager.getPref("append_by_default", false) ? 2 : 0);
-	if (window.opener && typeof(window.opener.gSingleWindowMode) != "undefined" && window.opener.gSingleWindowMode) {
-		if (!_("radio_append_replace").selectedIndex) _("radio_append_replace").selectedIndex = 2;
-		_("radio_append").hidden = true;
-	}
-
-	gBackupGroupName = gSessionManager._string("backup_sessions");
-	gBackupNames[gSessionManager._string("backup_session").trim().toLowerCase()] = true;
-	gBackupNames[gSessionManager._string("autosave_session").trim().toLowerCase()] = true;
-	
-	var deleting = (gParams.GetInt(1) & 16);
-	var saving = (gParams.GetInt(1) & 8);
-	var grouping = (gParams.GetInt(1) & 32);
-	var loading = (gParams.GetInt(1) & 64);  // not true for crash or start session prompt
-	var preselect = (gParams.GetInt(1) & 128);
-	var groupCount = 0;
-	var selected;
-	sessions.forEach(function(aSession) {
-		var trimName = aSession.name.trim().toLowerCase();
-		// ban backup session names
-		if (aSession.backup) gBackupNames[trimName] = true;
-		// Don't display loaded sessions in list for load or save or backup items in list for save or grouping
-		if (!((aSession.backup && (saving || grouping)) || ((gBannedNames[trimName]) && (saving || loading || (gParams.GetInt(1) & 1)))))
-		{
-			// get window and tab counts and group name for crashed session
-			if (aSession.fileName == "*") {
-				aSession.group = gBackupGroupName;
-				var counts = gParams.GetString(7).split(",");
-				aSession.windows = counts[0];
-				aSession.tabs = counts[1];
-			}
-			
-			// Break out Autosave variables
-			if (aSession.autosave) {
-				var autosave = aSession.autosave.split("/");
-				aSession.autosave = autosave[0];
-				aSession.autosave_time = autosave[1];
-			}
-			
-			// Mark if session loaded
-			aSession.loaded = gBannedNames[trimName] || null;
-			
-			// Flag latest session
-			if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(gParams.GetInt(1) & 1)) || (aSession.fileName == "*")) {
-				aSession.latest = true;
-			}
-			
-			// Select previous session if requested to do so and no session name passed
-			if (preselect && aSession.backup && !gParams.GetString(3) && (sessions.latestBackUpTime == aSession.timestamp)) {
-				selected = gSessionTreeData.length;
-			}
-
-			// select passed in item (if any)
-			if (aSession.fileName == gParams.GetString(3)) selected = gSessionTreeData.length;
-
-			// Add session to name list
-			gSessionNames[trimName] = gSessionTreeData.length;
-			
-			// Push to Tree database and backup
-			gSessionTreeData.push(aSession);
-			
-			// Build group menu list
-			if (aSession.group && !aSession.backup) {
-				// Don't treat special chars in group as regular expression characters
-				let groupRegExp = aSession.group.replace(/([\(\)\[\]\^\$\*\+\|\.\\\/])/g,"\\$1");
-				let regExp = new RegExp("^" + groupRegExp + "|," + groupRegExp + "$|," + groupRegExp + ",");
-				if (!regExp.test(gGroupNames.toString())) {
-					gGroupNames[groupCount++] = aSession.group.trim();
-				}
-			}
-		}
-	}, this);
-	
-	// Make a copy of array
-	gOriginalSessionTreeData = gSessionTreeData.slice(0);
-	
-	// Display Tree
-	gSessionTree.view = sessionTreeView;
-	
-	// select passed in item (if any)
-	if (selected != undefined) gSessionTree.view.selection.select(selected);
-	
-	if ((gParams.GetInt(2) & 1)) gSessionTree.view.selection.selectAll()
-
-	// If there is a text box label, enable text boxes
-	if (gParams.GetString(4))
-	{
-		_("text_container").hidden = false;
-		setDescription(_("text_label"), gParams.GetString(4));
+		gParams: null,
+		gSessionTree: null,
+		gTextBox: null,
+		gTextBoxVisible: false,
+		ggMenuList: null,
+		ggMenuListVisible: false,
+		gTabTree: null,
+		gTabTreeBox: null,
+		gTreeSplitter: null,
+		gCtrlClickNote: null,
+		gAcceptButton: null,
+		gExtraButton: null,
+		gSessionNames: {},
+		gGroupNames: [],
+		gBackupGroupName: null,
+		gBannedNames: [],
+		gBackupNames: [],
+		gSessionTreeData: null,
+		gOriginalSessionTreeData: null,
+		// gExistingName is the index of the item with the name in the text field.  -1 means no match
+		gExistingName: -1,
+		gNeedSelection: false,
+		gInvalidTime: false,
+		gFinishedLoading: false,
+		gReDrawWindow: true,
 		
-		// If renaming and name already entered, disable the session selection list
-		if (gParams.GetString(3) && !gParams.GetString(5)) gSessionTree.disabled = true;
+		// Used to adjust height of window when unchecking "auto save" box
+		gSavedEveryHeight: 0,
 
-		// group text input is enabled when saving or group changing
-		if ((gParams.GetInt(1) & 32) || gParams.GetString(5)) 
-		{
-			_("group-text-container").hidden = false;
-			ggMenuList = _("group_menu_list");
+		// Used to keep track of the accept button position change
+		gAcceptPositionDifference: 0,
+		gTimerId: null,
 
-			// Pre-populate Group Menu
-			gGroupNames.sort();
-			for (var i in gGroupNames) {
-				ggMenuList.appendItem(gGroupNames[i]);
-			}
-		}
-				
-		// session text input is enabled when not group changing (i.e., when saving or renaming)
-		if (!(gParams.GetInt(1) & 32)) 
-		{
-			_("session-text-container").hidden = false;
-			gTextBox = _("text_box");
+		sortedBy: 0,
+
+		// Input parameters stored in gSessionManager.sessionPromptData:
+		// acceptExistingLabel  - Okay button label when overwriting existing session
+		// acceptLabel          - Okay Button label for normal accept
+		// addCurrentSession    - True when recovering from crash
+		// allowNamedReplace    - True if double clicking a session name on save will replace existing session, but use default session name.
+		//                        (This is currently only settable via a hidden preference - allowNamedReplace).
+		// append_replace       - True if displaying the append/replace radio group, false otherwise
+		// autoSaveable         - Displays autosave checkbox if true
+		// callbackData         - Data to pass back to the gSessionManager.sessionPromptCallBack function.  Window will be modal if not set
+		// crashCount           - Count String for current crashed session
+		// defaultSessionName   - Default value comes from page title
+		// filename             - Filename of session save file
+		// getSessionsOverride  - Function to call to retrieve session list instead of gSessionManager.getSessions()
+		// grouping             - True if changing grouping
+		// ignorable            - Displays ignore checkbox if true
+		// multiSelect          - True if allowed to choose multiple sessions (used for deleting)
+		// preselect            - True if preselecting last backup session
+		// remove               - True if deleting session(s)
+		// selectAll            - True if all multiple items should be selected on initial prompt, false otherwise
+		// sessionLabel         - Label at top of window
+		// startupPrompt        - True if displayed when browser is first starting up, but not recovering from crash
+		// textLabel            - Label above text box
+
+		// Output parameters, stored in gSessionManager.sessionPromptReturnData
+		// append               - True if append session, false if not
+		// append_window        - True if append to window, false if not
+		// autoSave             - True if autosave button pressed
+		// autoSaveTime         - Auto save time value
+		// filename             - Filename(s) - If multiple filenames returned, returned as "\n" separated string.
+		// groupName            - Group Name
+		// ignore               - True if ignore checkbox checked
+		// sessionName          - Session Name
+		// sessionState         - Session state when not all tabs are selected
 		
-			// Pre-populate the text box with default session name if saving and the name is not banned or already existing.
-			// Otherwise disable accept button
-			var trimname = gParams.GetString(6).trim().toLowerCase();
-			if (gParams.GetString(5) && !gBannedNames[trimname] && ((gSessionNames[trimname] == undefined) || (gParams.GetInt(1) & 256)))
+		// SetInt 0 bit values
+		// 1 = Accept or Extra1 button pressed
+
+		// Used to disable saving if user switches to private browsing mode.
+		observe: function(aSubject, aTopic, aData)
+		{
+			switch (aTopic)
 			{
-				onTextboxInput(gParams.GetString(6));
+			case "private-browsing":
+				this.checkPrivateBrowsingMode(aData == "enter", this.gParams.autoSaveable);
+				break;
 			}
-			else gAcceptButton.disabled = true;
-		}
-	}
-	
-	// Force user to make a selection if no text or group box or not saving (i.e., deleting or renaming)
-	if ((gNeedSelection = !gTextBox || !ggMenuList || !gParams.GetString(5)) || (gParams.GetInt(1) & 256))
-	{
-		gSessionTree.addEventListener("select", onSessionTreeSelect, false);
-		onSessionTreeSelect();
-	}
-	
-	if (gSessionTree.hasAttribute("height"))
-	{
-		gSessionTree.height = gSessionTree.getAttribute("height");
-	}
-	
-	// This is never true when running under windows
-	if (!window.opener)
-	{
-		log("drawWindow: Clearing screenX and screenY", "INFO");
-		document.title += " - " + document.getElementById("bundle_brand").getString("brandFullName");
-		document.documentElement.removeAttribute("screenX");
-		document.documentElement.removeAttribute("screenY");
+		},
+
+		persist: function(aObj, aAttr, aValue)
+		{
+			aObj.setAttribute(aAttr, aValue);
+			document.persist(aObj.id, aAttr);
+		},
+
+		onLoad_proxy: function(aEvent) {
+			this.removeEventListener("load", gSessionManagerSessionPrompt.onLoad_proxy, false);
+			this.addEventListener("unload", gSessionManagerSessionPrompt.onUnload_proxy, false);
+			gSessionManagerSessionPrompt.onLoad(aEvent);
+		},
 		
-		// Move window so that the bottom part can be displayed when prompting for a session that
-		// does not select the session by default (DON'T THINK I NEED THIS)
-/*		
-		if (!preselect) {
-			var tabHeight = gTabTree.getAttribute("height");
-			var adjustHeight = window.screen.availHeight - tabHeight - window.outerHeight - window.screenY - 54;
-			log("drawWindow: window.screen.availHeight = " + window.screen.availHeight + ", tabHeight = " + tabHeight + ", window.outerHeight = " + window.outerHeight + ", window.screenY = " + window.screenY + ", adjustHeight = " + adjustHeight , "DATA");
-			if ((window.screenY + adjustHeight) < 0) adjustHeight = -window.screenY;
-			if (adjustHeight < 0) window.moveBy(0, adjustHeight);
-		}
-*/		
-	}
-	window.sizeToContent();
-};
+		onLoad: function(aEvent) {
+			OBSERVER_SERVICE.addObserver(gSessionManagerSessionPrompt, "private-browsing", false);
 
-function onSessionTreeClick(aEvent)
-{
-	if ((aEvent.button == 0) && !aEvent.metaKey && !aEvent.ctrlKey && !aEvent.shiftKey && !aEvent.altKey) {
-		if (aEvent.target.nodeName=="treechildren") {
-			switch (aEvent.type) {
-				case "click":
-					if (gTextBox && !(gParams.GetInt(1) & 256)) onTextboxInput(gSessionTreeData[gSessionTree.currentIndex].name);
-					break;
-				case "dblclick":
-					if (!(gParams.GetInt(1) & 16)) 
-						gAcceptButton.doCommand();
-					break;
+			// Set "accept" value to false for modal windows
+			window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock).SetInt(0, 0);
+			
+			// Remove windowtype from modal windows to prevent them from being re-used
+			if (!gSessionManager.sessionPromptData.callbackData) {
+				this._("sessionmanagerPrompt").removeAttribute("windowtype");
 			}
-		}
-		else if ((aEvent.type == "click") && (aEvent.target.nodeName == "treecol")) {
-			var types = { name: 0, group: 1, win_count: 2, tab_count: 3 };
-			var which = types[aEvent.target.id];
 			
-			// If not already sorted, sortedBy will be 0.  Otherwise it is which + 1 if sorted or -(which + 1) if inversely sorted
-			var flag = (Math.abs(sortedBy) == (which + 1)) ? (-sortedBy / Math.abs(sortedBy)) : 1
+			this._("mac_title").hidden = !/mac/i.test(navigator.platform);
 			
-			// Save selected items so they can be restored
-			var selectedFileNames = {};
-			var start = new Object();
-			var end = new Object();
-			var numRanges = gSessionTree.view.selection.getRangeCount();
+			this.gAcceptButton = document.documentElement.getButton("accept");
+			this.gExtraButton = document.documentElement.getButton("extra1");
 
-			for (var t = 0; t < numRanges; t++) {
-				gSessionTree.view.selection.getRangeAt(t,start,end);
-				for (var v = start.value; v <= end.value; v++){
-					selectedFileNames[gSessionTreeData[v].fileName] = true;
+			// Store XUL references
+			this.gTextBox = this._("text_box");
+			this.ggMenuList = this._("group_menu_list");
+			this.gTabTree = this._("tabTree");
+			this.gTabTreeBox = this._("tabTreeBox");
+			this.gTreeSplitter = this._("tree_splitter");
+			this.gCtrlClickNote = this._("ctrl_click_note");
+			this.gSessionTree = this._("session_tree");
+			
+			// Store "Constants"
+			this.gBackupGroupName = gSessionManager._string("backup_sessions");
+
+			// Disable saving in privacy mode
+			this.checkPrivateBrowsingMode(gSessionManager.isPrivateBrowserMode(), gSessionManager.sessionPromptData.autoSaveable, true);
+			
+			// Show selection menu if window is not modal
+			if (gSessionManager.sessionPromptData.callbackData) this._("menuBox").hidden = false;
+			
+			// Display the window
+			this.drawWindow();
+
+			// need to remove "rows" attribute otherwise session list jumps around when selecting.  Still need it to 
+			// display 5 rows by default and to set minimum height persistence to prevent height from shrinking to 0.
+			if (this.gSessionTree.hasAttribute("height"))
+			{
+				this.gSessionTree.height = this.gSessionTree.getAttribute("height");
+			}
+			else
+			{
+				this.persist(this.gSessionTree, "minheight", this.gSessionTree.treeBoxObject.height);
+			}
+			this.gSessionTree.removeAttribute("rows");
+			
+			// This is never true when running under windows
+			if (!window.opener)
+			{
+				document.title += " - " + document.getElementById("bundle_brand").getString("brandFullName");
+				document.documentElement.removeAttribute("screenX");
+				document.documentElement.removeAttribute("screenY");
+			}
+			
+			window.sizeToContent();
+			// Adjust window so it's not offscreen
+			this.adjustWindowSizeAndPosition();
+			
+			// watch for resize to prevent user from shrinking window so small it hides dialog buttons.
+			window.onresize = gSessionManagerSessionPrompt.resize;
+			
+			this.gFinishedLoading = true;
+		},
+
+		onUnload_proxy: function(aEvent) {
+			this.removeEventListener("unload", gSessionManagerSessionPrompt.onUnload_proxy, false);
+			gSessionManagerSessionPrompt.onUnload(aEvent);
+		},
+		
+		onUnload: function(aEvent) {
+			this.gSessionTree.removeEventListener("select", gSessionManagerSessionPrompt.onSessionTreeSelect_proxy, false);
+			OBSERVER_SERVICE.removeObserver(gSessionManagerSessionPrompt, "private-browsing");
+			
+			// Clear any currently stored functions
+			if (this.gParams) {
+				delete this.gParams.getSessionsOverride;
+			}
+			
+			if (window.opener)
+			{
+				this.persist(document.documentElement, "screenX", window.screenX);
+				this.persist(document.documentElement, "screenY", window.screenY);
+			}
+			
+			this.persistTreeHeights();
+			
+			// The following line keeps the window width from increasing when sizeToContent is called.
+			this._("sessionmanagerPrompt").width = window.innerWidth - 1;
+			
+			// Handle case if user closes window without click Okay.
+			gSessionManager.sessionPromptReturnData = gSessionManager.sessionPromptReturnData || {};
+			gSessionManager.sessionPromptReturnData.ignore = this._("checkbox_ignore").checked;
+		},
+
+		// Draw the window using parameters from gSessionManager.sessionPromptData
+		drawWindow: function() {
+			
+			// Clear any currently stored functions
+			if (this.gParams) {
+				delete this.gParams.getSessionsOverride;
+			}
+			
+			// store input parameters and 
+			this.gParams = {
+				// strings
+				acceptExistingLabel: gSessionManager.sessionPromptData.acceptExistingLabel,
+				acceptLabel: gSessionManager.sessionPromptData.acceptLabel,
+				callbackData: gSessionManager.sessionPromptData.callbackData,
+				crashCount: gSessionManager.sessionPromptData.crashCount,
+				defaultSessionName: gSessionManager.sessionPromptData.defaultSessionName,
+				filename: gSessionManager.sessionPromptData.filename,
+				sessionLabel: gSessionManager.sessionPromptData.sessionLabel,
+				textLabel: gSessionManager.sessionPromptData.textLabel,
+				// booleans
+				addCurrentSession: gSessionManager.sessionPromptData.addCurrentSession,
+				allowNamedReplace: gSessionManager.sessionPromptData.allowNamedReplace,
+				append_replace: gSessionManager.sessionPromptData.append_replace,
+				autoSaveable: gSessionManager.sessionPromptData.autoSaveable,
+				grouping: gSessionManager.sessionPromptData.grouping,
+				ignorable: gSessionManager.sessionPromptData.ignorable,
+				multiSelect: gSessionManager.sessionPromptData.multiSelect,
+				preselect: gSessionManager.sessionPromptData.preselect,
+				remove: gSessionManager.sessionPromptData.remove,
+				selectAll: gSessionManager.sessionPromptData.selectAll,
+				startupPrompt: gSessionManager.sessionPromptData.startupPrompt,
+				// override function
+				getSessionsOverride: gSessionManager.sessionPromptData.getSessionsOverride
+			};
+			
+			// Update selection menu if not modal
+			if (this.gParams.callbackData) {
+				let label = null;
+				switch(this.gParams.callbackData.type) {
+					case "save":
+						label = this.gParams.callbackData.oneWindow ? this._("saveWin").label : this._("save").label;
+						break;
+					case "load": 
+						label = this._("load").label;
+						break;
+					case "rename":
+						label = this._("rename").label;
+						break;
+					case "group":
+						label = this._("group").label;
+						break;
+					case "delete":
+						label = this._("remove").label;
+						break;
+				}
+				// don't update window if same command used
+				if (this._("actionButton").label == label) return;
+				this._("actionButton").label = label;
+			}
+			
+			// Clear any passed functions and parameters from global variable to prevent leaking
+			delete gSessionManager.sessionPromptData.getSessionsOverride;
+			gSessionManager.sessionPromptData = null;
+
+			this.gAcceptButton.label = this.gParams.acceptLabel || this.gAcceptButton.label;
+			this.gSessionTree.selType = (this.gParams.multiSelect)?"multiple":"single";
+
+			var currentSessionTreeHeight = this.gSessionTree.treeBoxObject.height;
+			
+			// if not initial window load
+			if (this.gFinishedLoading) {
+				// hide text boxes
+				this.gTextBoxVisible = !(this._("group-text-container").hidden = true);
+				this.ggMenuListVisible = !(this._("session-text-container").hidden = true);
+
+				// hide tab tree if not saving
+				if (!this.gParams.autoSaveable) this.gTabTreeBox.hidden = this.gTreeSplitter.hidden = true;
+				this.gSessionTree.removeEventListener("select", gSessionManagerSessionPrompt.onSessionTreeSelect_proxy, false);
+				
+				// Save current session and tab tree heights
+				this.persistTreeHeights();
+				
+				// Hide and disable extra button
+				this.gExtraButton.disabled = this.gExtraButton.hidden = true;
+			}
+			
+			this.gReDrawWindow = true;
+			this.updateWindow();
+			this.gReDrawWindow = false;
+
+			// Display Tab Tree if saving session otherwise adjust height if not initial load
+			if (this.gParams.autoSaveable && this.gParams.callbackData) {
+				this.displayTabTree();
+			}
+			else if (this.gFinishedLoading) {
+				// Fix session tree height to prevent it from changing
+				this.adjustSessionTreeHeight(currentSessionTreeHeight);
+			}
+		},
+
+		// Update window without re-reading parameters
+		updateWindow: function() {
+			// If already loaded
+			if (this.gFinishedLoading) {
+				
+				// Reset variables
+				this.gSessionNames = {};
+				this.gGroupNames = [];
+				this.gBannedNames = [];
+				this.gBackupNames = [];
+				this.gExistingName = -1;
+				this.gInvalidTime = false;
+				
+				// Remove old descriptions
+				this.removeDescriptions();
+
+				// unselect any selected session
+				this.gSessionTree.view.selection.clearSelection();
+					
+				// clean up text boxes
+				this.ggMenuList.removeAllItems();
+				this.ggMenuList.value = "";
+				this.gTextBox.value = "";
+				this.onTextboxInput();
+				
+				// make sure session tree is not disabled
+				this.gSessionTree.disabled = false;
+				
+				if (!this.gReDrawWindow) {
+					// remove any preentered filename or preselected name
+					this.gParams.filename = "";
+					this.gParams.defaultSessionName = "";
 				}
 			}
+
+			this.setDescription(this._("session_label"), this.gParams.sessionLabel);
 			
-			// Clear all selected items
-			gSessionTree.view.selection.clearSelection();
-			
-			// If inversely sorted and user clicks header again, go back to original order
-			if (flag && sortedBy < 0) {
-				flag = 0;
-				gSessionTreeData = gOriginalSessionTreeData.slice(0);
+			var sessions = null;
+			if (this.gParams.getSessionsOverride) {
+				if (typeof this.gParams.getSessionsOverride == "function") {
+					try {
+						sessions = this.gParams.getSessionsOverride();
+					} catch (ex) { 
+						log("Override function error. " + ex, "ERROR", true);
+					}
+				}
+				else {
+					log("Passed override function parameter is not a function.", "ERROR", true);
+				}
+				if (!sessions || !this._isValidSessionList(sessions)) {
+					window.close();
+					return;
+				}
 			}
 			else {
-				// Sort depending on which header is clicked
-				switch (which) {
-					case 0:
-						gSessionTreeData = gSessionTreeData.sort(function(a, b) { 
-							return flag * (a.name.toLowerCase().localeCompare(b.name.toLowerCase())); 
-						});
-						break;
-					case 1:
-						gSessionTreeData = gSessionTreeData.sort(function(a, b) { 
-							return flag * (a.group.toLowerCase().localeCompare(b.group.toLowerCase())); 
-						});
-						break;
-					case 2:
-						gSessionTreeData = gSessionTreeData.sort(function(a, b) { 
-							return flag * (parseInt(a.windows) - parseInt(b.windows)); 
-						});
-						break;
-					case 3:
-						gSessionTreeData = gSessionTreeData.sort(function(a, b) { 
-							return flag * (parseInt(a.tabs) - parseInt(b.tabs)); 
-						});
-						break;
-				}
+				sessions = gSessionManager.getSessions();
 			}
+
+			// Disable non-saving menuitems if no sessions
+			gSessionManager.setDisabled(this._("load"), !sessions.length);
+			gSessionManager.setDisabled(this._("rename"), !sessions.length);
+			gSessionManager.setDisabled(this._("remove"), !sessions.length);
+			gSessionManager.setDisabled(this._("group"), !sessions.length);
 			
-			// Recreate Session List index and restore selected items
-			for (var i=0; i<gSessionTreeData.length; i++) {
-				var trimName = gSessionTreeData[i].name.trim().toLowerCase();
-				gSessionNames[trimName] = i;
-				
-				if (selectedFileNames[gSessionTreeData[i].fileName]) {
-					gSessionTree.view.selection.toggleSelect(i);
-				}
-			}
-			sortedBy = flag * (which + 1);
-
-			// update header arrorws			
-			for (var i=0; i < aEvent.target.parentNode.childNodes.length; i++) {
-				var sortText = flag ? ((flag>0) ? "ascending" : "descending") : "natural";
-				aEvent.target.parentNode.childNodes[i].setAttribute("sortDirection", ((aEvent.target.parentNode.childNodes[i] == aEvent.target) ? sortText : "natural"))
-			}
-			
-			// Redraw the tree - Needed for OS X
-			gSessionTree.treeBoxObject.invalidate();
-		}
-	}
-}
-
-function onSessionTreeKeyPress(aEvent)
-{
-	if (gTextBox && (aEvent.keyCode == aEvent.DOM_VK_RETURN) && (gSessionTree.view.selection.count > 0)) {
-		onTextboxInput(gSessionTreeData[gSessionTree.currentIndex].name);
-		aEvent.preventDefault();
-	}
-}
-
-function onSessionTreeSelect()
-{
-	// If no session name or group name text box, disable the accept button if nothing selected.
-	// Otherwise isAcceptable when changing groups or onTextboxInput otherwise.
-	if (!gTextBox && !ggMenuList)
-	{
-		gAcceptButton.disabled = gSessionTree.view.selection.count == 0;
-		
-		// save current session tree height before doing any unhiding (subtract one since one gets added for some reason)
-		var currentSessionTreeHeight = gSessionTree.treeBoxObject.height - 1;
-		
-		// hide tab tree and splitter if more or less than one item is selected or muliple selection is enabled, but not deleting (used for converting sessions)
-		// hide the click note if append/replace buttons are displayed (manual load)
-		var hideTabTree = (gSessionTree.view.selection.count != 1) || ((gParams.GetInt(1) & 2) && !(gParams.GetInt(1) & 16));
-		gTreeSplitter.hidden = gTabTreeBox.hidden = hideTabTree;
-		gCtrlClickNote.hidden = hideTabTree || !(gParams.GetInt(1) & 64);
-		
-		// if displaying the tab tree, initialize it and then, if the tab tree was hidden, 
-		// resize the window based on the current persisted height of the tab tree and the
-		// current session tree height.  
-		if (!hideTabTree) {
-			// if deleting, change column label
-			if (gParams.GetInt(1) & 16) {
-				_("restore").setAttribute("label", gSessionManager._string("remove_session_ok"));
-			}
-			initTreeView(gSessionTreeData[gSessionTree.currentIndex].fileName, (gParams.GetInt(1) & 16), (gParams.GetInt(2) & 2));
-			if (!gAlreadyResized && gFinishedLoading) {
-				gAlreadyResized = true;
-				if (gTabTree.hasAttribute("height"))
-				{
-					gTabTree.height = gTabTree.getAttribute("height");
-				}
-				gSessionTree.height = currentSessionTreeHeight;
-				
-				// The following line keeps the window width from increasing when sizeToContent is called.
-				_("sessionmanagerPrompt").width = window.innerWidth - 1;
-				window.sizeToContent();
-				
-				log("onSessionTreeSelect: window.screenY = " + window.screenY + ", window.screen.availHeight = " + window.screen.availHeight + ", window.outerHeight = " + window.outerHeight, "DATA");
-
-				// Make sure window height isn't larger than screen height
-				if (window.screen.availHeight < window.outerHeight) {
-					window.outerHeight = window.screen.availHeight;
-				}
-				// Make sure the bottom of the window is visible by moving the window up if necessary
-				if (window.screenY + window.outerHeight > window.screen.availHeight) {
-					window.screenY = window.screen.availHeight - window.outerHeight;
-				}
-			}
-		}
-	}
-	else
-	{
-		if (gTextBox) onTextboxInput();
-		else isAcceptable();
-	}
-}
-
-function onTextboxInput(aNewValue)
-{
-	if (aNewValue)
-	{
-		var match = /   \([0-9]+\/[0-9]+\)$/m.exec(aNewValue);
-		if (match)
-		{
-			aNewValue = aNewValue.substring(0,match.index);
-		}
-		gTextBox.value = aNewValue;
-		setTimeout(function() { gTextBox.select(); gTextBox.focus(); }, 0);
-	}
-	
-	var input = gTextBox.value.trim().toLowerCase();
-	var oldWeight = !!gAcceptButton.style.fontWeight;
-	
-	gExistingName = (gSessionNames[input] != undefined) ? gSessionNames[input] : -1;
-	var newWeight = !!((gExistingName >= 0) || ((gParams.GetInt(1) & 256) && gSessionTree.view.selection.count > 0));
-	
-	if (!_("checkbox_autosave").hidden) {
-		var currentChecked = _("checkbox_autosave").checked;
-		if (gExistingName >= 0) {
-			_("checkbox_autosave").checked = gSessionTreeData[gExistingName].autosave != "false";
-			_("autosave_time").value = gSessionTreeData[gExistingName].autosave_time || "";
-		}
-		else {
-			_("checkbox_autosave").checked = false;
-			_("autosave_time").value = "";
-		}
-		if (currentChecked != _("checkbox_autosave").checked) _save_every_update();
-	}
-	
-	if (!gNeedSelection && oldWeight != newWeight)
-	{
-		gAcceptButton.label = (newWeight && gParams.GetString(5))?gParams.GetString(5):gParams.GetString(2);
-		gAcceptButton.style.fontWeight = (newWeight)?"bold":"";
-		// Show append button if replace button is shown.
-		gExtraButton.hidden = gAcceptButton.label != gParams.GetString(5)
-	}
-	gExtraButton.disabled = gExtraButton.hidden || _("checkbox_autosave").checked;
-
-	// Highlight matching item when accept label changes to replace and copy in group value (only when saving and not replacing name)
-	if (newWeight && gParams.GetString(5) && !(gParams.GetInt(1) & 256)) {
-		gSessionTree.view.selection.select(gExistingName);
-		if (ggMenuList) ggMenuList.value = gSessionTreeData[gExistingName].group;
-	}
-		
-	isAcceptable();
-}
-
-function isAcceptable() 
-{
-	var badSessionName = false;
-	var badGroupName = false;
-	
-	if (ggMenuList) {
-		var groupName = ggMenuList.value.trim();
-		badGroupName = (groupName == gBackupGroupName)
-		ggMenuList.inputField.setAttribute("badname", badGroupName);
-	}
-	
-	if (gTextBox) {
-		var input = gTextBox.value.trim().toLowerCase();
-		gTextBox.setAttribute("badname", gBackupNames[input]);
-		badSessionName = !input || gBackupNames[input] || gBannedNames[input];
-	}
-	
-	gAcceptButton.disabled = gInvalidTime || badSessionName || badGroupName || (gNeedSelection && (gSessionTree.view.selection.count == 0 || (gExistingName >= 0)));
-}
-
-function onAcceptDialog(aParam)
-{
-	// Put up warning prompt if deleting
-	if (gParams.GetInt(1) & 16) {
-		var dontPrompt = { value: false };
-		if (gSessionManager.getPref("no_delete_prompt") || PROMPT_SERVICE.confirmEx(window, gSessionManager.mTitle, gSessionManager._string("delete_confirm"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0) {
-			if (dontPrompt.value) {
-				gSessionManager.setPref("no_delete_prompt", true);
-			}
-		}
-		else return false;
-	}
-
-	// Only set to true if user clicked extra1 button
-	gAppendToSessionFlag = aParam;
-
-	gParams.SetInt(0, 1);
-	if (gNeedSelection || ((gParams.GetInt(1) & 256) && gSessionTree.view.selection.count > 0))
-	{
-		var selectedFileNames = [];
-		var start = new Object();
-		var end = new Object();
-		var numRanges = gSessionTree.view.selection.getRangeCount();
-
-		for (var t = 0; t < numRanges; t++) {
-			gSessionTree.view.selection.getRangeAt(t,start,end);
-			for (var v = start.value; v <= end.value; v++){
-				selectedFileNames.push(gSessionTreeData[v].fileName);
-			}
-		}
-		gParams.SetString(3, selectedFileNames.join("\n"));
-	}
-	else if (gExistingName >= 0)
-	{
-		var dontPrompt = { value: false };
-		if (gAppendToSessionFlag || gSessionManager.getPref("no_overwrite_prompt") || 
-		    PROMPT_SERVICE.confirmEx(null, gSessionManager.mTitle, gSessionManager._string("overwrite_prompt"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0)
-		{
-			gParams.SetString(3, gSessionTreeData[gExistingName].fileName);
-			if (dontPrompt.value)
+			if (this.gParams.addCurrentSession) // add a "virtual" current session
 			{
-				gSessionManager.setPref("no_overwrite_prompt", true);
+				sessions.unshift({ name: gSessionManager._string("current_session"), fileName: "*" });
 			}
-		}
-		else {
-			gParams.SetInt(0, 0);
-			return false;
-		}
+			
+			// Do not allow overwriting of open window or browser sessions (clone it so we don't overwrite the global variable)
+			for (let i in gSessionManager.mActiveWindowSessions) {
+				this.gBannedNames[i] = gSessionManager.mActiveWindowSessions[i];
+			}
+			var currentSession = gPreferenceManager.get("_autosave_values", "").split("\n")[0];
+			if (currentSession) this.gBannedNames[currentSession.trim().toLowerCase()] = true;
+			
+			// hide/show the "Don't show [...] again" checkbox
+			this._("checkbox_ignore").hidden = !(this.gParams.ignorable);
+
+			// hide/show the Autosave checkboxes
+			this._("checkbox_autosave").hidden = !(this.gParams.autoSaveable);
+			this._("save_every").hidden = this._("checkbox_autosave").hidden || !this._("checkbox_autosave").checked;
+			
+			// hide/show the append/replace radio buttons
+			this._("radio_append_replace").hidden = !(this.gParams.append_replace);
+			this._("radio_append_replace").selectedIndex = gPreferenceManager.get("overwrite", false) ? 1 : (gPreferenceManager.get("append_by_default", false) ? 2 : 0);
+			if (window.opener && (typeof(window.opener.gSingleWindowMode) != "undefined") && window.opener.gSingleWindowMode) {
+				if (!this._("radio_append_replace").selectedIndex) this._("radio_append_replace").selectedIndex = 2;
+				this._("radio_append").hidden = true;
+			}
+
+			this.gBackupNames[gSessionManager._string("backup_session").trim().toLowerCase()] = true;
+			this.gBackupNames[gSessionManager._string("autosave_session").trim().toLowerCase()] = true;
+			
+			var saving = (this.gParams.autoSaveable);
+			var grouping = (this.gParams.grouping);
+			var loading = (this.gParams.append_replace);  // not true for crash or start session prompt
+			var preselect = (this.gParams.preselect);
+			var groupCount = 0;
+			var selected;
+			this.gSessionTreeData = [];
+			sessions.forEach(function(aSession) {
+				var trimName = aSession.name.trim().toLowerCase();
+				// ban backup session names
+				if (aSession.backup) this.gBackupNames[trimName] = true;
+				// Don't display loaded sessions in list for load or save or backup items in list for save or grouping
+				if (!((aSession.backup && (saving || grouping)) || ((this.gBannedNames[trimName]) && (saving || loading || (this.gParams.addCurrentSession)))))
+				{
+					// get window and tab counts and group name for crashed session
+					if (aSession.fileName == "*") {
+						aSession.group = this.gBackupGroupName;
+						var counts = this.gParams.crashCount.split(",");
+						aSession.windows = counts[0];
+						aSession.tabs = counts[1];
+					}
+					
+					// Break out Autosave variables
+					if (aSession.autosave) {
+						var autosave = aSession.autosave.split("/");
+						aSession.autosave = autosave[0];
+						aSession.autosave_time = autosave[1];
+					}
+					
+					// Mark if session loaded
+					aSession.loaded = this.gBannedNames[trimName] || null;
+					
+					// Flag latest session
+					if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(this.gParams.addCurrentSession)) || (aSession.fileName == "*")) {
+						aSession.latest = true;
+					}
+					
+					// Select previous session if requested to do so and no session name passed
+					if (preselect && aSession.backup && !this.gParams.filename && (sessions.latestBackUpTime == aSession.timestamp)) {
+						selected = this.gSessionTreeData.length;
+					}
+
+					// select passed in item (if any)
+					if (aSession.fileName == this.gParams.filename) selected = this.gSessionTreeData.length;
+
+					// Add session to name list
+					this.gSessionNames[trimName] = this.gSessionTreeData.length;
+					
+					// Push to Tree database and backup
+					this.gSessionTreeData.push(aSession);
+					
+					// Build group menu list
+					if (aSession.group && !aSession.backup) {
+						// Don't treat special chars in group as regular expression characters
+						let groupRegExp = aSession.group.replace(/([\(\)\[\]\^\$\*\+\|\.\\\/])/g,"\\$1");
+						let regExp = new RegExp("^" + groupRegExp + "|," + groupRegExp + "$|," + groupRegExp + ",");
+						if (!regExp.test(this.gGroupNames.toString())) {
+							this.gGroupNames[groupCount++] = aSession.group.trim();
+						}
+					}
+				}
+			}, this);
+			
+			// Make a copy of array
+			this.gOriginalSessionTreeData = this.gSessionTreeData.slice(0);
+			
+			// Display Tree
+			this.gSessionTree.view = this.sessionTreeView;
+			
+			// select passed in item (if any)
+			if (typeof(selected) != "undefined") this.gSessionTree.view.selection.select(selected);
+			
+			if ((this.gParams.selectAll)) this.gSessionTree.view.selection.selectAll()
+
+			// If there is a text box label, enable text boxes
+			if (this.gParams.textLabel)
+			{
+				this._("text_container").hidden = false;
+				this.setDescription(this._("text_label"), this.gParams.textLabel);
+				
+				// If renaming and name already entered, disable the session selection list
+				this.gSessionTree.disabled = this.gParams.filename && !this.gParams.acceptExistingLabel;
+
+				// group text input is enabled when saving or group changing
+				if ((this.gParams.grouping) || this.gParams.acceptExistingLabel) 
+				{
+					this.ggMenuListVisible = !(this._("group-text-container").hidden = false);
+
+					// Pre-populate Group Menu
+					this.gGroupNames.sort();
+					for (var i in this.gGroupNames) {
+						this.ggMenuList.appendItem(this.gGroupNames[i]);
+					}
+				}
+						
+				// session text input is enabled when not group changing (i.e., when saving or renaming)
+				if (!(this.gParams.grouping)) 
+				{
+					this.gTextBoxVisible = !(this._("session-text-container").hidden = false);
+				
+					// Pre-populate the text box with default session name if saving and the name is not banned or already existing.
+					// Otherwise disable accept button
+					var trimname = this.gParams.defaultSessionName.trim().toLowerCase();
+					if (this.gParams.acceptExistingLabel && !this.gBannedNames[trimname] && ((this.gSessionNames[trimname] == undefined) || (this.gParams.allowNamedReplace)))
+					{
+						this.onTextboxInput(this.gParams.defaultSessionName);
+					}
+					else this.gAcceptButton.disabled = true;
+				}
+			}
+			
+			// Force user to make a selection if no text or group box or not saving (i.e., deleting or renaming)
+			if ((this.gNeedSelection = !this.gTextBoxVisible || !this.ggMenuListVisible || !this.gParams.acceptExistingLabel) || (this.gParams.allowNamedReplace))
+			{
+				this.gSessionTree.addEventListener("select",gSessionManagerSessionPrompt.onSessionTreeSelect_proxy, false);
+				this.onSessionTreeSelect();
+			}
+			else this.isAcceptable();
+		},
+		
+		onSessionTreeClick: function(aEvent)
+		{
+			if ((aEvent.button == 0) && !aEvent.metaKey && !aEvent.ctrlKey && !aEvent.shiftKey && !aEvent.altKey) {
+				if (aEvent.target.nodeName=="treechildren") {
+					switch (aEvent.type) {
+						case "click":
+							if (this.gTextBoxVisible && !(this.gParams.allowNamedReplace)) this.onTextboxInput(this.gSessionTreeData[this.gSessionTree.currentIndex].name);
+							break;
+						case "dblclick":
+							if (!(this.gParams.remove)) 
+								this.gAcceptButton.doCommand();
+							break;
+					}
+				}
+				else if ((aEvent.type == "click") && (aEvent.target.nodeName == "treecol")) {
+					var types = { name: 0, group: 1, win_count: 2, tab_count: 3 };
+					var which = types[aEvent.target.id];
+					
+					// If not already sorted, this.sortedBy will be 0.  Otherwise it is which + 1 if sorted or -(which + 1) if inversely sorted
+					var flag = (Math.abs(this.sortedBy) == (which + 1)) ? (-this.sortedBy / Math.abs(this.sortedBy)) : 1
+					
+					// Save selected items so they can be restored
+					var selectedFileNames = {};
+					var start = new Object();
+					var end = new Object();
+					var numRanges = this.gSessionTree.view.selection.getRangeCount();
+
+					for (var t = 0; t < numRanges; t++) {
+						this.gSessionTree.view.selection.getRangeAt(t,start,end);
+						for (var v = start.value; v <= end.value; v++){
+							selectedFileNames[this.gSessionTreeData[v].fileName] = true;
+						}
+					}
+					
+					// Clear all selected items
+					this.gSessionTree.view.selection.clearSelection();
+					
+					// If inversely sorted and user clicks header again, go back to original order
+					if (flag && this.sortedBy < 0) {
+						flag = 0;
+						this.gSessionTreeData = this.gOriginalSessionTreeData.slice(0);
+					}
+					else {
+						// Sort depending on which header is clicked
+						switch (which) {
+							case 0:
+								this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
+									return flag * (a.name.toLowerCase().localeCompare(b.name.toLowerCase())); 
+								});
+								break;
+							case 1:
+								this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
+									return flag * (a.group.toLowerCase().localeCompare(b.group.toLowerCase())); 
+								});
+								break;
+							case 2:
+								this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
+									return flag * (parseInt(a.windows) - parseInt(b.windows)); 
+								});
+								break;
+							case 3:
+								this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
+									return flag * (parseInt(a.tabs) - parseInt(b.tabs)); 
+								});
+								break;
+						}
+					}
+					
+					// Recreate Session List index and restore selected items
+					for (var i=0; i<this.gSessionTreeData.length; i++) {
+						var trimName = this.gSessionTreeData[i].name.trim().toLowerCase();
+						this.gSessionNames[trimName] = i;
+						
+						if (selectedFileNames[this.gSessionTreeData[i].fileName]) {
+							this.gSessionTree.view.selection.toggleSelect(i);
+						}
+					}
+					this.sortedBy = flag * (which + 1);
+
+					// update header arrorws			
+					for (var i=0; i < aEvent.target.parentNode.childNodes.length; i++) {
+						var sortText = flag ? ((flag>0) ? "ascending" : "descending") : "natural";
+						aEvent.target.parentNode.childNodes[i].setAttribute("sortDirection", ((aEvent.target.parentNode.childNodes[i] == aEvent.target) ? sortText : "natural"))
+					}
+					
+					// Redraw the tree - Needed for OS X
+					this.gSessionTree.treeBoxObject.invalidate();
+				}
+			}
+		},
+
+		onSessionTreeKeyPress: function(aEvent)
+		{
+			if (this.gTextBoxVisible && (aEvent.keyCode == aEvent.DOM_VK_RETURN) && (this.gSessionTree.view.selection.count > 0)) {
+				this.onTextboxInput(this.gSessionTreeData[this.gSessionTree.currentIndex].name);
+				aEvent.preventDefault();
+			}
+		},
+		
+		onSessionTreeSelect_proxy: function(aEvent)
+		{
+			gSessionManagerSessionPrompt.onSessionTreeSelect(aEvent)
+		},
+
+		displayTabTree: function()
+		{
+				// save current session tree height before doing any unhiding (subtract one if called initiall since height is off by one in that case)
+				var currentSessionTreeHeight = this.gSessionTree.treeBoxObject.height - (!this.gFinishedLoading ? 0 : 1);
+				var tabTreeWasHidden = this.gTabTreeBox.hidden;
+				
+				// hide tab tree and splitter if more or less than one item is selected or muliple selection is enabled, but not deleting (used for converting sessions)
+				// hide the click note if append/replace buttons are displayed (manual load)
+				var hideTabTree = !this.gParams.autoSaveable && !!((this.gSessionTree.view.selection.count != 1) || ((this.gParams.multiSelect) && !(this.gParams.remove)));
+				this.gTreeSplitter.hidden = this.gTabTreeBox.hidden = hideTabTree;
+				this.gCtrlClickNote.hidden = hideTabTree || !(this.gParams.append_replace) || this.gParams.autoSaveable;
+				
+				// if displaying the tab tree, initialize it and then, if the tab tree was hidden, 
+				// resize the window based on the current persisted height of the tab tree and the
+				// current session tree height.  
+				if (!hideTabTree) {
+					// if deleting, change column label
+					if (this.gParams.remove) {
+						this._("restore").setAttribute("label", gSessionManager._string("remove_session_ok"));
+					}
+					else if (this.gParams.autoSaveable) {
+						this._("restore").setAttribute("label", this._("save_label").getAttribute("value"));
+					}
+					gSessionManagerSessionBrowser.initTreeView(this.gParams.autoSaveable ? "" : this.gSessionTreeData[this.gSessionTree.currentIndex].fileName, this.gParams.remove, this.gParams.startupPrompt, this.gParams.autoSaveable);
+				}
+				
+				// If tab tree was displayed or hidden, adjust session tree height
+				if (this.gFinishedLoading && tabTreeWasHidden != hideTabTree) {
+					if (!hideTabTree && this.gTabTree.hasAttribute("height"))
+					{
+						this.gTabTree.height = this.gTabTree.getAttribute("height");
+					}
+					
+					// Fix session tree height to prevent it from changing
+					this.adjustSessionTreeHeight(currentSessionTreeHeight);
+				}
+		},
+		
+		onSessionTreeSelect: function(aEvent)
+		{
+			// If no session name or group name text box, disable the accept button if nothing selected.
+			// Otherwise isAcceptable when changing groups or onTextboxInput otherwise.
+			if (!this.gTextBoxVisible && !this.ggMenuListVisible)
+			{
+				this.gAcceptButton.disabled = this.gSessionTree.view.selection.count == 0;
+				
+				// Display Tab Tree
+				this.displayTabTree();
+			}
+			else
+			{
+				if (this.gTextBoxVisible) this.onTextboxInput();
+				else this.isAcceptable();
+			}
+		},
+
+		onTextboxInput: function(aNewValue)
+		{
+			if (aNewValue)
+			{
+				var match = /   \([0-9]+\/[0-9]+\)$/m.exec(aNewValue);
+				if (match)
+				{
+					aNewValue = aNewValue.substring(0,match.index);
+				}
+				this.gTextBox.value = aNewValue;
+				setTimeout(function() { gSessionManagerSessionPrompt.gTextBox.select(); gSessionManagerSessionPrompt.gTextBox.focus(); }, 0);
+			}
+			
+			var input = this.gTextBox.value.trim().toLowerCase();
+			var oldWeight = !!this.gAcceptButton.style.fontWeight;
+			
+			this.gExistingName = (this.gSessionNames[input] != undefined) ? this.gSessionNames[input] : -1;
+			var newWeight = !!((this.gExistingName >= 0) || ((this.gParams.allowNamedReplace) && this.gSessionTree.view.selection.count > 0));
+			
+			if (!this._("checkbox_autosave").hidden) {
+				var currentChecked = this._("checkbox_autosave").checked;
+				if (this.gExistingName >= 0) {
+					this._("checkbox_autosave").checked = this.gSessionTreeData[this.gExistingName].autosave != "false";
+					this._("autosave_time").value = this.gSessionTreeData[this.gExistingName].autosave_time || "";
+				}
+				else {
+					this._("checkbox_autosave").checked = false;
+					this._("autosave_time").value = "";
+				}
+				if (currentChecked != this._("checkbox_autosave").checked) this._save_every_update();
+			}
+			
+			if (!this.gNeedSelection && oldWeight != newWeight)
+			{
+				this.gAcceptButton.label = (newWeight && this.gParams.acceptExistingLabel)?this.gParams.acceptExistingLabel:this.gParams.acceptLabel;
+				this.gAcceptButton.style.fontWeight = (newWeight)?"bold":"";
+				// Show append button if replace button is shown.
+				this.gExtraButton.hidden = this.gAcceptButton.label != this.gParams.acceptExistingLabel
+			}
+			this.gExtraButton.disabled = this.gExtraButton.hidden || this._("checkbox_autosave").checked;
+
+			// Highlight matching item when accept label changes to replace and copy in group value (only when saving and not replacing name)
+			if (newWeight && this.gParams.acceptExistingLabel && !(this.gParams.allowNamedReplace)) {
+				this.gSessionTree.view.selection.select(this.gExistingName);
+				if (this.ggMenuListVisible) this.ggMenuList.value = this.gSessionTreeData[this.gExistingName].group;
+			}
+				
+			this.isAcceptable();
+		},
+
+		isAcceptable: function() 
+		{
+			var badSessionName = false;
+			var badGroupName = false;
+			
+			if (gSessionManagerSessionPrompt.ggMenuListVisible) {
+				var groupName = gSessionManagerSessionPrompt.ggMenuList.value.trim();
+				badGroupName = (groupName == gSessionManagerSessionPrompt.gBackupGroupName)
+				gSessionManagerSessionPrompt.ggMenuList.inputField.setAttribute("badname", badGroupName);
+			}
+			
+			if (gSessionManagerSessionPrompt.gTextBoxVisible) {
+				var input = gSessionManagerSessionPrompt.gTextBox.value.trim().toLowerCase();
+				gSessionManagerSessionPrompt.gTextBox.setAttribute("badname", gSessionManagerSessionPrompt.gBackupNames[input]);
+				badSessionName = !input || gSessionManagerSessionPrompt.gBackupNames[input] || gSessionManagerSessionPrompt.gBannedNames[input];
+			}
+			
+			gSessionManagerSessionPrompt.gAcceptButton.disabled = gSessionManagerSessionPrompt.gExtraButton.disabled =
+				gSessionManagerSessionPrompt.gInvalidTime || badSessionName || badGroupName || (this.gParams.autoSaveable && gSessionManager.isPrivateBrowserMode()) ||
+				(this.gParams.autoSaveable && gSessionManagerSessionBrowser.gNoTabsChecked) ||
+				(gSessionManagerSessionPrompt.gNeedSelection && (gSessionManagerSessionPrompt.gSessionTree.view.selection.count == 0 || (gSessionManagerSessionPrompt.gExistingName >= 0)));
+		},
+
+		// aParam = true if user clicked extra1 button (Append), false otherwise
+		onAcceptDialog: function(aParam)
+		{
+			// Put up warning prompt if deleting
+			if (this.gParams.remove) {
+				var dontPrompt = { value: false };
+				if (gPreferenceManager.get("no_delete_prompt") || PROMPT_SERVICE.confirmEx(window, gSessionManager.mTitle, gSessionManager._string("delete_confirm"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0) {
+					if (dontPrompt.value) {
+						gPreferenceManager.set("no_delete_prompt", true);
+					}
+				}
+				else return false;
+			}
+
+			let filename;
+			if (this.gNeedSelection || ((this.gParams.allowNamedReplace) && this.gSessionTree.view.selection.count > 0))
+			{
+				var selectedFileNames = [];
+				var start = new Object();
+				var end = new Object();
+				var numRanges = this.gSessionTree.view.selection.getRangeCount();
+
+				for (var t = 0; t < numRanges; t++) {
+					this.gSessionTree.view.selection.getRangeAt(t,start,end);
+					for (var v = start.value; v <= end.value; v++){
+						selectedFileNames.push(this.gSessionTreeData[v].fileName);
+					}
+				}
+				filename = selectedFileNames.join("\n");
+			}
+			else if (this.gExistingName >= 0)
+			{
+				var dontPrompt = { value: false };
+				if (aParam || gPreferenceManager.get("no_overwrite_prompt") || 
+					PROMPT_SERVICE.confirmEx(null, gSessionManager.mTitle, gSessionManager._string("overwrite_prompt"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0)
+				{
+					filename = this.gSessionTreeData[this.gExistingName].fileName;
+					if (dontPrompt.value)
+					{
+						gPreferenceManager.set("no_overwrite_prompt", true);
+					}
+				}
+				else {
+					return false;
+				}
+			}
+			else
+			{
+				filename  = "";
+			}
+			
+			gSessionManager.sessionPromptReturnData = { 
+				append: ((this._("radio_append").selected && !this._("radio_append_replace").hidden) || aParam),
+				append_window: this._("radio_append_window").selected, 
+				autoSave: this._("checkbox_autosave").checked,
+				autoSaveTime: (this._("checkbox_autosave").checked ? parseInt(this._("autosave_time").value.trim()) : null),
+				filename: filename,
+				groupName: this._("group_menu_list").value.trim(),
+				ignore: this._("checkbox_ignore").checked, 
+				sessionState: gSessionManagerSessionBrowser.gAllTabsChecked ? null : gSessionManagerSessionBrowser.storeSession(),
+				sessionName: this._("text_box").value.trim()
+			};
+			
+			if (this.gParams.callbackData) {
+				try {
+					gSessionManager.sessionPromptCallBack(this.gParams.callbackData);
+				} catch(ex) {
+					logError(ex);
+				}
+				// clear out return data and preset to not accepting
+				gSessionManager.sessionPromptReturnData = null;
+				this.updateWindow();
+				return false;
+			}
+			else {
+				// If modal, set "accept" value
+				window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock).SetInt(0, 1);
+			}
+			
+			// Click extra button doesn't close window so do that here
+			if (aParam) window.close();
+		},
+		
+		onSelectMenu: function(aEvent) {
+			if (this._("actionButton").label == aEvent.explicitOriginalTarget.label) return;
+				
+			switch(aEvent.explicitOriginalTarget.id) {
+				case "save":
+					gSessionManager.save();
+					break;
+				case "saveWin":
+					gSessionManager.saveWindow();  // TODO figure this out later - currently menu item is hidden so it can't be selected
+					break;
+				case "load": 
+					gSessionManager.load();
+					break;
+				case "rename":
+					gSessionManager.rename();
+					break;
+				case "group":
+					gSessionManager.group();
+					break;
+				case "remove":
+					gSessionManager.remove();
+					break;
+			}
+		},
+
+		setDescription: function(aObj, aValue)
+		{
+			aValue.split("\n").forEach(function(aLine) {
+				let description = document.createElement("description");
+				description.className = "addedDescription";
+				aObj.appendChild(description).textContent = aLine;
+			});
+		},
+
+		removeDescriptions: function() {
+			let descriptions = document.getElementsByTagName("description");
+			let ignored = 0;
+			while (descriptions.length > ignored) {
+				if (descriptions[ignored].className == "addedDescription") {
+					descriptions[ignored].parentNode.removeChild(descriptions[ignored]);
+				}
+				else {
+					ignored++;
+				}
+			}
+		},
+
+		persistTreeHeights: function() {
+			// only persist tree heights is neither is collapsed to prevent "giant" trees
+			if (this.gTreeSplitter.getAttribute("state") != "collapsed") {
+				// persist session tree height if it has a height, subtract one if tab Tree is hidden because one is added if it is
+				if (this.gSessionTree && this.gSessionTree.treeBoxObject.height > 0) {
+					var tweak = this.gTabTreeBox.hidden ? 1 : 0;
+					this.persist(this.gSessionTree, "height", this.gSessionTree.treeBoxObject.height - tweak);
+					log("persistTreeHeights: persist session tree height = " + this.gSessionTree.treeBoxObject.height + ", tweak = " + tweak, "DATA");
+				}
+				// persist tab tree height if it has a height
+				if (this.gTabTree && this.gTabTree.treeBoxObject.height > 0) {
+					this.persist(this.gTabTree, "height", this.gTabTree.treeBoxObject.height);
+					log("persistTreeHeights: persist tab tree height = " + this.gTabTree.treeBoxObject.height, "DATA");
+				}
+			}
+			log("persistTreeHeights: session tree height = " + this.gSessionTree.getAttribute("height") + ", tab tree height = " + this.gTabTree.getAttribute("height"), "DATA");
+		},
+
+		// Fix session tree height to prevent it from changing
+		adjustSessionTreeHeight: function(currentSessionTreeHeight) {
+			// Restore height and save it for when window closes
+			this.gSessionTree.height = currentSessionTreeHeight;
+			
+			// The following line keeps the window width from increasing when sizeToContent is called.
+			this._("sessionmanagerPrompt").width = window.innerWidth - 1;
+			window.sizeToContent();
+			// The following is needed because the session tree usually shrinks when calling the above
+			window.innerHeight = window.innerHeight - this.gSessionTree.treeBoxObject.height + currentSessionTreeHeight;
+			
+			// Adjust window so it's not offscreen
+			this.adjustWindowSizeAndPosition();
+			log("onSessionTreeSelect: window.screenY = " + window.screenY + ", window.screen.availHeight = " + window.screen.availHeight + ", window.outerHeight = " + window.outerHeight, "DATA");
+		},
+		
+		adjustWindowSizeAndPosition: function() {
+			// Make sure window height isn't larger than screen height
+			if (window.screen.availHeight < window.outerHeight) {
+				window.outerHeight = window.screen.availHeight;
+			}
+			// Make sure the bottom of the window is visible by moving the window up if necessary
+			if (window.screenY + window.outerHeight > window.screen.availHeight) {
+				window.screenY = window.screen.availHeight - window.outerHeight;
+			}
+		},
+
+		checkPrivateBrowsingMode: function(inPrivateBrowsing, aSaving, aJustOpened)
+		{
+			gSessionManager.setDisabled(this._("save"), inPrivateBrowsing);
+			gSessionManager.setDisabled(this._("saveWin"), inPrivateBrowsing);
+			
+			// If saving, disable, the save or append button
+			if (aSaving) {
+				if (inPrivateBrowsing) {
+					this.gAcceptButton.disabled = true;
+					this.gExtraButton.disabled = true;
+				}
+				else if (!aJustOpened) this.isAcceptable();
+			}
+		},
+
+		_: function(aId)
+		{
+			return document.getElementById(aId);
+		},
+
+		_isValidSessionList: function(aSessions)
+		{
+			if (aSessions==null || typeof(aSessions)!="object" || typeof(aSessions.length)!="number" || 
+				aSessions.length == 0 || !aSessions[0].name) {
+				log("Override function returned an invalid session list.", "ERROR", true);
+				return false;
+			}
+			return true;
+		},
+
+		_save_every_update: function()
+		{
+			var checked = gSessionManagerSessionPrompt._('checkbox_autosave').checked;
+			var save_every_height = null;
+			
+			gSessionManagerSessionPrompt._('save_every').hidden = !checked;
+			
+			// resize window
+			if (checked) {
+				save_every_height = parseInt(window.getComputedStyle(gSessionManagerSessionPrompt._('save_every'), "").height);
+				if (isNaN(save_every_height)) save_every_height = 0;
+				gSessionManagerSessionPrompt.gSavedEveryHeight = save_every_height;
+				window.innerHeight += save_every_height;
+			}
+			else {
+				if (typeof(gSessionManagerSessionPrompt.gSavedEveryHeight) == "number") {
+					window.innerHeight -= gSessionManagerSessionPrompt.gSavedEveryHeight;
+				}
+			}
+		},
+
+		isNumber: function(aTextBox)
+		{
+			this.gInvalidTime = !/^([1-9]\d*)?$/.test(aTextBox.value);
+			aTextBox.setAttribute("badname", this.gInvalidTime ? "true" : "false");
+			
+			this.isAcceptable();
+		},
+
+		// if the accept button is no longer moving when resizing, the window is too small so make it bigger.
+		resize: function(aEvent, aString)
+		{
+			var currentAcceptPositionDifference = window.outerHeight - gSessionManagerSessionPrompt.gAcceptButton.boxObject.y;
+			if (!gSessionManagerSessionPrompt.gAcceptPositionDifference) {
+				gSessionManagerSessionPrompt.gAcceptPositionDifference = currentAcceptPositionDifference;
+			}
+			else if (currentAcceptPositionDifference != gSessionManagerSessionPrompt.gAcceptPositionDifference) {
+				if (gSessionManagerSessionPrompt.gTimerId) {
+					clearTimeout(gSessionManagerSessionPrompt.gTimerId);
+					delete gSessionManagerSessionPrompt.gTimerId;
+				}
+				gSessionManagerSessionPrompt.gTimerId = setTimeout(function() {window.resizeTo(window.outerWidth,window.outerHeight + gSessionManagerSessionPrompt.gAcceptPositionDifference - currentAcceptPositionDifference);}, 100);
+			}
+		},
+
+		// Tree controller
+
+		sessionTreeView: {
+			_atoms: {},
+			_getAtom: function(aName)
+			{
+				if (!this._atoms[aName]) {
+					var as = Components.classes["@mozilla.org/atom-service;1"].getService(Components.interfaces.nsIAtomService);
+					this._atoms[aName] = as.getAtom(aName);
+				}
+				return this._atoms[aName];
+			},
+
+			treeBox: null,
+			selection: null,
+
+			get rowCount()                     { return gSessionManagerSessionPrompt.gSessionTreeData.length; },
+			setTree: function(treeBox)         { this.treeBox = treeBox; },
+			getCellText: function(idx, column) { 
+				switch(column.id) {
+					case "name":
+						return gSessionManagerSessionPrompt.gSessionTreeData[idx].name;
+						break;
+					case "group":
+						return gSessionManagerSessionPrompt.gSessionTreeData[idx].group;
+						break;
+					case "win_count":
+						return gSessionManagerSessionPrompt.gSessionTreeData[idx].windows;
+						break;
+					case "tab_count":
+						return gSessionManagerSessionPrompt.gSessionTreeData[idx].tabs;
+						break;
+				}
+				return null;
+			},
+			canDrop: function(idx, orient)      { return false; },
+			isContainer: function(idx)          { return false; },
+			isContainerOpen: function(idx)      { return false; },
+			isContainerEmpty: function(idx)     { return false; },
+			isSelectable: function(idx, column) { return false; },
+			isSeparator: function(idx)          { return false; },
+			isSorted: function()                { return gSessionManagerSessionPrompt.sortedBy != 0; },
+			isEditable: function(idx, column)   { return false; },
+			getLevel: function(idx)             { return 0; },
+			getParentIndex: function(idx)       { return -1; },
+			getImageSrc: function(idx, column)  { return null; },
+
+			hasNextSibling: function(idx, after) {
+				return (idx <= after) && (idx < gSessionManagerSessionPrompt.gSessionTreeData.length - 1) && 
+				       (after < gSessionManagerSessionPrompt.gSessionTreeData.length - 1);
+			},
+
+			getCellProperties: function(idx, column, prop) {
+				if ((column.id == "group") && (gSessionManagerSessionPrompt.gSessionTreeData[idx].backup)) 
+					prop.AppendElement(this._getAtom("disabled"));
+				if (gSessionManagerSessionPrompt.gSessionTreeData[idx].latest) 
+					prop.AppendElement(this._getAtom("latest"));
+				if (gSessionManagerSessionPrompt.gSessionTreeData[idx].loaded)
+					prop.AppendElement(this._getAtom("disabled"));
+				if (gSessionManagerSessionPrompt.gSessionTreeData[idx].autosave)
+					prop.AppendElement(this._getAtom(gSessionManagerSessionPrompt.gSessionTreeData[idx].autosave));
+			},
+
+			getRowProperties: function(idx, prop) {
+				if (idx % 2 != 0)
+					prop.AppendElement(this._getAtom("alternate"));
+			},
+
+			drop: function(row, orient) { },
+			getCellValue: function(idx, column) { },
+			getProgressMode : function(idx, column) { },
+			toggleOpenState: function(idx) { },
+			cycleHeader: function(column) { },
+			cycleCell: function(idx, column) { },
+			selectionChanged: function() { },
+			setCellValue: function() { },
+			setCellText: function() { },
+			performAction: function(action) { },
+			performActionOnCell: function(action, index, column) { },
+			performActionOnRow: function(action, index) { },
+			getColumnProperties: function(column, prop) { }
+		},
 	}
-	else
-	{
-		gParams.SetString(3, "");
-	}
-	gParams.SetString(6, _("text_box").value.trim());
-	gParams.SetString(7, _("group_menu_list").value.trim());
-	
-	// Click extra button doesn't close window so do that here
-	if (gAppendToSessionFlag) window.close();
+	window.addEventListener("load", gSessionManagerSessionPrompt.onLoad_proxy, false);
 }
-
-function setDescription(aObj, aValue)
-{
-	aValue.split("\n").forEach(function(aLine) {
-		aObj.appendChild(document.createElement("description")).textContent = aLine;
-	});
-}
-
-function _(aId)
-{
-	return document.getElementById(aId);
-}
-
-function _isValidSessionList(aSessions)
-{
-	if (aSessions==null || typeof(aSessions)!="object" || typeof(aSessions.length)!="number" || 
-	    aSessions.length == 0 || !aSessions[0].name) {
-		log("Override function returned an invalid session list.", "ERROR", true);
-		return false;
-	}
-	return true;
-}
-
-function _save_every_update()
-{
-	var checked = _('checkbox_autosave').checked;
-	var save_every_height = null;
-	
-	_('save_every').hidden = !checked;
-	
-	// resize window
-	if (checked) {
-		save_every_height = parseInt(window.getComputedStyle(_('save_every'), "").height);
-		if (isNaN(save_every_height)) save_every_height = 0;
-		window.innerHeight += save_every_height;
-	}
-	else {
-		if (save_every_height) window.innerHeight -= save_every_height;
-	}
-}
-
-function isNumber(aTextBox)
-{
-	gInvalidTime = !/^([1-9]\d*)?$/.test(aTextBox.value);
-	aTextBox.setAttribute("badname", gInvalidTime ? "true" : "false");
-	
-	isAcceptable();
-}
-
-// if the accept button is no longer moving when resizing, the window is too small so make it bigger.
-function resize(aEvent, aString)
-{
-	var currentAcceptPositionDifference = window.outerHeight - gAcceptButton.boxObject.y;
-	if (!gAcceptPositionDifference) {
-		gAcceptPositionDifference = currentAcceptPositionDifference;
-	}
-	else if (currentAcceptPositionDifference != gAcceptPositionDifference) {
-		if (gTimerId) {
-			clearTimeout(gTimerId);
-			delete gTimerId;
-		}
-		gTimerId = setTimeout(function() {window.resizeTo(window.outerWidth,window.outerHeight + gAcceptPositionDifference - currentAcceptPositionDifference);}, 100);
-	}
-}
-
-// Tree controller
-
-var sessionTreeView = {
-	_atoms: {},
-	_getAtom: function(aName)
-	{
-		if (!this._atoms[aName]) {
-			var as = Components.classes["@mozilla.org/atom-service;1"].getService(Components.interfaces.nsIAtomService);
-			this._atoms[aName] = as.getAtom(aName);
-		}
-		return this._atoms[aName];
-	},
-
-	treeBox: null,
-	selection: null,
-
-	get rowCount()                     { return gSessionTreeData.length; },
-	setTree: function(treeBox)         { this.treeBox = treeBox; },
-	getCellText: function(idx, column) { 
-		switch(column.id) {
-			case "name":
-				return gSessionTreeData[idx].name;
-				break;
-			case "group":
-				return gSessionTreeData[idx].group;
-				break;
-			case "win_count":
-				return gSessionTreeData[idx].windows;
-				break;
-			case "tab_count":
-				return gSessionTreeData[idx].tabs;
-				break;
-		}
-		return null;
-	},
-	canDrop: function(idx, orient)      { return false; },
-	isContainer: function(idx)          { return false; },
-	isContainerOpen: function(idx)      { return false; },
-	isContainerEmpty: function(idx)     { return false; },
-	isSelectable: function(idx, column) { return false; },
-	isSeparator: function(idx)          { return false; },
-	isSorted: function()                { return sortedBy != 0; },
-	isEditable: function(idx, column)   { return false; },
-	getLevel: function(idx)             { return 0; },
-	getParentIndex: function(idx)       { return -1; },
-	getImageSrc: function(idx, column)  { return null; },
-
-	hasNextSibling: function(idx, after) {
-		return (idx <= after) && (idx < gSessionTreeData.length - 1) && (after < gSessionTreeData.length - 1);
-	},
-
-	getCellProperties: function(idx, column, prop) {
-		if ((column.id == "group") && (gSessionTreeData[idx].backup)) 
-			prop.AppendElement(this._getAtom("disabled"));
-		if (gSessionTreeData[idx].latest) 
-			prop.AppendElement(this._getAtom("latest"));
-		if (gSessionTreeData[idx].loaded)
-			prop.AppendElement(this._getAtom("disabled"));
-		if (gSessionTreeData[idx].autosave)
-			prop.AppendElement(this._getAtom(gSessionTreeData[idx].autosave));
-	},
-
-	getRowProperties: function(idx, prop) {
-		if (idx % 2 != 0)
-			prop.AppendElement(this._getAtom("alternate"));
-	},
-
-	drop: function(row, orient) { },
-	getCellValue: function(idx, column) { },
-	getProgressMode : function(idx, column) { },
-	toggleOpenState: function(idx) { },
-	cycleHeader: function(column) { },
-	cycleCell: function(idx, column) { },
-	selectionChanged: function() { },
-	setCellValue: function() { },
-	setCellText: function() { },
-	performAction: function(action) { },
-	performActionOnCell: function(action, index, column) { },
-	performActionOnRow: function(action, index) { },
-	getColumnProperties: function(column, prop) { }
-};
 
 // String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
 if (typeof(String.trim) != "function") {
@@ -795,5 +1091,3 @@ if (typeof(String.trim) != "function") {
 		return this.replace(/^\s+|\s+$/g, "");
 	};
 }
-
-window.addEventListener("load", onLoad, false);
