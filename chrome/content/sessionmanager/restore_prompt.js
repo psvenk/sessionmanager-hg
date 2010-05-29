@@ -1,11 +1,9 @@
 Components.utils.import("resource://sessionmanager/modules/logger.jsm");
+Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm");
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
 
 restorePrompt = function() {
 	log("restorePrompt start", "INFO");
-	
-	// Make sure the EOL character is set or session files will get corrupted when written
-	gSessionManager.mEOL = /win|os[\/_]?2/i.test(navigator.platform)?"\r\n":/mac/i.test(navigator.platform)?"\r":"\n";
 	
 	// default count variable
 	var countString = "";
@@ -46,18 +44,16 @@ restorePrompt = function() {
 	{
 		if (fileName)
 		{
-			gSessionManager._recovering =  fileName;
+			gSessionManager._recovering = { fileName: fileName, sessionState: values.sessionState };
 		}
-		else if (!gSessionManager.getPref("save_window_list", false))
+		else if (!gPreferenceManager.get("save_window_list", false))
 		{
 			gSessionManager.clearUndoData("window", true);
 		}
 		params.SetInt(0, 1); // don't recover the crashed session
 	}
 	
-	log("restorePrompt: _recovering = " + gSessionManager._recovering, "DATA");
-	
-	gSessionManager.mPref_encrypt_sessions = gSessionManager.getPref("encrypt_sessions", false);
+	gSessionManager.mPref_encrypt_sessions = gPreferenceManager.get("encrypt_sessions", false);
 	// actually save the crashed session
 	if (session && backupFile) {
 		gSessionManager.writeFile(backupFile, session);
@@ -67,19 +63,18 @@ restorePrompt = function() {
 	log("restorePrompt: _encrypt_file = " + gSessionManager._encrypt_file, "DATA");
 	
 	// If user chose to prompt for tabs and selected a filename
-	if (fileName && values.choseTabs) {
+	if (fileName && values.sessionState) {
 		// if recovering current session, recover it from our backup file
 		if (fileName == "*") {
 			fileName = backupFile.leafName;
 			params.SetInt(0, 1); // don't recover the crashed session
-			gSessionManager._recovering = fileName;
+			gSessionManager._recovering = { fileName: fileName, sessionState: values.sessionState };
 		}
-		gSessionManager._chose_tabs = true;
 	}
 		
-	log("restorePrompt: _chose_tabs = " + gSessionManager._chose_tabs, "DATA");
-		
-	var autosave_values = gSessionManager.getPref("_autosave_values", "").split("\n");
+	log("restorePrompt: _recovering = " + (gSessionManager._recovering ? gSessionManager._recovering.fileName : "null"), "DATA");
+	
+	var autosave_values = gPreferenceManager.get("_autosave_values", "").split("\n");
 	var autosave_name = autosave_values[0];
 	if (autosave_name)
 	{
@@ -93,10 +88,10 @@ restorePrompt = function() {
 			}
 			
 			// not recovering autosave session or current session (selecting tabs), save the autosave session first
-			if (values.choseTabs || ((chosen_name != autosave_name) && (fileName != backupFile.leafName)))
+			if (values.sessionState || ((chosen_name != autosave_name) && (fileName != backupFile.leafName)))
 			{
 				// delete autosave preferences
-				gSessionManager.delPref("_autosave_values");
+				gPreferenceManager.delete("_autosave_values");
 
 				// Clear any stored auto save session preferences
 				gSessionManager.getAutoSaveValues();
@@ -105,7 +100,7 @@ restorePrompt = function() {
 				var temp_state = gSessionManager.readFile(file);
 				// encrypt if encryption enabled
 				if (gSessionManager.mPref_encrypt_sessions) {
-					gSessionManager.mPref_encrypted_only = gSessionManager.getPref("encrypted_only", false);
+					gSessionManager.mPref_encrypted_only = gPreferenceManager.get("encrypted_only", false);
 					temp_state = gSessionManager.decryptEncryptByPreference(temp_state);
 				}
 				
