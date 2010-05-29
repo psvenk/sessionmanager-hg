@@ -210,7 +210,7 @@ with (com.morac) {
 			}
 			
 			var sessions = gSessionManager.selectSession(gSessionManager._string("ss_select"), gSessionManager._string("ss_convert"), 
-														 { multiSelect: true, selectAll: this.selectAll }, function() { return gSessionSaverConverter.sessionList;});
+														 { multiSelect: true, selectAll: this.selectAll }, new Function("return com.morac.gSessionSaverConverter.sessionList;"));
 			if (sessions) {
 				sessions = sessions.split("\n");
 				sessions.forEach(function (aSession) {
@@ -643,7 +643,7 @@ with (com.morac) {
 			var sessionsToConvert = gSessionManager.selectSession(gSessionManager._string("ss_select"), 
 																  gSessionManager._string("ss_convert"), 
 																  { multiSelect: true, selectAll: this.selectAll }, 
-																  function() { return gConvertTMPSession.sessionList;}
+																  new Function("return com.morac.gConvertTMPSession.sessionList;")
 																 );   
 			delete this.sessionList;
 			if (!sessionsToConvert) return;
