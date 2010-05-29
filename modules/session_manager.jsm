@@ -773,15 +773,11 @@ var gSessionManager = {
 		log("load: aFileName = " + aFileName + ", aMode = " + aMode + ", aSessionState = " + !!aSessionState, "DATA");
 		let state, window_autosave_values, force_new_window = false, overwrite_window = false, use_new_window = false;
 		
-		// If no window passed, just grab a recent one.  If no recent window, open a new one
+		// If no window passed, just grab a recent one.  
 		aWindow = aWindow || this.getMostRecentWindow("navigator:browser");
-		if (!aWindow) {
-			aWindow = this.openWindow(gPreferenceManager.get("browser.chromeURL", null, true), "chrome,all,dialog=no");
-			use_new_window = true;
-		}
 
 		if (!aFileName) {
-			let values = { append_replace: true, callbackData: { type: "load", window__SSi: aWindow.__SSi } };
+			let values = { append_replace: true, callbackData: { type: "load", window__SSi: (aWindow ? aWindow.__SSi : null) } };
 			aFileName = this.selectSession(this._string("load_session"), this._string("load_session_ok"), values);
 			let file;
 			if (!aFileName || !(file = this.getSessionDir(aFileName)) || !file.exists()) return;
@@ -802,6 +798,12 @@ var gSessionManager = {
 			this.ioError();
 			return;
 		}		
+		
+		// If no passed or recent window, open a new one
+		if (!aWindow) {
+			aWindow = this.openWindow(gPreferenceManager.get("browser.chromeURL", null, true), "chrome,all,dialog=no");
+			use_new_window = true;
+		}
 		
 		// If user somehow managed to load an active Window or Auto Session, ignore it
 		if ((/^window/.test(matchArray[3]) && this.mActiveWindowSessions[matchArray[1].trim().toLowerCase()]) ||
@@ -1739,9 +1741,9 @@ var gSessionManager = {
 			getSessionsOverride: aValues.getSessionsOverride,
 		};
 
-		// Modal if no window or there's a not a callback function
-		let window = !aValues.no_parent_window ? this.getMostRecentWindow("navigator:browser") : null;
-		let modal = !window || !aValues.callbackData;
+		// Modal if startup or crash prompt or if there's a not a callback function
+		let window = this.isRunning() ? this.getMostRecentWindow("navigator:browser") : null;
+		let modal = !this.isRunning() || !aValues.callbackData;
 		
 		// Use existing dialog window if not modal
 		let dialog = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow("SessionManager:SessionPrompt");
