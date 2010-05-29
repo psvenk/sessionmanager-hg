@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>{1280606b-2510-4fe0-97ef-9b5a22eafe30}</em:id>
-    <em:version>0.6.8pre20100528</em:version>
+    <em:version>0.6.8pre20100528a</em:version>
     
 	<!-- Temporary lines for development version -->
 	<em:updateURL>http://sessionmanager.mozdev.org/update.rdf</em:updateURL>
@@ -120,7 +120,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>de-DE</em:locale>
+        <em:locale>de</em:locale>
         <em:name>Sitzungs-Manager</em:name>
         <em:description>Sichert den Zustand aller Fenster und stellt ihn wieder her.</em:description>
         <em:creator>Morac</em:creator>
@@ -163,7 +163,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>fr-FR</em:locale>
+        <em:locale>fr</em:locale>
         <em:name>Gestionnaire de session</em:name>
         <em:description>Enregistre et rétabli l'état de toutes les fenêtres.</em:description>
         <em:creator>Morac</em:creator>
@@ -262,7 +262,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>nl-NL</em:locale>
+        <em:locale>nl</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Session Manager slaat de status van alle vensters op, en stelt u in staat ze te herstellen.</em:description>
         <em:creator>Morac</em:creator>
