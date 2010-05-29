@@ -3403,7 +3403,7 @@ var gSessionManager = {
 		let sessionstart = (SessionStartup.sessionType != Ci.nsISessionStartup.NO_SESSION) && !this.mAlreadyShutdown;
 		let recoverOnly = this.isRunning() || sessionstart || this._no_prompt_for_session;
 		this._no_prompt_for_session = false;
-		log("recoverSession: recovering = " + this._recovering + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
+		log("recoverSession: recovering = " + (this._recovering ? this._recovering.fileName : "null") + ", sessionstart = " + sessionstart + ", recoverOnly = " + recoverOnly, "DATA");
 		if (typeof(this._temp_restore) == "string") {
 			log("recoverSession: command line session data = \"" + this._temp_restore + "\"", "DATA");
 			temp_restore = this._temp_restore.split("\n");
@@ -3414,9 +3414,10 @@ var gSessionManager = {
 		// handle crash where user chose a specific session
 		if (this._recovering)
 		{
-			let recovering = this._crash_session_filename = this._recovering;
+			let recovering = this._crash_session_filename = this._recovering.fileName;
+			let sessionState = this._recovering.sessionState;
 			this._recovering = null;
-			this.load(aWindow, recovering, "startup", this.sessionPromptReturnData.sessionState);
+			this.load(aWindow, recovering, "startup", sessionState);
 			// Clear out return data and preset to not accepting
 			this.sessionPromptReturnData = null;
 		}
