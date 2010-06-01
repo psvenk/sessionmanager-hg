@@ -43,7 +43,7 @@ with (com.morac) {
 		gAcceptPositionDifference: 0,
 		gTimerId: null,
 
-		sortedBy: 0,
+		sortedBy: { column: null, direction: 0 },
 
 		// Input parameters stored in gSessionManager.sessionPromptData:
 		// acceptExistingLabel  - Okay button label when overwriting existing session
@@ -462,8 +462,18 @@ with (com.morac) {
 			// Make a copy of array
 			this.gOriginalSessionTreeData = this.gSessionTreeData.slice(0);
 			
-			// Display Tree
-			this.gSessionTree.view = this.sessionTreeView;
+			// Sort session list if it was previously sorted
+			if (this.sortedBy.column) {
+				this.sortSessions();
+			}
+			
+			// Display Tree - or redraw it if already drew it before
+			if (!this.gFinishedLoading) {
+				this.gSessionTree.view = this.sessionTreeView;
+			}
+			else {
+				this.gSessionTree.treeBoxObject.invalidate();
+			}
 			
 			// select passed in item (if any)
 			if (typeof(selected) != "undefined") this.gSessionTree.view.selection.select(selected);
@@ -531,11 +541,8 @@ with (com.morac) {
 					}
 				}
 				else if ((aEvent.type == "click") && (aEvent.target.nodeName == "treecol")) {
-					var types = { name: 0, group: 1, win_count: 2, tab_count: 3 };
-					var which = types[aEvent.target.id];
-					
-					// If not already sorted, this.sortedBy will be 0.  Otherwise it is which + 1 if sorted or -(which + 1) if inversely sorted
-					var flag = (Math.abs(this.sortedBy) == (which + 1)) ? (-this.sortedBy / Math.abs(this.sortedBy)) : 1
+					// If not already sorted, this.sortedBy.direction will be 0.  this.sortedBy.column is the column that is sorted.
+					var new_sortBy_direction = (this.sortedBy.column == aEvent.target.id) ? -this.sortedBy.direction : 1
 					
 					// Save selected items so they can be restored
 					var selectedFileNames = {};
@@ -554,35 +561,15 @@ with (com.morac) {
 					this.gSessionTree.view.selection.clearSelection();
 					
 					// If inversely sorted and user clicks header again, go back to original order
-					if (flag && this.sortedBy < 0) {
-						flag = 0;
+					if (new_sortBy_direction && (this.sortedBy.column == aEvent.target.id) && (this.sortedBy.direction < 0)) {
+						new_sortBy_direction = 0;
 						this.gSessionTreeData = this.gOriginalSessionTreeData.slice(0);
 					}
-					else {
-						// Sort depending on which header is clicked
-						switch (which) {
-							case 0:
-								this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
-									return flag * (a.name.toLowerCase().localeCompare(b.name.toLowerCase())); 
-								});
-								break;
-							case 1:
-								this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
-									return flag * (a.group.toLowerCase().localeCompare(b.group.toLowerCase())); 
-								});
-								break;
-							case 2:
-								this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
-									return flag * (parseInt(a.windows) - parseInt(b.windows)); 
-								});
-								break;
-							case 3:
-								this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
-									return flag * (parseInt(a.tabs) - parseInt(b.tabs)); 
-								});
-								break;
-						}
-					}
+
+					this.sortedBy = { column: ((new_sortBy_direction != 0) ? aEvent.target.id : null), direction: new_sortBy_direction };
+					
+					// Sort depending on which header is clicked and adjust arrows, only adjusts arrows if this.sortedBy.direction is 0.
+					this.sortSessions();
 					
 					// Recreate Session List index and restore selected items
 					for (var i=0; i<this.gSessionTreeData.length; i++) {
@@ -593,14 +580,7 @@ with (com.morac) {
 							this.gSessionTree.view.selection.toggleSelect(i);
 						}
 					}
-					this.sortedBy = flag * (which + 1);
 
-					// update header arrorws			
-					for (var i=0; i < aEvent.target.parentNode.childNodes.length; i++) {
-						var sortText = flag ? ((flag>0) ? "ascending" : "descending") : "natural";
-						aEvent.target.parentNode.childNodes[i].setAttribute("sortDirection", ((aEvent.target.parentNode.childNodes[i] == aEvent.target) ? sortText : "natural"))
-					}
-					
 					// Redraw the tree - Needed for OS X
 					this.gSessionTree.treeBoxObject.invalidate();
 				}
@@ -854,6 +834,41 @@ with (com.morac) {
 				case "remove":
 					gSessionManager.remove();
 					break;
+			}
+		},
+		
+		sortSessions: function() {
+			// sort session list data if this.sortedBy.direction is set
+			if (this.sortedBy.direction != 0) {
+				switch (this.sortedBy.column) {
+					case "name":
+						this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
+							return gSessionManagerSessionPrompt.sortedBy.direction * (a.name.toLowerCase().localeCompare(b.name.toLowerCase())); 
+						});
+						break;
+					case "group":
+						this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
+							return gSessionManagerSessionPrompt.sortedBy.direction * (a.group.toLowerCase().localeCompare(b.group.toLowerCase())); 
+						});
+						break;
+					case "win_count":
+						this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
+							return gSessionManagerSessionPrompt.sortedBy.direction * (parseInt(a.windows) - parseInt(b.windows)); 
+						});
+						break;
+					case "tab_count":
+						this.gSessionTreeData = this.gSessionTreeData.sort(function(a, b) { 
+							return gSessionManagerSessionPrompt.sortedBy.direction * (parseInt(a.tabs) - parseInt(b.tabs)); 
+						});
+						break;
+				}
+			}
+			
+			// update header arrorws
+			var cols = this._("sessionTreeCols");
+			for (var i=0; i < cols.childNodes.length; i++) {
+				var sortText = this.sortedBy.direction ? ((this.sortedBy.direction>0) ? "ascending" : "descending") : "natural";
+				cols.childNodes[i].setAttribute("sortDirection", ((cols.childNodes[i].id == this.sortedBy.column) ? sortText : "natural"))
 			}
 		},
 
