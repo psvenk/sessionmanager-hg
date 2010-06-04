@@ -14,8 +14,11 @@
 	xhtml2:role="wairole:alert"
 	id="sessionmanagerPrompt"
 	title="&sessionManager;"
+	onload="com.morac.gSessionManagerSessionPrompt.onLoad();"
+	onunload="com.morac.gSessionManagerSessionPrompt.onUnload();"
 	ondialogaccept="return com.morac.gSessionManagerSessionPrompt.onAcceptDialog(false);"
 	ondialogextra1="return com.morac.gSessionManagerSessionPrompt.onAcceptDialog(true);"
+	onresize="com.morac.gSessionManagerSessionPrompt.resize();"
 	buttonlabelextra1="&prompt.append.label;"
 	style="min-width: 40em; -moz-user-focus: ignore;"
 	persist="width"
@@ -51,7 +54,7 @@
 			<vbox flex="1">
 				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" rows="5" flex="1" flags="dont-build-content"
 				      onkeypress="com.morac.gSessionManagerSessionPrompt.onSessionTreeKeyPress(event)" onclick="com.morac.gSessionManagerSessionPrompt.onSessionTreeClick(event)" 
-					  ondblclick="com.morac.gSessionManagerSessionPrompt.onSessionTreeClick(event)">
+					  ondblclick="com.morac.gSessionManagerSessionPrompt.onSessionTreeClick(event)" onselect="com.morac.gSessionManagerSessionPrompt.onSessionTreeSelect();">
 					<treecols id="sessionTreeCols">
 						<treecol id="name" label="&session_name.label;" persist="width" flex="2" ignoreincolumnpicker="true"/>
 						<splitter class="tree-splitter"/>
@@ -63,7 +66,7 @@
 					</treecols>
 					<treechildren flex="1"/>
 				</tree>
-				<splitter id="tree_splitter" hidden="true" state="open" collapse="both" oncommand="com.morac.gSessionManagerSessionPrompt.resize(event, this.getAttribute('state'));">
+				<splitter id="tree_splitter" hidden="true" state="open" collapse="both" oncommand="com.morac.gSessionManagerSessionPrompt.resize();">
 					<grippy/>
 				</splitter>
 				<vbox id="tabTreeBox" hidden="true" flex="1">
@@ -99,8 +102,8 @@
 				<hbox id="group-text-container" hidden="true">
 					<label class="textbox_label" value="&session_group.label;"></label>
 					<menulist flex="1" id="group_menu_list" editable="true" onkeyup="com.morac.gSessionManagerSessionPrompt.isAcceptable();"
-					          onchange="window.setTimeout(com.morac.gSessionManagerSessionPrompt.isAcceptable,50)"
-					          onmouseup="window.setTimeout(com.morac.gSessionManagerSessionPrompt.isAcceptable,50)">
+					          onchange="window.setTimeout(function() { com.morac.gSessionManagerSessionPrompt.isAcceptable(); },50)"
+					          onmouseup="window.setTimeout(function() { com.morac.gSessionManagerSessionPrompt.isAcceptable(); },50)">
 						<menupopup>
 						</menupopup>
 					</menulist>
@@ -116,7 +119,7 @@
 					</radiogroup>
 					<checkbox id="checkbox_ignore" label="&prompt.ignore.label;" hidden="true"/>
 					<checkbox id="checkbox_autosave" label="&prompt.autosave.label;" hidden="true"
-					          onclick="window.setTimeout(com.morac.gSessionManagerSessionPrompt._save_every_update,0)"/>
+					          onclick="window.setTimeout(function() { com.morac.gSessionManagerSessionPrompt._save_every_update(); },0)"/>
 				</hbox>
 				<hbox id="save_every" hidden="true">
 					<label class="textbox_label" id="autosave_label" value="&prompt.save_every1.label;"/>
