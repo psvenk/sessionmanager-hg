@@ -18,6 +18,7 @@
 //    but needs to pass back session data in case windows are closed.  Use the tab tree to allow user to select which windows and tabs
 //    to save.  The tab tree currently updates when windows and tabs are opened,closed and load, but the currently tab selections are lost.
 //    This should be fixed to not lose tab selections.  Might be a good idea to allow user to select which window to save if "Save window" is chosen.
+// - Either show a split pane for windows/tabs with current window/tabs on left and selected session's window/tabs on right.  Or make a toggle radio button.
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -1712,7 +1713,7 @@ var gSessionManager = {
 		let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
 		aValues = aValues || {};
 
-		// Clear out return data
+		// Clear out return data and initialize it
 		this.sessionPromptReturnData = null;
 		
 		this.sessionPromptData = {
@@ -1744,6 +1745,10 @@ var gSessionManager = {
 		// Modal if startup or crash prompt or if there's a not a callback function
 		let window = this.isRunning() ? this.getMostRecentWindow("navigator:browser") : null;
 		let modal = !this.isRunning() || !aValues.callbackData;
+		
+		// Initialize return data if modal.  Don't initialize if not modal because that can result in a memory leak since it might
+		// not be cleared
+		if (modal) this.sessionPromptReturnData = {};
 		
 		// Use existing dialog window if not modal
 		let dialog = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow("SessionManager:SessionPrompt");
@@ -3355,6 +3360,9 @@ var gSessionManager = {
 			this.mPref__autosave_group = values[1];
 			this.mPref__autosave_time = (!values[2] || isNaN(values[2])) ? 0 : values[2];
 		}
+
+		// Update tab tree if it's open
+		OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-session-tree", null);
 	},
 
 	// Merge autosave variables into a a string
@@ -3747,6 +3755,12 @@ var gSessionManager = {
 			// if recovering from crash, sessionstore:windows-restored notification is ignored so sessionmanager window count will already be one so don't subract anything.
 			let tweaker = this._crash_session_filename ? 0 : 1;
 			OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:windows-restored", this._number_of_windows - tweaker);
+		}
+
+		// Save session manager window value for aWindow since it will be overwritten on load.  Other windows opened will have the value set correctly.
+		if (aWindow.__SSi && aWindow.gSessionManagerWindowObject) {
+			aWindow.gSessionManagerWindowObject.__SessionManagerWindowId = aWindow.__SSi;
+			SessionStore.setWindowValue(aWindow, "__SessionManagerWindowId", aWindow.__SSi);
 		}
 		
 		return true;
