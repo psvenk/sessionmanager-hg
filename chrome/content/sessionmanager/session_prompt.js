@@ -511,12 +511,7 @@ with (com.morac) {
 				
 					// Pre-populate the text box with default session name if saving and the name is not banned or already existing.
 					// Otherwise disable accept button
-					var trimname = this.gParams.defaultSessionName.trim().toLowerCase();
-					if (this.gParams.acceptExistingLabel && !this.gBannedNames[trimname] && ((this.gSessionNames[trimname] == undefined) || (this.gParams.allowNamedReplace)))
-					{
-						this.onTextboxInput(this.gParams.defaultSessionName);
-					}
-					else this.gAcceptButton.disabled = true;
+					this.populateDefaultSessionName(this.gParams.defaultSessionName);
 				}
 			}
 			
@@ -527,6 +522,15 @@ with (com.morac) {
 				this.onSessionTreeSelect();
 			}
 			else this.isAcceptable();
+		},
+		
+		populateDefaultSessionName: function(aName, aTabSelect) {
+			var trimname = aName.trim().toLowerCase();
+			if (this.gParams.acceptExistingLabel && !this.gBannedNames[trimname] && (aTabSelect || (this.gSessionNames[trimname] == undefined) || (this.gParams.allowNamedReplace)))
+			{
+				this.onTextboxInput(aName);  // Set 2nd paramter to aTabSelect to prevent selecting name from tab tree resulting in textbox taking focus
+			}
+			else this.gAcceptButton.disabled = true;
 		},
 		
 		onSessionTreeClick: function(aEvent)
@@ -657,7 +661,7 @@ with (com.morac) {
 			}
 		},
 
-		onTextboxInput: function(aNewValue)
+		onTextboxInput: function(aNewValue, aDontTakeFocus)
 		{
 			if (aNewValue)
 			{
@@ -667,7 +671,7 @@ with (com.morac) {
 					aNewValue = aNewValue.substring(0,match.index);
 				}
 				this.gTextBox.value = aNewValue;
-				setTimeout(function() { gSessionManagerSessionPrompt.gTextBox.select(); gSessionManagerSessionPrompt.gTextBox.focus(); }, 0);
+				if (!aDontTakeFocus) setTimeout(function() { gSessionManagerSessionPrompt.gTextBox.select(); gSessionManagerSessionPrompt.gTextBox.focus(); }, 0);
 			}
 			
 			var input = this.gTextBox.value.trim().toLowerCase();
