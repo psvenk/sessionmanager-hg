@@ -38,9 +38,13 @@ with (com.morac) {
 		
 		// Used to adjust height of window when unchecking "auto save" box
 		gSavedEveryHeight: 0,
+		
+		// Flag used to indicate if select tree should do anything
+		gSelectSessionTreeActive: false,
 
 		// Used to keep track of the accept button position change
 		gAcceptPositionDifference: 0,
+		gLastScreenY: 0,
 		gTimerId: null,
 
 		sortedBy: { column: null, direction: 0 },
@@ -90,6 +94,9 @@ with (com.morac) {
 			case "private-browsing":
 				this.checkPrivateBrowsingMode(aData == "enter", this.gParams.autoSaveable);
 				break;
+			case "sessionmanager:update-session-tree":
+				this.updateWindow();
+				break;
 			}
 		},
 
@@ -99,14 +106,9 @@ with (com.morac) {
 			document.persist(aObj.id, aAttr);
 		},
 
-		onLoad_proxy: function(aEvent) {
-			this.removeEventListener("load", gSessionManagerSessionPrompt.onLoad_proxy, false);
-			this.addEventListener("unload", gSessionManagerSessionPrompt.onUnload_proxy, false);
-			gSessionManagerSessionPrompt.onLoad(aEvent);
-		},
-		
-		onLoad: function(aEvent) {
-			OBSERVER_SERVICE.addObserver(gSessionManagerSessionPrompt, "private-browsing", false);
+		onLoad: function() {
+			OBSERVER_SERVICE.addObserver(this, "private-browsing", false);
+			OBSERVER_SERVICE.addObserver(this, "sessionmanager:update-session-tree", false);
 
 			// Set "accept" value to false for modal windows
 			window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock).SetInt(0, 0);
@@ -166,21 +168,14 @@ with (com.morac) {
 			// Adjust window so it's not offscreen
 			this.adjustWindowSizeAndPosition();
 			
-			// watch for resize to prevent user from shrinking window so small it hides dialog buttons.
-			window.onresize = gSessionManagerSessionPrompt.resize;
-			
 			this.gFinishedLoading = true;
 		},
 
-		onUnload_proxy: function(aEvent) {
-			this.removeEventListener("unload", gSessionManagerSessionPrompt.onUnload_proxy, false);
-			gSessionManagerSessionPrompt.onUnload(aEvent);
-		},
-		
-		onUnload: function(aEvent) {
-			this.gSessionTree.removeEventListener("select", gSessionManagerSessionPrompt.onSessionTreeSelect_proxy, false);
-			OBSERVER_SERVICE.removeObserver(gSessionManagerSessionPrompt, "private-browsing");
-			
+		onUnload: function() {
+			this.gSelectSessionTreeActive = false;
+			OBSERVER_SERVICE.removeObserver(this, "private-browsing");
+			OBSERVER_SERVICE.removeObserver(this, "sessionmanager:update-session-tree");
+
 			// Clear any currently stored functions
 			if (this.gParams) {
 				delete this.gParams.getSessionsOverride;
@@ -197,9 +192,11 @@ with (com.morac) {
 			// The following line keeps the window width from increasing when sizeToContent is called.
 			this._("sessionmanagerPrompt").width = window.innerWidth - 1;
 			
-			// Handle case if user closes window without click Okay.
-			gSessionManager.sessionPromptReturnData = gSessionManager.sessionPromptReturnData || {};
-			gSessionManager.sessionPromptReturnData.ignore = this._("checkbox_ignore").checked;
+			// Handle case if user closes window without click Okay.  Only used for modal windows, specifically
+			// startup session prompt.  Object is initialized in session_manager.jsm because initializing it here
+			// would result in a memory leak for non-modal windows, where gSessionManager.sessionPromptReturnData isn't cleared out
+			// on return.
+			if (gSessionManager.sessionPromptReturnData) gSessionManager.sessionPromptReturnData.ignore = this._("checkbox_ignore").checked;
 		},
 
 		// Draw the window using parameters from gSessionManager.sessionPromptData
@@ -279,7 +276,7 @@ with (com.morac) {
 
 				// hide tab tree if not saving
 				if (!this.gParams.autoSaveable) this.gTabTreeBox.hidden = this.gTreeSplitter.hidden = true;
-				this.gSessionTree.removeEventListener("select", gSessionManagerSessionPrompt.onSessionTreeSelect_proxy, false);
+				this.gSelectSessionTreeActive = false;
 				
 				// Save current session and tab tree heights
 				this.persistTreeHeights();
@@ -304,8 +301,13 @@ with (com.morac) {
 
 		// Update window without re-reading parameters
 		updateWindow: function() {
+			var oldSessionTreeRowCount = 0;
+		
 			// If already loaded
 			if (this.gFinishedLoading) {
+				
+				// Get current row count
+				oldSessionTreeRowCount = this.sessionTreeView.rowCount;
 				
 				// Reset variables
 				this.gSessionNames = {};
@@ -468,11 +470,12 @@ with (com.morac) {
 			}
 			
 			// Display Tree - or redraw it if already drew it before
-			if (!this.gFinishedLoading) {
+			if (!oldSessionTreeRowCount) {
 				this.gSessionTree.view = this.sessionTreeView;
 			}
 			else {
-				this.gSessionTree.treeBoxObject.invalidate();
+				// Update row count (this redraws the tree)
+				this.gSessionTree.treeBoxObject.rowCountChanged(0, this.sessionTreeView.rowCount - oldSessionTreeRowCount);
 			}
 			
 			// select passed in item (if any)
@@ -520,7 +523,7 @@ with (com.morac) {
 			// Force user to make a selection if no text or group box or not saving (i.e., deleting or renaming)
 			if ((this.gNeedSelection = !this.gTextBoxVisible || !this.ggMenuListVisible || !this.gParams.acceptExistingLabel) || (this.gParams.allowNamedReplace))
 			{
-				this.gSessionTree.addEventListener("select",gSessionManagerSessionPrompt.onSessionTreeSelect_proxy, false);
+				this.gSelectSessionTreeActive = true;
 				this.onSessionTreeSelect();
 			}
 			else this.isAcceptable();
@@ -581,7 +584,7 @@ with (com.morac) {
 						}
 					}
 
-					// Redraw the tree - Needed for OS X
+					// Redraw the tree
 					this.gSessionTree.treeBoxObject.invalidate();
 				}
 			}
@@ -595,11 +598,6 @@ with (com.morac) {
 			}
 		},
 		
-		onSessionTreeSelect_proxy: function(aEvent)
-		{
-			gSessionManagerSessionPrompt.onSessionTreeSelect(aEvent)
-		},
-
 		displayTabTree: function()
 		{
 				// save current session tree height before doing any unhiding (subtract one if called initiall since height is off by one in that case)
@@ -638,8 +636,11 @@ with (com.morac) {
 				}
 		},
 		
-		onSessionTreeSelect: function(aEvent)
+		onSessionTreeSelect: function()
 		{
+			// Only process when gSelectSessionTreeActive is true
+			if (!this.gSelectSessionTreeActive) return;
+
 			// If no session name or group name text box, disable the accept button if nothing selected.
 			// Otherwise isAcceptable when changing groups or onTextboxInput otherwise.
 			if (!this.gTextBoxVisible && !this.ggMenuListVisible)
@@ -706,27 +707,27 @@ with (com.morac) {
 			this.isAcceptable();
 		},
 
-		isAcceptable: function() 
+		isAcceptable: function(aNotAcceptable) 
 		{
 			var badSessionName = false;
 			var badGroupName = false;
 			
-			if (gSessionManagerSessionPrompt.ggMenuListVisible) {
-				var groupName = gSessionManagerSessionPrompt.ggMenuList.value.trim();
-				badGroupName = (groupName == gSessionManagerSessionPrompt.gBackupGroupName)
-				gSessionManagerSessionPrompt.ggMenuList.inputField.setAttribute("badname", badGroupName);
+			if (this.ggMenuListVisible) {
+				var groupName = this.ggMenuList.value.trim();
+				badGroupName = (groupName == this.gBackupGroupName)
+				this.ggMenuList.inputField.setAttribute("badname", badGroupName);
 			}
 			
-			if (gSessionManagerSessionPrompt.gTextBoxVisible) {
-				var input = gSessionManagerSessionPrompt.gTextBox.value.trim().toLowerCase();
-				gSessionManagerSessionPrompt.gTextBox.setAttribute("badname", gSessionManagerSessionPrompt.gBackupNames[input]);
-				badSessionName = !input || gSessionManagerSessionPrompt.gBackupNames[input] || gSessionManagerSessionPrompt.gBannedNames[input];
+			if (this.gTextBoxVisible) {
+				var input = this.gTextBox.value.trim().toLowerCase();
+				this.gTextBox.setAttribute("badname", this.gBackupNames[input]);
+				badSessionName = !input || this.gBackupNames[input] || this.gBannedNames[input];
 			}
 			
-			gSessionManagerSessionPrompt.gAcceptButton.disabled = gSessionManagerSessionPrompt.gExtraButton.disabled =
-				gSessionManagerSessionPrompt.gInvalidTime || badSessionName || badGroupName || (this.gParams.autoSaveable && gSessionManager.isPrivateBrowserMode()) ||
-				(this.gParams.autoSaveable && gSessionManagerSessionBrowser.gNoTabsChecked) ||
-				(gSessionManagerSessionPrompt.gNeedSelection && (gSessionManagerSessionPrompt.gSessionTree.view.selection.count == 0 || (gSessionManagerSessionPrompt.gExistingName >= 0)));
+			this.gAcceptButton.disabled = this.gExtraButton.disabled = aNotAcceptable ||
+				this.gInvalidTime || badSessionName || badGroupName || (this.gParams.autoSaveable && gSessionManager.isPrivateBrowserMode()) ||
+				(this.gParams.autoSaveable && (gSessionManagerSessionBrowser.gNoTabsChecked || (gSessionManagerSessionBrowser.treeView.treeBox && gSessionManagerSessionBrowser.treeView.rowCount == 0))) ||
+				(this.gNeedSelection && (this.gSessionTree.view.selection.count == 0 || (this.gExistingName >= 0)));
 		},
 
 		// aParam = true if user clicked extra1 button (Append), false otherwise
@@ -788,7 +789,7 @@ with (com.morac) {
 				filename: filename,
 				groupName: this._("group_menu_list").value.trim(),
 				ignore: this._("checkbox_ignore").checked, 
-				sessionState: gSessionManagerSessionBrowser.gAllTabsChecked ? null : gSessionManagerSessionBrowser.storeSession(),
+				sessionState: gSessionManagerSessionBrowser.gAllTabsChecked ? null : gSessionManagerSessionBrowser.storeSession(this.gParams.autoSaveable),
 				sessionName: this._("text_box").value.trim()
 			};
 			
@@ -997,20 +998,30 @@ with (com.morac) {
 			
 			this.isAcceptable();
 		},
+		
+		correctSizeAndPosition: function(currentAcceptPositionDifference, topResize) 
+		{
+			var moveUp = topResize || ((window.screenY + window.outerHeight + this.gAcceptPositionDifference - currentAcceptPositionDifference) > window.screen.availHeight);
+			window.resizeTo(window.outerWidth,window.outerHeight + this.gAcceptPositionDifference - currentAcceptPositionDifference);
+			if (moveUp) window.moveBy(0, currentAcceptPositionDifference - this.gAcceptPositionDifference);
+			delete this.gTimerId;
+		},
 
 		// if the accept button is no longer moving when resizing, the window is too small so make it bigger.
-		resize: function(aEvent, aString)
+		resize: function()
 		{
-			var currentAcceptPositionDifference = window.outerHeight - gSessionManagerSessionPrompt.gAcceptButton.boxObject.y;
-			if (!gSessionManagerSessionPrompt.gAcceptPositionDifference) {
-				gSessionManagerSessionPrompt.gAcceptPositionDifference = currentAcceptPositionDifference;
+			var currentAcceptPositionDifference = window.outerHeight - this.gAcceptButton.boxObject.y;
+			var topResize = gSessionManagerSessionPrompt.gLastScreenY != window.screenY;
+			gSessionManagerSessionPrompt.gLastScreenY = window.screenY;
+			if (!this.gAcceptPositionDifference) {
+				this.gAcceptPositionDifference = currentAcceptPositionDifference;
 			}
-			else if (currentAcceptPositionDifference != gSessionManagerSessionPrompt.gAcceptPositionDifference) {
-				if (gSessionManagerSessionPrompt.gTimerId) {
-					clearTimeout(gSessionManagerSessionPrompt.gTimerId);
-					delete gSessionManagerSessionPrompt.gTimerId;
+			else if (currentAcceptPositionDifference < this.gAcceptPositionDifference) {
+				if (this.gTimerId) {
+					clearTimeout(this.gTimerId);
+					delete this.gTimerId;
 				}
-				gSessionManagerSessionPrompt.gTimerId = setTimeout(function() {window.resizeTo(window.outerWidth,window.outerHeight + gSessionManagerSessionPrompt.gAcceptPositionDifference - currentAcceptPositionDifference);}, 100);
+				this.gTimerId = setTimeout(function() { gSessionManagerSessionPrompt.correctSizeAndPosition(currentAcceptPositionDifference, topResize); }, 100);
 			}
 		},
 
@@ -1097,7 +1108,6 @@ with (com.morac) {
 			getColumnProperties: function(column, prop) { }
 		},
 	}
-	window.addEventListener("load", gSessionManagerSessionPrompt.onLoad_proxy, false);
 }
 
 // String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
