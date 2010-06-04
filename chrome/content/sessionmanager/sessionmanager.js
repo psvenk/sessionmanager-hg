@@ -12,6 +12,9 @@ with (com.morac) {
 	com.morac.gSessionManagerWindowObject = {
 		mFullyLoaded: false,
 		
+		// SessionManager Window ID
+		__SessionManagerWindowId: null,
+		
 		// timers
 		_win_timer : null,
 		_clear_state_timer: null,
@@ -77,6 +80,12 @@ with (com.morac) {
 				log("observe: Restore new window done, window session = " + this.__window_session_name, "DATA");
 				this._backup_window_sesion_data = null;
 				this.updateUndoButton();
+
+				// Update the __SessionManagerWindowId if it's not set (this should only be for the first browser window).
+				if (!this.__SessionManagerWindowId) {
+					this.__SessionManagerWindowId = window.__SSi;
+					SessionStore.setWindowValue(window, "__SessionManagerWindowId", window.__SSi);
+				}
 				break;
 			case "sessionmanager:update-undo-button":
 				// only update all windows if window state changed.
@@ -238,9 +247,12 @@ with (com.morac) {
 			}, this);
 			gBrowser.tabContainer.addEventListener("TabClose", this.onTabOpenClose, false);
 			gBrowser.tabContainer.addEventListener("TabOpen", this.onTabOpenClose, false)
+			gBrowser.tabContainer.addEventListener("TabMove", this.onTabMove, false)
 			if (gSessionManager.mPref_reload) {
 				gBrowser.tabContainer.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			}
+			gBrowser.tabContainer.addEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
+
 					
 			// Hide Session Manager toolbar item if option requested
 			this.showHideToolsMenu();
@@ -333,30 +345,34 @@ with (com.morac) {
 			if (gSessionManager._countWindows) {
 				OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:window-loaded", null);
 			}
+
+			// Store a window id for use when saving sessions.  Use the SessionStore __SSi value which exists for all
+			// windows except the first window open.  For first window set it when SS
+			if (window.__SSi) {
+				this.__SessionManagerWindowId = window.__SSi;
+				SessionStore.setWindowValue(window, "__SessionManagerWindowId", window.__SSi);
+			}
 			
-			// Detect page loads for session prompt
-			gBrowser.addEventListener("load", gSessionManagerWindowObject.onPageLoad, true);
+			// Update tab tree if it's open
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "WINDOW_OPEN " + this.__SessionManagerWindowId);
 			
 			log("onLoad end", "TRACE");
 		},
 
 		// This fires only when the window is manually closed by using the "X" or via a window.close() call
-		onClose_proxy: function(aEvent)
+		onClose_proxy: function()
 		{
 			log("onClose Fired", "INFO");
 			gSessionManagerWindowObject.onWindowCloseRequest();
 		},
 
 		// This fires any time the window is closed.  It fires too late to use SessionStore's setWindowValue.
-		onUnload_proxy: function()
+		onUnload_proxy: function(aEvent)
 		{
 			log("onUnload Fired", "INFO");
 			this.removeEventListener("close", gSessionManagerWindowObject.onClose_proxy, false);
 			this.removeEventListener("unload", gSessionManagerWindowObject.onUnload_proxy, false);
 			gSessionManagerWindowObject.onUnload();
-			
-			// Update tab tree if it's open
-			OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-tab-tree", null);
 		},
 
 		onUnload: function()
@@ -372,11 +388,10 @@ with (com.morac) {
 			
 			gBrowser.tabContainer.removeEventListener("TabClose", this.onTabOpenClose, false);
 			gBrowser.tabContainer.removeEventListener("TabOpen", this.onTabOpenClose, false);
-			if (gSessionManager.mPref_reload) {
-				gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
-			}
+			gBrowser.tabContainer.removeEventListener("TabMove", this.onTabMove, false)
+			gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			gBrowser.tabContainer.removeEventListener("click", this.onTabBarClick, false);
-			gBrowser.removeEventListener("load", gSessionManagerWindowObject.onPageLoad, true);
+			gBrowser.tabContainer.removeEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
 			
 			// stop watching for titlebar changes
 			gBrowser.ownerDocument.unwatch("title");
@@ -425,14 +440,13 @@ with (com.morac) {
 					gSessionManager.mAlreadyShutdown = true;
 				}
 			}
+			
+			// Update tab tree if it's open
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "WINDOW_CLOSE " + this.__SessionManagerWindowId);
+			
 			log("onUnload end", "TRACE");
 		},
 
-		onPageLoad: function() {
-			// Update tab tree if it's open
-			OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-tab-tree", null);
-		},
-		
 		// This is needed because a window close can be cancelled and we don't want to process such as closing a window
 		onWindowCloseRequest: function() {
 			log("onWindowCloseRequest start", "TRACE");
@@ -510,10 +524,20 @@ with (com.morac) {
 			// Give browser a chance to update count closed tab count.  Only SeaMonkey currently needs this, but it doesn't hurt Firefox.
 			setTimeout(gSessionManagerWindowObject.updateUndoButton, 0);
 			
-			// Update tab tree when tab is closed. The onPageLoad function will update when a tab is opened.
-			if (aEvent.type == "TabClose") OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-tab-tree", null);
+			// Update tab tree when tab is opened or closed. For open
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos);
+		},
+		
+		onTabMove: function(aEvent)
+		{
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos + " " + aEvent.detail);
 		},
 
+		onTabLoad: function(aEvent) {
+			// Update tab tree if it's open
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos);
+		},
+		
 		onTabRestoring_proxy: function(aEvent)
 		{
 			gSessionManagerWindowObject.onTabRestoring(aEvent);
