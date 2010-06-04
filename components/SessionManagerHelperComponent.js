@@ -256,7 +256,12 @@ SessionManagerHelperComponent.prototype = {
 				// Call the gPreferenceManager Module's initialize procedure
 				gPreferenceManager.initialize();
 				
-				this._restoreCache();
+				try {
+					// This seems to throw an error under OS X for whatever reason so catch it here to 
+					// allow gSessionManager to initialize
+					this._restoreCache();
+				}
+				catch (ex) { logError(ex); }
 				
 				// Call the gSessionManager Module's initialize procedure
 				gSessionManager.initialize();
