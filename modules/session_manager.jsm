@@ -3758,8 +3758,8 @@ var gSessionManager = {
 		}
 
 		// Save session manager window value for aWindow since it will be overwritten on load.  Other windows opened will have the value set correctly.
-		if (aWindow.__SSi && aWindow.gSessionManagerWindowObject) {
-			aWindow.gSessionManagerWindowObject.__SessionManagerWindowId = aWindow.__SSi;
+		if (aWindow.__SSi && aWindow.com.morac.gSessionManagerWindowObject) {
+			aWindow.com.morac.gSessionManagerWindowObject.__SessionManagerWindowId = aWindow.__SSi;
 			SessionStore.setWindowValue(aWindow, "__SessionManagerWindowId", aWindow.__SSi);
 		}
 		
