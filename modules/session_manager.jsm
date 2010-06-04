@@ -649,7 +649,7 @@ var gSessionManager = {
 		if ((!aWindow && aOneWindow) || this.isPrivateBrowserMode()) return;
 		
 		// Save Window should be modal
-		let values = aValues || { text: this.getFormattedName((aWindow ? (aWindow.content.document.title || "about:blank") : ""), new Date()) || (new Date()).toLocaleString(), 
+		let values = aValues || { text: aWindow ? (this.getFormattedName((aWindow.content.document.title || "about:blank"), new Date()) || (new Date()).toLocaleString()) : "", 
 		                          autoSaveable : true, allowNamedReplace : this.mPref_allowNamedReplace, 
 								  callbackData: (aOneWindow ? null : { type: "save", window__SSi: (aWindow ? aWindow.__SSi : null), oneWindow: aOneWindow })};
 								  
