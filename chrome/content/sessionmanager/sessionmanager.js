@@ -251,7 +251,15 @@ with (com.morac) {
 			if (gSessionManager.mPref_reload) {
 				gBrowser.tabContainer.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			}
+			// In Firefox 3.0 and 3.5 the following is good enough, but in Firefox 3.6 and above this doesn't detect cached page loads on 
+			// Pages which cache and the favicon doesn't change (like Google).
+			// The "pageshow" event does fire on this, but that is on a browser not on a tab so there's no way to determine what tab loaded.  It also
+			// fires on all page loads so there's no way to be selective about it.  Not sure what can be done about that other than to update all the tabs maybe.
 			gBrowser.tabContainer.addEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
+			if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") >= 0) {
+				// TODO: get this working
+//				gBrowser.addEventListener("pageshow", gSessionManagerWindowObject.onTabLoad, true);
+			}
 
 					
 			// Hide Session Manager toolbar item if option requested
@@ -392,6 +400,10 @@ with (com.morac) {
 			gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			gBrowser.tabContainer.removeEventListener("click", this.onTabBarClick, false);
 			gBrowser.tabContainer.removeEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
+			if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") >= 0) {
+				// TODO: get this working
+//				gBrowser.removeEventListener("pageshow", gSessionManagerWindowObject.onTabLoad, true);
+			}
 			
 			// stop watching for titlebar changes
 			gBrowser.ownerDocument.unwatch("title");
@@ -535,7 +547,7 @@ with (com.morac) {
 
 		onTabLoad: function(aEvent) {
 			// Update tab tree if it's open
-			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos);
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos + " " + aEvent.target.image);
 		},
 		
 		onTabRestoring_proxy: function(aEvent)
