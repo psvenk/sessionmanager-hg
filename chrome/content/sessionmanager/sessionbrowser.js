@@ -64,10 +64,30 @@ with (com.morac) {
 		aShowWindowSessions: false,
 		
 		updateData: null,
+		
+		// If auto-save checkbox is visible, this means we are saving so notify windows to listen for tab moves and page loads, otherwise tell them not to listen
+		// Only send notification if tab tree is also visible (not saving window)
+		autoSaveCheckBoxChange: function(aEvent) {
+			if ((aEvent.attrName == "hidden") && gSessionManagerSessionPrompt.gParams.callbackData && !gSessionManagerSessionPrompt.gParams.callbackData.oneWindow) {
+				var wasTabTreeVisible = gSessionManager.savingTabTreeVisible;
+				gSessionManager.savingTabTreeVisible = (aEvent.newValue != "true");
+
+				// If status changed, notifiy windows
+				if (wasTabTreeVisible != gSessionManager.savingTabTreeVisible) {
+					OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:save-tab-tree-change", gSessionManager.savingTabTreeVisible ? "open" : "close");
+				}
+			}
+		},
 
 		onUnload_proxy: function(aEvent) {
 			this.removeEventListener("unload", gSessionManagerSessionBrowser.onUnload_proxy, false);
 			OBSERVER_SERVICE.removeObserver(gSessionManagerSessionBrowser, "sessionmanager:update-tab-tree");
+			
+			// if windows are watching for page loads and tab moves tell them to stop
+			if (gSessionManager.savingTabTreeVisible) {
+				gSessionManager.savingTabTreeVisible = false;
+				OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:save-tab-tree-change", "close");
+			}
 		},
 		
 		// Used to update tree when session data changes
@@ -83,14 +103,15 @@ with (com.morac) {
 					// Anything within 200 ms is considered the same load so it restarts another timer for 200 ms.  This means that if loads keep happening with
 					// a periodicity of less than 200 ms, the timer will never expire.  Loads where the favicon changes are considered unique loads. 
 					// Also other events like tab closes or loads can result in the tree getting out of sync, though updateTree has some protective code to prevent that from happening.
-					// Normally there are 2 loads per page, one for the page and one for the favicon.
+					// Normally there are 2 "real" loads per page, one for the page and one for the favicon.
+					// Currently "load" is only sent in Firefox 3.5 and lower and "pageshow" is never sent.  Firefox 3.6 and up use different notifications that are sent less often.
 					var timeout = 100;
 					var data = aData.split(" ");
 					if ((data[0] == "load") || (data[0] == "pageshow")) {
 						timeout = 200;
 						var id = aSubject.com.morac.gSessionManagerWindowObject.__SessionManagerWindowId + " " + data[1] + " " + data[2];
 						// If timer already set for a load on thie tab, clear it and start the timer again.  This can result
-						// in loads getting out of sync with other tab events since other events have a 0ms wait time.
+						// in loads getting out of sync with other tab events since other events have a 100 ms wait time.
 						if (this.gTimerId && this.gLastLoadedTab == id) {
 							clearTimeout(this.gTimerId);
 							delete this.gTimerId;
@@ -262,13 +283,16 @@ with (com.morac) {
 		
 		// This is called any time there is an updated tab event or window event.  In all cases:
 		//    - updateData.window contains window object that is opening or closing or that contains the tab.
-		//    - data[0] contains a string of what happened (TabOpen, TabClose, TabMove, load (or pageshow), "WINDOW_OPEN" or "WINDOW_CLOSE")
+		//    - data[0] contains a string of what happened (TabOpen, TabClose, TabMove, load, pageshow, locationChange, iconChange, windowOpen or windowClose)
 		//    - data[1] contains the tab position for tabs or the extData.__SessionManagerWindowId window value for windows
 		//    - data[2] contains the original tab position for TabMove.  It contains the favicon URL for load (or pageshow). It is undefined for all other events.
+		//
+		// Note: Currently "load" is only used in Firefox 3.5 and lower and locationChange and iconChange is only used in Firefox 3.6 and higher.  
+		//       pageshow isn't currently used, but left here for compatibility reasons.
 		updateTree: function() {
-			dump("updateTree: " + this.updateData.data + "\n");
+			//dump("updateTree: " + this.updateData.data + "\n");
 			var data = this.updateData.data.split(" ");
-			var removing = (data[0] == "WINDOW_CLOSE") || (data[0] == "TabClose");
+			var removing = (data[0] == "windowClose") || (data[0] == "TabClose");
 			var new_window_state = removing ? null : SessionStore.getWindowState(this.updateData.window);
 			if (new_window_state) {
 				new_window_state = gSessionManager.JSON_decode(new_window_state);
@@ -276,7 +300,7 @@ with (com.morac) {
 			}
 
 			// If window is opening add it's state to end of current state since open windows are added to the end of the session
-			if (data[0] == "WINDOW_OPEN") {
+			if (data[0] == "windowOpen") {
 				var row = this.treeView.rowCount;
 				this.addWindowStateObjectToTree(new_window_state.windows[0], this.gStateObject.windows.length);
 				this.gTabTree.treeBoxObject.rowCountChanged(row, new_window_state.windows[0].tabs.length + 1);
@@ -284,9 +308,9 @@ with (com.morac) {
 				this.gStateObject.windows.selectedWindow = this.gStateObject.windows.length - 1;
 			}
 			else {
-				var isWindow = (data[0] == "WINDOW_CLOSE");
+				var isWindow = (data[0] == "windowClose");
 				var adding = (data[0] == "TabOpen");
-				var loading = (data[0] == "load") || (data[0] == "pageshow");
+				var loading = (data[0] == "load") || (data[0] == "pageshow") || (data[0] == "locationChange") || (data[0] == "iconChange");
 			
 				var window_id = isWindow ? data[1] : SessionStore.getWindowValue(this.updateData.window,"__SessionManagerWindowId");
 				var tab_position = !isWindow ? parseInt(data[1]) : null;
@@ -304,11 +328,12 @@ with (com.morac) {
 								// sometimes when the last time was just closed, Firefox uses a tab position of 1.  This causes the following to throw an exception so adjust
 								// the tab_position variable so it's valid.
 								if (adding || loading) {
-									if (this.gTreeData[j].tabs.length <= tab_position) tab_position = this.gTreeData[j].tabs.length - 1;
+									var length = adding ? new_window_state.windows[0].tabs.length : this.gTreeData[j].tabs.length;
+									if (length <= tab_position) tab_position = length - 1;
 									if (tab_position < 0) tab_position = 0;
 								}
-								// Get tab tree state
-								var tabData = (removing || moving) ? null : this.addTabStateObjectToTree(new_window_state.windows[0].tabs[tab_position], this.gTreeData[j]);
+								// Get tab tree state - don't bother copying parent window if loading since we don't use that
+								var tabData = (removing || moving) ? null : this.addTabStateObjectToTree(new_window_state.windows[0].tabs[tab_position], loading ? null : this.gTreeData[j]);
 								var pos = isWindow ? j : (j + tab_position + 1);
 								var windowOpen = this.treeView.isContainerOpen(j);
 								if (loading && this.gTreeData[j].tabs.length > 0) {
@@ -377,7 +402,7 @@ with (com.morac) {
 						switch(data[0]) {
 							// If closing window or tab, need to delete it from gStateObject
 							// If changing tabs, simply replace the old window state with the new one to make things simpler
-							case "WINDOW_CLOSE":
+							case "windowClose":
 								this.gStateObject.windows.splice(i, 1);
 								break;
 							case "TabClose":
@@ -386,6 +411,9 @@ with (com.morac) {
 							case "TabOpen":
 							case "TabMove":
 							case "load":
+							case "pageshow":
+							case "locationChange":
+							case "iconChange":
 								this.gStateObject.windows[i] = new_window_state.windows[0];
 								break;
 						}
