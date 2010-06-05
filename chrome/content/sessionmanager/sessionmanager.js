@@ -28,6 +28,37 @@ with (com.morac) {
 
 /* ........ Observers .............. */
 
+		// Listener for changes to tabs - See https://developer.mozilla.org/En/Listening_to_events_on_all_tabs
+		// Only care about location and favicon changes
+		// This is only registered when tab tree is visiable in session prompt window while saving
+		tabProgressListener: {
+		
+			findTabIndexForBrowser: function(aBrowser) {
+				// Check each tab of this browser instance
+				for (var index = 0; index < gBrowser.browsers.length; index++) {
+					if (aBrowser == gBrowser.getBrowserAtIndex(index)) return index;
+				}
+				return null;
+			},
+			
+			// Interface functions
+			onLocationChange: function(aBrowser, webProgress, request, location) {
+				var index = this.findTabIndexForBrowser(aBrowser);
+				if (index != null) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "locationChange " + index);
+			},
+			
+			onLinkIconAvailable: function(aBrowser) {
+				var index = this.findTabIndexForBrowser(aBrowser);
+				if (index != null) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "iconChange " + index);
+			},
+
+			onProgressChange: function() {},
+			onSecurityChange: function() {},
+			onStateChange: function() {},
+			onStatusChange: function() {},
+			onRefreshAttempted: function() { return true; }
+		},
+
 		observe: function(aSubject, aTopic, aData)
 		{
 			log("gSessionManagerWindowObject.observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
@@ -58,6 +89,34 @@ with (com.morac) {
 				case "_autosave_values":
 					gBrowser.updateTitlebar();
 					break;
+				}
+				break;
+			case "sessionmanager:save-tab-tree-change":
+				// In Firefox 3.0 and 3.5 the gBrowser.tabContainer "load" event always fires (multiple times) for any page load, even when reading cached pages.
+				// In Firefox 3.6 and above, it won't fire for cached pages where the favicon doesn't change. For example going back and forth on Google's site pages.
+				// Using addTabsProgressListener instead of "load" works in this case.  It doesn't return the tab, but we can easily get it by
+				// searching all tabs to find the one that contains the event's target (getBrowserForTab()).  
+				// Since this is slower, than the "load" method only do it if needed (Firefox 3.6 and above) and only do either if save window's tab tree is visible.
+				switch (aData) {
+					case "open":
+						gBrowser.tabContainer.addEventListener("TabMove", this.onTabMove, false);
+						// For Firefox 3.5 and lower use tabbrowser "load" event otherwise use browser "addTabsProgressListener" notification
+						if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") < 0) {
+							gBrowser.tabContainer.addEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
+						}
+						else {
+							gBrowser.addTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+						}
+						break;
+					case "close":
+						gBrowser.tabContainer.removeEventListener("TabMove", this.onTabMove, false);
+						if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") < 0) {
+							gBrowser.tabContainer.removeEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
+						}
+						else {
+							gBrowser.removeTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+						}
+						break;
 				}
 				break;
 			case "sessionmanager:close-windowsession":
@@ -247,20 +306,20 @@ with (com.morac) {
 			}, this);
 			gBrowser.tabContainer.addEventListener("TabClose", this.onTabOpenClose, false);
 			gBrowser.tabContainer.addEventListener("TabOpen", this.onTabOpenClose, false)
-			gBrowser.tabContainer.addEventListener("TabMove", this.onTabMove, false)
 			if (gSessionManager.mPref_reload) {
 				gBrowser.tabContainer.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			}
-			// In Firefox 3.0 and 3.5 the following is good enough, but in Firefox 3.6 and above this doesn't detect cached page loads on 
-			// Pages which cache and the favicon doesn't change (like Google).
-			// The "pageshow" event does fire on this, but that is on a browser not on a tab so there's no way to determine what tab loaded.  It also
-			// fires on all page loads so there's no way to be selective about it.  Not sure what can be done about that other than to update all the tabs maybe.
-			gBrowser.tabContainer.addEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
-			if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") >= 0) {
-				// TODO: get this working
-//				gBrowser.addEventListener("pageshow", gSessionManagerWindowObject.onTabLoad, true);
+			// If saving tab tree currently open, add event listeners
+			if (gSessionManager.savingTabTreeVisible) {
+				gBrowser.tabContainer.addEventListener("TabMove", this.onTabMove, false);
+				// For Firefox 3.5 and lower use tabbrowser "load" event otherwise use browser "addTabsProgressListener" notification
+				if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") < 0) {
+					gBrowser.tabContainer.addEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
+				}
+				else {
+					gBrowser.addTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+				}
 			}
-
 					
 			// Hide Session Manager toolbar item if option requested
 			this.showHideToolsMenu();
@@ -339,13 +398,12 @@ with (com.morac) {
 				}
 			} catch(ex) {}
 			
-			// Put up one time message after upgrade if it needs to be displayed
+			// Put up one time message after upgrade if it needs to be displayed - only done for one window
 			if (gSessionManager._displayUpdateMessage) {
 				let url = gSessionManager._displayUpdateMessage;
 				delete(gSessionManager._displayUpdateMessage);
 				setTimeout(function() {
-					let tBrowser = getBrowser();
-					tBrowser.selectedTab = tBrowser.addTab(url);
+					gBrowser.selectedTab = gBrowser.addTab(url);
 				},100);
 			}
 			
@@ -362,7 +420,7 @@ with (com.morac) {
 			}
 			
 			// Update tab tree if it's open
-			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "WINDOW_OPEN " + this.__SessionManagerWindowId);
+			if (gSessionManager.savingTabTreeVisible) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "windowOpen " + this.__SessionManagerWindowId);
 			
 			log("onLoad end", "TRACE");
 		},
@@ -393,18 +451,16 @@ with (com.morac) {
 			WIN_OBSERVING.forEach(function(aTopic) {
 				OBSERVER_SERVICE.removeObserver(this, aTopic);
 			}, this);
-			
+
+			// Remomving events that weren't added doesn't hurt anything so remove all possible events.
 			gBrowser.tabContainer.removeEventListener("TabClose", this.onTabOpenClose, false);
 			gBrowser.tabContainer.removeEventListener("TabOpen", this.onTabOpenClose, false);
 			gBrowser.tabContainer.removeEventListener("TabMove", this.onTabMove, false)
 			gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			gBrowser.tabContainer.removeEventListener("click", this.onTabBarClick, false);
 			gBrowser.tabContainer.removeEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
-			if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") >= 0) {
-				// TODO: get this working
-//				gBrowser.removeEventListener("pageshow", gSessionManagerWindowObject.onTabLoad, true);
-			}
-			
+			if (typeof gBrowser.removeTabsProgressListener == "function") gBrowser.removeTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+
 			// stop watching for titlebar changes
 			gBrowser.ownerDocument.unwatch("title");
 
@@ -454,7 +510,7 @@ with (com.morac) {
 			}
 			
 			// Update tab tree if it's open
-			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "WINDOW_CLOSE " + this.__SessionManagerWindowId);
+			if (gSessionManager.savingTabTreeVisible) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "windowClose " + this.__SessionManagerWindowId);
 			
 			log("onUnload end", "TRACE");
 		},
@@ -537,14 +593,16 @@ with (com.morac) {
 			setTimeout(gSessionManagerWindowObject.updateUndoButton, 0);
 			
 			// Update tab tree when tab is opened or closed. For open
-			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos);
+			if (gSessionManager.savingTabTreeVisible) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos);
 		},
 		
+		// This is only registered when tab tree is visiable in session prompt window while saving
 		onTabMove: function(aEvent)
 		{
 			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos + " " + aEvent.detail);
 		},
 
+		// This is only registered when tab tree is visiable in session prompt window while saving
 		onTabLoad: function(aEvent) {
 			// Update tab tree if it's open
 			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos + " " + aEvent.target.image);
