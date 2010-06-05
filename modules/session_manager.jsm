@@ -48,7 +48,8 @@ const OBSERVING = ["browser:purge-session-history", "quit-application-requested"
 
 // Observers to register for per window.  WIN_OBSERVING2 is for notifications that won't be removed for the last window closed
 const WIN_OBSERVING = ["sessionmanager:update-undo-button", "sessionmanager:updatetitlebar", "sessionmanager:initial-windows-restored",
-                       "sessionmanager:close-windowsession", "sessionmanager:nsPref:changed", "browser:purge-session-history", "private-browsing"];
+                       "sessionmanager:save-tab-tree-change", "sessionmanager:close-windowsession", "sessionmanager:nsPref:changed", 
+					   "browser:purge-session-history", "private-browsing"];
 const WIN_OBSERVING2 = ["sessionmanager:process-closed-window", "quit-application-granted"];
 
 // Services that will always exist, save a pointer to them so they are available during shut down.
@@ -107,6 +108,9 @@ var gSessionManager = {
 	_number_of_windows: 0,
 	_crash_session_filename: null,
 	
+	// Used to indicate whether or not saving tab tree needs to be updated
+	savingTabTreeVisible: false,
+	
 	// Used for encryption thread so we don't have more than one
 	_encrypt_thread: null,
 	_encrypt_change_queued: 0,
@@ -145,11 +149,14 @@ var gSessionManager = {
 	
 	// Callback used to get extensions in Firefox 4.0 and higher
 	getExtensionsCallback: function(extensions) {
-		gSessionManager.checkForUpdate(extensions, true);
+		try {
+			gSessionManager.checkForUpdate(extensions);
+		}
+		catch(ex) { logError(ex); }
 	},
 	
 	// Check for updated version and make any required changes
-	checkForUpdate: function(extensions, aInternalCall) {
+	checkForUpdate: function(extensions) {
 		let oldVersion = gPreferenceManager.get("version", "");
 		let newVersion = extensions.get("{1280606b-2510-4fe0-97ef-9b5a22eafe30}").version;
 		if (oldVersion != newVersion)
@@ -231,15 +238,6 @@ var gSessionManager = {
 				// If development version, go to development change page
 				let dev_version = (/pre\d*/.test(newVersion));
 				this._displayUpdateMessage = dev_version ? FIRST_URL_DEV : FIRST_URL;
-			}
-			
-			// If called from Firefox 4.0's getExtensions callback, it's too late to set _displayUpdateMessage so
-			// just open the tab ourselves.
-			if (aInternalCall) {
-				let window = this.getMostRecentWindow("navigator:browser");
-				let tab = window.gBrowser.addTab(this._displayUpdateMessage);
-				window.gBrowser.selectedTab = tab;
-				this._displayUpdateMessage = null;
 			}
 		}
 	},
@@ -333,9 +331,11 @@ var gSessionManager = {
 			OBSERVER_SERVICE.addObserver(this, aTopic, false);
 		}, this);
 		
-		// Perform any needed update processing here for Firefox 3.6 or earlier.
+		// Perform any needed update processing here.  For Firefox 4.0 and greater need to use the getExtensions callback
 		if (Application.extensions) {
 			this.checkForUpdate(Application.extensions);
+		} else {
+			Application.getExtensions(gSessionManager.getExtensionsCallback);
 		}
 	
 		log("gSessionManager initialize end", "TRACE");
