@@ -168,7 +168,9 @@ SessionManagerHelperComponent.prototype = {
 	classDescription: "Session Manager Helper Component",
 	classID:          Components.ID("{5714d620-47ce-11db-b0de-0800200c9a66}"),
 	contractID:       "@morac/sessionmanager-helper;1",
-	_xpcom_categories: [{ category: "app-startup", service: true },
+	// profile-after-change can only be registered in Firefox 3.5 and higher so need to add it as
+	// an event listener in "app-startup" notification in Firefox 3.0.
+	_xpcom_categories: [{ category: "app-startup", service: true }, { category: "profile-after-change"},
 	                    { category: "command-line-handler", entry: "sessionmanager" }],
 						
 	// State variables
@@ -237,7 +239,10 @@ SessionManagerHelperComponent.prototype = {
 		switch (aTopic)
 		{
 		case "app-startup":
-			os.addObserver(this, "profile-after-change", false);
+			// Need to register for "profile-after-change" here in Firefox 3.0
+			if (VERSION_COMPARE_SERVICE.compare(Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).platformVersion,"1.9.1a1pre") < 0) {
+				os.addObserver(this, "profile-after-change", false);
+			}
 			os.addObserver(this, "final-ui-startup", false);
 			os.addObserver(this, "sessionstore-state-read", false);
 			os.addObserver(this, "sessionstore-windows-restored", false);
@@ -250,7 +255,10 @@ SessionManagerHelperComponent.prototype = {
 			this.handlePrivacyChange(aSubject, aData);
 			break;
 		case "profile-after-change":
-			os.removeObserver(this, aTopic);
+			// Need to unregister here in Firefox 3.0
+			if (VERSION_COMPARE_SERVICE.compare(Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).platformVersion,"1.9.1a1pre") < 0) {
+				os.removeObserver(this, aTopic);
+			}
 			try
 			{
 				// Call the gPreferenceManager Module's initialize procedure
@@ -286,11 +294,6 @@ SessionManagerHelperComponent.prototype = {
 			os.addObserver(this, "sessionmanager-preference-save", false);
 			os.addObserver(this, "sessionmanager:restore-startup-preference", false);
 			os.addObserver(this, "sessionmanager:ignore-preference-changes", false);
-			
-			// Check for updated version here in Firefox 4.0 or above because Application.getExtensions returns null prior to now.
-			if (!Application.extensions) {
-				Application.getExtensions(gSessionManager.getExtensionsCallback);
-			}
 			
 			// Observe startup preference
 			gPreferenceManager.observe(BROWSER_STARTUP_PAGE_PREFERENCE, this, false, true);
