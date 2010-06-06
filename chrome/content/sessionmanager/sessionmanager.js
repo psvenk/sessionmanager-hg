@@ -122,7 +122,7 @@ with (com.morac) {
 			case "sessionmanager:close-windowsession":
 				// notification will either specify specific window session name or be null for all window sessions
 				if (this.__window_session_name && (!aData || (this.__window_session_name == aData))) {
-					let abandon = aSubject.QueryInterface(Ci.nsISupportsPRBool).data;
+					let abandon = aSubject.QueryInterface(Components.interfaces.nsISupportsPRBool).data;
 					log((abandon ? "Abandoning" : "Closing") + " window session " + this.__window_session_name);
 					if (abandon) {
 						gSessionManager.abandonSession(window);
@@ -368,7 +368,14 @@ with (com.morac) {
 			
 			// Watch for changes to the titlebar so we can add our sessionname after it since 
 			// DOMTitleChanged doesn't fire every time the title changes in the titlebar.
-			gBrowser.ownerDocument.watch("title", gSessionManagerWindowObject.updateTitlebar);
+			// If Firefox we can watch gBrowser.ownerDocument since that changes when the title changes, in SeaMonkey it doesn't change
+			// and there's nothing else to watch so we need to do a hook.
+			if (Application.name != "SeaMonkey" ) {
+				gBrowser.ownerDocument.watch("title", gSessionManagerWindowObject.updateTitlebar);
+			}
+			else {
+				eval("gBrowser.updateTitlebar = " + gBrowser.updateTitlebar.toString().replace('window.QueryInterface(nsIInterfaceRequestor)', 'newTitle = gSessionManagerWindowObject.updateTitlebar("title", "", newTitle); $&'));
+			}
 			gBrowser.updateTitlebar();
 
 			// Workaround for bug 366986
@@ -459,11 +466,13 @@ with (com.morac) {
 			gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			gBrowser.tabContainer.removeEventListener("click", this.onTabBarClick, false);
 			gBrowser.tabContainer.removeEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
-			if (typeof gBrowser.removeTabsProgressListener == "function") gBrowser.removeTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+			// Only remove this if the function exists (Firefox 3.5 and up)
+			if (typeof gBrowser.removeTabsProgressListener == "function")
+				gBrowser.removeTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
 
 			// stop watching for titlebar changes
 			gBrowser.ownerDocument.unwatch("title");
-
+			
 			
 			// Last window closing will leaks briefly since mObserving2 observers are not removed from it 
 			// until after shutdown is run, but since browser is closing anyway, who cares?
@@ -533,8 +542,8 @@ with (com.morac) {
 					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:gSessionManager._string("untitled_window"));
 					
 					// Set up a one second timer to clear the saved data in case the window isn't actually closing
-					this._clear_state_timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-					this._clear_state_timer.init(gSessionManagerWindowObject, 1000, Ci.nsITimer.TYPE_ONE_SHOT);
+					this._clear_state_timer = Cc["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+					this._clear_state_timer.init(gSessionManagerWindowObject, 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 				}
 			}
 			catch(ex) { 
@@ -586,26 +595,26 @@ with (com.morac) {
 		},
 		
 /* ........ Tab Listeners .............. */
-		
+
 		onTabOpenClose: function(aEvent)
 		{
 			// Give browser a chance to update count closed tab count.  Only SeaMonkey currently needs this, but it doesn't hurt Firefox.
 			setTimeout(gSessionManagerWindowObject.updateUndoButton, 0);
 			
 			// Update tab tree when tab is opened or closed. For open
-			if (gSessionManager.savingTabTreeVisible) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos);
+			if (gSessionManager.savingTabTreeVisible) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + gSessionManagerWindowObject.findTabIndex(aEvent.target));
 		},
 		
 		// This is only registered when tab tree is visiable in session prompt window while saving
 		onTabMove: function(aEvent)
 		{
-			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos + " " + aEvent.detail);
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + gSessionManagerWindowObject.findTabIndex(aEvent.target) + " " + aEvent.detail);
 		},
 
 		// This is only registered when tab tree is visiable in session prompt window while saving
 		onTabLoad: function(aEvent) {
 			// Update tab tree if it's open
-			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + aEvent.target._tPos + " " + aEvent.target.image);
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + gSessionManagerWindowObject.findTabIndex(aEvent.target) + " " + aEvent.target.image);
 		},
 		
 		onTabRestoring_proxy: function(aEvent)
@@ -692,8 +701,20 @@ with (com.morac) {
 				aButton.open = true;
 			}
 		},
-	
+		
 /* ........ Miscellaneous Enhancements .............. */
+
+		// For Firefox, the tab index is stored in _tPos, but for SeaMonkey that isn't available so we have to search for it.
+		findTabIndex: function(aTab) {
+			if (typeof aTab._tPos != "undefined") return aTab._tPos
+			else {
+				// Check each tab of this browser instance
+				for (var index = 0; index < aTab.parentNode.childNodes.length; index++) {
+					if (aTab == aTab.parentNode.childNodes[index]) return index;
+				}
+				return null;
+			}
+		},
 
 		appendClosedWindow: function(aState)
 		{
@@ -726,8 +747,8 @@ with (com.morac) {
 				log("checkWinTimer: Window Timer stopped", "INFO");
 			}
 			else if (!this._win_timer && (this.__window_session_time > 0) && this.__window_session_name) {
-				this._win_timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
-				this._win_timer.init(gSessionManagerWindowObject, this.__window_session_time * 60000, Ci.nsITimer.TYPE_REPEATING_PRECISE);
+				this._win_timer = Cc["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+				this._win_timer.init(gSessionManagerWindowObject, this.__window_session_time * 60000, Components.interfaces.nsITimer.TYPE_REPEATING_PRECISE);
 				log("checkWinTimer: Window Timer started for " + this.__window_session_time + " minutes", "INFO");
 			}
 		},
@@ -796,7 +817,7 @@ with (com.morac) {
 		
 		doTMPConvertFile: function(aFileUri, aSilent)
 		{
-			Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Ci.mozIJSSubScriptLoader).loadSubScript("chrome://sessionmanager/content/sessionconvert.js");
+			Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://sessionmanager/content/sessionconvert.js");
 			delete(gSessionSaverConverter);
 			gConvertTMPSession.init(true);
 			if (!gConvertTMPSession.convertFile(aFileUri, aSilent) && !aSilent) {
