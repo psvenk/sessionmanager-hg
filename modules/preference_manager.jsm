@@ -5,11 +5,35 @@ const Cu = Components.utils;
 // import modules
 Cu.import("resource://sessionmanager/modules/logger.jsm");
 
-// Services
-const Application = (Cc["@mozilla.org/fuel/application;1"]) ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
-                    ((Cc["@mozilla.org/smile/application;1"]) ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
-const mObserverService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
-const mPreferenceBranch = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);				
+// Get lazy getter functions from XPCOMUtils or define them if they don't exist (only defined in Firefox 3.6 and up)
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+if (typeof XPCOMUtils.defineLazyGetter == "undefined") {
+	XPCOMUtils.defineLazyGetter = function XPCU_defineLazyGetter(aObject, aName, aLambda)
+	{
+		aObject.__defineGetter__(aName, function() {
+			delete aObject[aName];
+			return aObject[aName] = aLambda.apply(aObject);
+		});
+	}
+}
+if (typeof XPCOMUtils.defineLazyServiceGetter == "undefined") {
+	XPCOMUtils.defineLazyServiceGetter = function XPCU_defineLazyServiceGetter(aObject, aName, aContract, aInterfaceName)
+	{
+		this.defineLazyGetter(aObject, aName, function XPCU_serviceLambda() {
+			return Cc[aContract].getService(Ci[aInterfaceName]);
+		});
+	}
+}
+
+// Lazily define services
+XPCOMUtils.defineLazyServiceGetter(this, "mObserverService", "@mozilla.org/observer-service;1", "nsIObserverService");
+XPCOMUtils.defineLazyServiceGetter(this, "mPreferenceBranch", "@mozilla.org/preferences-service;1", "nsIPrefBranch2");
+if (Cc["@mozilla.org/fuel/application;1"]) {
+	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/fuel/application;1", "fuelIApplication");
+}
+else if (Cc["@mozilla.org/smile/application;1"]) {
+	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/smile/application;1", "smileIApplication");
+}
 
 // Constants
 const OLD_PREFERENCE_ROOT = "extensions.sessionmanager.";

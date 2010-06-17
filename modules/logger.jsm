@@ -8,16 +8,42 @@ const ERROR_STRING_NAME = "file_not_found";
 
 const Cc = Components.classes;
 const Ci = Components.interfaces
+const Cu = Components.utils;
 const report = Components.utils.reportError;
 
-// Get and store services
-const mPromptService = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
-const mConsoleService = Cc['@mozilla.org/consoleservice;1'].getService(Ci.nsIConsoleService);
-const mObserverService = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
-const mPreferenceBranch = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
-const Application = (Cc["@mozilla.org/fuel/application;1"]) ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
-                    ((Cc["@mozilla.org/smile/application;1"]) ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
+// Get lazy getter functions from XPCOMUtils or define them if they don't exist (only defined in Firefox 3.6 and up)
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+if (typeof XPCOMUtils.defineLazyGetter == "undefined") {
+	XPCOMUtils.defineLazyGetter = function XPCU_defineLazyGetter(aObject, aName, aLambda)
+	{
+		aObject.__defineGetter__(aName, function() {
+			delete aObject[aName];
+			return aObject[aName] = aLambda.apply(aObject);
+		});
+	}
+}
+if (typeof XPCOMUtils.defineLazyServiceGetter == "undefined") {
+	XPCOMUtils.defineLazyServiceGetter = function XPCU_defineLazyServiceGetter(aObject, aName, aContract, aInterfaceName)
+	{
+		this.defineLazyGetter(aObject, aName, function XPCU_serviceLambda() {
+			return Cc[aContract].getService(Ci[aInterfaceName]);
+		});
+	}
+}
 
+// Lazily define services
+XPCOMUtils.defineLazyServiceGetter(this, "mPromptService", "@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+XPCOMUtils.defineLazyServiceGetter(this, "mConsoleService", "@mozilla.org/consoleservice;1", "nsIConsoleService");
+XPCOMUtils.defineLazyServiceGetter(this, "mObserverService", "@mozilla.org/observer-service;1", "nsIObserverService");
+XPCOMUtils.defineLazyServiceGetter(this, "mPreferenceBranch", "@mozilla.org/preferences-service;1", "nsIPrefBranch2");
+if (Cc["@mozilla.org/fuel/application;1"]) {
+	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/fuel/application;1", "fuelIApplication");
+}
+else if (Cc["@mozilla.org/smile/application;1"]) {
+	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/smile/application;1", "smileIApplication");
+}
+  
+// Exported functions
 var EXPORTED_SYMBOLS = ["log", "logError", "deleteLogFile", "openLogFile", "logging_level"];
 
 // logging level

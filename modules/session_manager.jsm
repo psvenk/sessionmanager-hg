@@ -29,6 +29,26 @@ Cu.import("resource://sessionmanager/modules/logger.jsm");
 Cu.import("resource://sessionmanager/modules/preference_manager.jsm");
 Cu.import("resource://sessionmanager/modules/password_manager.jsm");
 
+// Get lazy getter functions from XPCOMUtils or define them if they don't exist (only defined in Firefox 3.6 and up)
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+if (typeof XPCOMUtils.defineLazyGetter == "undefined") {
+	XPCOMUtils.defineLazyGetter = function XPCU_defineLazyGetter(aObject, aName, aLambda)
+	{
+		aObject.__defineGetter__(aName, function() {
+			delete aObject[aName];
+			return aObject[aName] = aLambda.apply(aObject);
+		});
+	}
+}
+if (typeof XPCOMUtils.defineLazyServiceGetter == "undefined") {
+	XPCOMUtils.defineLazyServiceGetter = function XPCU_defineLazyServiceGetter(aObject, aName, aContract, aInterfaceName)
+	{
+		this.defineLazyGetter(aObject, aName, function XPCU_serviceLambda() {
+			return Cc[aContract].getService(Ci[aInterfaceName]);
+		});
+	}
+}
+
 //
 // Constants
 //
@@ -52,21 +72,26 @@ const WIN_OBSERVING = ["sessionmanager:update-undo-button", "sessionmanager:upda
 					   "browser:purge-session-history", "private-browsing"];
 const WIN_OBSERVING2 = ["sessionmanager:process-closed-window", "quit-application-granted"];
 
-// Services that will always exist, save a pointer to them so they are available during shut down.
-const OBSERVER_SERVICE = Cc["@mozilla.org/observer-service;1"].getService(Ci.nsIObserverService);
-const WINDOW_MEDIATOR_SERVICE = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
-const PROMPT_SERVICE = Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService);
-const IO_SERVICE = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-const SECRET_DECODER_RING_SERVICE = Cc["@mozilla.org/security/sdr;1"].getService(Ci.nsISecretDecoderRing);
-const NATIVE_JSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
-const VERSION_COMPARE_SERVICE = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-const SCREEN_MANAGER = Cc["@mozilla.org/gfx/screenmanager;1"].getService(Ci.nsIScreenManager);
-
-const Application = Cc["@mozilla.org/fuel/application;1"] ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
-                    (Cc["@mozilla.org/smile/application;1"] ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
-const PrivateBrowsing = Cc["@mozilla.org/privatebrowsing;1"] ? Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService) : null;
-
-const SM_BUNDLE = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+// Get lazy references to services that will always exist, save a pointer to them so they are available during shut down.
+XPCOMUtils.defineLazyServiceGetter(this, "OBSERVER_SERVICE", "@mozilla.org/observer-service;1", "nsIObserverService");
+XPCOMUtils.defineLazyServiceGetter(this, "WINDOW_MEDIATOR_SERVICE", "@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+XPCOMUtils.defineLazyServiceGetter(this, "PROMPT_SERVICE", "@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
+XPCOMUtils.defineLazyServiceGetter(this, "IO_SERVICE", "@mozilla.org/network/io-service;1", "nsIIOService");
+XPCOMUtils.defineLazyServiceGetter(this, "SECRET_DECODER_RING_SERVICE", "@mozilla.org/security/sdr;1", "nsISecretDecoderRing");
+XPCOMUtils.defineLazyServiceGetter(this, "NATIVE_JSON", "@mozilla.org/dom/json;1", "nsIJSON");
+XPCOMUtils.defineLazyServiceGetter(this, "VERSION_COMPARE_SERVICE", "@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
+XPCOMUtils.defineLazyServiceGetter(this, "SCREEN_MANAGER", "@mozilla.org/gfx/screenmanager;1", "nsIScreenManager");
+if (Cc["@mozilla.org/fuel/application;1"]) {
+	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/fuel/application;1", "fuelIApplication");
+}
+else if (Cc["@mozilla.org/smile/application;1"]) {
+	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/smile/application;1", "smileIApplication");
+}
+if (Cc["@mozilla.org/privatebrowsing;1"]) {
+	XPCOMUtils.defineLazyServiceGetter(this, "PrivateBrowsing", "@mozilla.org/privatebrowsing;1", "nsIPrivateBrowsingService");
+}
+else PrivateBrowsing = null;
+XPCOMUtils.defineLazyGetter(this, "SM_BUNDLE", function() { return Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties"); });
 
 // EOL Character - dependent on operating system.
 var os = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULRuntime).OS;
@@ -82,7 +107,6 @@ var EXPORTED_SYMBOLS = ["gSessionManager", "BACKUP_SESSION_FILENAME", "SESSION_R
 						"SECRET_DECODER_RING_SERVICE", "SessionStore", "WINDOW_MEDIATOR_SERVICE", "VERSION_COMPARE_SERVICE"];
 
 // Reference to main thread for putting up alerts when not in main thread
-const mainThread = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).currentThread;
 var mainAlertThread = function(aText) {
   this.text = aText;
 };
@@ -1704,6 +1728,7 @@ var gSessionManager = {
 			PROMPT_SERVICE.alert(this.getMostRecentWindow(), this.mTitle, aText);
 		}
 		else {
+			let mainThread = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).mainThread;
 			mainThread.dispatch(new mainAlertThread(aText), mainThread.DISPATCH_NORMAL);
 		}
 	},
