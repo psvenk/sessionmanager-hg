@@ -704,9 +704,10 @@ with (com.morac) {
 		
 /* ........ Miscellaneous Enhancements .............. */
 
-		// For Firefox, the tab index is stored in _tPos, but for SeaMonkey that isn't available so we have to search for it.
+		// For Firefox, the tab index is stored in _tPos. For SeaMonkey use gBrowser.getTabIndex.  If that doesn't exist, do a search.
 		findTabIndex: function(aTab) {
 			if (typeof aTab._tPos != "undefined") return aTab._tPos
+			else if (typeof gBrowser.getTabIndex == "function") return gBrowser.getTabIndex(aTab);
 			else {
 				// Check each tab of this browser instance
 				for (var index = 0; index < aTab.parentNode.childNodes.length; index++) {
