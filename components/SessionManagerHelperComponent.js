@@ -38,9 +38,6 @@ const Cu = Components.utils;
 const Cr = Components.results;
 const report = Components.utils.reportError;
 
-const Application = Cc["@mozilla.org/fuel/application;1"] ? Cc["@mozilla.org/fuel/application;1"].getService(Ci.fuelIApplication) :  
-                    (Cc["@mozilla.org/smile/application;1"] ? Cc["@mozilla.org/smile/application;1"].getService(Ci.smileIApplication) : null);
-
 // Browser preferences
 const BROWSER_STARTUP_PAGE_PREFERENCE = "browser.startup.page";
 const BROWSER_WARN_ON_QUIT = "browser.warnOnQuit";
@@ -64,7 +61,6 @@ const SAVE_CRASHED_WINDOW_SESSIONS = "save_crashed_window_sessions";
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
 // Thread variables/constants
-const main = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).currentThread;
 var sessionLoadThread = null;
 var saveCrashedWindowSessionsThread = null;
 
@@ -129,6 +125,7 @@ backgroundThread.prototype = {
 			logError(err);
 		}
 		// kick off current thread to terminate this thread
+		let main = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).mainThread;
 		main.dispatch(new mainThread(this.threadID), main.DISPATCH_NORMAL);
 	},
   
