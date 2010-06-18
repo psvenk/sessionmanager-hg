@@ -25,6 +25,7 @@
 	windowtype="SessionManager:SessionPrompt"
 >
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionbrowser.js"/>
+	<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionbrowserPanel.js"/>
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/session_prompt.js"/>
 	
 	<stringbundleset id="stringbundleset">
@@ -32,6 +33,20 @@
 	</stringbundleset>
 
 	<command id="cmd_menuselect" oncommand="com.morac.gSessionManagerSessionPrompt.onSelectMenu(event);"/>
+
+	<panel id="sessionContentPanel"
+		   onpopupshowing="com.morac.gSessionManagerSessionBrowserPanel.initTreeView();"
+		   onpopuphidden="com.morac.gSessionManagerSessionBrowserPanel.restoreSelection();">
+		<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="tabTreePanel" rows="5" flex="1" flags="dont-build-content"
+			  seltype="single" _window_label="&winTabTree.windowLabel;" onselect="com.morac.gSessionManagerSessionBrowserPanel.onSessionTreeSelect();">
+			<treecols>
+				<treecol primary="true" id="titlePanel" persist="width" label="&winTabTree.listHeader;" flex="1" ignoreincolumnpicker="true"/>
+				<splitter class="tree-splitter"/>
+				<treecol id="locationPanel" persist="width hidden" label="&winTabTree.urlHeader;" flex="1"/>
+			</treecols>
+			<treechildren flex="1"/>
+		</tree>
+	</panel>
 	
 	<hbox id="menuBox" hidden="true">
 		<button type="menu" id="actionButton" label="">
@@ -52,9 +67,13 @@
 			
 			<vbox id="session_label"/>
 			<vbox flex="1">
-				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" rows="5" flex="1" flags="dont-build-content"
-				      onkeypress="com.morac.gSessionManagerSessionPrompt.onSessionTreeKeyPress(event)" onclick="com.morac.gSessionManagerSessionPrompt.onSessionTreeClick(event)" 
-					  ondblclick="com.morac.gSessionManagerSessionPrompt.onSessionTreeClick(event)" onselect="com.morac.gSessionManagerSessionPrompt.onSessionTreeSelect();">
+				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" 
+					  rows="5" flex="1" flags="dont-build-content" 
+					  oncontextmenu="com.morac.gSessionManagerSessionBrowserPanel.checkForOpen(this, event);"
+				      onkeypress="com.morac.gSessionManagerSessionPrompt.onSessionTreeKeyPress(event)"
+					  onclick="com.morac.gSessionManagerSessionPrompt.onSessionTreeClick(event);" 
+					  ondblclick="com.morac.gSessionManagerSessionPrompt.onSessionTreeClick(event)"
+					  onselect="com.morac.gSessionManagerSessionPrompt.onSessionTreeSelect();">
 					<treecols id="sessionTreeCols">
 						<treecol id="name" label="&session_name.label;" persist="width" flex="2" ignoreincolumnpicker="true"/>
 						<splitter class="tree-splitter"/>
