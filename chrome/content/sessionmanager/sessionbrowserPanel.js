@@ -71,8 +71,8 @@ with (com.morac) {
 		// Check to see if panel should even open
 		checkForOpen: function(aTree, aEvent) {
 			if ((aEvent.target.nodeName == "treechildren") && gSessionManagerSessionPrompt.gParams.autoSaveable && (aTree.currentIndex >= 0)) {
-				var tabTree = document.getElementById("tabTreeBox");
-				document.getElementById("sessionContentPanel").openPopup(tabTree, "overlap", 3, 0, false, false);
+				var elem = gSessionManagerSessionPrompt.gTabTreeBox.hidden ? gSessionManagerSessionPrompt.gSessionTree : gSessionManagerSessionPrompt.gTabTreeBox;
+				document.getElementById("sessionContentPanel").openPopup(elem, (gSessionManagerSessionPrompt.gTabTreeBox.hidden ? "after_start" : "overlap"), 3, 0, false, false);
 			}
 		},
 		
@@ -118,6 +118,8 @@ with (com.morac) {
 			
 			var width = parseInt(window.getComputedStyle(gSessionManagerSessionPrompt.gTabTree, null).width);
 			var height = parseInt(window.getComputedStyle(gSessionManagerSessionPrompt.gTabTree, null).height);
+			width = (isNaN(width) || width < 200) ? window.innerWidth : width;
+			height = (isNaN(height) || height < 200) ? 200 : height;
 //			this.gPanel.sizeTo(window.innerWidth, (isNaN(sessionTreeHeight) ? 200 : sessionTreeHeight));
 			this.gPanel.sizeTo(width, height);
 		},
