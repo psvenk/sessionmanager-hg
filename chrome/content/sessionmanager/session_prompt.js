@@ -36,6 +36,9 @@ with (com.morac) {
 		gFinishedLoading: false,
 		gReDrawWindow: true,
 		
+		// For saving last selected row so it can be restored
+		gLastSelectedRow: null,
+		
 		// Used to adjust height of window when unchecking "auto save" box
 		gSavedEveryHeight: 0,
 		
@@ -322,6 +325,7 @@ with (com.morac) {
 
 				// unselect any selected session
 				this.gSessionTree.view.selection.clearSelection();
+				this.gLastSelectedRow = null;
 					
 				// clean up text boxes
 				this.ggMenuList.removeAllItems();
@@ -540,6 +544,7 @@ with (com.morac) {
 					switch (aEvent.type) {
 						case "click":
 							if (this.gTextBoxVisible && !(this.gParams.allowNamedReplace)) this.onTextboxInput(this.gSessionTreeData[this.gSessionTree.currentIndex].name);
+							this.gLastSelectedRow = this.gSessionTree.currentIndex;
 							break;
 						case "dblclick":
 							if (!(this.gParams.remove)) 
@@ -593,7 +598,7 @@ with (com.morac) {
 				}
 			}
 		},
-
+		
 		onSessionTreeKeyPress: function(aEvent)
 		{
 			if (this.gTextBoxVisible && (aEvent.keyCode == aEvent.DOM_VK_RETURN) && (this.gSessionTree.view.selection.count > 0)) {
