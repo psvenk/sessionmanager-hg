@@ -147,17 +147,26 @@ with (com.morac) {
 			// Display the window
 			this.drawWindow();
 
-			// need to remove "rows" attribute otherwise session list jumps around when selecting.  Still need it to 
-			// display 5 rows by default and to set minimum height persistence to prevent height from shrinking to 0.
+			// Need to remove "rows" attribute from session tree otherwise it jumps around when selecting. 
+			// Need to do the same thing for tab tree otherwise Firefox 3.6 and higher will constantly repaint
+			// the window if the tab tree's height is 128 or more.  This causes high CPU usage and is likely a bug.
+			// We still need it to display 5 rows by default so set minimum height persistence to prevent height from shrinking to 0.
+			
+			// Persist minheights if not already done - use session tree's height for tab trees since 
+			// they both contain 5 rows and will have the same minheight.
+			if (!this.gTabTree.hasAttribute("minheight")) {
+				this.persist(this.gSessionTree, "minheight", this.gSessionTree.treeBoxObject.height);
+				this.persist(this.gTabTree, "minheight", this.gSessionTree.treeBoxObject.height);
+			}
+			
+			// Remove session tree row - tab tree was removed from xul.
+			this.gSessionTree.removeAttribute("rows");
+			
+			// Restore session tree height if stored
 			if (this.gSessionTree.hasAttribute("height"))
 			{
 				this.gSessionTree.height = this.gSessionTree.getAttribute("height");
 			}
-			else
-			{
-				this.persist(this.gSessionTree, "minheight", this.gSessionTree.treeBoxObject.height);
-			}
-			this.gSessionTree.removeAttribute("rows");
 			
 			// This is never true when running under windows
 			if (!window.opener)

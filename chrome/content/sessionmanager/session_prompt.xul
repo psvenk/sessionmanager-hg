@@ -37,7 +37,7 @@
 	<panel id="sessionContentPanel"
 		   onpopupshowing="com.morac.gSessionManagerSessionBrowserPanel.initTreeView();"
 		   onpopuphidden="com.morac.gSessionManagerSessionBrowserPanel.restoreSelection();">
-		<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="tabTreePanel" rows="5" flex="1" flags="dont-build-content"
+		<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="tabTreePanel" flex="1" flags="dont-build-content"
 			  seltype="single" _window_label="&winTabTree.windowLabel;" onselect="com.morac.gSessionManagerSessionBrowserPanel.onSessionTreeSelect();">
 			<treecols>
 				<treecol primary="true" id="titlePanel" persist="width" label="&winTabTree.listHeader;" flex="1" ignoreincolumnpicker="true"/>
@@ -67,8 +67,8 @@
 			
 			<vbox id="session_label"/>
 			<vbox flex="1">
-				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="session_tree" 
-					  rows="5" flex="1" flags="dont-build-content" 
+				<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
+					  id="session_tree" rows="5" flex="1" flags="dont-build-content" 
 					  oncontextmenu="com.morac.gSessionManagerSessionBrowserPanel.checkForOpen(this, event);"
 				      onkeypress="com.morac.gSessionManagerSessionPrompt.onSessionTreeKeyPress(event)"
 					  onclick="com.morac.gSessionManagerSessionPrompt.onSessionTreeClick(event);" 
@@ -89,8 +89,10 @@
 					<grippy/>
 				</splitter>
 				<vbox id="tabTreeBox" hidden="true" flex="1">
-					<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="tabTree" rows="5" flex="1" flags="dont-build-content"
-						seltype="single" onclick="com.morac.gSessionManagerSessionBrowser.onTabTreeClick(event);" onkeydown="com.morac.gSessionManagerSessionBrowser.onTabTreeKeyDown(event);"
+					<tree xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" id="tabTree"
+						seltype="single" flex="1" flags="dont-build-content"
+						onclick="com.morac.gSessionManagerSessionBrowser.onTabTreeClick(event);" 
+						onkeydown="com.morac.gSessionManagerSessionBrowser.onTabTreeKeyDown(event);"
 						_window_label="&winTabTree.windowLabel;">
 						<treecols>
 							<treecol id="restore" type="checkbox" label="&winTabTree.restoreHeader;" ignoreincolumnpicker="true"/>
