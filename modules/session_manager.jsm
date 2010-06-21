@@ -2673,7 +2673,7 @@ var gSessionManager = {
 	
 	readFile: function(aFile,headerOnly)
 	{
-		this.checkFileLock(aFile);
+		this.checkFileLock(aFile, false, true);
 		try
 		{
 			let stream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
@@ -2689,12 +2689,12 @@ var gSessionManager = {
 				if (headerOnly) break;
 			}
 			cvstream.close();
-			this.clearFileLock(aFile);
+			this.clearFileLock(aFile, false, true);
 			
 			return content.replace(/\r\n?/g, "\n");
 		}
 		catch (ex) { }
-		this.clearFileLock(aFile);
+		this.clearFileLock(aFile, false, true);
 		
 		return null;
 	},
@@ -2758,39 +2758,61 @@ var gSessionManager = {
 	},
 	
     // Used to prevent multiple threads from accessing the same file
-	checkFileLock: function(aFile, aEncryptLock)
+	checkFileLock: function(aFile, aEncryptLock, aReadOnly)
 	{	
 		let logged = false;
+		let filename = (typeof(aFile) == "object") ? aFile.leafName : aFile;
 		let thread = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).currentThread;
 		let mainThread = Cc["@mozilla.org/thread-manager;1"].getService().isMainThread;
-		//log((mainThread ? "main" : "background") + " - Locking for " + aFile.leafName, "EXTRA");
+
+		// If file lock info not created, create it
+		if (!this._file_lock[filename]) 
+			this._file_lock[filename] = { read: 0, write: false, encrypt: false, thread: "none" };
+			
+//		log("checkFileLock start: File=" + filename + ", " + this._file_lock[filename].toSource(), "EXTRA");
+
 		// Wait if file is locked for generic read/write or if file is locked for encryption change and 
-		// this call is from the main thread. 
-		while(this._file_lock[aFile.leafName] || this._encrypt_lock[aFile.leafName] && mainThread) {
+		// this call is from the main thread. Allow multiple reads at the same time, if no write or encrypt lock.
+		while((!aReadOnly && (this._file_lock[filename].read > 0)) || this._file_lock[filename].write || (this._file_lock[filename].encrypt && mainThread)) {
 			if (!logged) {
 				logged = true;
 				// if in main thread and locked, it was locked by backgroudn thread and vice-versa
-				log(aFile.leafName + " locked by " + (mainThread ? "background" : "main") + " thread", "TRACE");
+				log(filename + " locked by " + (mainThread ? "background" : "main") + " thread", "TRACE");
 			}
 			// Allow other events to process on this thread while we wait for lock to go away
 			thread.processNextEvent(true);
 		}
 		if (aEncryptLock) {
-			this._encrypt_lock[((typeof(aFile) == "object") ? aFile.leafName : aFile)] = true;
+			this._file_lock[filename].encrypt = true;
+		}
+		else if (!aReadOnly) {
+			this._file_lock[filename].write = true;
 		}
 		else {
-			this._file_lock[aFile.leafName] = true;
+			this._file_lock[filename].read++;
 		}
+		this._file_lock[filename].thread = mainThread ? "main" : "background";
+//		log("checkFileLock end: File=" + filename + ", " + this._file_lock[filename].toSource(), "EXTRA");
 	},
 	
-	clearFileLock: function(aFile, aEncryptLock)
+	clearFileLock: function(aFile, aEncryptLock, aReadOnly)
 	{
-		//log(((Cc["@mozilla.org/thread-manager;1"].getService().isMainThread) ? "main" : "background") + " - Unlocking for " + aFile.leafName, "EXTRA");
+		let filename = (typeof(aFile) == "object") ? aFile.leafName : aFile;
+//		log("clearFileLock start: File=" + filename + ", " + this._file_lock[filename].toSource(), "EXTRA");
 		if (aEncryptLock) {
-			delete this._encrypt_lock[((typeof(aFile) == "object") ? aFile.leafName : aFile)];
+			this._file_lock[filename].encrypt = false;
 		}
-		else {
-			delete this._file_lock[aFile.leafName];
+		else if (!aReadOnly) {
+			this._file_lock[filename].write = false;
+		}
+		else if (this._file_lock[filename].read > 0) {
+			this._file_lock[filename].read--;
+		}
+//		log("clearFileLock end: File=" + filename + ", " + this._file_lock[filename].toSource(), "EXTRA");
+		
+		// If not locked any more just delete the object
+		if (!(this._file_lock[filename].encrypt || this._file_lock[filename].write || (this._file_lock[filename].read > 0))) {
+			delete this._file_lock[filename];
 		}
 	},
 
