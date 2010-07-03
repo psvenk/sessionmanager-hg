@@ -51,6 +51,14 @@ toolbar[iconsize="small"] #sessionmanager-toolbar {
 	opacity: 0.2;
 }
 
+#actionButton[private="true"] {
+	-moz-border-top-colors: transparent threedhighlight threedlightshadow;
+	-moz-border-right-colors: transparent threeddarkshadow threedshadow;
+	-moz-border-bottom-colors: transparent threeddarkshadow threedshadow;
+	-moz-border-left-colors: transparent threedhighlight threedlightshadow;
+	color: graytext;
+}
+
 /* Make closed tabs have icons, but not display entire graphic for images */
 .sessionmanager-closedtab-item > .menu-iconic-left > .menu-iconic-icon {
   width: 16px;
