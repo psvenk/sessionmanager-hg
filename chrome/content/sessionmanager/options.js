@@ -81,6 +81,9 @@ with (com.morac) {
 		
 		// Update Logging Level checkboxes
 		readLogLevel();
+		
+		// Enable/Disable log checkboxes
+		updateLogCheckboxes(_("enable_logging").checked);
 
 		// Disable Apply Button by default
 		_("sessionmanagerOptions").getButton("extra1").disabled = true;
@@ -181,6 +184,13 @@ with (com.morac) {
 		for (var i=0; i < logCB.length; i++) {
 			logCB[i].checked = ((logLevel & logging_level[logCB[i].getAttribute("_logLevel")]) > 0);
 		};
+	}
+	
+	function updateLogCheckboxes(checked) {
+		var boxes = _("loggingCategories").getElementsByTagName("checkbox");
+		for (var i = 0; i < boxes.length; i++) {   
+			boxes[i].disabled = !checked;
+		}
 	}
 
 	function _(aId)

@@ -344,11 +344,12 @@
 		<groupbox>
 			<caption label="&logging.caption;"/>
 			<hbox>
-				<checkbox label="&enable_logging.label;" accesskey="&enable_logging.accesskey;" preference="preference.logging"/>
+				<checkbox label="&enable_logging.label;" accesskey="&enable_logging.accesskey;" preference="preference.logging"
+						  id="enable_logging" oncommand="updateLogCheckboxes(this.checked);"/>
 				<button label="&open_log.label;" accesskey="&open_log.accesskey;" oncommand="com.morac.openLogFile();"/>
 				<button label="&delete_log.label;" accesskey="&delete_log.accesskey;" oncommand="com.morac.deleteLogFile(true);"/>
 			</hbox>
-			<vbox>
+			<vbox id="loggingCategories">
 				<checkbox class="logLevel" label="&log_level_state.label;" accesskey="&log_level_state.accesskey;" _logLevel="STATE" oncommand="logLevelUpdate();"/>
 				<checkbox class="logLevel" label="&log_level_trace.label;" accesskey="&log_level_trace.accesskey;" _logLevel="TRACE" oncommand="logLevelUpdate();"/>
 				<checkbox class="logLevel" label="&log_level_data.label;" accesskey="&log_level_data.accesskey;" _logLevel="DATA" oncommand="logLevelUpdate();"/>
