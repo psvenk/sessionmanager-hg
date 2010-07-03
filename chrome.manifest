@@ -1,3 +1,10 @@
+# New Component Registration
+component {5714d620-47ce-11db-b0de-0800200c9a66} components/SessionManagerHelperComponent.js
+contract @morac/sessionmanager-helper;1 {5714d620-47ce-11db-b0de-0800200c9a66}
+category profile-after-change SessionManagerHelperComponent @morac/sessionmanager-helper;1
+category command-line-handler SessionManagerHelperComponent @morac/sessionmanager-helper;1
+
+# Shared Resources
 resource sessionmanager ./
 content	sessionmanager	jar:chrome/sessionmanager.jar!/content/sessionmanager/
 skin	sessionmanager	classic/1.0	jar:chrome/sessionmanager.jar!/skin/classic/sessionmanager/
