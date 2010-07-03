@@ -168,7 +168,7 @@ SessionManagerHelperComponent.prototype = {
 	// profile-after-change can only be registered in Firefox 3.5 and higher so need to add it as
 	// an event listener in "app-startup" notification in Firefox 3.0.
 	_xpcom_categories: [{ category: "app-startup", service: true }, { category: "profile-after-change"},
-	                    { category: "command-line-handler", entry: "sessionmanager" }],
+	                    { category: "command-line-handler", entry: "SessionManagerHelperComponent" }],
 						
 	// State variables
 	_ignorePrefChange: false,
@@ -240,6 +240,12 @@ SessionManagerHelperComponent.prototype = {
 			if (VERSION_COMPARE_SERVICE.compare(Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).platformVersion,"1.9.1a1pre") < 0) {
 				os.addObserver(this, "profile-after-change", false);
 			}
+			break;
+		case "private-browsing-change-granted":
+			this.handlePrivacyChange(aSubject, aData);
+			break;
+		case "profile-after-change":
+			// Register for other notifications
 			os.addObserver(this, "final-ui-startup", false);
 			os.addObserver(this, "sessionstore-state-read", false);
 			os.addObserver(this, "sessionstore-windows-restored", false);
@@ -247,11 +253,7 @@ SessionManagerHelperComponent.prototype = {
 			os.addObserver(this, "private-browsing-change-granted", false);
 			os.addObserver(this, "sessionmanager:windows-restored", false);
 			os.addObserver(this, "sessionmanager:window-loaded", false);
-			break;
-		case "private-browsing-change-granted":
-			this.handlePrivacyChange(aSubject, aData);
-			break;
-		case "profile-after-change":
+		
 			// Need to unregister here in Firefox 3.0
 			if (VERSION_COMPARE_SERVICE.compare(Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).platformVersion,"1.9.1a1pre") < 0) {
 				os.removeObserver(this, aTopic);
@@ -746,6 +748,11 @@ SessionManagerHelperComponent.prototype = {
 };
 
 // Register Component
-function NSGetModule(compMgr, fileSpec) {
-  return XPCOMUtils.generateModule([SessionManagerHelperComponent]);
-};
+/**
+* XPCOMUtils.generateNSGetFactory was introduced in Mozilla 2 (Firefox 4).
+* XPCOMUtils.generateNSGetModule is for Mozilla 1.9.2 (Firefox 3.6).
+*/
+if (XPCOMUtils.generateNSGetFactory)
+    var NSGetFactory = XPCOMUtils.generateNSGetFactory([SessionManagerHelperComponent]);
+else
+    var NSGetModule = XPCOMUtils.generateNSGetModule([SessionManagerHelperComponent]);
