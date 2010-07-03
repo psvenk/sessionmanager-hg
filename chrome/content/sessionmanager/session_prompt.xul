@@ -50,7 +50,7 @@
 	
 	<hbox id="menuBox" hidden="true">
 		<button type="menu" id="actionButton" label="">
-			<menupopup id="actionButtonPopup">
+			<menupopup id="actionButtonPopup" onpopupshown="com.morac.gSessionManagerSessionPrompt.updateForPrivateBrowsingMode();">
 				<menuitem id="load" label="&session_open.label;" accesskey="&session_open.accesskey;" command="cmd_menuselect"/>
 				<menuitem id="save" label="&session_save_ok.label;" accesskey="&session_save.accesskey;" command="cmd_menuselect"/>
 				<menuitem id="saveWin" hidden="true" label="&saveOne.label;" accesskey="&saveOne.accesskey;" command="cmd_menuselect"/>

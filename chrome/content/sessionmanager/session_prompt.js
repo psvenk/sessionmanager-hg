@@ -249,6 +249,8 @@ with (com.morac) {
 			// Update selection menu if not modal
 			if (this.gParams.callbackData) {
 				let label = null;
+				// Remove private attribute if changing since can't change to save when in private browsing
+				this._("actionButton").removeAttribute("private");
 				switch(this.gParams.callbackData.type) {
 					case "save":
 						label = this.gParams.callbackData.oneWindow ? this._("saveWin").label : this._("save").label;
@@ -958,10 +960,18 @@ with (com.morac) {
 			}
 		},
 
-		checkPrivateBrowsingMode: function(inPrivateBrowsing, aSaving, aJustOpened)
+		updateForPrivateBrowsingMode: function() 
 		{
+			let inPrivateBrowsing = gSessionManager.isPrivateBrowserMode();
 			gSessionManager.setDisabled(this._("save"), inPrivateBrowsing);
 			gSessionManager.setDisabled(this._("saveWin"), inPrivateBrowsing);
+		},
+		
+		checkPrivateBrowsingMode: function(inPrivateBrowsing, aSaving, aJustOpened)
+		{
+			// disable menu if saving
+			let menu = this._("actionButton");
+			menu.setAttribute("private", ((menu.label == this._("save").label) || (menu.label == this._("saveWin").label)) ? "true" : "false");
 			
 			// If saving, disable, the save or append button
 			if (aSaving) {
