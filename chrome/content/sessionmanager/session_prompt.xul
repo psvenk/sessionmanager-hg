@@ -141,7 +141,7 @@
 					<checkbox id="checkbox_ignore" label="&prompt.ignore.label;" hidden="true"/>
 					<checkbox id="checkbox_autosave" label="&prompt.autosave.label;" hidden="true"
 					          onDOMAttrModified="com.morac.gSessionManagerSessionBrowser.autoSaveCheckBoxChange(event);"
-					          onclick="window.setTimeout(function() { com.morac.gSessionManagerSessionPrompt._save_every_update(); },0)"/>
+					          oncommand="window.setTimeout(function() { com.morac.gSessionManagerSessionPrompt._save_every_update(); },0)"/>
 				</hbox>
 				<hbox id="save_every" hidden="true">
 					<label class="textbox_label" id="autosave_label" value="&prompt.save_every1.label;"/>
