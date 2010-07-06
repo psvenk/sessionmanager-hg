@@ -240,7 +240,8 @@ function logExtensions(extensions) {
 	if (!_logEnabled) return;
 	_logged_Addons = true;
 
-	if (!Application) return;
+	// Quit if Application doesn't exist or called from background thread (to prevent rare timing crash)
+	if (!Application || !Cc["@mozilla.org/thread-manager;1"].getService().isMainThread) return;
 		
 	// Firefox 4.0 changes method for getting extensions to a callback function.  Use this function as the callback
 	// function and check the parameter since it will be set if called back or null if called internally.
