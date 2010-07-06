@@ -12,13 +12,7 @@
 // 7. Allow users to remove a window from an auto-save session so that it won't be saved automatically.
 // 8. Add ability to import/export settings.
 // 9. Add ability to import/export sessions.
-
-// Currently working on:
-// 1. The callback save functions won't work if the opening window was closed.  Currently save window is modal.  Save is not modal,
-//    but needs to pass back session data in case windows are closed.  Use the tab tree to allow user to select which windows and tabs
-//    to save.  The tab tree currently updates when windows and tabs are opened,closed and load, but the currently tab selections are lost.
-//    This should be fixed to not lose tab selections.  Might be a good idea to allow user to select which window to save if "Save window" is chosen.
-// - Either show a split pane for windows/tabs with current window/tabs on left and selected session's window/tabs on right.  Or make a toggle radio button.
+// 10. Allow user to choose tabs to save for "Save Window".
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -3497,9 +3491,27 @@ var gSessionManager = {
 				temp_restore_index++;
 			}
 			log("recoverSession: Startup session = " + session, "DATA");
-			if ((session) && (file = this.getSessionDir(session)) && file.exists())
+			if (session && (file = this.getSessionDir(session)) && (file.exists() || (session == BACKUP_SESSION_FILENAME)))
 			{
-				this.load(aWindow, session, "startup", values.sessionState);
+				// If user chooses to restore backup session, but there is no backup session, then an auto-save session was open when 
+				// browser closed so restore that.
+				if (!file.exists()) {
+					let sessions = this.getSessions();
+					// if latest user saved session newer than latest backup session
+					if (sessions.latestBackUpTime < sessions.latestTime) {
+						// find latest session if it's an autosave session
+						session = sessions.filter(function(element, index, array) {  
+							return ((sessions.latestTime == element.timestamp) && /^window|session/.exec(element.autosave));  
+						})[0];
+						if (session) {
+							session = session.fileName;
+							log("recoverSession: Backup session not found, using autosave session = " + session, "DATA");
+						}
+					}
+					else session = null;
+				}
+				if (session) this.load(aWindow, session, "startup", values.sessionState);
+				else log("recoverSession: Backup session not found.", "TRACE");
 			}
 			// if user set to resume previous session, don't clear this so that way user can choose whether to backup
 			// current session or not and still have it restore.
