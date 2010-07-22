@@ -653,35 +653,67 @@ SessionManagerHelperComponent.prototype = {
 				if (!gSessionManager.mAlreadyShutdown) {
 					let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
 
-					// Manually construct the prompt window because the promptService doesn't allow 4 button prompts
-					let params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
-					params.SetInt(0, 1); 												// Set default to cancel
-					params.SetString(0, bundle.GetStringFromName("preserve_session"));	// dialog text
-					params.SetString(1, bundle.GetStringFromName("prompt_not_again"));	// checkbox text
-					params.SetString(12, bundle.GetStringFromName("sessionManager"));	// title
+					// shared variables
+					let params = null;
+					let newtype = false;
 					
-					// buttons are tricky because they don't display in order
-					// if there are 4 buttons they display as 11, 8, 10, 9
-					// if there are 3 buttons they display as 8, 10, 9
-					// A button always returns it's string number - 8, eg: 10 returns 2.
-					// So we need to tweak things when displaying 3 or 4 buttons.
-					
-					if (resume_current) {
-						params.SetInt(2, 3);												// Display 3 buttons
-						params.SetString(8, bundle.GetStringFromName("save_quit"));			// first button text (returns 0)
-						params.SetString(10, bundle.GetStringFromName("quit"));				// second button text (returns 2)
-						params.SetString(9, bundle.GetStringFromName("cancel"));			// third button text (returns 1)
+					// Firefox 3.6 and earlier
+					if (VERSION_COMPARE_SERVICE.compare(Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).platformVersion,"2.0a1pre") < 0) {
+
+						// Manually construct the prompt window because the promptService doesn't allow 4 button prompts
+						params = Cc["@mozilla.org/embedcomp/dialogparam;1"].createInstance(Ci.nsIDialogParamBlock);
+						params.SetInt(0, 1); 												// Set default to cancel
+						params.SetString(0, bundle.GetStringFromName("preserve_session"));	// dialog text
+						params.SetString(1, bundle.GetStringFromName("prompt_not_again"));	// checkbox text
+						params.SetString(12, bundle.GetStringFromName("sessionManager"));	// title
+						
+						// buttons are tricky because they don't display in order
+						// if there are 4 buttons they display as 11, 8, 10, 9
+						// if there are 3 buttons they display as 8, 10, 9
+						// A button always returns it's string number - 8, eg: 10 returns 2.
+						// So we need to tweak things when displaying 3 or 4 buttons.
+						
+						if (resume_current) {
+							params.SetInt(2, 3);												// Display 3 buttons
+							params.SetString(8, bundle.GetStringFromName("save_quit"));			// first button text (returns 0)
+							params.SetString(10, bundle.GetStringFromName("quit"));				// second button text (returns 2)
+							params.SetString(9, bundle.GetStringFromName("cancel"));			// third button text (returns 1)
+						}
+						else {
+							params.SetInt(2, 4);												// Display 4 buttons
+							params.SetString(11, bundle.GetStringFromName("save_quit"));		// first button text (returns 3)
+							params.SetString(8, bundle.GetStringFromName("quit"));				// second button text (returns 0)
+							params.SetString(10, bundle.GetStringFromName("save_and_restore"));	// third button text (returns 2)
+							params.SetString(9, bundle.GetStringFromName("cancel"));			// fourth button text (returns 1)
+						}
 					}
 					else {
-						params.SetInt(2, 4);												// Display 4 buttons
-						params.SetString(11, bundle.GetStringFromName("save_quit"));		// first button text (returns 3)
-						params.SetString(8, bundle.GetStringFromName("quit"));				// second button text (returns 0)
-						params.SetString(10, bundle.GetStringFromName("save_and_restore"));	// third button text (returns 2)
-						params.SetString(9, bundle.GetStringFromName("cancel"));			// fourth button text (returns 1)
+						// New type of prompt in Firefox 4.0 - See http://mxr.mozilla.org/mozilla2.0/source/toolkit/components/prompts/src/nsPrompter.js
+						newtype = true;
+						
+						params = Cc["@mozilla.org/hash-property-bag;1"].createInstance(Ci.nsIWritablePropertyBag2).QueryInterface(Ci.nsIWritablePropertyBag);
+						params.setProperty("promptType", "confirmEx");
+						params.setProperty("title",      bundle.GetStringFromName("sessionManager"));
+						params.setProperty("text",       bundle.GetStringFromName("preserve_session"));
+						params.setProperty("checkLabel", bundle.GetStringFromName("prompt_not_again"));
+						params.setProperty("checked",    false);
+
+						if (resume_current) {
+							params.setProperty("button0Label", bundle.GetStringFromName("save_quit"));			// 1st button (returns 0)
+							params.setProperty("button2Label", bundle.GetStringFromName("quit"));				// 2nd button (returns 2)
+							params.setProperty("button1Label", bundle.GetStringFromName("cancel"));				// 3rd button (returns 1)
+						}
+						else {
+							params.setProperty("button3Label", bundle.GetStringFromName("save_quit"));			// 1st button (returns 3)
+							params.setProperty("button0Label", bundle.GetStringFromName("quit"));				// 2nd button (returns 0)
+							params.setProperty("button2Label", bundle.GetStringFromName("save_and_restore"));	// 3rd button (returns 2)
+							params.setProperty("button1Label", bundle.GetStringFromName("cancel")); 			// 4th button (returns 1);
+						}
 					}
 					
 					watcher.openWindow(window, "chrome://global/content/commonDialog.xul", "_blank", "centerscreen,chrome,modal,titlebar", params);
-					let results = params.GetInt(0);
+					let results = newtype ? params.getProperty("buttonNumClicked") : params.GetInt(0);
+					let checkbox_checked = newtype ? params.getProperty("checked") : params.GetInt(1);
 						
 					// If cancel pressed, cancel shutdown and return;
 					if (results == 1) {
@@ -707,7 +739,7 @@ SessionManagerHelperComponent.prototype = {
 					}
 					
 					// If checkbox checked
-					if (params.GetInt(1))
+					if (checkbox_checked)
 					{
 						if (results == 2) {
 							gPreferenceManager.set(SM_RESUME_SESSION_PREFERENCE, BACKUP_SESSION_FILENAME);
