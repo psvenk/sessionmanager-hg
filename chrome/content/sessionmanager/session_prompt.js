@@ -767,6 +767,22 @@ with (com.morac) {
 			let filename;
 			if (this.gNeedSelection || ((this.gParams.allowNamedReplace) && this.gSessionTree.view.selection.count > 0))
 			{
+				// If saving and replacing using the default name put up overwrite prompt
+				if (this.gParams.autoSaveable && this.gParams.allowNamedReplace && this.gSessionTree.view.selection.count > 0) {
+					var dontPrompt = { value: false };
+					if (gPreferenceManager.get("no_overwrite_prompt") || 
+						PROMPT_SERVICE.confirmEx(null, gSessionManager.mTitle, gSessionManager._string("overwrite_prompt"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0)
+					{
+						if (dontPrompt.value)
+						{
+							gPreferenceManager.set("no_overwrite_prompt", true);
+						}
+					}
+					else {
+						return false;
+					}
+				}
+			
 				var selectedFileNames = [];
 				var start = new Object();
 				var end = new Object();
