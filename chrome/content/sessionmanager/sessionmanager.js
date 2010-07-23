@@ -542,7 +542,7 @@ with (com.morac) {
 					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:gSessionManager._string("untitled_window"));
 					
 					// Set up a one second timer to clear the saved data in case the window isn't actually closing
-					this._clear_state_timer = Cc["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+					this._clear_state_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 					this._clear_state_timer.init(gSessionManagerWindowObject, 1000, Components.interfaces.nsITimer.TYPE_ONE_SHOT);
 				}
 			}
@@ -748,7 +748,7 @@ with (com.morac) {
 				log("checkWinTimer: Window Timer stopped", "INFO");
 			}
 			else if (!this._win_timer && (this.__window_session_time > 0) && this.__window_session_name) {
-				this._win_timer = Cc["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+				this._win_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
 				this._win_timer.init(gSessionManagerWindowObject, this.__window_session_time * 60000, Components.interfaces.nsITimer.TYPE_REPEATING_PRECISE);
 				log("checkWinTimer: Window Timer started for " + this.__window_session_time + " minutes", "INFO");
 			}
@@ -818,7 +818,7 @@ with (com.morac) {
 		
 		doTMPConvertFile: function(aFileUri, aSilent)
 		{
-			Cc["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://sessionmanager/content/sessionconvert.js");
+			Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://sessionmanager/content/sessionconvert.js");
 			delete(gSessionSaverConverter);
 			gConvertTMPSession.init(true);
 			if (!gConvertTMPSession.convertFile(aFileUri, aSilent) && !aSilent) {
