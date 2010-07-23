@@ -13,6 +13,7 @@
 // 8. Add ability to import/export settings.
 // 9. Add ability to import/export sessions.
 // 10. Allow user to choose tabs to save for "Save Window".
+// 11. Add option to show crash/restore prompt inside browser window, just like Firefox does.
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
@@ -970,6 +971,8 @@ var gSessionManager = {
 						    /^https?:\/\//.test(tempState.windows[i].tabs[j].entries[tempState.windows[i].tabs[j].index - 1].url)) {
 							if (!tempState.windows[i].tabs[j].extData) tempState.windows[i].tabs[j].extData = {};
 							tempState.windows[i].tabs[j].extData["session_manager_allow_reload"] = current_time;
+							// if last entry isn't loading, need to delay reload to give browser time to load correct history index.
+							tempState.windows[i].tabs[j].extData["session_manager_delay_reload"] = (tempState.windows[i].tabs[j].entries.length != tempState.windows[i].tabs[j].index);
 						}
 					}
 				}

@@ -631,10 +631,12 @@ with (com.morac) {
 			{	
 				// This is a load and not restoring a closed tab or window
 				let tab_time = SessionStore.getTabValue(aEvent.originalTarget, "session_manager_allow_reload");
+				let reload_delay = SessionStore.getTabValue(aEvent.originalTarget, "session_manager_delay_reload") ? 100 : 0;
 				if (tab_time) 
 				{
 					// Delete the tab value
 					SessionStore.deleteTabValue(aEvent.originalTarget, "session_manager_allow_reload");
+					if (reload_delay) SessionStore.deleteTabValue(aEvent.originalTarget, "session_manager_delay_reload");
 					
 					// Compare the times to make sure this really was loaded recently and wasn't a tab that was loading, but then closed and reopened later
 					tab_time = parseInt(tab_time);
@@ -643,12 +645,15 @@ with (com.morac) {
 					current_time = current_time.getTime();
 					
 					log("onTabRestoring: Tab age is " + ((current_time - tab_time)/1000) + " seconds.", "EXTRA");
+					log("onTabRestoring: Reload delay is " + reload_delay, "EXTRA");
 					
 					// Don't reload a tab older than the specified preference (defaults to 1 minute)
 					if (current_time - tab_time < gSessionManager.mPref_reload_timeout) 
 					{
-						// This came from Tab Mix Plus.  It's should reload the tabs without having to wait for them to finishing loading
-						setTimeout( function (browser) {
+						// This originally came from Tab Mix Plus.  It reloads the tabs without having to wait for them to finishing loading.
+						// The problem with this is that it will always load the last (most "forward") entry in a tab's history because the index hasn't
+						// loaded yet so if this isn't the case, a delay is required.  So delay loading any tabs that have a forward history.
+						function reload_tab(browser)  {
 							const nsIWebNavigation = Components.interfaces.nsIWebNavigation;
 							let _webNav = browser.webNavigation;
 							try {
@@ -659,9 +664,18 @@ with (com.morac) {
 			
 							try {
 								const flags = nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE;
-								_webNav.reload(flags);
+								if (_webNav.canGoForward || !reload_delay) {
+									_webNav.reload(flags);
+								}
+								else {
+									log("onTabRestoring: History for " + _webNav.currentURI.spec + " not yet ready when reloading, trying again.", "EXTRA");
+									// if we delayed, but there's no forward history then it hasn't loaded yet so try again.
+									setTimeout( reload_tab, reload_delay, aEvent.originalTarget.linkedBrowser);
+								}
 							} catch (e) { logError(e); }
-						}, 0, aEvent.originalTarget.linkedBrowser);
+						}
+						
+						setTimeout( reload_tab, reload_delay, aEvent.originalTarget.linkedBrowser);
 					}
 				}
 			}
