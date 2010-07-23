@@ -535,6 +535,11 @@ with (com.morac) {
 			{
 				this.gSelectSessionTreeActive = true;
 				this.onSessionTreeSelect();
+				
+				// If renaming and rename pre-selected, put focus on text box
+				if (this.gParams.callbackData && (this.gParams.callbackData.type == "rename") && this.gParams.filename) {
+					setTimeout(function() { gSessionManagerSessionPrompt.gTextBox.select(); gSessionManagerSessionPrompt.gTextBox.focus(); }, 0);
+				}
 			}
 			else this.isAcceptable();
 		},
