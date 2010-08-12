@@ -1,0 +1,138 @@
+<!ENTITY options.title "&sessionManager; Seçenekleri">
+<!ENTITY general.caption "Genel">
+<!ENTITY startNend.caption "Başlangıç &amp; Kapatma">
+<!ENTITY resume_sess.label "Açılışta daima belirli oturumu yükle:">
+<!ENTITY resume_sess.accesskey "S">
+<!ENTITY backup_sess.label "Kapanışta">
+<!ENTITY backup_sess.accesskey "h">
+<!ENTITY backup_session.label0 "şimdiki oturumu iptal et">
+<!ENTITY backup_session.label1 "geçerli oturumu yedekle">
+<!ENTITY backup_session.label2 "geçerli oturumu yedeklemeyi sor">
+<!ENTITY crashrecovery.label "Çökme Kurtarması Aktif">
+<!ENTITY crashrecovery.accesskey "e">
+<!ENTITY autosave_session.label "Değiştirilen oturumu otomatik kaydet">
+<!ENTITY autosave_session.accesskey "a">
+<!ENTITY restoring.caption "Oturum Geri yükleme">
+<!ENTITY sessionList.caption "Oturum Listesi">
+<!ENTITY orderList.label "Oturum listesini al">
+<!ENTITY orderList.accesskey "d">
+<!ENTITY orderList.label1 "Alfabetik">
+<!ENTITY orderList.label2 "Eskiden Yeniye">
+<!ENTITY orderList.label_2 "Yeniden Eskiye">
+<!ENTITY max_backup.label "yedeği tutulacak eski (çökmüş) oturumların sayısı:">
+<!ENTITY max_backup.accesskey "N">
+<!ENTITY undoClose.caption "Kapamayı Geri al">
+<!ENTITY windowsNtabs.caption "Kapatılmış Pencereler &amp; Sekmeler">
+<!ENTITY max_closed.label "En fazla Hatırlanacak kapatılmış pencere sayısı">
+<!ENTITY max_closed.accesskey "w">
+<!ENTITY max_tabs.label "En fazla hatırlanmış kapatılmış sekme numarası (her pencereye):">
+<!ENTITY max_tabs.accesskey "t">
+<!ENTITY submenu.label "Kapatılmış pencere ve sekmeleri ana menüde listele">
+<!ENTITY submenu.accesskey "c">
+<!ENTITY persistence.caption "ısrarlı">
+<!ENTITY closed_tabs.label "tekrar açılabilir kapatılmış tüm pencerelerin listesini düzelt:">
+<!ENTITY closed_tabs.accesskey "e">
+<!ENTITY closed_tabs.label0 "asla">
+<!ENTITY closed_tabs.label1 "başlangıçta">
+<!ENTITY closed_tabs.label2 "daima">
+<!ENTITY window_list.label "kapanışta kapatılmış pencerelerin listesini temizleme">
+<!ENTITY window_list.accesskey "o">
+<!ENTITY clear_list.label "Listeyi temizle">
+<!ENTITY clear_list.accesskey "r">
+<!ENTITY advanced.caption "Gelişmiş">
+<!ENTITY name_format.caption "Oturum isimleri">
+<!ENTITY name_format.label "Oturum isimleri için öneri:">
+<!ENTITY name_format.accesskey "F">
+<!ENTITY name_format.desc "Aktif Sekme başlaığı için &#37;t, Bugun tarih ve saaati icin &#37;m, Ek başlık uzunlukları için &#37;#t.">
+<!ENTITY sessionstore.caption "Oturum Kayıt">
+<!ENTITY service.caption "&quot;Oturum Kayıt&quot; Ayarları">
+<!ENTITY service.description "Ne yaptığınızı bilmiyorsanız buraya dokunmayın">
+<!ENTITY interval.label "iki durum kaydı arasındaki en fazla zaman aralığı (saniye olarak):">
+<!ENTITY interval.accesskey "i">
+<!ENTITY postdata.label "Kaydedilecek En fazla POSTDATA miktarı (bayt olarak; hepsi için -1)">
+<!ENTITY postdata.accesskey "x">
+<!ENTITY privacy.label "Önemli bilgiyi kaydet (POSTDATA ve Çerezler)">
+<!ENTITY privacy.accesskey "v">
+<!ENTITY privacy.level0 "tüm siteler">
+<!ENTITY privacy.level1 "yanlızca şifrelenmemiş siteler">
+<!ENTITY privacy.level2 "Hiç bir site">
+<!ENTITY sessiondir.caption "Kayıtlı Oturumun Bölgesi">
+<!ENTITY sessiondir.desc "Kayıtlı Oturumların varsayılan Bölgesi olmalı">
+<!ENTITY encrypt.caption "Şifreleme">
+<!ENTITY encrypt.desc "Dikkat: Şifrelenmiş oturumlar yanlızca key3.db ve cert8.db dosyalarında tanımlanmış profillerle açılabilirler. İlaveten eğer, bir ana şifre ayarlanmış ise, oturumlar bu Ana şifre girilmeden şifrelenip çözülemezler.">
+<!ENTITY encrypt.label "Kapatılan pencere ve kaydedilen otorumları şifrele">
+<!ENTITY encrypt.accesskey "e">
+<!ENTITY change_dir.label "Değiştir">
+<!ENTITY change_dir.accesskey "C">
+<!ENTITY default_dir.label "Varsayılan">
+<!ENTITY default_dir.accesskey "D">
+<!ENTITY sanitizer.label "Oturum Yöneticisi Kayıtlı Oturumlar">
+<!ENTITY sanitizer.accesskey "M">
+<!ENTITY saving.caption "Oturum Kaydı">
+<!ENTITY lastpage.label "Son yüklediğim sayfayı göster">
+<!ENTITY noSession.label "Yok">
+<!ENTITY noSession.accesskey "N">
+<!ENTITY promptSession.label "Bir oturum sor">
+<!ENTITY promptSession.accesskey "P">
+<!ENTITY selectSession.label "Oturum Seç">
+<!ENTITY selectSession.accesskey "S">
+<!ENTITY cookies.label "Oturum Çerezlerini kaydet">
+<!ENTITY cookies.accesskey "C">
+<!ENTITY sessionImport.caption "Oturumları İçe aktar..">
+<!ENTITY importSS.label "SessionSaver">
+<!ENTITY importSS.accesskey "I">
+<!ENTITY importTMP.label "Tab Mix Plus">
+<!ENTITY importTMP.accesskey "l">
+<!ENTITY apply.label "Tamam">
+<!ENTITY save_and_restore.caption "Kaydetme &amp; Geri Yükleme">
+<!ENTITY display.caption "Görünüm">
+<!ENTITY middleclick.label "Orta tıklaması kapatılan son sekmeyi açar">
+<!ENTITY middleclick.accesskey "M">
+<!ENTITY max_display.label "Menüde gösterilecek En çok oturum sayısı">
+<!ENTITY max_display.accesskey "M">
+<!ENTITY hide_tools_menu.label "Araçlar Menüsünde Oturum Yöneticisini gösterme">
+<!ENTITY hide_tools_menu.accesskey "D">
+<!ENTITY disable_cache_fixer.label "Cache Fixer özelliğini kapat">
+<!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Şifreleme başarısız olmuşsa, şifrelenmeyen bilgi kaydedilmez">
+<!ENTITY encrypted_only.accesskey "N">
+<!ENTITY encrypt2.desc "Dikkat: Eğer işaretlenmiş ise ve, oturum yada pencere bilgisi şifrelenmemiş ise, bu bilgi kurtarılmayacak şekilde kaybedilebilir. Ana şifre istendiğinde şifre girilmez ise şifreleme başarılı olmaz. Bu kutuyu işaretlerken iyice düşünüp öyle karar vermelisiniz.">
+<!ENTITY closed_window_list.label "Tarayıcının &quot;kendi kapatılmış pencereler listesini&quot; kullan">
+<!ENTITY closed_window_list.accesskey "U">
+<!ENTITY closed_windows.label "Yeniden açılabilecek kapatılmış pencere listesini yükle:">
+<!ENTITY closed_windows.accesskey "S">
+<!ENTITY open_as_tabs.label "Şimdiki görünüme sekmeler olarak aç">
+<!ENTITY open_as_tabs.accesskey "p">
+<!ENTITY last_window_shutdown.label "son açılan tarayıcı penceresine kapatıldığı gibi davran€">
+<!ENTITY last_window_shutdown.accesskey "T">
+<!ENTITY preselect_previous_session.label "önceki oturumu seç">
+<!ENTITY preselect_previous_session.accesskey "R">
+<!ENTITY logging.caption "Günlük">
+<!ENTITY enable_logging.label "Günlük Aktif">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Log Dosyasını Aç">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Log Dosyasını Sil">
+<!ENTITY delete_log.accesskey "d">
+<!ENTITY log_level_state.label "Kapatma Kaydını logla">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "İzleme datasını logla">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Kararsız Datayı logla">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Bilgi Mesajlarını logla">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Ekstra Ayıklama datasını logla">
+<!ENTITY log_level_extra.accesskey "e">
+<!ENTITY reload.label "Yüklenmiş Pencereleri Yenile">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "Varolan Pencereyi Değiştir">
+<!ENTITY overwrite.accesskey "p">
+<!ENTITY allow_saving_during_pbm.label "Gizli Tarama Modunda kaydetmeye izin ver">
+<!ENTITY allow_saving_during_pbm.label2 "Şifrelemenin aktif olması gerekir">
+<!ENTITY allow_saving_during_pbm.accesskey "S">
+<!ENTITY session_name_in_titlebar.label "Etkin oturumları Durum çubuğunda göster">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Prepend?">
+<!ENTITY append.label "Ekle">
+<!ENTITY donotadd.label "Ekleme">
