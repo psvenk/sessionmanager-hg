@@ -136,3 +136,22 @@
 <!ENTITY prepend.label "Prepend">
 <!ENTITY append.label "Append">
 <!ENTITY donotadd.label "Do not add">
+<!ENTITY use_browser_crash_prompt.label "Use browser's built in crash recovery prompt">
+<!ENTITY use_browser_crash_prompt.accesskey "U">
+<!ENTITY reset_warnings.label "Reset warning prompts">
+<!ENTITY reset_warnings.accesskey "R">
+<!ENTITY export_settings.label "Export settings">
+<!ENTITY export_settings.accesskey "X">
+<!ENTITY import_settings.label "Import settings">
+<!ENTITY import_settings.accesskey "I">
+<!ENTITY settingsImportExport.caption "Import/Export Settings">
+<!ENTITY keyboard.caption "Keyboard Shortcuts">
+<!ENTITY keyboard.desc "To use a keyboard shortcut for an action enter it here, otherwise leave it blank.  Changes here will not apply to existing windows.">
+<!ENTITY clear.label "Clear">
+<!ENTITY clear.accesskey "C">
+<!ENTITY clear_tab_list.label "Clear Closed Tabs">
+<!ENTITY clear_tab_list.accesskey "a">
+<!ENTITY clear_window_list.label "Clear Closed Windows">
+<!ENTITY clear_window_list.accesskey "i">
+<!ENTITY backup_on_restart.label "Save backup on browser restart">
+<!ENTITY backup_on_restart.accesskey "b">

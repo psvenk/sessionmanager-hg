@@ -80,3 +80,8 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "Load (Append To Current Window)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Leave this window open">
+<!ENTITY clearTabList.label "Clear &apos;Closed&apos; Tab List...">
+<!ENTITY clearTabList.accesskey "T">
+<!ENTITY clearWindowList.label "Clear &apos;Closed&apos; Window List...">
+<!ENTITY clearWindowList.accesskey "W">
