@@ -10,10 +10,28 @@ Components.utils.import("resource://sessionmanager/modules/session_manager.jsm",
 // use the namespace
 with (com.morac) {
 	var originalOverwriteLabel = null;
+	var keyNames=[];
+	var gLocaleKeys;
+	var gPlatformKeys = new Object();
+	
+	var observer = {
+		observe: function(aSubject, aTopic, aData) {
+			log("options.observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
+			switch (aTopic)
+			{
+			case "sessionmanager:encryption-change":
+				_("encrypt_sessions").disabled = (aData == "start");
+				break;
+			}
+		}
+	};
 
 	var onLoad = function(aEvent) {
 		this.removeEventListener("load", onLoad, false);
-		this.addEventListener("unload", onUnload, false);			
+		this.addEventListener("unload", onUnload, false);
+
+		// listen for encryption change start/stop
+		OBSERVER_SERVICE.addObserver(observer, "sessionmanager:encryption-change", false);
 
 		// If instant Apply is on, hide the apply button
 		if (gPreferenceManager.get("browser.preferences.instantApply", false, true)) {
@@ -82,6 +100,9 @@ with (com.morac) {
 		// Update Logging Level checkboxes
 		readLogLevel();
 		
+		// Initialize and read keys
+		initKeys()
+		
 		// Enable/Disable log checkboxes
 		updateLogCheckboxes(_("enable_logging").checked);
 
@@ -96,8 +117,8 @@ with (com.morac) {
 
 	var onUnload = function(aEvent) {
 		this.removeEventListener("unload", onUnload, false);
+		OBSERVER_SERVICE.removeObserver(observer, "sessionmanager:encryption-change");		
 		_("preference.options_selected_tab").valueFromPreferences = _("generalPrefsTab").selectedIndex;
-		setLogLevel();
 	};
 
 	var _disable = gSessionManager.setDisabled;
@@ -131,11 +152,11 @@ with (com.morac) {
 		return value;
 	}
 
-	function promptClearUndoList()
+	function promptClearUndoList(aType)
 	{
 		var max_tabs_undo = _("max_tabs").value;
 		
-		gSessionManager.clearUndoListPrompt();
+		gSessionManager.clearUndoListPrompt(aType);
 		
 		_("max_tabs").value = max_tabs_undo;
 	};
@@ -192,7 +213,7 @@ with (com.morac) {
 			boxes[i].disabled = !checked;
 		}
 	}
-
+	
 	function _(aId)
 	{
 		return document.getElementById(aId);
@@ -278,12 +299,17 @@ with (com.morac) {
 		for (var i=0; i<prefs.length; i++) {
 			prefs[i].valueFromPreferences = prefs[i].value;
 		}
-		setStartValue();
-		setLogLevel();
+		saveSpecialPrefs();
 		
 		// Disable Apply Button
 		_("sessionmanagerOptions").getButton("extra1").disabled = true;
 	}	
+	
+	function saveSpecialPrefs() {
+		setStartValue();
+		setLogLevel();
+		saveKeyConfig();
+	}
 
 	function enableApply() {
 		_("sessionmanagerOptions").getButton("extra1").disabled = false;
@@ -303,6 +329,9 @@ with (com.morac) {
 						break;
 					case 2:
 						link = link + "display";
+						break;
+					case 3:
+						link = link + "keyboard";
 						break;
 				}
 				break;
@@ -410,6 +439,128 @@ with (com.morac) {
 		
 		// Re-select same pane to refresh it - General pane's tab boxes aren't the right height unless the General tab is re-selected
 		_("sessionmanagerOptions")._selector.selectedItem.click();
+	}
+	
+	// Key stuff - originally comes from keyconfig add-on
+	function initKeys() {
+		for (var property in KeyEvent) {
+			keyNames[KeyEvent[property]] = property.replace("DOM_","");
+		}
+		keyNames[8] = "VK_BACK";
+
+		gLocaleKeys = document.getElementById("localeKeys");
+
+		var platformKeys = document.getElementById("platformKeys");
+		gPlatformKeys.shift = platformKeys.getString("VK_SHIFT");
+		gPlatformKeys.meta  = platformKeys.getString("VK_META");
+		gPlatformKeys.alt   = platformKeys.getString("VK_ALT");
+		gPlatformKeys.ctrl  = platformKeys.getString("VK_CONTROL");
+		gPlatformKeys.sep   = platformKeys.getString("MODIFIER_SEPARATOR");
+		switch (gPreferenceManager.get("ui.key.accelKey", 0, true)){
+			case 17:  gPlatformKeys.accel = gPlatformKeys.ctrl; break;
+			case 18:  gPlatformKeys.accel = gPlatformKeys.alt; break;
+			case 224: gPlatformKeys.accel = gPlatformKeys.meta; break;
+			default:  gPlatformKeys.accel = (window.navigator.platform.search("Mac") == 0 ? gPlatformKeys.meta : gPlatformKeys.ctrl);
+		}
+		
+		readKeyConfig();
+	}
+	
+	function clearKey(element) {
+		element.previousSibling.value = "";
+		element.previousSibling.key = "";
+		
+		if (gPreferenceManager.get("browser.preferences.instantApply", false, true)) {
+			saveKeyConfig();
+		}
+		else enableApply();
+	}
+	
+	function readKeyConfig() {
+		var keys = gSessionManager.JSON_decode(_("preference.keys").valueFromPreferences, true);
+		if (!keys._JSON_decode_failed) {
+		
+			var keyBoxes = _("key_rows").getElementsByTagName("textbox");
+			for (var i=0; i < keyBoxes.length; i++) {
+				var keyname = keyBoxes[i].id.replace(/_key/,"");
+				keyBoxes[i].value = (keys[keyname]) ? getFormattedKey(keys[keyname].modifiers,keys[keyname].key,keys[keyname].keycode) : "";
+				keyBoxes[i].key = keys[keyname];
+			}
+		}
+	}
+	
+	function saveKeyConfig() {
+		var keys = {};
+		
+		var keyBoxes = _("key_rows").getElementsByTagName("textbox");
+		for (var i=0; i < keyBoxes.length; i++) {
+			if (keyBoxes[i].key) {
+				keys[keyBoxes[i].id.replace(/_key/,"")] = keyBoxes[i].key;
+			}
+		}
+		
+		_("preference.keys").valueFromPreferences = gSessionManager.JSON_encode(keys);
+	}
+	
+	function getFormattedKey(modifiers,key,keycode) {
+		if(modifiers == "shift,alt,control,accel" && keycode == "VK_SCROLL_LOCK") return "";
+		if(key == "" || (!key && keycode == "")) return "";
+
+		var val = "";
+		if(modifiers) val = modifiers
+			.replace(/^[\s,]+|[\s,]+$/g,"").split(/[\s,]+/g).join(gPlatformKeys.sep)
+			.replace("alt",gPlatformKeys.alt)
+			.replace("shift",gPlatformKeys.shift)
+			.replace("control",gPlatformKeys.ctrl)
+			.replace("meta",gPlatformKeys.meta)
+			.replace("accel",gPlatformKeys.accel)
+			+gPlatformKeys.sep;
+		if(key)
+			val += key;
+		if(keycode) try {
+			val += gLocaleKeys.getString(keycode)
+		} catch(e){val += gStrings.unrecognized.replace("$1",keycode);}
+
+		return val;
+	}
+	
+	function keyPress(element, event) {
+		event.preventDefault();
+		event.stopPropagation(); 
+
+		var modifiers = [];
+		if(event.altKey) modifiers.push("alt");
+		if(event.ctrlKey) modifiers.push("control");
+		if(event.metaKey) modifiers.push("meta");
+		if(event.shiftKey) modifiers.push("shift");
+
+		modifiers = modifiers.join(" ");
+
+		var key = null; var keycode = null;
+		if (event.charCode) key = String.fromCharCode(event.charCode).toUpperCase();
+		else { keycode = keyNames[event.keyCode]; if(!keycode) return;}
+
+		var keyvalue = getFormattedKey(modifiers,key,keycode);
+		
+		// check if duplicate key
+		var keyBoxes = _("key_rows").getElementsByTagName("textbox");
+		for (var i=0; i < keyBoxes.length; i++) {
+			if (keyBoxes[i].value == keyvalue) return;
+		}
+		
+		element.value = getFormattedKey(modifiers,key,keycode);
+		element.key = { modifiers: modifiers, key: key, keycode: keycode };
+		
+		if (gPreferenceManager.get("browser.preferences.instantApply", false, true)) {
+			saveKeyConfig();
+		}
+		else enableApply();
+	}
+	
+	function disableButtons(aValue) {
+		var buttons = _("sessionmanagerOptions").getElementsByTagName("button");
+		for (var i=0; i < buttons.length; i++) buttons[i].disabled = aValue;
+		_("sessionmanagerOptions").getButton("help").disabled = aValue;
 	}
 }
 window.addEventListener("load", onLoad, false);
