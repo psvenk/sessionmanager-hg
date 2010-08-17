@@ -54,88 +54,7 @@ const SM_RESUME_SESSION_PREFERENCE = "resume_session";
 const SM_STARTUP_PREFERENCE = "startup";
 const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "shutdown_on_last_window_close";
 
-// Thread Constants
-const LOAD_SESSIONS = "load_sessions";
-const SAVE_CRASHED_WINDOW_SESSIONS = "save_crashed_window_sessions";
-
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-
-// Thread variables/constants
-var sessionLoadThread = null;
-var saveCrashedWindowSessionsThread = null;
-
-// Main Thread - Called when finished loading sessions or saving crashed window sessions
-var mainThread = function(threadID) {
-  this.threadID = threadID;
-};
-
-mainThread.prototype = {
-	run: function() {
-		try {
-			switch(this.threadID) 
-			{
-			case LOAD_SESSIONS:
-				sessionLoadThread.shutdown();
-				delete(sessionLoadThread);
-				log("SessionManagerHelperComponent mainThread: Background Session Thread destroyed from mainThread", "TRACE");
-				break;
-			case SAVE_CRASHED_WINDOW_SESSIONS:
-				saveCrashedWindowSessionsThread.shutdown();
-				delete(saveCrashedWindowSessionsThread);
-				gSessionManager._screen_width = null;
-				gSessionManager._screen_height = null;
-				log("SessionManagerHelperComponent mainThread: Background Window Crash Session Thread destroyed from mainThread", "TRACE");
-				break;
-			}
-		} catch(err) {
-			logError(err);
-		}
-	},
-  
-	QueryInterface: function(iid) {
-		if (iid.equals(Ci.nsIRunnable) || iid.equals(Ci.nsISupports)) {
-			return this;
-		}
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
-};
-
-// A thread used to load the session files in the background so they will 
-// be cached when the user goes to use them or to save window sessions on a crash.
-var backgroundThread = function(threadID) {
-  this.threadID = threadID;
-};
-
-backgroundThread.prototype = {
-	run: function() {
-		//perform work here that doesn't touch the DOM or anything else that isn't thread safe
-		try {
-			switch(this.threadID) 
-			{
-			case LOAD_SESSIONS:
-				gSessionManager.getSessions();
-				log("SessionManagerHelperComponent backgroundThread: Background Session Load Complete.", "TRACE");
-				break;
-			case SAVE_CRASHED_WINDOW_SESSIONS:
-				gSessionManager.saveCrashedWindowSessions();
-				log("SessionManagerHelperComponent windowSessionSaveThread: Open Window Sessions at time of crash saved.", "TRACE");
-				break;
-			}
-		} catch(err) {
-			logError(err);
-		}
-		// kick off current thread to terminate this thread
-		let main = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).mainThread;
-		main.dispatch(new mainThread(this.threadID), main.DISPATCH_NORMAL);
-	},
-  
-	QueryInterface: function(iid) {
-		if (iid.equals(Ci.nsIRunnable) || iid.equals(Ci.nsISupports)) {
-			return this;
-		}
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
-};
 
 // Session Manager's helper component.  It handles the following:
 // 1. Searching command line arguments for sessions to load
@@ -177,6 +96,8 @@ SessionManagerHelperComponent.prototype = {
 	_sessionStore_windows_restored: 0,
 	_sessionManager_windows_loaded: 0,
 	_TMP_protectedtabs_warnOnClose: null,
+	_encryption_in_progress: false,
+	_tried_to_quit: false,
 	
 	// interfaces supported
 	QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver, Ci.nsICommandLineHandler]),
@@ -264,8 +185,7 @@ SessionManagerHelperComponent.prototype = {
 				gPreferenceManager.initialize();
 				
 				try {
-					// This seems to throw an error under OS X for whatever reason so catch it here to 
-					// allow gSessionManager to initialize
+					// This shouldn't throw an exception anymore, but if it does catch it.
 					this._restoreCache();
 				}
 				catch (ex) { logError(ex); }
@@ -293,13 +213,18 @@ SessionManagerHelperComponent.prototype = {
 			os.addObserver(this, "sessionmanager-preference-save", false);
 			os.addObserver(this, "sessionmanager:restore-startup-preference", false);
 			os.addObserver(this, "sessionmanager:ignore-preference-changes", false);
+			os.addObserver(this, "sessionmanager:encryption-change", false);
 			
 			// Observe startup preference
 			gPreferenceManager.observe(BROWSER_STARTUP_PAGE_PREFERENCE, this, false, true);
-			
-			// Cache the sessions in the background so they are ready when the user opens the menu
-			sessionLoadThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
-			sessionLoadThread.dispatch(new backgroundThread(LOAD_SESSIONS), sessionLoadThread.DISPATCH_NORMAL);
+			break;
+		case "sessionmanager:encryption-change":
+			this._encryption_in_progress = (aData == "start");
+			if (!this._encryption_in_progress && this._tried_to_quit) {
+				let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+				gSessionManager.threadSafeAlert(bundle.GetStringFromName("encryption_change_done"));
+			}
+			this._tried_to_quit = false;
 			break;
 		case "sessionmanager:window-loaded":
 			// When Session Manager has finished processing the "onLoad" event for the same number of windows that
@@ -391,6 +316,7 @@ SessionManagerHelperComponent.prototype = {
 			if (typeof(this._TMP_protectedtabs_warnOnClose) == "boolean") {
 				gPreferenceManager.set(TMP_PROTECTED_TABS_WARN_ON_CLOSE, this._TMP_protectedtabs_warnOnClose, true);
 			}
+			os.removeObserver(this, "sessionmanager:encryption-change");
 			os.removeObserver(this, "sessionmanager-preference-save");
 			os.removeObserver(this, "sessionmanager:ignore-preference-changes");
 			os.removeObserver(this, "quit-application-requested");
@@ -446,9 +372,15 @@ SessionManagerHelperComponent.prototype = {
 					gSessionManager._screen_height = window.screen.height;
 				}
 			
-				saveCrashedWindowSessionsThread = Cc["@mozilla.org/thread-manager;1"].getService().newThread(0);
-				saveCrashedWindowSessionsThread.dispatch(new backgroundThread(SAVE_CRASHED_WINDOW_SESSIONS), saveCrashedWindowSessionsThread.DISPATCH_NORMAL);
+				// Save crashed windows
+				gSessionManager.saveCrashedWindowSessions();
+				gSessionManager._screen_width = null;
+				gSessionManager._screen_height = null;
+				log("SessionManagerHelperComponent _check_for_window_restore_complete: Open Window Sessions at time of crash saved.", "TRACE");
 			}
+			
+			// cache session data
+			gSessionManager.cacheSessions();
 		}
 	},
 
@@ -500,10 +432,13 @@ SessionManagerHelperComponent.prototype = {
         		openWindow(null, "chrome://sessionmanager/content/restore_prompt.xul", "_blank", "chrome,modal,centerscreen,titlebar", params);
         	if (params.GetInt(0) == 1) aStateDataString.QueryInterface(Ci.nsISupportsString).data = "";
         	else if (initialState.session) {
-	        	// don't prompt for tabs if checkbox not checked
-	        	delete(initialState.session.lastUpdate);
-	        	delete(initialState.session.recentCrashes);
-	        	aStateDataString.QueryInterface(Ci.nsISupportsString).data = gSessionManager.JSON_encode(initialState);
+				// if not using built-in crash prompt, make sure it doesn't prompt for tabs
+				if (!gPreferenceManager.get("use_browser_crash_prompt", false)) {
+					// don't prompt for tabs if checkbox not checked
+					delete(initialState.session.lastUpdate);
+					delete(initialState.session.recentCrashes);
+					aStateDataString.QueryInterface(Ci.nsISupportsString).data = gSessionManager.JSON_encode(initialState);
+				}
         	}
     	}
     	initialState = null;
@@ -523,12 +458,16 @@ SessionManagerHelperComponent.prototype = {
 				return;
 			}
 			let pd_path = gPreferenceManager.get("browser.cache.disk.parent_directory", null, true);
-			cache = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
-			cache.initWithPath(pd_path);
+			if (pd_path) {
+				cache = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsILocalFile);
+				cache.initWithPath(pd_path);
+			}
 		}
-		catch (ex) {}
+		catch (ex) { 
+			cache = null; 
+		}
 		
-		if (!cache) cache = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfLD", Ci.nsILocalFile);
+		if (!cache) cache = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfLD", Ci.nsIFile);
 		cache.append("Cache");
 		cache.append("_CACHE_MAP_");
 		if (!cache.exists())
@@ -631,6 +570,17 @@ SessionManagerHelperComponent.prototype = {
 	{
 		// If quit already canceled, just return
 		if (aSubject.QueryInterface(Ci.nsISupportsPRBool) && aSubject.data) return;
+		
+		let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+		
+		// If encryption change in progress, prevent quit
+		if (this._encryption_in_progress) {
+			this._tried_to_quit = true;
+			gSessionManager.threadSafeAlert(bundle.GetStringFromName("quit_during_encrypt_change_alert"));
+			aSubject.QueryInterface(Ci.nsISupportsPRBool);
+			aSubject.data = true;
+			return;
+		}
 
 		// If private browsing mode don't allow saving
 		try {
@@ -651,7 +601,6 @@ SessionManagerHelperComponent.prototype = {
 				// if didn't already shut down
 				log("SessionManagerHelperComponent gSessionManager.mAlreadyShutdown = " + gSessionManager.mAlreadyShutdown, "DATA");
 				if (!gSessionManager.mAlreadyShutdown) {
-					let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
 
 					// shared variables
 					let params = null;
