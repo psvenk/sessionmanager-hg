@@ -247,6 +247,7 @@ with (com.morac) {
 			this.removeEventListener("load", gSessionManagerWindowObject.onLoad_proxy, false);
 			
 			if (gSessionManager._initialized) {
+				gSessionManagerWindowObject.setKeys();
 				gSessionManagerWindowObject.onLoad();
 			}
 			else {
@@ -486,7 +487,7 @@ with (com.morac) {
 				}, this);
 			}
 			
-			// Stop Session timer and start another if needed
+			// Stop Session timer if last window closed
 			if (gSessionManager._timer && (numWindows == 0)) { 
 				log("onUnload: Session Timer stopped because last window closed", "INFO");
 				gSessionManager._timer.cancel();
@@ -512,6 +513,11 @@ with (com.morac) {
 						}
 						catch(ex) {}
 					}, this);
+					// Copy window state to module so session data is available
+					gSessionManager.mClosingWindowState = this.mClosingWindowState;
+					this.mClosingWindowState = null;
+					this.mCleanBrowser = null;
+					this.mClosedWindowName = null;
 					gSessionManager.shutDown();
 					// Don't look at the session startup type if a new window is opened without shutting down the browser.
 					gSessionManager.mAlreadyShutdown = true;
@@ -538,8 +544,11 @@ with (com.morac) {
 				if (this.__window_session_name || !gSessionManager.mUseSSClosedWindowList || (gSessionManager.getBrowserWindows().length == 1)) {
 					log("onWindowCloseRequest saved closing state", "INFO");
 					this.mClosingWindowState = gSessionManager.getSessionState(null, window, null, null, null, true); 
-					this.mCleanBrowser = Array.every(gBrowser.browsers, gSessionManager.isCleanBrowser);
-					this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:gSessionManager._string("untitled_window"));
+					// Only need to save closed window data is not using browser's closed window list
+					if (!gSessionManager.mUseSSClosedWindowList) {
+						this.mCleanBrowser = Array.every(gBrowser.browsers, gSessionManager.isCleanBrowser);
+						this.mClosedWindowName = content.document.title || ((gBrowser.currentURI.spec != "about:blank")?gBrowser.currentURI.spec:gSessionManager._string("untitled_window"));
+					}
 					
 					// Set up a one second timer to clear the saved data in case the window isn't actually closing
 					this._clear_state_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
@@ -822,6 +831,27 @@ with (com.morac) {
 			if (sessionMenu) sessionMenu.hidden = gSessionManager.mPref_hide_tools_menu;
 		},
 
+		setKeys: function()
+		{
+			try {
+				let keys = gPreferenceManager.get("keys", ""), keyname;
+				keys = gSessionManager.JSON_decode(keys, true);
+
+				if (!keys._JSON_decode_failed) {
+					let keysets = document.getElementById("mainKeyset").getElementsByTagName("key");
+					
+					for (var i=0; i < keysets.length; i++) {
+						if (keyname = keysets[i].id.match(/key_session_manager_(.*)/)) {
+							if (keys[keyname[1]]) {
+								keysets[i].setAttribute("key", keys[keyname[1]].key || keys[keyname[1]].keycode);
+								keysets[i].setAttribute("modifiers", keys[keyname[1]].modifiers);
+							}
+						}
+					}
+				}
+			} catch(ex) { logError(ex); }
+		},
+		
 /* ........ Auxiliary Functions .............. */
 
 		// Over TMP's conversion functionality since it won't work any more, plus my method is more elegant
