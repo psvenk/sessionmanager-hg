@@ -5,6 +5,7 @@ const LOG_ENABLE_PREFERENCE_NAME = "extensions.{1280606b-2510-4fe0-97ef-9b5a22ea
 const LOG_LEVEL_PREFERENCE_NAME = "extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging_level";
 const BUNDLE_URI = "chrome://sessionmanager/locale/sessionmanager.properties";
 const ERROR_STRING_NAME = "file_not_found";
+const UUID = "{1280606b-2510-4fe0-97ef-9b5a22eafe30}";
 
 const Cc = Components.classes;
 const Ci = Components.interfaces
@@ -191,7 +192,7 @@ function setLogFile() {
 	if (!_logFile) {
 		try {
 			// Get Profile folder and append log file name
-			_logFile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsILocalFile).clone();
+			_logFile = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
 			_logFile.append(FILE_NAME);
 		}
 		catch (ex) { 
@@ -236,7 +237,7 @@ function write_log(aMessage) {
 //
 // Log Extensions - Also log browser version
 //
-function logExtensions(extensions) {
+function logExtensions(aExtensions) {
 	if (!_logEnabled) return;
 	_logged_Addons = true;
 
@@ -245,11 +246,11 @@ function logExtensions(extensions) {
 		
 	// Firefox 4.0 changes method for getting extensions to a callback function.  Use this function as the callback
 	// function and check the parameter since it will be set if called back or null if called internally.
-	if (!extensions && (typeof(Application.getExtensions) == "function")) {
+	if (!aExtensions && (typeof(Application.getExtensions) == "function")) {
 		Application.getExtensions(logExtensions);
 		return false;
 	}
-	extensions = extensions ? extensions.all : Application.extensions.all;
+	let extensions = aExtensions ? aExtensions : Application.extensions;
 
 	// Set to initialized.  Do this here so the addons are always logged first
 	_initialized = true;
@@ -259,12 +260,21 @@ function logExtensions(extensions) {
 	log("Browser = " + Application.id + " - " + Application.name + " " + Application.version, "INFO");
 	
 	// Log Addons
-	if (extensions.length) {
+	if (extensions.all.length) {
 		log("Extensions installed and enabled:");
-		for (let i=0; i<extensions.length; i++) {
-			if (extensions[i].enabled) {
-				log(extensions[i].name + " " + extensions[i].version, "INFO");
+		for (let i=0; i<extensions.all.length; i++) {
+			if (extensions.all[i].enabled) {
+				log("   " + extensions.all[i].name + " " + extensions.all[i].version, "INFO");
 			}
+		}
+	}
+	
+	// Log prefrences
+	let prefs = extensions.get(UUID).prefs.all
+	if (prefs.length) {
+		log("Add-on preferences:");
+		for (let i=0; i<prefs.length; i++) {
+			log("   " + prefs[i].name + " = " + prefs[i].value, "INFO");
 		}
 	}
 
