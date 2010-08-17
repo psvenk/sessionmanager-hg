@@ -35,11 +35,14 @@ restorePrompt = function() {
 		}
 	}
 	
+	// Always show crash prompt in Firefox 3.0 otherwise use preference
+	var show_crash_prompt = !gPreferenceManager.get("use_browser_crash_prompt", false) || (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.1a1pre") < 0);
+	
 	var params = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
 	params.SetInt(0, 0);
 			
 	var values = { name: "*", addCurrentSession: true, ignorable: false, count: countString }
-	var fileName = (location.search != "?cancel")?(gSessionManager.prompt(gSessionManager._string("recover_session"), gSessionManager._string("recover_session_ok"), values)?values.name:""):"";
+	var fileName = (show_crash_prompt && location.search != "?cancel")?(gSessionManager.prompt(gSessionManager._string("recover_session"), gSessionManager._string("recover_session_ok"), values)?values.name:""):"";
 	if (fileName != "*")
 	{
 		if (fileName)
@@ -50,7 +53,7 @@ restorePrompt = function() {
 		{
 			gSessionManager.clearUndoData("window", true);
 		}
-		params.SetInt(0, 1); // don't recover the crashed session
+		if (show_crash_prompt) params.SetInt(0, 1); // don't recover the crashed session
 	}
 	
 	gSessionManager.mPref_encrypt_sessions = gPreferenceManager.get("encrypt_sessions", false);
