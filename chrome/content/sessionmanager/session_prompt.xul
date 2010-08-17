@@ -51,14 +51,15 @@
 	<hbox id="menuBox" hidden="true">
 		<button type="menu" id="actionButton" label="">
 			<menupopup id="actionButtonPopup" onpopupshown="com.morac.gSessionManagerSessionPrompt.updateForPrivateBrowsingMode();">
-				<menuitem id="load" label="&session_open.label;" accesskey="&session_open.accesskey;" command="cmd_menuselect"/>
+				<menuitem id="load" label="&session_load.label;" accesskey="&session_load.accesskey;" command="cmd_menuselect"/>
 				<menuitem id="save" label="&session_save_ok.label;" accesskey="&session_save.accesskey;" command="cmd_menuselect"/>
-				<menuitem id="saveWin" hidden="true" label="&saveOne.label;" accesskey="&saveOne.accesskey;" command="cmd_menuselect"/>
+				<menuitem id="saveWin" hidden="true" label="&saveOne.label;" accesskey="&saveOne.accesskey;" command="cmd_menuselect"/> <!-- TODO -->
 				<menuitem id="rename" label="&session_rename_ok.label;" accesskey="&session_rename.accesskey;" command="cmd_menuselect"/>
-				<menuitem id="remove" label="&session_delete.label;" accesskey="&session_delete.accesskey;" command="cmd_menuselect"/>  <!-- TODO -->
+				<menuitem id="remove" label="&session_delete.label;" accesskey="&session_delete.accesskey;" command="cmd_menuselect"/>  
 				<menuitem id="group" label="&session_group.label;" accesskey="&group.accesskey;" command="cmd_menuselect"/>
 			</menupopup>
 		</button>
+		<checkbox id="leave_window_open" label="&leave_window_open.label;"/>
 	</hbox>
 
 	<hbox flex="1">
