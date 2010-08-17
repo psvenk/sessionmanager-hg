@@ -14,7 +14,7 @@
 						xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
 						buttons="accept,cancel,extra1,help" buttonlabelextra1="&apply.label;"
 						ondialogextra1="savePrefs();" onchange="enableApply();"
-						ondialogaccept="setStartValue();" ondialoghelp="goHelp();"
+						ondialogaccept="saveSpecialPrefs();" ondialoghelp="goHelp();"
 						windowtype="SessionManager:Options" persist="lastSelected">
 	
 	<!-- ************************************** -->
@@ -26,7 +26,9 @@
 			<preference id="preference.append_by_default" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.append_by_default" type="bool"/>
 			<preference id="preference.autosave_session" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.autosave_session" type="bool"/>
 			<preference id="preference.backup_session" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.backup_session" type="int"/>
+			<preference id="preference.backup_on_restart" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.backup_on_restart" type="bool"/>
 			<preference id="preference.hide_tools_menu" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.hide_tools_menu" type="bool"/>
+			<preference id="preference.keys" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.keys" type="string"/>
 			<preference id="preference.max_backup_keep" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.max_backup_keep" type="int"/>
 			<preference id="preference.max_display" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.max_display" type="int"/>
 			<preference id="preference.name_format" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.name_format" type="string"/>
@@ -38,6 +40,7 @@
 			<preference id="preference.session_list_order" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.session_list_order" type="int"/>
 			<preference id="preference.session_name_in_titlebar" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.session_name_in_titlebar" type="int"/>
 			<preference id="preference.shutdown_on_last_window_close" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.shutdown_on_last_window_close" type="bool"/>
+			<preference id="preference.use_browser_crash_prompt" name="extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.use_browser_crash_prompt" type="bool"/>
 		</preferences>
 
 		<script type="application/x-javascript" src="chrome://sessionmanager/content/sessionconvert.js"/>	
@@ -47,6 +50,7 @@
 				<tab label="&startNend.caption;"/>
 				<tab label="&save_and_restore.caption;"/>
 				<tab label="&display.caption;"/>
+				<tab label="&keyboard.caption;"/>
 			</tabs>
 			<tabpanels>
 				<tabpanel orient="vertical">
@@ -87,6 +91,10 @@
 						<separator style="height: 0.5em;" orient="vertical"/>
 						<checkbox label="&last_window_shutdown.label;" accesskey="&last_window_shutdown.accesskey;" 
 						          preference="preference.shutdown_on_last_window_close"/>
+						<checkbox label="&backup_on_restart.label;" accesskey="&backup_on_restart.accesskey;" 
+						          preference="preference.backup_on_restart"/>
+						<checkbox label="&use_browser_crash_prompt.label;" accesskey="&use_browser_crash_prompt.accesskey;" 
+						          preference="preference.use_browser_crash_prompt"/>
 					</groupbox>
 				</tabpanel>
 				<tabpanel orient="vertical">
@@ -161,15 +169,72 @@
 					<checkbox id="hide_tools_menu" label="&hide_tools_menu.label;" 
 					          accesskey="&hide_tools_menu.accesskey;" preference="preference.hide_tools_menu"/>
 				</tabpanel>
+				<tabpanel orient="vertical">
+					<description style="width: 34em;">&keyboard.desc;</description>
+					<separator style="height: 0.5em;" orient="vertical"/>
+					<grid>
+						<columns>
+							<column/>
+							<column/>
+							<column/>
+						</columns>
+						<rows id="key_rows" onkeydown="disableButtons(true);" onkeyup="disableButtons(false);">
+							<row align="center">
+								<label value="&remove.label;" accesskey="&remove.accesskey;" control="delete_key"/>
+								<textbox id="delete_key" onkeypress="keyPress(this, event);"/>
+								<button label="&clear.label;" accesskey="&clear.accesskey;" oncommand="clearKey(this);"/>
+							</row>
+							<row align="center">
+								<label value="&group.label;" accesskey="&group.accesskey;" control="group_key"/>
+								<textbox id="group_key" onkeypress="keyPress(this, event);"/>
+								<button label="&clear.label;" accesskey="&clear.accesskey;" oncommand="clearKey(this);"/>
+							</row>
+							<row align="center">
+								<label value="&load.label;" accesskey="&load.accesskey;" control="load_key"/>
+								<textbox id="load_key" onkeypress="keyPress(this, event);"/>
+								<button label="&clear.label;" accesskey="&clear.accesskey;" oncommand="clearKey(this);"/>
+							</row>
+							<row align="center">
+								<label value="&options.label;" accesskey="&options.accesskey;" control="options_key"/>
+								<textbox id="options_key" onkeypress="keyPress(this, event);"/>
+								<button label="&clear.label;" accesskey="&clear.accesskey;" oncommand="clearKey(this);"/>
+							</row>
+							<row align="center">
+								<label value="&rename.label;" accesskey="&rename.accesskey;" control="rename_key"/>
+								<textbox id="rename_key" onkeypress="keyPress(this, event);"/>
+								<button label="&clear.label;" accesskey="&clear.accesskey;" oncommand="clearKey(this);"/>
+							</row>
+							<row align="center">
+								<label value="&save.label;" accesskey="&save.accesskey;" control="save_key"/>
+								<textbox id="save_key" onkeypress="keyPress(this, event);"/>
+								<button label="&clear.label;" accesskey="&clear.accesskey;" oncommand="clearKey(this);"/>
+							</row>
+							<row align="center">
+								<label value="&saveOne.label;" accesskey="&saveOne.accesskey;" control="save_window_key"/>
+								<textbox id="save_window_key" onkeypress="keyPress(this, event);"/>
+								<button label="&clear.label;" accesskey="&clear.accesskey;" oncommand="clearKey(this);"/>
+							</row>
+						</rows>
+					</grid>
+				</tabpanel>
 			</tabpanels>
 		</tabbox>
-		<groupbox>
-			<caption label="&sessionImport.caption;"/>
-			<hbox>
-				<button label="&importTMP.label;" accesskey="&importTMP.accesskey;" oncommand="com.morac.gConvertTMPSession.init();"/>
-				<button label="&importSS.label;" accesskey="&importSS.accesskey;" oncommand="com.morac.gSessionSaverConverter.init();"/>
-			</hbox>
-		</groupbox>
+		<hbox>
+			<groupbox>
+				<caption label="&sessionImport.caption;"/>
+				<hbox>
+					<button label="&importTMP.label;" accesskey="&importTMP.accesskey;" oncommand="com.morac.gConvertTMPSession.init();"/>
+					<button label="&importSS.label;" accesskey="&importSS.accesskey;" oncommand="com.morac.gSessionSaverConverter.init();"/>
+				</hbox>
+			</groupbox>
+			<groupbox>
+				<caption label="&settingsImportExport.caption;"/>
+				<hbox>
+					<button label="&import_settings.label;" accesskey="&import_settings.accesskey;" oncommand="com.morac.gPreferenceManager.import();"/>
+					<button label="&export_settings.label;" accesskey="&export_settings.accesskey;" oncommand="com.morac.gPreferenceManager.export();"/>
+				</hbox>
+			</groupbox>
+		</hbox>
 	</prefpane>
 	
 	<!-- ******************************************* -->
@@ -247,6 +312,8 @@
 			<checkbox id="save_window_list" label="&window_list.label;" accesskey="&window_list.accesskey;" preference="preference.save_window_list"/>
 		</groupbox>
 		<hbox pack="end">
+			<button	id="clear_undo_tab_button" pack="end" label="&clear_tab_list.label;" accesskey="&clear_tab_list.accesskey;" oncommand="promptClearUndoList('tab');"/>
+			<button	id="clear_undo_window_button" pack="end" label="&clear_window_list.label;" accesskey="&clear_window_list.accesskey;" oncommand="promptClearUndoList('window');"/>
 			<button	id="clear_undo_button" pack="end" label="&clear_list.label;" accesskey="&clear_list.accesskey;" oncommand="promptClearUndoList();"/>
 		</hbox>
 	</prefpane>
@@ -286,6 +353,8 @@
 		</groupbox>
 		<checkbox label="&disable_cache_fixer.label;" accesskey="&disable_cache_fixer.accesskey;" 
 		          preference="preference.disable_cache_fixer"/>
+		<separator style="height: 0.5em;" orient="vertical"/>				  
+		<button label="&reset_warnings.label;" accesskey="&reset_warnings.accesskey;" oncommand="com.morac.gPreferenceManager.resetWarningPrompts();"/>				  
 	</prefpane>
 
 	<!-- ********************************************** -->
@@ -361,6 +430,8 @@
 	
 	<stringbundleset id="stringbundleset">
 		<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
+		<stringbundle id="platformKeys" src="chrome://global-platform/locale/platformKeys.properties"/>
+		<stringbundle id="localeKeys" src="chrome://global/locale/keys.properties"/>
 	</stringbundleset>
 
 	<script type="application/x-javascript" src="chrome://sessionmanager/content/options.js"/>
