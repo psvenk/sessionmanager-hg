@@ -28,6 +28,7 @@ if (typeof XPCOMUtils.defineLazyServiceGetter == "undefined") {
 // Lazily define services
 XPCOMUtils.defineLazyServiceGetter(this, "mObserverService", "@mozilla.org/observer-service;1", "nsIObserverService");
 XPCOMUtils.defineLazyServiceGetter(this, "mPreferenceBranch", "@mozilla.org/preferences-service;1", "nsIPrefBranch2");
+XPCOMUtils.defineLazyServiceGetter(this, "NATIVE_JSON", "@mozilla.org/dom/json;1", "nsIJSON");
 if (Cc["@mozilla.org/fuel/application;1"]) {
 	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/fuel/application;1", "fuelIApplication");
 }
@@ -38,6 +39,7 @@ else if (Cc["@mozilla.org/smile/application;1"]) {
 // Constants
 const OLD_PREFERENCE_ROOT = "extensions.sessionmanager.";
 const PREFERENCE_ROOT = "extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.";
+const SM_UUID = "{1280606b-2510-4fe0-97ef-9b5a22eafe30}";
 
 var EXPORTED_SYMBOLS = ["gPreferenceManager"];
 
@@ -110,6 +112,123 @@ var gPreferenceManager = {
 			pref.reset();
 		}
 	},
+	
+	// Delete warning prompt preferences which have the format of "no_....._prompt"
+	resetWarningPrompts: function(aExtensions)
+	{
+		let extensions = Application.extensions ? Application.extensions : aExtensions;
+		if (!extensions) {
+			if (typeof(Application.getExtensions) == "function") {
+				Application.getExtensions(gPreferenceManager.resetWarningPrompts);
+			}
+			return;
+		}
+	
+		let prefs = extensions.get(SM_UUID).prefs.all;
+		if (prefs.length) {
+			prefs = prefs.filter(function(element, index, array) {
+				return element.name.match(/no_(.*)_prompt/);
+			});
+			prefs.forEach(function(pref) {
+				pref.reset();
+			});
+		}
+	},
+	
+	import: function()
+	{
+		let file = chooseFile(false);
+		if (!file) return;
+	
+		let prefsString = "";  
+		let success = true;
+		let reason = "";
+		try {
+			let fstream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);  
+			let cstream = Cc["@mozilla.org/intl/converter-input-stream;1"].createInstance(Ci.nsIConverterInputStream);  
+			fstream.init(file, -1, 0, 0);  
+			cstream.init(fstream, "UTF-8", 0, 0); // you can use another encoding here if you wish  
+
+			let (str = {}) {  
+				let read = 0;  
+				do {   
+					read = cstream.readString(0xffffffff, str); // read as much as we can and put it in str.value  
+					prefsString += str.value;  
+				} while (read != 0);  
+			}  
+			cstream.close(); // this closes fstream  		
+		
+			let prefs = NATIVE_JSON.decode(prefsString);
+			if (prefs.length) {
+				for (let i=0; i<prefs.length; i++) {
+					this.set(prefs[i].name, prefs[i].value);
+				}
+			}
+		} 
+		catch(ex) { 
+			success = false;
+			reason = ex;
+			logError(ex); 
+		}
+		
+		let window = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator).getMostRecentWindow("SessionManager:Options");
+		let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+		let text = success ? bundle.GetStringFromName("import_successful") :  (bundle.GetStringFromName("import_failed") + " - " + reason);
+		Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService).alert(window, bundle.GetStringFromName("import_prompt"), text);
+	},
+	
+	export: function(aExtensions)
+	{
+		let extensions = Application.extensions ? Application.extensions : aExtensions;
+		if (!extensions) {
+			if (typeof(Application.getExtensions) == "function") {
+				Application.getExtensions(gPreferenceManager.export);
+			}
+			return;
+		}
+	
+		let file = chooseFile(true);
+		if (!file) return;
+	
+		let success = true;
+		let reason = "";
+		try {
+			let prefs = extensions.get(SM_UUID).prefs.all;
+			if (prefs.length) {
+			
+				let myprefs = [];
+				for (let i=0; i<prefs.length; i++) {
+					myprefs.push({ name: prefs[i].name, value: prefs[i].value });
+				}
+				prefsString = NATIVE_JSON.encode(myprefs);
+				
+				// file is nsIFile, prefsString is a string
+				let foStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
+
+				foStream.init(file, 0x02 | 0x08 | 0x20, -1, 0); 
+				// write, create, truncate
+				// 664 = u:rwx, g:rw, u:r
+
+				// if you are sure there will never ever be any non-ascii text in data you can 
+				// also call foStream.writeData directly
+				let converter = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
+				converter.init(foStream, "UTF-8", 0, 0);
+				converter.writeString(prefsString);
+				converter.flush();
+				converter.close(); // this closes foStream			
+			}
+		}
+		catch(ex) { 
+			success = false;
+			reason = ex;
+			logError(ex); 
+		}
+		
+		let window = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator).getMostRecentWindow("SessionManager:Options");
+		let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+		let text = success ? bundle.GetStringFromName("export_successful") :  (bundle.GetStringFromName("export_failed") + " - " + reason);
+		Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService).alert(window, bundle.GetStringFromName("export_prompt"), text);
+	},
 
 	// Use Preference Service for observing instead of FUEL because FUEL's preference observer is not working - Bug 488587
 	observe: function(aPrefName, aObserver, aOwnsWeak, aUseRootBranch)
@@ -164,4 +283,25 @@ function movePreferenceRoot()
 			}
 		}
 	}
+}
+
+// Pick file to save/load preferences
+// aSave true = save
+// aSave false = load
+function chooseFile(aSave)
+{
+	let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
+	let nsIFilePicker = Ci.nsIFilePicker;
+	let filepicker = Cc["@mozilla.org/filepicker;1"].createInstance(nsIFilePicker);
+	let window = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator).getMostRecentWindow("SessionManager:Options");
+	
+	filepicker.init(window, bundle.GetStringFromName((aSave ? "export" : "import") + "_prompt"), (aSave ? nsIFilePicker.modeSave : nsIFilePicker.modeOpen));
+	filepicker.appendFilter(bundle.GetStringFromName("settings_file_extension_description"), "*.session_manager_settings");
+	filepicker.defaultString = bundle.GetStringFromName("default_settings_file_name");
+	filepicker.defaultExtension = bundle.GetStringFromName("settings_file_extension");
+	var ret = filepicker.show();
+	if (ret == nsIFilePicker.returnOK || ret == nsIFilePicker.returnReplace) {
+		return filepicker.file;
+	}
+	else return null;
 }
