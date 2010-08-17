@@ -1,23 +1,7 @@
-// To Do:
-// 1. Add way of combining delete/load/save/etc into existing window prompt and letting user choose to perform functionality without
-//    having the prompt window close. (Session Editor).
-// 2. Add sub-grouping
-// 3. Add support for hot keys for saving and restoring
-// 4. Firefox's tab close confirmation will display when closing the last browser window in Firefox 3.0 and 3.5.  This will result in two 
-//    in a row for OS X since closing the last window triggers "shutdown".  Firefox 3.6 puts up the Quit prompt in this instance, which
-//    Session Manager now prevents from occuring.  Might want to "fix" FF 3.0 and 3.5 by checking for DOMWindowClosed in the component.
-// 5. Allow searching sessions for names, URLs, etc.  This would either need to be done in a background thread or the data would need to 
-//    be cached during idle time (see NSIIdleService).
-// 6. Add a reset warning option to reset the warning that people made "not show again".
-// 7. Allow users to remove a window from an auto-save session so that it won't be saved automatically.
-// 8. Add ability to import/export settings.
-// 9. Add ability to import/export sessions.
-// 10. Allow user to choose tabs to save for "Save Window".
-// 11. Add option to show crash/restore prompt inside browser window, just like Firefox does.
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
+const Cr = Components.results;
 
 // import modules
 Cu.import("resource://sessionmanager/modules/logger.jsm");
@@ -44,6 +28,15 @@ if (typeof XPCOMUtils.defineLazyServiceGetter == "undefined") {
 	}
 }
 
+// NetUtil only exists in Firefox 3.6 and above
+__defineGetter__("NetUtil", function() {
+	delete this.NetUtil;
+	try {
+		Cu.import("resource://gre/modules/NetUtil.jsm");
+		return NetUtil;
+	} catch(ex) {}
+});
+
 //
 // Constants
 //
@@ -57,6 +50,10 @@ const FIRST_URL = "http://sessionmanager.mozdev.org/history.html";
 const FIRST_URL_DEV = "http://sessionmanager.mozdev.org/changelog.xhtml";
 const STARTUP_PROMPT = -11;
 const STARTUP_LOAD = -12;
+
+const INVALID_FILENAMES = ["CON", "PRN", "AUX", "CLOCK$", "NUL", "COM0", "COM1", "COM2", "COM3", "COM4",
+						   "COM5", "COM6", "COM7", "COM8", "COM9", "LPT0", "LPT1", "LPT2", "LPT3", "LPT4",
+						   "LPT5", "LPT6", "LPT7", "LPT8", "LPT9"];
 
 // Observers to register for once.
 const OBSERVING = ["browser:purge-session-history", "quit-application-requested", "quit-application-granted", "quit-application"];
@@ -117,6 +114,270 @@ mainAlertThread.prototype = {
 	}
 };
 						
+// This function procseses read session file, it is here because it can be called as a callback function and I 
+// don't want it called directly from outside this module
+function getCountString(aCount) { 
+	return "\tcount=" + aCount.windows + "/" + aCount.tabs + "\n"; 
+};
+
+function processReadSessionFile(state, aFile, headerOnly, aSyncCallback) {
+	// old crashrecovery file format
+	if ((/\n\[Window1\]\n/.test(state)) && 
+		(/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(state))) 
+	{
+		// read entire file if only read header
+		let name = RegExp.$1 || gSessionManager._string("untitled_window");
+		let timestamp = parseInt(RegExp.$2) || aFile.lastModifiedTime;
+		if (headerOnly) state = gSessionManager.readFile(aFile);
+		headerOnly = false;
+		state = state.substring(state.indexOf("[Window1]\n"), state.length);
+		state = gSessionManager.JSON_encode(gSessionManager.decodeOldFormat(state, true));
+		let countString = getCountString(gSessionManager.getCount(state));
+		state = "[SessionManager v2]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
+		gSessionManager.writeFile(aFile, state);
+	}
+	// Not latest session format
+	else if ((/^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!SESSION_REGEXP.test(state)))
+	{
+		// This should always match, but is required to get the RegExp values set correctly.
+		// matchArray[0] - Entire 4 line header
+		// matchArray[1] - Top 3 lines (includes name and timestamp)
+		// matchArray[2] - " v2" (if it exists) - if missing file is in old format
+		// matchArray[3] - Autosave string (if it exists)
+		// matchArray[4] - Autosave value (not really used at the moment)
+		// matchArray[5] - Count string (if it exists)
+		// matchArray[6] - Group string and any invalid count string before (if either exists)
+		// matchArray[7] - Invalid count string (if it exists)
+		// matchArray[8] - Group string (if it exists)
+		// matchArray[9] - Screen size string and, if no group string, any invalid count string before (if either exists)
+		// matchArray[10] - Invalid count string (if it exists)
+		// matchArray[11] - Screen size string (if it exists)
+		let matchArray = /(^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window\/?\d*)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=[^\t\n\r]+[\n]?))?((\t.*)?(\tscreensize=\d+x\d+[\n]?))?/m.exec(state)
+		if (matchArray)
+		{	
+			// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
+			let goodSession = !/autosave=(false|true|session\/?\d*|window\/?\d*).*\nautosave=(false|true|session\/?\d*|window\/?\d*)/m.test(state);
+			
+			// read entire file if only read header
+			if (headerOnly) state = gSessionManager.readFile(aFile);
+			headerOnly = false;
+
+			if (goodSession)
+			{
+				let data = state.split("\n")[((matchArray[3]) ? 4 : 3)];
+				let backup_data = data;
+				// decrypt if encrypted, do not decode if in old format since old format was not encoded
+				data = gSessionManager.decrypt(data, true, !matchArray[2]);
+				// If old format test JSON data
+				if (!matchArray[2]) {
+					matchArray[1] = matchArray[1].replace(/^\[SessionManager\]/, "[SessionManager v2]");
+					let test_decode = gSessionManager.JSON_decode(data, true);
+					// if it failed to decode, try to decrypt again using new format
+					if (test_decode._JSON_decode_failed) {
+						data = gSessionManager.decrypt(backup_data, true);
+					}
+				}
+				backup_data = null;
+				if (!data) {
+					// master password entered, but still could not be decrypted - either corrupt or saved under different profile
+					if (data == false) {
+						gSessionManager.moveToCorruptFolder(aFile);
+					}
+					return null;
+				}
+				let countString = (matchArray[5]) ? (matchArray[5]) : getCountString(gSessionManager.getCount(data));
+				// remove \n from count string if group or screen size is there
+				if ((matchArray[8] || matchArray[11]) && (countString[countString.length-1] == "\n")) countString = countString.substring(0, countString.length - 1);
+				let autoSaveString = (matchArray[3]) ? (matchArray[3]).split("\n")[0] : "autosave=false";
+				if (autoSaveString == "autosave=true") autoSaveString = "autosave=session/";
+				state = matchArray[1] + autoSaveString + countString + (matchArray[8] ? matchArray[8] : "") + (matchArray[11] ? matchArray[11] : "") + gSessionManager.decryptEncryptByPreference(data);
+				// bad session so rename it so it won't load again - This catches case where window and/or 
+				// tab count is zero.  Technically we can load when tab count is 0, but that should never
+				// happen so session is probably corrupted anyway so just flag it so.
+				if (/(\d\/0)|(0\/\d)/.test(countString)) 
+				{
+					// If one window and no tabs (blank session), delete file otherwise mark it bad
+					if (countString == "\tcount=1/0\n") {
+						gSessionManager.delFile(aFile, true);
+						return null;
+					}
+					else {
+						gSessionManager.moveToCorruptFolder(aFile);
+						return null;
+					}
+				}
+				gSessionManager.writeFile(aFile, state);
+			}
+			// else bad session format, attempt to recover by removing extra line
+			else {
+				let newstate = state.split("\n");
+				newstate.splice(3,newstate.length - (newstate[newstate.length-1].length ? 5 : 6));
+				if (RegExp.$6 == "\tcount=0/0") newstate.splice(3,1);
+				state = newstate.join("\n");
+				// Simply do a write and recursively proces the session again with the current state until it's correct
+				// or marked as invalid.  This handles the issue with asynchronous writes.
+				gSessionManager.writeFile(aFile, state);
+				state = processReadSessionFile(state, aFile, headerOnly, aSyncCallback) 
+			}
+		}
+	}
+	
+	// Convert from Firefox 2/3 format to 3.5+ format if running Firefox 3.5 or later since
+	// Firefox 4 and later won't read the old format.  Only convert if the user is not running Firefox 3, 
+	// but previously ran FF3 (or we don't know what they ran prior to this).  This will only be called when
+	// either caching or displaying the session list so just do a asynchronous read to do the conversion since the
+	// session contents are not returned in those cases.
+	if (gSessionManager.convertFF3Sessions && state) {
+		// Do an asynchronous read and then check that to prevent tying up GUI
+		gSessionManager.asyncReadFile(aFile, function(aInputStream, aStatusCode) {
+			if (Components.isSuccessCode(aStatusCode) && aInputStream.available()) {
+				// Read the session file from the stream and process and return it to the callback function
+				let is = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
+				is.init(aInputStream);
+				let state = is.read(aInputStream.available());
+				is.close();
+				aInputStream.close();
+				if ((/,\s?\"(xultab|text|ownerURI|postdata)\"\s?:/m).test(state)) {
+					try {
+						state = gSessionManager.convertToLatestSessionFormat(aFile, state);
+					}
+					catch(ex) { 
+						logError(ex); 
+					}
+				}
+			}
+		});
+	}
+	
+	return state;
+}
+
+// This object handles the asynchronous read/writes when changing the encryption status of all session files
+var EncryptionChangeHandler = {
+	exception: null,
+	sessions: null,
+	current_filename: null,
+	
+	changeEncryption: function() {
+		this.changeClosedWindowEncryption();
+		this.changeSessionEncryption();
+	},
+	
+	changeSessionEncryption: function() {
+		// if no sessions, then this is first time run
+		if (!this.sessions) {
+			this.exception = null;
+			this.sessions = gSessionManager.getSessions();
+			if (!this.sessions.length) {
+				this.sessions = null;
+				return;
+			}
+			log("Encryption change running", "TRACE");
+		}
+		// Get next session and read it or if no more do end processing
+		let session = this.sessions.pop();
+		if (session) {
+			this.current_filename = session.fileName
+			let file = gSessionManager.getSessionDir(this.current_filename);
+			//log("Reading " + this.current_filename, "INFO");
+			if (file.exists()) {
+				try {
+					gSessionManager.asyncReadFile(file,  function(aInputStream, aStatusCode) {
+						EncryptionChangeHandler.onSessionFileRead(aInputStream, aStatusCode);
+						EncryptionChangeHandler.changeSessionEncryption();
+					});
+				}
+				catch(ex) {
+					logError(ex);
+					this.changeSessionEncryption();
+				}
+			}
+			else {
+				this.changeSessionEncryption();
+			}
+		}
+		else {
+			//log("All Done wih exception = " + this.exception, "INFO");
+			this.sessions = null;
+			this.current_filename = null;
+			if (this.exception) {
+				gSessionManager.cryptError(exception);
+				this.exception = null;
+			}
+			
+			OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:encryption-change", "done");
+			log("Encryption change complete", "TRACE");
+		}
+	},
+	
+	changeClosedWindowEncryption: function() {
+		let exception = null;
+		if (!gSessionManager.mUseSSClosedWindowList) {
+			let windows = gSessionManager.getClosedWindows_SM();
+			let okay = true;
+			windows.forEach(function(aWindow) {
+				aWindow.state = gSessionManager.decryptEncryptByPreference(aWindow.state, true);
+				if (!aWindow.state || (typeof(aWindow.state) != "string")) {
+					exception = aWindow.state;
+					okay = false;
+					return;
+				}
+			});
+			if (okay) {
+				gSessionManager.storeClosedWindows_SM(windows);
+			}
+			if (exception) gSessionManager.cryptError(exception);
+		}
+	},
+	
+	onSessionFileRead: function(aInputStream, aStatusCode) 
+	{
+		// if read okay and is available
+		if (Components.isSuccessCode(aStatusCode) && aInputStream.available()) {
+			//log("Read " + this.current_filename, "INFO");
+			
+			// Read the file from the stream
+			let is = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
+			is.init(aInputStream);
+			let state = is.read(aInputStream.available());
+			is.close();
+			aInputStream.close();
+
+			if (state) 
+			{
+				state = state.replace(/\r\n?/g, "\n");
+				if (SESSION_REGEXP.test(state))
+				{
+					state = state.split("\n")
+					state[4] = gSessionManager.decryptEncryptByPreference(state[4], true);
+					if (state[4] && (typeof(state[4]) == "string")) {
+						state = state.join("\n");
+						//log("Writing " + this.current_filename, "INFO");
+						let file = gSessionManager.getSessionDir(this.current_filename);
+						gSessionManager.writeFile(file, state, function(aResult) {
+							// If write successful
+							if (Components.isSuccessCode(aResult)) {
+								// Update cache with new timestamp so we don't re-read it for no reason
+								if (gSessionManager.mSessionCache[this.current_filename]) {
+									let file = gSessionManager.getSessionDir(this.current_filename);
+									gSessionManager.mSessionCache[this.current_filename].time = file.lastModifiedTime;
+								}
+							}
+						});
+					}
+					else if (!this.exception) this.exception = state[4];
+				}
+			}
+		}
+		else {
+			this.exception = new Components.Exception(this.current_filename, Cr.NS_ERROR_FILE_ACCESS_DENIED, Components.stack.caller);
+		}
+	}
+};
+
+//
+// The main exported object
+//
 var gSessionManager = {
 	// private temporary values
 	_initialized: false,
@@ -129,15 +390,6 @@ var gSessionManager = {
 	
 	// Used to indicate whether or not saving tab tree needs to be updated
 	savingTabTreeVisible: false,
-	
-	// Used for encryption thread so we don't have more than one
-	_encrypt_thread: null,
-	_encrypt_change_queued: 0,
-	
-	// Used to prevent two threads from reading/writing to a file at the same time.  Encrypt lock prevents file from being
-	// modified while encryption is changing on that file.
-	_file_lock: {},
-	_encrypt_lock: {},
 	
 	// Timers
 	_timer : null,
@@ -165,6 +417,9 @@ var gSessionManager = {
 	// Cache
 	mSessionCache: {},
 	mClosedWindowCache: { timestamp: 0, data: null },
+	
+	// Flags
+	convertFF3Sessions: false,
 	
 	// Callback used to get extensions in Firefox 4.0 and higher
 	getExtensionsCallback: function(extensions) {
@@ -293,11 +548,16 @@ var gSessionManager = {
 			this.mPlatformVersion = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo).platformVersion;
 		} catch (ex) { logError(ex); }
 		
+		// Set flag indicating last version ran was Firefox 3.0 (prior to Firefox 3.5). Convert sessions if no longer running FF3.
+		let FF3 = (VERSION_COMPARE_SERVICE.compare(this.mPlatformVersion,"1.9.1a1pre") < 0);
+		this.convertFF3Sessions = gPreferenceManager.get("lastRanFF3", true) && !FF3;
+		gPreferenceManager.set("lastRanFF3", FF3);
+		
 		// Everything is good to go so set initialized to true
 		this._initialized = true;
 
 		// Get and save the Profile directory
-		this.mProfileDirectory = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsILocalFile);
+		this.mProfileDirectory = Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get("ProfD", Ci.nsIFile);
 
 		this.old_mTitle = this.mTitle = this._string("sessionManager");
 		
@@ -670,7 +930,7 @@ var gSessionManager = {
 		// Save Window should be modal
 		let values = aValues || { text: aWindow ? (this.getFormattedName((aWindow.content.document.title || "about:blank"), new Date()) || (new Date()).toLocaleString()) : "", 
 		                          autoSaveable : true, allowNamedReplace : this.mPref_allowNamedReplace, 
-								  callbackData: (aOneWindow ? null : { type: "save", window__SSi: (aWindow ? aWindow.__SSi : null), oneWindow: aOneWindow })};
+								  callbackData: { type: "save", window__SSi: (aWindow ? aWindow.__SSi : null), oneWindow: aOneWindow }};
 								  
 		if (!aName)
 		{
@@ -700,34 +960,45 @@ var gSessionManager = {
 						}
 					}
 				}
-				this.writeFile(file, this.getSessionState(aName, aOneWindow?aWindow:false, this.getNoUndoData(), values.autoSave, aGroup, null, values.autoSaveTime, values.sessionState, oldstate));
+				this.writeFile(file, this.getSessionState(aName, aOneWindow?aWindow:false, this.getNoUndoData(), values.autoSave, aGroup, null, values.autoSaveTime, values.sessionState, oldstate), function(aResults) {
+					if (Components.isSuccessCode(aResults)) {
+						// Combine auto-save values into string
+						let autosaveValues = gSessionManager.mergeAutoSaveValues(aName, aGroup, values.autoSaveTime);
+						let refresh = true;
+						if (!aOneWindow)
+						{
+							if (values.autoSave)
+							{
+								gPreferenceManager.set("_autosave_values", autosaveValues);
+							}
+							else if (gSessionManager.mPref__autosave_name == aName)
+							{
+								// If in auto-save session and user saves on top of it as manual turn off autosave
+								gPreferenceManager.set("_autosave_values","");
+							}
+						}
+						else 
+						{
+							if (values.autoSave)
+							{
+								// Store autosave values into window value and also into window variables
+								gSessionManager.getAutoSaveValues(autosaveValues, aWindow);
+								refresh = false;
+							}
+						}
+						
+						// Update tab tree if it's open (getAutoSaveValues does this as well so don't do it again if already done)
+						if (refresh) OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-session-tree", null);
+					}
+					else {
+						let exception = new Components.Exception(aFileName, Cr.NS_ERROR_FILE_ACCESS_DENIED, Components.stack.caller);
+						this.ioError(exception);
+					}
+				});
 			}
 			catch (ex)
 			{
 				this.ioError(ex);
-			}
-
-			// Combine auto-save values into string
-			let autosaveValues = this.mergeAutoSaveValues(aName, aGroup, values.autoSaveTime);
-			if (!aOneWindow)
-			{
-				if (values.autoSave)
-				{
-					gPreferenceManager.set("_autosave_values", autosaveValues);
-				}
-				else if (this.mPref__autosave_name == aName)
-				{
-					// If in auto-save session and user saves on top of it as manual turn off autosave
-					gPreferenceManager.set("_autosave_values","");
-				}
-			}
-			else 
-			{
-				if (values.autoSave)
-				{
-					// Store autosave values into window value and also into window variables
-					this.getAutoSaveValues(autosaveValues, aWindow);
-				}
 			}
 		}
 	},
@@ -1358,8 +1629,8 @@ var gSessionManager = {
 			}
 			aPopup.insertBefore(menuitem, listEnd);
 		}, this);
-		separator.nextSibling.hidden = (mClosedTabs.length == 0);
-		separator.hidden = separator.nextSibling.hidden || label.hidden;
+		separator.nextSibling.hidden = get_("clear_tabs").hidden = (mClosedTabs.length == 0);
+		separator.hidden = get_("clear_windows").hidden = get_("clear_tabs").hidden = separator.nextSibling.hidden || label.hidden;
 		
 		let showPopup = number_closed_windows + mClosedTabs.length > 0;
 		
@@ -1518,32 +1789,36 @@ var gSessionManager = {
 		}
 	},
 
-	clearUndoList: function()
+	clearUndoList: function(aType)
 	{
 		let window = this.getMostRecentWindow("navigator:browser");
 	
-		let max_tabs_undo = gPreferenceManager.get("browser.sessionstore.max_tabs_undo", 10, true);
-		
-		gPreferenceManager.set("browser.sessionstore.max_tabs_undo", 0, true);
-		gPreferenceManager.set("browser.sessionstore.max_tabs_undo", max_tabs_undo, true);
-		// Check to see if the value was set correctly.  Tab Mix Plus will reset the max_tabs_undo preference 
-		// to 10 when changing from 0 to any number.  See http://tmp.garyr.net/forum/viewtopic.php?t=10158
-		if (gPreferenceManager.get("browser.sessionstore.max_tabs_undo", 10, true) != max_tabs_undo) {
+		if (aType != "window") {
+			let max_tabs_undo = gPreferenceManager.get("browser.sessionstore.max_tabs_undo", 10, true);
+			
+			gPreferenceManager.set("browser.sessionstore.max_tabs_undo", 0, true);
 			gPreferenceManager.set("browser.sessionstore.max_tabs_undo", max_tabs_undo, true);
+			// Check to see if the value was set correctly.  Tab Mix Plus will reset the max_tabs_undo preference 
+			// to 10 when changing from 0 to any number.  See http://tmp.garyr.net/forum/viewtopic.php?t=10158
+			if (gPreferenceManager.get("browser.sessionstore.max_tabs_undo", 10, true) != max_tabs_undo) {
+				gPreferenceManager.set("browser.sessionstore.max_tabs_undo", max_tabs_undo, true);
+			}
 		}
 
-		if (this.mUseSSClosedWindowList) {
-			// use forgetClosedWindow command if available, otherwise use hack
-			if (typeof(SessionStore.forgetClosedWindow) != "undefined") {
-				while (SessionStore.getClosedWindowCount()) SessionStore.forgetClosedWindow(0);
+		if (aType != "tab") {
+			if (this.mUseSSClosedWindowList) {
+				// use forgetClosedWindow command if available, otherwise use hack
+				if (typeof(SessionStore.forgetClosedWindow) != "undefined") {
+					while (SessionStore.getClosedWindowCount()) SessionStore.forgetClosedWindow(0);
+				}
+				else {
+					let state = { windows: [ {} ], _closedWindows: [] };
+					SessionStore.setWindowState(window, this.JSON_encode(state), false);
+				}
 			}
 			else {
-				let state = { windows: [ {} ], _closedWindows: [] };
-				SessionStore.setWindowState(window, this.JSON_encode(state), false);
+				this.clearUndoData("window");
 			}
-		}
-		else {
-			this.clearUndoData("window");
 		}
 		
 		if (window) {
@@ -1764,9 +2039,9 @@ var gSessionManager = {
 			getSessionsOverride: aValues.getSessionsOverride,
 		};
 
-		// Modal if startup or crash prompt or if there's a not a callback function
+		// Modal if startup or crash prompt or if there's a not a callback function or saving one window
 		let window = this.isRunning() ? this.getMostRecentWindow("navigator:browser") : null;
-		let modal = !this.isRunning() || !aValues.callbackData;
+		let modal = !this.isRunning() || !aValues.callbackData || aValues.callbackData.oneWindow;
 		
 		// Initialize return data if modal.  Don't initialize if not modal because that can result in a memory leak since it might
 		// not be cleared
@@ -1858,15 +2133,16 @@ var gSessionManager = {
 		return Cc["@mozilla.org/embedcomp/window-watcher;1"].getService(Ci.nsIWindowWatcher).openWindow(aParent || null, aChromeURL, "_blank", aFeatures, aArgument);
 	},
 
-	clearUndoListPrompt: function()
+	clearUndoListPrompt: function(aType)
 	{
 		let dontPrompt = { value: false };
-		if (gPreferenceManager.get("no_clear_list_prompt") || PROMPT_SERVICE.confirmEx(null, this.mTitle, this._string("clear_list_prompt"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
+		let prompttext = (aType == "tab") ? "clear_tab_list_prompt" : ((aType == "window") ? "clear_window_list_prompt" : "clear_list_prompt");
+		if (gPreferenceManager.get("no_clear_" + aType + "list_prompt") || PROMPT_SERVICE.confirmEx(null, this.mTitle, this._string(prompttext), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, this._string("prompt_not_again"), dontPrompt) == 0)
 		{
-			this.clearUndoList();
+			this.clearUndoList(aType);
 			if (dontPrompt.value)
 			{
-				gPreferenceManager.set("no_clear_list_prompt", true);
+				gPreferenceManager.set("no_clear_" + aType + "list_prompt", true);
 			}
 		}
 	},
@@ -2003,23 +2279,24 @@ var gSessionManager = {
 		if (this._crash_session_filename && !this.isPrivateBrowserMode()) {
 			let file = this.getSessionDir(this._crash_session_filename);
 			if (file) {
-				let crashed_session = this.readSessionFile(file);
-				if (crashed_session) {
-					crashed_session = this.decrypt(crashed_session, true);
+				this.readSessionFile(file, false, function(crashed_session) {
 					if (crashed_session) {
-						crashed_session = this.JSON_decode(crashed_session.split("\n")[4], true);
-						if (!crashed_session._JSON_decode_failed) {
-							// Save each window session found in crashed file
-							crashed_session.windows.forEach(function(aWindow) {
-								if (aWindow.extData && aWindow.extData._sm_window_session_values) {
-									// read window session data and save it and the window into the window session file		
-									let window_session_data = aWindow.extData._sm_window_session_values.split("\n");
-									this.saveWindowSession(window_session_data, aWindow);
-								}
-							}, this);
+						crashed_session = gSessionManager.decrypt(crashed_session.split("\n")[4], true);
+						if (crashed_session) {
+							crashed_session = gSessionManager.JSON_decode(crashed_session, true);
+							if (!crashed_session._JSON_decode_failed) {
+								// Save each window session found in crashed file
+								crashed_session.windows.forEach(function(aWindow) {
+									if (aWindow.extData && aWindow.extData._sm_window_session_values) {
+										// read window session data and save it and the window into the window session file		
+										let window_session_data = aWindow.extData._sm_window_session_values.split("\n");
+										gSessionManager.saveWindowSession(window_session_data, aWindow);
+									}
+								});
+							}
 						}
 					}
-				}
+				});
 			}
 		}
 	},
@@ -2155,6 +2432,55 @@ var gSessionManager = {
 			}
 			return dir.QueryInterface(Ci.nsILocalFile);
 		}
+	},
+
+	// Cache the session data so menu opens faster, don't want to use async since that reads the entire
+	// file in and we don't need to do that.  So simulate it by doing a bunch of short synchronous reads.
+	// This reads in one file every 50 ms.  Since it's possible for getSessions() to be called during that
+	// time frame, simply stop caching if a session is already cached as that means getSessions() was called.
+	cacheSessions: function() {
+		let sessionFiles = [];
+		let filesEnum = this.getSessionDir().directoryEntries.QueryInterface(Ci.nsISimpleEnumerator);
+		while (filesEnum.hasMoreElements())
+		{
+			let file = filesEnum.getNext().QueryInterface(Ci.nsIFile);
+			// don't try to read a directory
+			if (file.isDirectory()) continue;
+			sessionFiles.push({filename: file.leafName, lastModifiedTime: file.lastModifiedTime});
+		}
+		let cache_count = sessionFiles.length;
+		if (!cache_count) return;
+		
+		log("gSessionManager:cacheSessions: Caching " + cache_count + " session files.", "INFO");	
+		let matchArray, session;
+		// timer call back function to cache session data
+		var callback = {
+			notify: function(timer) {
+				//let a = Date.now();
+				session = sessionFiles.pop();
+				// if the session is already cached, that means getSession() was called so stop caching sessions
+				if (session && !gSessionManager.mSessionCache[session.filename]) {
+					if (matchArray = SESSION_REGEXP.exec(gSessionManager.readSessionFile(gSessionManager.getSessionDir(session.filename), true)))
+					{
+						let timestamp = parseInt(matchArray[2]) || session.lastModifiedTime;
+						let backupItem = (BACKUP_SESSION_REGEXP.test(session.filename) || (session.filename == AUTO_SAVE_SESSION_NAME));
+						let group = matchArray[7] ? matchArray[7] : "";
+						// save mSessionCache data
+						gSessionManager.mSessionCache[session.filename] = { name: matchArray[1], timestamp: timestamp, autosave: matchArray[3], time: session.lastModifiedTime, windows: matchArray[4], tabs: matchArray[5], backup: backupItem, group: group };
+					}
+					//log("gSessionManager:cacheSessions: Cached " + session.filename + " in " + (Date.now() - a) + " milli-seconds.", "INFO");
+					timer.initWithCallback(this, 50, Ci.nsITimer.TYPE_ONE_SHOT);
+				}
+				else {
+					gSessionManager.convertFF3Sessions = false;
+					log("gSessionManager:cacheSessions: Finished caching.  Cached " + (cache_count - sessionFiles.length) + " session files.", "INFO");
+				}
+			}
+		}
+		
+		log("gSessionManager.convertFF3Sessions = " + gSessionManager.convertFF3Sessions, "DATA");
+		let timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+		timer.initWithCallback(callback, 50, Ci.nsITimer.TYPE_ONE_SHOT);
 	},
 
 	//
@@ -2543,134 +2869,63 @@ var gSessionManager = {
 		}
 	},
 
-	readSessionFile: function(aFile,headerOnly)
+	readSessionFile: function(aFile,headerOnly,aSyncCallback)
 	{
-		function getCountString(aCount) { 
-			return "\tcount=" + aCount.windows + "/" + aCount.tabs + "\n"; 
-		};
+		// Since there's no way to really actually read only the first few lines in a file with an
+		// asynchronous read, we do header only reads synchronously.
+		if (typeof aSyncCallback == "function") {
+			this.asyncReadFile(aFile, function(aInputStream, aStatusCode) {
+				if (Components.isSuccessCode(aStatusCode) && aInputStream.available()) {
+					// Read the session file from the stream and process and return it to the callback function
+					let is = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
+					is.init(aInputStream);
+					let state = is.read(headerOnly ? 1024 : aInputStream.available());
+					is.close();
+					aInputStream.close();
+					state = processReadSessionFile(state, aFile, headerOnly, aSyncCallback);
+					if (state) aSyncCallback(state);
+				}
+			});
+			return null;
+		}
+		else {
+			let state = this.readFile(aFile,headerOnly);
+			return processReadSessionFile(state, aFile, headerOnly);
+		}
+	},
+	
+	asyncReadFile: function(aFile, aCallback)
+	{
+		let fileURI = IO_SERVICE.newFileURI(aFile);
+		let channel = IO_SERVICE.newChannelFromURI(fileURI);
+		
+		// Use NetUtil if it exists (Firefox 3.6 and above) otherwise mostly duplicate code from NetUtil.
+		if (typeof NetUtil != "undefined") {
+			NetUtil.asyncFetch(channel, aCallback);
+		}
+		else {
+			// Create a pipe that will create our output stream that we can use once
+			// we have gotten all the data.
+			let pipe = Cc["@mozilla.org/pipe;1"].createInstance(Ci.nsIPipe);
+			pipe.init(true, true, 0, 0xffffffff, null);
+		
+			// Create a listener that will give data to the pipe's output stream.
+			let listener = Cc["@mozilla.org/network/simple-stream-listener;1"].createInstance(Ci.nsISimpleStreamListener);
+		
+			listener.init(pipe.outputStream, {
+				onStartRequest: function(aRequest, aContext) {},
+				onStopRequest: function(aRequest, aContext, aStatusCode) {
+					pipe.outputStream.close();
+					aCallback(pipe.inputStream, aStatusCode);
+				}
+			});
 
-		let state = this.readFile(aFile,headerOnly);
-		
-		// old crashrecovery file format
-		if ((/\n\[Window1\]\n/.test(state)) && 
-			(/^\[SessionManager\]\n(?:name=(.*)\n)?(?:timestamp=(\d+))?/m.test(state))) 
-		{
-			// read entire file if only read header
-			let name = RegExp.$1 || this._string("untitled_window");
-			let timestamp = parseInt(RegExp.$2) || aFile.lastModifiedTime;
-			if (headerOnly) state = this.readFile(aFile);
-			headerOnly = false;
-			state = state.substring(state.indexOf("[Window1]\n"), state.length);
-			state = this.JSON_encode(this.decodeOldFormat(state, true));
-			let countString = getCountString(this.getCount(state));
-			state = "[SessionManager v2]\nname=" + name + "\ntimestamp=" + timestamp + "\nautosave=false" + countString + state;
-			this.writeFile(aFile, state);
+			channel.asyncOpen(listener, null);
 		}
-		// Not latest session format
-		else if ((/^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n/m.test(state)) && (!SESSION_REGEXP.test(state)))
-		{
-			// This should always match, but is required to get the RegExp values set correctly.
-			// matchArray[0] - Entire 4 line header
-			// matchArray[1] - Top 3 lines (includes name and timestamp)
-			// matchArray[2] - " v2" (if it exists) - if missing file is in old format
-			// matchArray[3] - Autosave string (if it exists)
-			// matchArray[4] - Autosave value (not really used at the moment)
-			// matchArray[5] - Count string (if it exists)
-			// matchArray[6] - Group string and any invalid count string before (if either exists)
-			// matchArray[7] - Invalid count string (if it exists)
-			// matchArray[8] - Group string (if it exists)
-			// matchArray[9] - Screen size string and, if no group string, any invalid count string before (if either exists)
-			// matchArray[10] - Invalid count string (if it exists)
-			// matchArray[11] - Screen size string (if it exists)
-			let matchArray = /(^\[SessionManager( v2)?\]\nname=.*\ntimestamp=\d+\n)(autosave=(false|true|session\/?\d*|window\/?\d*)[\n]?)?(\tcount=[1-9][0-9]*\/[1-9][0-9]*[\n]?)?((\t.*)?(\tgroup=[^\t\n\r]+[\n]?))?((\t.*)?(\tscreensize=\d+x\d+[\n]?))?/m.exec(state)
-			if (matchArray)
-			{	
-				// If two autosave lines, session file is bad so try and fix it (shouldn't happen anymore)
-				let goodSession = !/autosave=(false|true|session\/?\d*|window\/?\d*).*\nautosave=(false|true|session\/?\d*|window\/?\d*)/m.test(state);
-				
-				// read entire file if only read header
-				if (headerOnly) state = this.readFile(aFile);
-				headerOnly = false;
-
-				if (goodSession)
-				{
-					let data = state.split("\n")[((matchArray[3]) ? 4 : 3)];
-					let backup_data = data;
-					// decrypt if encrypted, do not decode if in old format since old format was not encoded
-					data = this.decrypt(data, true, !matchArray[2]);
-					// If old format test JSON data
-					if (!matchArray[2]) {
-						matchArray[1] = matchArray[1].replace(/^\[SessionManager\]/, "[SessionManager v2]");
-						let test_decode = this.JSON_decode(data, true);
-						// if it failed to decode, try to decrypt again using new format
-						if (test_decode._JSON_decode_failed) {
-							data = this.decrypt(backup_data, true);
-						}
-					}
-					backup_data = null;
-					if (!data) {
-						// master password entered, but still could not be decrypted - either corrupt or saved under different profile
-						if (data == false) {
-							this.moveToCorruptFolder(aFile);
-						}
-						return null;
-					}
-					let countString = (matchArray[5]) ? (matchArray[5]) : getCountString(this.getCount(data));
-					// remove \n from count string if group or screen size is there
-					if ((matchArray[8] || matchArray[11]) && (countString[countString.length-1] == "\n")) countString = countString.substring(0, countString.length - 1);
-					let autoSaveString = (matchArray[3]) ? (matchArray[3]).split("\n")[0] : "autosave=false";
-					if (autoSaveString == "autosave=true") autoSaveString = "autosave=session/";
-					state = matchArray[1] + autoSaveString + countString + (matchArray[8] ? matchArray[8] : "") + (matchArray[11] ? matchArray[11] : "") + this.decryptEncryptByPreference(data);
-					// bad session so rename it so it won't load again - This catches case where window and/or 
-					// tab count is zero.  Technically we can load when tab count is 0, but that should never
-					// happen so session is probably corrupted anyway so just flag it so.
-					if (/(\d\/0)|(0\/\d)/.test(countString)) 
-					{
-						// If one window and no tabs (blank session), delete file otherwise mark it bad
-						if (countString == "\tcount=1/0\n") {
-							this.delFile(aFile, true);
-							return null;
-						}
-						else {
-							this.moveToCorruptFolder(aFile);
-							return null;
-						}
-					}
-					this.writeFile(aFile, state);
-				}
-				// else bad session format, attempt to recover by removing extra line
-				else {
-					let newstate = state.split("\n");
-					newstate.splice(3,newstate.length - (newstate[newstate.length-1].length ? 5 : 6));
-					if (RegExp.$6 == "\tcount=0/0") newstate.splice(3,1);
-					state = newstate.join("\n");
-					this.writeFile(aFile, state);
-					state = this.readSessionFile(aFile,headerOnly);
-				}
-			}
-		}
-		
-		// Convert from Firefox 2/3 format to 3.5+ format if running Firefox 3.7 or later since
-		// Firefox will no longer read older session formats
-		if (VERSION_COMPARE_SERVICE.compare(this.mPlatformVersion,"1.9.3a1pre") >= 0) {
-			if ((/,\s?\"(xultab|text|ownerURI|postdata)\"\s?:/m).test(state)) {
-				try {
-					// read entire file if only read header
-					if (headerOnly) state = this.readFile(aFile);
-					state = this.convertToLatestSessionFormat(aFile, state);
-				}
-				catch(ex) { 
-					logError(ex); 
-				}
-			}
-		}
-		
-		return state;
 	},
 	
 	readFile: function(aFile,headerOnly)
 	{
-		this.checkFileLock(aFile, false, true);
 		try
 		{
 			let stream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
@@ -2686,28 +2941,44 @@ var gSessionManager = {
 				if (headerOnly) break;
 			}
 			cvstream.close();
-			this.clearFileLock(aFile, false, true);
 			
 			return content.replace(/\r\n?/g, "\n");
 		}
 		catch (ex) { }
-		this.clearFileLock(aFile, false, true);
 		
 		return null;
 	},
 
-	writeFile: function(aFile, aData)
+	writeFile: function(aFile, aData, aCallback)
 	{
 		if (!aData) return;  // this handles case where data could not be encrypted and null was passed to writeFile
-		this.checkFileLock(aFile);
-		let stream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
-		stream.init(aFile, 0x02 | 0x08 | 0x20, 0600, 0);
-		let cvstream = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
-		cvstream.init(stream, "UTF-8", 0, Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
-		cvstream.writeString(aData.replace(/\n/g, _EOL));
-		cvstream.flush();
-		cvstream.close();
-		this.clearFileLock(aFile);
+		aData = aData.replace(/\n/g, _EOL);  // Change EOL for OS
+		let ostream = Cc["@mozilla.org/network/safe-file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
+		ostream.init(aFile, 0x02 | 0x08 | 0x20, 0600, 0);
+		let converter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
+		converter.charset = "UTF-8";
+		
+		// Use NetUtil to asynchronous write if availalble (Firefox 3.6 and above), otherwise use use our own version
+		if (typeof NetUtil != "undefined") {
+			// Asynchronously copy the data to the file.
+			let istream = converter.convertToInputStream(aData);
+			NetUtil.asyncCopy(istream, ostream, aCallback);
+		}
+		else {
+			let convertedData = converter.ConvertFromUnicode(aData);
+			convertedData += converter.Finish();
+
+			// write and close stream
+			ostream.write(convertedData, convertedData.length);
+			if (ostream instanceof Ci.nsISafeOutputStream) {
+				ostream.finish();
+			} else {
+				ostream.close();
+			}
+			
+			// Fake a successful callback
+			if (typeof aCallBack == "function") aCallBack(0);
+		}
 	},
 
 	delFile: function(aFile, aSilent)
@@ -2716,13 +2987,10 @@ var gSessionManager = {
 		{
 			try
 			{
-				this.checkFileLock(aFile);
 				aFile.remove(false);
-				this.clearFileLock(aFile);
 			}
 			catch (ex)
 			{
-				this.clearFileLock(aFile);
 				if (!aSilent)
 				{
 					this.ioError(ex);
@@ -2743,76 +3011,14 @@ var gSessionManager = {
 					dir.create(Ci.nsIFile.DIRECTORY_TYPE, 0700);
 				}
 		
-				this.checkFileLock(aFile);
 				aFile.moveTo(dir, null);
-				this.clearFileLock(aFile);
 			}
 		}	
 		catch (ex) { 
-			this.clearFileLock(aFile);
 			if (!aSilent) this.ioError(ex); 
 		}
 	},
 	
-    // Used to prevent multiple threads from accessing the same file
-	checkFileLock: function(aFile, aEncryptLock, aReadOnly)
-	{	
-		let logged = false;
-		let filename = (typeof(aFile) == "object") ? aFile.leafName : aFile;
-		let thread = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).currentThread;
-		let mainThread = Cc["@mozilla.org/thread-manager;1"].getService().isMainThread;
-
-		// If file lock info not created, create it
-		if (!this._file_lock[filename]) 
-			this._file_lock[filename] = { read: 0, write: false, encrypt: false, thread: "none" };
-			
-//		log("checkFileLock start: File=" + filename + ", " + this._file_lock[filename].toSource(), "EXTRA");
-
-		// Wait if file is locked for generic read/write or if file is locked for encryption change and 
-		// this call is from the main thread. Allow multiple reads at the same time, if no write or encrypt lock.
-		while((!aReadOnly && (this._file_lock[filename].read > 0)) || this._file_lock[filename].write || (this._file_lock[filename].encrypt && mainThread)) {
-			if (!logged) {
-				logged = true;
-				// if in main thread and locked, it was locked by backgroudn thread and vice-versa
-				log(filename + " locked by " + (mainThread ? "background" : "main") + " thread", "TRACE");
-			}
-			// Allow other events to process on this thread while we wait for lock to go away
-			thread.processNextEvent(true);
-		}
-		if (aEncryptLock) {
-			this._file_lock[filename].encrypt = true;
-		}
-		else if (!aReadOnly) {
-			this._file_lock[filename].write = true;
-		}
-		else {
-			this._file_lock[filename].read++;
-		}
-		this._file_lock[filename].thread = mainThread ? "main" : "background";
-//		log("checkFileLock end: File=" + filename + ", " + this._file_lock[filename].toSource(), "EXTRA");
-	},
-	
-	clearFileLock: function(aFile, aEncryptLock, aReadOnly)
-	{
-		let filename = (typeof(aFile) == "object") ? aFile.leafName : aFile;
-//		log("clearFileLock start: File=" + filename + ", " + this._file_lock[filename].toSource(), "EXTRA");
-		if (aEncryptLock) {
-			this._file_lock[filename].encrypt = false;
-		}
-		else if (!aReadOnly) {
-			this._file_lock[filename].write = false;
-		}
-		else if (this._file_lock[filename].read > 0) {
-			this._file_lock[filename].read--;
-		}
-//		log("clearFileLock end: File=" + filename + ", " + this._file_lock[filename].toSource(), "EXTRA");
-		
-		// If not locked any more just delete the object
-		if (!(this._file_lock[filename].encrypt || this._file_lock[filename].write || (this._file_lock[filename].read > 0))) {
-			delete this._file_lock[filename];
-		}
-	},
-
 /* ........ Encryption functions .............. */
 
 	cryptError: function(aException, notSaved)
@@ -2889,115 +3095,15 @@ var gSessionManager = {
 		}
 		return aData;
 	},
-
+	
 	encryptionChange: function()
 	{
 		// force a master password prompt so we don't waste time if user cancels it
 		if (PasswordManager.enterMasterPassword()) 
 		{
-			var currThread = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).currentThread;
-			if (!this._encrypt_thread) this._encrypt_thread = Cc["@mozilla.org/thread-manager;1"].getService(Ci.nsIThreadManager).newThread(0);
-			this._encrypt_change_queued++;
-		
-			// Main Thread called when finished loading sessions
-			var mainThread = {
-				run: function() {
-					try {
-						// If no more changes queued, shutdown thread
-						if (--gSessionManager._encrypt_change_queued <= 0) {
-							gSessionManager._encrypt_thread.shutdown();
-							delete gSessionManager._encrypt_thread;
-							log("mainThread: Background Encryption Thread destroyed from mainThread", "TRACE");
-							// Do notification in main thread since doesn't work in background thread
-							if (!gSessionManager.mUseSSClosedWindowList) {
-								OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:update-undo-button", null);
-							}
-						}
-					} catch(err) {
-						logError(err);
-					}
-				},
-			  
-				QueryInterface: function(iid) {
-					if (iid.equals(Ci.nsIRunnable) || iid.equals(Ci.nsISupports)) {
-						return this;
-					}
-					throw Cr.NS_ERROR_NO_INTERFACE;
-				}
-			};
-			
-			// Do this in the background so we don't hang the GUI
-			let encryptionChangeThread = {
-				run: function() {
-					log("Encryption Change running", "TRACE");
-					//perform work here that doesn't touch the DOM or anything else that isn't thread safe
-					try {
-						let exception = null;
-						let okay = true;
-						let sessions = gSessionManager.getSessions();
-						sessions.forEach(function(aSession) {
-							let file = this.getSessionDir(aSession.fileName);
-							this.checkFileLock(file, true);
-							let state = this.readSessionFile(file);
-							if (state) 
-							{
-								if (SESSION_REGEXP.test(state))
-								{
-									state = state.split("\n")
-									state[4] = this.decryptEncryptByPreference(state[4], true);
-									if (state[4] && (typeof(state[4]) == "string")) {
-										state = state.join("\n");
-										this.writeFile(file, state);
-									}
-									else if (!exception) exception = state[4];
-								}
-							}
-							this.clearFileLock(file,true);
-						}, gSessionManager);
-						
-						if (exception) {
-							gSessionManager.cryptError(exception);
-							exception = null;
-						}
-					
-						if (!gSessionManager.mUseSSClosedWindowList) {
-							gSessionManager.checkFileLock(CLOSED_WINDOW_FILE,true);
-							let windows = gSessionManager.getClosedWindows_SM();
-							let okay = true;
-							windows.forEach(function(aWindow) {
-								aWindow.state = this.decryptEncryptByPreference(aWindow.state, true);
-								if (!aWindow.state || (typeof(aWindow.state) != "string")) {
-									exception = aWindow.state;
-									okay = false;
-									return;
-								}
-							}, gSessionManager);
-							if (okay) {
-								gSessionManager.storeClosedWindows_SM(windows);
-							}
-							gSessionManager.clearFileLock(CLOSED_WINDOW_FILE,true);
-						}
-						
-						// cache sessions
-						gSessionManager.getSessions();
-						
-						if (exception) gSessionManager.cryptError(exception);
-					}
-					catch(ex) {
-						logError(ex);
-					}
-					log("Encryption change complete", "TRACE");
-					// kick off current thread to terminate this thread
-					currThread.dispatch(mainThread, currThread.DISPATCH_NORMAL);
-				},
-				QueryInterface: function(iid) {
-					if (iid.equals(Ci.nsIRunnable) || iid.equals(Ci.nsISupports)) {
-						return this;
-					}
-					throw Cr.NS_ERROR_NO_INTERFACE;
-				}
-			};
-			this._encrypt_thread.dispatch(encryptionChangeThread, this._encrypt_thread.DISPATCH_NORMAL);
+			// disable checkbox to prevent user from switching again until processing is finished.
+			OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:encryption-change", "start");
+			EncryptionChangeHandler.changeEncryption();
 		}
 		// failed to encrypt/decrypt so revert setting
 		else {
@@ -3005,7 +3111,6 @@ var gSessionManager = {
 			this.cryptError(this._string("change_encryption_fail"));
 		}
 	},
-
 /* ........ Conversion functions .............. */
 
 	convertEntryToLatestSessionFormat: function(aEntry)
@@ -3391,8 +3496,10 @@ var gSessionManager = {
 				}
 			}
 			catch(ex) {
-				// log it so we can tell when things aren't working
-				logError(ex);
+				// log it so we can tell when things aren't working.  Don't log exceptions in deleteWindowValue
+				// because it throws an exception if value we are trying to delete doesn't exist. Since we are 
+				// deleting the value, we don't care if it doesn't exist.
+				if (ex.message.indexOf("deleteWindowValue") == -1) logError(ex);
 			}
 			
 			// start/stop window timer
@@ -3943,7 +4050,16 @@ var gSessionManager = {
 	{
 		// Make sure we don't replace spaces with _ in filename since tabs become spaces
 		aString = aString.replace(/\t/g, " ");
-		return aString.replace(/[^\w ',;!()@&+=~\x80-\xFE-]/g, "_").substr(0, 64) + SESSION_EXT;
+		
+		// Reserved File names under Windows so add a "_" to name if one of them is used
+		if (INVALID_FILENAMES.indexOf(aString) != -1) aString += "_";
+		
+		// Don't allow illegal characters for Operating Systems:
+		// NTFS - <>:"/\|*? or ASCII chars from 00 to 1F
+		// FAT - ^
+		// OS 9, OS X and Linux - :
+		return aString.replace(/[<>:"\/\\|*?^\x00-\x1F]/g, "_").substr(0, 64) + SESSION_EXT;
+//		return aString.replace(/[^\w ',;!()@&+=~\x80-\xFE-]/g, "_").substr(0, 64) + SESSION_EXT;
 	},
 	
 	getMostRecentWindow: function(aType)
