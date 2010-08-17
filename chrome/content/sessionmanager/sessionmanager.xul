@@ -10,6 +10,16 @@
 		<stringbundle id="bundle_sessionmanager" src="chrome://sessionmanager/locale/sessionmanager.properties"/>
 	</stringbundleset>
 	
+	<keyset id="mainKeyset">
+		<key id="key_session_manager_delete" modifiers="" key="" oncommand="com.morac.gSessionManager.remove();"/>
+		<key id="key_session_manager_group" modifiers="" key="" oncommand="com.morac.gSessionManager.group();"/>
+		<key id="key_session_manager_load" modifiers="" key="" oncommand="com.morac.gSessionManager.load(window);"/>
+		<key id="key_session_manager_options" modifiers="" key="" oncommand="com.morac.gSessionManager.openOptions();"/>
+		<key id="key_session_manager_rename" modifiers="" key="" oncommand="com.morac.gSessionManager.rename();"/>
+		<key id="key_session_manager_save" modifiers="" key="" oncommand="com.morac.gSessionManager.save(window);"/>
+		<key id="key_session_manager_save_window" modifiers="" key="" oncommand="com.morac.gSessionManager.saveWindow(window);"/>
+	</keyset>
+	
 	<!-- Menu in toolbar -->
 	<toolbarpalette id="BrowserToolbarPalette"> <!-- Firefox/SeaMonkey (toolbar) -->
 		<toolbarbutton id="sessionmanager-toolbar" type="menu-button" class="toolbarbutton-1 chromeclass-toolbar-additional" label="&sessionManager;" buttontooltiptext="&toolbar.tooltip;"
@@ -17,12 +27,12 @@
 			<menupopup onpopupshowing="com.morac.gSessionManager.init(this, true);" onclick="event.stopPropagation();" oncommand="event.stopPropagation();">
 				<!--menuitem label="SQL Conversion Test" oncommand="com.morac.gSessionManager.convertToSQL();"/>
 				<menuitem label="&session_explorer.label;" accesskey="&session_explorer.accesskey;" oncommand="com.morac.gSessionManager.openSessionExplorer();"/-->
-				<menuitem _id="load" label="&load.label;" accesskey="&load.accesskey;" oncommand="com.morac.gSessionManager.load(window);"/>
-				<menuitem _id="save" label="&save.label;" accesskey="&save.accesskey;" oncommand="com.morac.gSessionManager.save(window);"/>
-				<menuitem _id="saveWin" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="com.morac.gSessionManager.saveWindow(window);"/>
-				<menuitem _id="rename" label="&rename.label;" accesskey="&rename.accesskey;" oncommand="com.morac.gSessionManager.rename();"/>
-				<menuitem _id="remove" label="&remove.label;" accesskey="&remove.accesskey;" oncommand="com.morac.gSessionManager.remove();"/>
-				<menuitem _id="group" label="&group.label;" accesskey="&group.accesskey;" oncommand="com.morac.gSessionManager.group();"/>
+				<menuitem _id="load" label="&load.label;" accesskey="&load.accesskey;" key="key_session_manager_load" oncommand="com.morac.gSessionManager.load(window);"/>
+				<menuitem _id="save" label="&save.label;" accesskey="&save.accesskey;" key="key_session_manager_save" oncommand="com.morac.gSessionManager.save(window);"/>
+				<menuitem _id="saveWin" label="&saveOne.label;" accesskey="&saveOne.accesskey;" key="key_session_manager_save_window" oncommand="com.morac.gSessionManager.saveWindow(window);"/>
+				<menuitem _id="rename" label="&rename.label;" accesskey="&rename.accesskey;" key="key_session_manager_rename" oncommand="com.morac.gSessionManager.rename();"/>
+				<menuitem _id="remove" label="&remove.label;" accesskey="&remove.accesskey;" key="key_session_manager_delete" oncommand="com.morac.gSessionManager.remove();"/>
+				<menuitem _id="group" label="&group.label;" accesskey="&group.accesskey;" key="key_session_manager_group" oncommand="com.morac.gSessionManager.group();"/>
 				<menuseparator _id="autosave-separator"/>
 				<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="com.morac.gSessionManager.closeSession();"/>
 				<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="com.morac.gSessionManager.abandonSession();"/>
@@ -37,7 +47,7 @@
 				<menuseparator _id="separator"/>
 				<menuitem label="&openFolder.label;" accesskey="&openFolder.accesskey;" oncommand="com.morac.gSessionManager.openFolder();"/>
 				<menuseparator _id="options-separator"/>
-				<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="com.morac.gSessionManager.openOptions();"/>
+				<menuitem label="&options.label;" accesskey="&options.accesskey;" key="key_session_manager_options" oncommand="com.morac.gSessionManager.openOptions();"/>
 				<menuseparator/>
 				<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
 					<menupopup onpopupshowing="event.stopPropagation();">
@@ -45,6 +55,8 @@
 						<menuseparator _id="closed-separator"/>
 						<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
 						<menuseparator _id="end-separator"/>
+						<menuitem _id="clear_tabs" label="&clearTabList.label;" accesskey="&clearTabList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt('tab');"/>
+						<menuitem _id="clear_windows" label="&clearWindowList.label;" accesskey="&clearWindowList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt('window');"/>
 						<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt();"/>
 					</menupopup>
 				</menu>
@@ -59,6 +71,8 @@
 				<menuseparator _id="closed-separator"/>
 				<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
 				<menuseparator _id="end-separator"/>
+				<menuitem _id="clear_tabs" label="&clearTabList.label;" accesskey="&clearTabList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt('tab');"/>
+				<menuitem _id="clear_windows" label="&clearWindowList.label;" accesskey="&clearWindowList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt('window');"/>
 				<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt();"/>
 			</menupopup>
 		</toolbarbutton>
@@ -83,12 +97,12 @@
 	
 	<menupopup id="sessionmanager-menu-popup" onpopupshowing="com.morac.gSessionManager.init(this);">
 		<!--menuitem label="SQL Conversion Test" oncommand="com.morac.gSessionManager.convertToSQL();"/-->
-		<menuitem _id="load" label="&load.label;" accesskey="&load.accesskey;" oncommand="com.morac.gSessionManager.load(window);"/>
-		<menuitem _id="save" label="&save.label;" accesskey="&save.accesskey;" oncommand="com.morac.gSessionManager.save(window);"/>
-		<menuitem _id="saveWin" label="&saveOne.label;" accesskey="&saveOne.accesskey;" oncommand="com.morac.gSessionManager.saveWindow(window);"/>
-		<menuitem _id="rename" label="&rename.label;" accesskey="&rename.accesskey;" oncommand="com.morac.gSessionManager.rename();"/>
-		<menuitem _id="remove" label="&remove.label;" accesskey="&remove.accesskey;" oncommand="com.morac.gSessionManager.remove();"/>
-		<menuitem _id="group" label="&group.label;" accesskey="&group.accesskey;" oncommand="com.morac.gSessionManager.group();"/>
+		<menuitem _id="load" label="&load.label;" accesskey="&load.accesskey;" key="key_session_manager_load" oncommand="com.morac.gSessionManager.load(window);"/>
+		<menuitem _id="save" label="&save.label;" accesskey="&save.accesskey;" key="key_session_manager_save" oncommand="com.morac.gSessionManager.save(window);"/>
+		<menuitem _id="saveWin" label="&saveOne.label;" accesskey="&saveOne.accesskey;" key="key_session_manager_save_window" oncommand="com.morac.gSessionManager.saveWindow(window);"/>
+		<menuitem _id="rename" label="&rename.label;" accesskey="&rename.accesskey;" key="key_session_manager_rename" oncommand="com.morac.gSessionManager.rename();"/>
+		<menuitem _id="remove" label="&remove.label;" accesskey="&remove.accesskey;" key="key_session_manager_delete" oncommand="com.morac.gSessionManager.remove();"/>
+		<menuitem _id="group" label="&group.label;" accesskey="&group.accesskey;" key="key_session_manager_group" oncommand="com.morac.gSessionManager.group();"/>
 		<menuseparator _id="autosave-separator"/>
 		<menuitem _id="closer" label="&closeSession.label;" accesskey="&closeSession.accesskey;" oncommand="com.morac.gSessionManager.closeSession();"/>
 		<menuitem _id="abandon" label="&abandonSession.label;" accesskey="&abandonSession.accesskey;" oncommand="com.morac.gSessionManager.abandonSession();"/>
@@ -103,7 +117,7 @@
 		<menuseparator _id="separator"/>
 		<menuitem label="&openFolder.label;" accesskey="&openFolder.accesskey;" oncommand="com.morac.gSessionManager.openFolder();"/>
 		<menuseparator _id="options-separator"/>
-		<menuitem label="&options.label;" accesskey="&options.accesskey;" oncommand="com.morac.gSessionManager.openOptions();"/>
+		<menuitem label="&options.label;" accesskey="&options.accesskey;" key="key_session_manager_options" oncommand="com.morac.gSessionManager.openOptions();"/>
 		<menuseparator/>
 		<menu _id="undo-menu" label="&undoClosed.label;" accesskey="&undoClosed.accesskey;">
 			<menupopup onpopupshowing="event.stopPropagation();">
@@ -111,6 +125,8 @@
 				<menuseparator _id="closed-separator"/>
 				<menuitem _id="tabs" label="&closedTabs;" disabled="true"/>
 				<menuseparator _id="end-separator"/>
+				<menuitem _id="clear_tabs" label="&clearTabList.label;" accesskey="&clearTabList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt('tab');"/>
+				<menuitem _id="clear_windows" label="&clearWindowList.label;" accesskey="&clearWindowList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt('window');"/>
 				<menuitem label="&clearList.label;" accesskey="&clearList.accesskey;" oncommand="com.morac.gSessionManager.clearUndoListPrompt();"/>
 			</menupopup>
 		</menu>
