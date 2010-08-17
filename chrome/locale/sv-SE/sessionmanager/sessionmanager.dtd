@@ -60,6 +60,7 @@
 <!ENTITY prompt.save_every2.label "minuter (inaktiverad om tom)">
 <!ENTITY winTabTree.restoreHeader "Återställ">
 <!ENTITY winTabTree.listHeader "Fönster och flikar">
+<!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Fönster &#37;S">
 <!ENTITY load.label "Ladda in session...">
 <!ENTITY load.accesskey "L">
