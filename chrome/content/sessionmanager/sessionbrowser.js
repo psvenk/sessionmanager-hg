@@ -39,6 +39,7 @@
 if(!com) var com={};
 if(!com.morac) com.morac={};
 
+Components.utils.import("resource://sessionmanager/modules/logger.jsm");
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
 
 const Cc = Components.classes;
@@ -64,9 +65,10 @@ with (com.morac) {
 		aShowWindowSessions: false,
 		
 		updateData: null,
+		oneWindow: false,
 		
 		// If auto-save checkbox is visible, this means we are saving so notify windows to listen for tab moves and page loads, otherwise tell them not to listen
-		// Only send notification if tab tree is also visible (not saving window)
+		// Only send notification if tab tree is also visible and not saving window
 		autoSaveCheckBoxChange: function(aEvent) {
 			if ((aEvent.attrName == "hidden") && gSessionManagerSessionPrompt.gParams.callbackData && !gSessionManagerSessionPrompt.gParams.callbackData.oneWindow) {
 				var wasTabTreeVisible = gSessionManager.savingTabTreeVisible;
@@ -148,6 +150,7 @@ with (com.morac) {
 			}
 			else {
 				var state = null, currentSession = false;
+				this.oneWindow = gSessionManagerSessionPrompt.gParams.callbackData && gSessionManagerSessionPrompt.gParams.callbackData.oneWindow;
 			
 				// Save deleting and saving parameters
 				this.gDeleting = aDeleting;
@@ -157,8 +160,8 @@ with (com.morac) {
 				this.gAllTabsChecked = true;
 				this.treeView.initialize();
 				
-				// Watch for session changes
-				if (aSaving && !this.gObserving) {
+				// Watch for session changes when saving sessions (not windows)
+				if (aSaving && !this.gObserving && !this.oneWindow) {
 					window.addEventListener("unload", gSessionManagerSessionBrowser.onUnload_proxy, false);
 					this.gObserving = true;
 					OBSERVER_SERVICE.addObserver(gSessionManagerSessionBrowser, "sessionmanager:update-tab-tree", false);
@@ -169,7 +172,12 @@ with (com.morac) {
 				
 				// If Saving show current session in tabs
 				if (aSaving) {
-					state = SessionStore.getBrowserState();
+					try {
+						state = this.oneWindow ? SessionStore.getWindowState(this.getBrowserWindow()) : SessionStore.getBrowserState();
+					} catch(ex) { 
+						logError(ex);
+						return; 
+					}
 				}
 				// if chose crashed session read from sessionstore.js instead of session file
 				else if (aFileName == "*") {
@@ -427,7 +435,7 @@ with (com.morac) {
 
 		storeSession: function(aSaving) {
 			// If saving make sure we have the most up to date session data
-			if (aSaving) this.gStateObject = gSessionManager.JSON_decode(SessionStore.getBrowserState());
+			if (aSaving && !this.oneWindow) this.gStateObject = gSessionManager.JSON_decode(SessionStore.getBrowserState());
 		
 			// remove all unselected tabs from the state before restoring it
 			// remove all selected tabs from state when deleting
