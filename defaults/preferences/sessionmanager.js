@@ -3,6 +3,7 @@ pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.description", "chrome://
 // Only used in Firefox 3.0
 pref("browser.sessionstore.restore_prompt_uri", "chrome://sessionmanager/content/restore_prompt.xul");
 
+pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.allowNamedReplace", false);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.append_by_default", false);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.autosave_session", true);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.backup_on_restart", false);
@@ -13,6 +14,8 @@ pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.disable_cache_fixer", fa
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.encrypt_sessions", false);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.encrypted_only", false);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.hide_tools_menu", false);
+pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.keys", "");
+pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.leave_prompt_window_open", true);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging", false);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging_level", 15);  // Log all except extra by default
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.max_backup_keep", 10);
@@ -36,4 +39,5 @@ pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.session_name_in_titlebar
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.startup", 0);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.submenus", false);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.update_message", true);
+pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.use_browser_crash_prompt", false);
 pref("extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.use_SS_closed_window_list", true);
