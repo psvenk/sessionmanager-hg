@@ -2,18 +2,17 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>{1280606b-2510-4fe0-97ef-9b5a22eafe30}</em:id>
-    <em:version>0.6.8.3</em:version>
+    <em:version>0.6.8.4pre20100816</em:version>
     
 	<!-- Temporary lines for development version -->
-	<em:updateURL>http://sessionmanager.mozdev.org/update.rdf</em:updateURL>
-    <em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCX78sBYEBcAAN7uB6M8L+2S587tweKF97hwc6uqO8K1FPo8juYUsT4OA1mNr/qzf3dlV9JxB9eLap4VQxsNOmMy9yT2G+2I796+eQlCi5LSPF5pVXZHGpZHlWei4MiF61pqYfPfb8x7XdbGctCgM84Z+O9u1YHvkq7ZF3oifpI6wIDAQAB</em:updateKey>
+	<em:updateURL>https://www.mozdev.org/p/updates/sessionmanager/%7B1280606b-2510-4fe0-97ef-9b5a22eafe30%7D/update.rdf</em:updateURL>
     
     <!-- Firefox -->
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>4.0b3pre</em:maxVersion>
+        <em:maxVersion>4.0b4pre</em:maxVersion>
       </Description>
     </em:targetApplication>
     
@@ -92,7 +91,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>cs-CZ</em:locale>
+        <em:locale>cs</em:locale>
         <em:name>Správce relací</em:name>
         <em:description>Ukládá a obnovuje stav všech oken.</em:description>
         <em:creator>Morac</em:creator>
@@ -106,7 +105,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>da-DK</em:locale>
+        <em:locale>da</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Gemmer og henter tilstanden for alle vinduer.</em:description>
         <em:creator>Morac</em:creator>
@@ -149,7 +148,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>fi-FI</em:locale>
+        <em:locale>fi</em:locale>
         <em:name>Istuntojenhallinta</em:name>
         <em:description>Tallentaa ja palauttaa kaikkien ikkunoinen tilan.</em:description>
         <em:creator>Morac</em:creator>
@@ -177,7 +176,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>hu-HU</em:locale>
+        <em:locale>hu</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Lehetővé teszi a munkamenet (ablakok és lapok) mentését és visszaállítását</em:description>
         <em:creator>Morac</em:creator>
@@ -191,7 +190,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>it-IT</em:locale>
+        <em:locale>it</em:locale>
         <em:name>Gestione sessioni</em:name>
         <em:description>Salva e ripristina lo stato di tutte le finestre.</em:description>
         <em:creator>Morac</em:creator>
@@ -205,7 +204,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>ja-JP</em:locale>
+        <em:locale>ja</em:locale>
         <em:name>セッションマネージャ</em:name>
         <em:description>すべてのウインドウの状態を保存し復元します</em:description>
         <em:creator>Morac</em:creator>
@@ -219,7 +218,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>ko-KR</em:locale>
+        <em:locale>ko</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>모든 창의 상태를 저장하여 복원합니다.</em:description>
         <em:creator>Morac</em:creator>
@@ -233,7 +232,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>lt-LT</em:locale>
+        <em:locale>lt</em:locale>
         <em:name>Sesijų tvarkytojas</em:name>
         <em:description>Išsaugo ir atkuria visus langus.</em:description>
         <em:creator>Morac</em:creator>
@@ -248,7 +247,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>mk-MK</em:locale>
+        <em:locale>mk</em:locale>
         <em:name>Менаџер на сесијата</em:name>
         <em:description>Ја зачувува и обновува состојбата на сите прозорци.</em:description>
         <em:creator>Morac</em:creator>
@@ -276,7 +275,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>pl-PL</em:locale>
+        <em:locale>pl</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Zapisuje i odtwarza stan wszystkich okien</em:description>
         <em:creator>Morac</em:creator>
@@ -346,7 +345,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>sk-SK</em:locale>
+        <em:locale>sk</em:locale>
         <em:name>Session Manager</em:name>
         <em:description>Umožní uložiť a obnoviť stav všetkých okien</em:description>
         <em:creator>Morac</em:creator>
@@ -374,7 +373,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>tr-TR</em:locale>
+        <em:locale>tr</em:locale>
         <em:name>Oturum Yöneticisi</em:name>
         <em:description>Tüm pencerelerin durumlarını kaydeder ve geri yükler</em:description>
         <em:creator>Morac</em:creator>
@@ -388,7 +387,7 @@
     </em:localized>
     <em:localized>
       <Description>
-        <em:locale>uk-UA</em:locale>
+        <em:locale>uk</em:locale>
         <em:name>Менеджер сесій</em:name>
         <em:description>Saves and restores the state of all windows.</em:description>
         <em:creator>Morac</em:creator>
