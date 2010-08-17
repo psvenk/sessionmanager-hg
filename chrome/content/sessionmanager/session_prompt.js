@@ -49,6 +49,9 @@ with (com.morac) {
 		gAcceptPositionDifference: 0,
 		gLastScreenY: 0,
 		gTimerId: null,
+		
+		// Is this a modal window?
+		modal: false,
 
 		sortedBy: { column: null, direction: 0 },
 
@@ -60,7 +63,7 @@ with (com.morac) {
 		//                        (This is currently only settable via a hidden preference - allowNamedReplace).
 		// append_replace       - True if displaying the append/replace radio group, false otherwise
 		// autoSaveable         - Displays autosave checkbox if true
-		// callbackData         - Data to pass back to the gSessionManager.sessionPromptCallBack function.  Window will be modal if not set
+		// callbackData         - Data to pass back to the gSessionManager.sessionPromptCallBack function.  Window will be modal if not set (or if oneWindow callback set)
 		// crashCount           - Count String for current crashed session
 		// defaultSessionName   - Default value comes from page title
 		// filename             - Filename of session save file
@@ -98,7 +101,7 @@ with (com.morac) {
 				this.checkPrivateBrowsingMode(aData == "enter", this.gParams.autoSaveable);
 				break;
 			case "sessionmanager:update-session-tree":
-				this.updateWindow();
+				this.updateWindow(true);
 				break;
 			}
 		},
@@ -116,8 +119,11 @@ with (com.morac) {
 			// Set "accept" value to false for modal windows
 			window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock).SetInt(0, 0);
 			
+			// Window is modal if no callback data or if oneWindow is set
+			this.modal = (!gSessionManager.sessionPromptData.callbackData || gSessionManager.sessionPromptData.callbackData.oneWindow);
+			
 			// Remove windowtype from modal windows to prevent them from being re-used
-			if (!gSessionManager.sessionPromptData.callbackData) {
+			if (this.modal) {
 				this._("sessionmanagerPrompt").removeAttribute("windowtype");
 			}
 			
@@ -142,7 +148,10 @@ with (com.morac) {
 			this.checkPrivateBrowsingMode(gSessionManager.isPrivateBrowserMode(), gSessionManager.sessionPromptData.autoSaveable, true);
 			
 			// Show selection menu if window is not modal
-			if (gSessionManager.sessionPromptData.callbackData) this._("menuBox").hidden = false;
+			if (!this.modal) this._("menuBox").hidden = false;
+			
+			// Check/uncheck leave window open checkbox based on preference
+			this._("leave_window_open").checked = gPreferenceManager.get("leave_prompt_window_open", true);
 			
 			// Display the window
 			this.drawWindow();
@@ -168,8 +177,7 @@ with (com.morac) {
 				this.gSessionTree.height = this.gSessionTree.getAttribute("height");
 			}
 			
-			// This is never true when running under windows
-			if (!window.opener)
+			if (!window.opener || this.modal)
 			{
 				document.title += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 				document.documentElement.removeAttribute("screenX");
@@ -193,7 +201,7 @@ with (com.morac) {
 				delete this.gParams.getSessionsOverride;
 			}
 			
-			if (window.opener)
+			if (window.opener && !this.modal)
 			{
 				this.persist(document.documentElement, "screenX", window.screenX);
 				this.persist(document.documentElement, "screenY", window.screenY);
@@ -203,6 +211,10 @@ with (com.morac) {
 			
 			// The following line keeps the window width from increasing when sizeToContent is called.
 			this._("sessionmanagerPrompt").width = window.innerWidth - 1;
+			
+			// save leave_window_open preference.
+			if (gPreferenceManager.get("leave_prompt_window_open", true) != this._("leave_window_open").checked)
+				gPreferenceManager.set("leave_prompt_window_open", this._("leave_window_open").checked);
 			
 			// Handle case if user closes window without click Okay.  Only used for modal windows, specifically
 			// startup session prompt.  Object is initialized in session_manager.jsm because initializing it here
@@ -247,7 +259,7 @@ with (com.morac) {
 			};
 			
 			// Update selection menu if not modal
-			if (this.gParams.callbackData) {
+			if (!this.modal) {
 				let label = null;
 				// Remove private attribute if changing since can't change to save when in private browsing
 				this._("actionButton").removeAttribute("private");
@@ -304,7 +316,7 @@ with (com.morac) {
 			this.gReDrawWindow = false;
 
 			// Display Tab Tree if saving session otherwise adjust height if not initial load
-			if (this.gParams.autoSaveable && this.gParams.callbackData) {
+			if (this.gParams.autoSaveable) {
 				this.displayTabTree();
 			}
 			else if (this.gFinishedLoading) {
@@ -314,7 +326,7 @@ with (com.morac) {
 		},
 
 		// Update window without re-reading parameters
-		updateWindow: function() {
+		updateWindow: function(aRefreshOnly) {
 			var oldSessionTreeRowCount = 0;
 		
 			// If already loaded
@@ -334,23 +346,25 @@ with (com.morac) {
 				// Remove old descriptions
 				this.removeDescriptions();
 
-				// unselect any selected session
-				this.gSessionTree.view.selection.clearSelection();
-				this.gLastSelectedRow = null;
+				if (!aRefreshOnly) {
+					// unselect any selected session
+					this.gSessionTree.view.selection.clearSelection();
+					this.gLastSelectedRow = null;
+						
+					// clean up text boxes
+					this.ggMenuList.removeAllItems();
+					this.ggMenuList.value = "";
+					this.gTextBox.value = "";
+					this.onTextboxInput();
+				
+					// make sure session tree is not disabled
+					this.gSessionTree.disabled = false;
 					
-				// clean up text boxes
-				this.ggMenuList.removeAllItems();
-				this.ggMenuList.value = "";
-				this.gTextBox.value = "";
-				this.onTextboxInput();
-				
-				// make sure session tree is not disabled
-				this.gSessionTree.disabled = false;
-				
-				if (!this.gReDrawWindow) {
-					// remove any preentered filename or preselected name
-					this.gParams.filename = "";
-					this.gParams.defaultSessionName = "";
+					if (!this.gReDrawWindow) {
+						// remove any preentered filename or preselected name
+						this.gParams.filename = "";
+						this.gParams.defaultSessionName = "";
+					}
 				}
 			}
 
@@ -524,9 +538,9 @@ with (com.morac) {
 				{
 					this.gTextBoxVisible = !(this._("session-text-container").hidden = false);
 				
-					// Pre-populate the text box with default session name if saving and the name is not banned or already existing.
+					// If not refreshing, pre-populate the text box with default session name if saving and the name is not banned or already existing.
 					// Otherwise disable accept button
-					this.populateDefaultSessionName(this.gParams.defaultSessionName);
+					if (!aRefreshOnly) this.populateDefaultSessionName(this.gParams.defaultSessionName);
 				}
 			}
 			
@@ -542,6 +556,13 @@ with (com.morac) {
 				}
 			}
 			else this.isAcceptable();
+			
+			// If refreshing session list, update save buttons in case session name now exists, otherwise
+			// default to focusing on Session List.  If gTextBox is focused this does nothing for some reason, but that's good.
+			if (aRefreshOnly) {
+				this.onTextboxInput()
+			}
+			else gSessionManagerSessionPrompt.gSessionTree.focus()
 		},
 		
 		populateDefaultSessionName: function(aName, aTabSelect) {
@@ -720,13 +741,21 @@ with (com.morac) {
 				this.gAcceptButton.style.fontWeight = (newWeight)?"bold":"";
 				// Show append button if replace button is shown.
 				this.gExtraButton.hidden = this.gAcceptButton.label != this.gParams.acceptExistingLabel
+
+				// When replace changes to save, clear current selection and group name if saving 
+				if (!newWeight && this.gParams.acceptExistingLabel) {
+					this.gSessionTree.view.selection.clearSelection();
+					if (this.ggMenuListVisible) this.ggMenuList.value = "";
+				}
 			}
 			this.gExtraButton.disabled = this.gExtraButton.hidden || this._("checkbox_autosave").checked;
 
 			// Highlight matching item when accept label changes to replace and copy in group value (only when saving and not replacing name)
-			if (newWeight && this.gParams.acceptExistingLabel && !(this.gParams.allowNamedReplace)) {
-				this.gSessionTree.view.selection.select(this.gExistingName);
-				if (this.ggMenuListVisible) this.ggMenuList.value = this.gSessionTreeData[this.gExistingName].group;
+			if (newWeight && this.gParams.acceptExistingLabel) {
+				// if not overwriting session with new name, select the session based on the entered name
+				if (!this.gParams.allowNamedReplace) this.gSessionTree.view.selection.select(this.gExistingName);
+				// use selected session's group
+				if (this.ggMenuListVisible) this.ggMenuList.value = this.gSessionTreeData[this.gSessionTree.view.selection.currentIndex].group;
 			}
 				
 			this.isAcceptable();
@@ -834,7 +863,7 @@ with (com.morac) {
 				sessionName: this._("text_box").value.trim()
 			};
 			
-			if (this.gParams.callbackData) {
+			if (!this.modal) {
 				try {
 					gSessionManager.sessionPromptCallBack(this.gParams.callbackData);
 				} catch(ex) {
@@ -842,7 +871,12 @@ with (com.morac) {
 				}
 				// clear out return data and preset to not accepting
 				gSessionManager.sessionPromptReturnData = null;
-				this.updateWindow();
+				
+				// if user wants to close window, do it
+				if (!this._("leave_window_open").checked)
+					window.close();
+				else 
+					this.updateWindow();
 				return false;
 			}
 			else {
