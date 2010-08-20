@@ -2,7 +2,7 @@
 <RDF xmlns="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
   <Description about="urn:mozilla:install-manifest">
     <em:id>{1280606b-2510-4fe0-97ef-9b5a22eafe30}</em:id>
-    <em:version>0.6.8.4pre20100816</em:version>
+    <em:version>0.6.9pre20100820</em:version>
     
 	<!-- Temporary lines for development version -->
 	<em:updateURL>https://www.mozdev.org/p/updates/sessionmanager/%7B1280606b-2510-4fe0-97ef-9b5a22eafe30%7D/update.rdf</em:updateURL>
@@ -12,7 +12,7 @@
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
         <em:minVersion>3.0</em:minVersion>
-        <em:maxVersion>4.0b4pre</em:maxVersion>
+        <em:maxVersion>4.0b5pre</em:maxVersion>
       </Description>
     </em:targetApplication>
     
@@ -21,7 +21,7 @@
       <Description>
          <em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
          <em:minVersion>2.0</em:minVersion>
-         <em:maxVersion>2.1a3</em:maxVersion>
+         <em:maxVersion>2.1b1</em:maxVersion>
       </Description>
     </em:targetApplication>
     
