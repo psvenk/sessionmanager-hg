@@ -85,3 +85,4 @@
 <!ENTITY clearTabList.accesskey "T">
 <!ENTITY clearWindowList.label "Clear &apos;Closed&apos; Window List...">
 <!ENTITY clearWindowList.accesskey "W">
+<!ENTITY hidden.label "Hidden">
