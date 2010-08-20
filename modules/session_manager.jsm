@@ -605,6 +605,18 @@ var gSessionManager = {
 			if (this.mPref_startup == 2) gPreferenceManager.set("startup",0);
 		}
 		
+		// Put up saving warning if private browsing mode permanently enabled.
+		if (this.isAutoStartPrivateBrowserMode()) {
+			if (!gPreferenceManager.get("no_private_browsing_prompt", false)) {
+				let dontPrompt = { value: false };
+				PROMPT_SERVICE.alertCheck(null, this._string("sessionManager"), this._string("private_browsing_warning"), this._string("prompt_not_again"), dontPrompt);
+				if (dontPrompt.value)
+				{
+					gPreferenceManager.set("no_private_browsing_prompt", true);
+				}
+			}
+		}
+		
 		// Add observers
 		OBSERVING.forEach(function(aTopic) {
 			OBSERVER_SERVICE.addObserver(this, aTopic, false);
@@ -2457,7 +2469,13 @@ var gSessionManager = {
 		var callback = {
 			notify: function(timer) {
 				//let a = Date.now();
-				session = sessionFiles.pop();
+				try {
+					session = sessionFiles.pop();
+				}
+				catch(ex) { 
+					logError(ex);
+					session = null;
+				};
 				// if the session is already cached, that means getSession() was called so stop caching sessions
 				if (session && !gSessionManager.mSessionCache[session.filename]) {
 					if (matchArray = SESSION_REGEXP.exec(gSessionManager.readSessionFile(gSessionManager.getSessionDir(session.filename), true)))
