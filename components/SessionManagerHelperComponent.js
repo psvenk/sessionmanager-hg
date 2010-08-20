@@ -67,6 +67,8 @@ Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 // 8. Handles syncing the Firefox and Session Manager startup preferences.  
 // 9. Handles saving and restoring browser startup preference at startup and shutdown (if need be).
 // 10. Handles displaying the Session Manager shut down prompt and overriding the browser and Tab Mix Plus's prompts.
+// 11. Prevent shutdown when encryption change is in progress
+// 12. Check for when initial window load is complete at startup to kick off saving crashed windows (if needed) and caching sessions.
 //
 function SessionManagerHelperComponent() {
 	try {
@@ -574,7 +576,7 @@ SessionManagerHelperComponent.prototype = {
 		let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
 		
 		// If encryption change in progress, prevent quit
-		if (this._encryption_in_progress) {
+		if (this._encryption_in_progress && (aTopic == "quit-application-requested")) {
 			this._tried_to_quit = true;
 			gSessionManager.threadSafeAlert(bundle.GetStringFromName("quit_during_encrypt_change_alert"));
 			aSubject.QueryInterface(Ci.nsISupportsPRBool);
