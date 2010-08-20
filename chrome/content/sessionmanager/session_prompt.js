@@ -274,7 +274,7 @@ with (com.morac) {
 						label = this._("rename").label;
 						break;
 					case "group":
-						label = this._("group").label;
+						label = this._("group-menu").label;
 						break;
 					case "delete":
 						label = this._("remove").label;
@@ -391,12 +391,6 @@ with (com.morac) {
 				sessions = gSessionManager.getSessions();
 			}
 
-			// Disable non-saving menuitems if no sessions
-			gSessionManager.setDisabled(this._("load"), !sessions.length);
-			gSessionManager.setDisabled(this._("rename"), !sessions.length);
-			gSessionManager.setDisabled(this._("remove"), !sessions.length);
-			gSessionManager.setDisabled(this._("group"), !sessions.length);
-			
 			if (this.gParams.addCurrentSession) // add a "virtual" current session
 			{
 				sessions.unshift({ name: gSessionManager._string("current_session"), fileName: "*" });
@@ -904,7 +898,7 @@ with (com.morac) {
 				case "rename":
 					gSessionManager.rename();
 					break;
-				case "group":
+				case "group-menu":
 					gSessionManager.group();
 					break;
 				case "remove":
@@ -1015,6 +1009,7 @@ with (com.morac) {
 			}
 		},
 
+		// This is needed because disabled menu items are re-eneabled once menu is shown.  This is called from onpopupshow.
 		updateForPrivateBrowsingMode: function() 
 		{
 			let inPrivateBrowsing = gSessionManager.isPrivateBrowserMode();
