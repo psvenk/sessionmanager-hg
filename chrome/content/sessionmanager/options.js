@@ -105,6 +105,13 @@ with (com.morac) {
 		
 		// Enable/Disable log checkboxes
 		updateLogCheckboxes(_("enable_logging").checked);
+		
+		// Change styling if in permanent private browsing mode
+		checkPrivateBrowsing(_("backup_session"));
+		checkPrivateBrowsing(_("resume_session"));
+		
+		// Hide setting to use browser crash prompt under Firefox 3.0
+		_("use_browser_crash_prompt").hidden = (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion, "1.9.1a1pre") < 0);
 
 		// Disable Apply Button by default
 		_("sessionmanagerOptions").getButton("extra1").disabled = true;
@@ -561,6 +568,19 @@ with (com.morac) {
 		var buttons = _("sessionmanagerOptions").getElementsByTagName("button");
 		for (var i=0; i < buttons.length; i++) buttons[i].disabled = aValue;
 		_("sessionmanagerOptions").getButton("help").disabled = aValue;
+	}
+	
+	function checkPrivateBrowsing(aElem) {
+		var warn = (aElem.id == "backup_session" && (aElem.value != 0)) || ((aElem.id == "resume_session") && (aElem.value == BACKUP_SESSION_FILENAME));
+
+		if (warn && gSessionManager.isAutoStartPrivateBrowserMode()) {
+			aElem.setAttribute("warn", "true");
+			aElem.setAttribute("tooltiptext", gSessionManager._string("private_browsing_warning"));
+		}
+		else {
+			aElem.removeAttribute("warn");
+			aElem.removeAttribute("tooltiptext");
+		}
 	}
 }
 window.addEventListener("load", onLoad, false);

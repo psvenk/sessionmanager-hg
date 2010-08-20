@@ -72,7 +72,7 @@
 							          preference="preference.preselect_previous_session"/>
 						</hbox>
 						<hbox pack="end">
-							<menulist id="resume_session" preference="preference.resume_session">
+							<menulist id="resume_session" preference="preference.resume_session" oncommand="checkPrivateBrowsing(this);">
 								<menupopup>
 								</menupopup>
 							</menulist>
@@ -80,7 +80,7 @@
 						<separator style="height: 1.0em;" orient="vertical"/>
 						<hbox align="center">
 							<label value="&backup_sess.label;" accesskey="&backup_sess.accesskey;" control="backup_session"/>
-							<menulist id="backup_session" preference="preference.backup_session">
+							<menulist id="backup_session" preference="preference.backup_session" oncommand="checkPrivateBrowsing(this);">
 								<menupopup>
 									<menuitem value="1" label="&backup_session.label1;"/>
 									<menuitem value="0" label="&backup_session.label0;"/>
@@ -94,7 +94,7 @@
 						<checkbox label="&backup_on_restart.label;" accesskey="&backup_on_restart.accesskey;" 
 						          preference="preference.backup_on_restart"/>
 						<checkbox label="&use_browser_crash_prompt.label;" accesskey="&use_browser_crash_prompt.accesskey;" 
-						          preference="preference.use_browser_crash_prompt"/>
+						          id="use_browser_crash_prompt" preference="preference.use_browser_crash_prompt"/>
 					</groupbox>
 				</tabpanel>
 				<tabpanel orient="vertical">
