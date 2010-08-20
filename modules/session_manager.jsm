@@ -1700,6 +1700,15 @@ var gSessionManager = {
 			aEvent.preventDefault();
 			aEvent.stopPropagation();
 		}
+		let match_array;
+		if (aEvent.button == 1 && (match_array = aEvent.originalTarget.getAttribute("index").match(/^tab(\d+)$/)))
+		{
+			let window = aEvent.originalTarget.ownerDocument.defaultView;
+			window.undoCloseTab(match_array[1]);
+			this.updateClosedList(aEvent.originalTarget, match_array[1], "tab");
+			aEvent.preventDefault();
+			aEvent.stopPropagation();
+		}
 	},
 	
 	removeUndoMenuItem: function(aTarget)
@@ -1778,8 +1787,8 @@ var gSessionManager = {
 		// remove item from list
 		popup.removeChild(aMenuItem);
 					
-		// Hide popup if no more tabs, an empty undo popup contains 5 items (see sessionmanager.xul file)
-		if (popup.childNodes.length == 5) 
+		// Hide popup if no more tabs, an empty undo popup contains 7 items (see sessionmanager.xul file)
+		if (popup.childNodes.length == 7) 
 		{
 			popup.hidePopup();
 		}
@@ -2789,10 +2798,10 @@ var gSessionManager = {
 			}
 			try {
 				let aState = this.JSON_decode(state.split("\n")[4]);
-				log("backupCurrentSession: Number of Windows #1 = " + aState.windows.length, "DATA");
+				log("backupCurrentSession: Number of Windows #1 = " + aState.windows.length + ((aState.windows.length == 1) ? (", Number of Tabs in Window[1] = " + aState.windows[0].tabs.length) : ""), "DATA");
 				log(state, "STATE");
 				// if window data has been cleared ("Visited Pages" cleared on shutdown), use mClosingWindowState, if it exists.
-				if (aState.windows.length == 0 && this.mClosingWindowState) {
+				if ((aState.windows.length == 0 || (aState.windows.length == 1 && aState.windows[0].tabs.length == 0)) && this.mClosingWindowState) {
 					log("backupCurrentSession: Using closing Window State", "INFO");
 					state = this.getSessionState(this._string("backup_session"), null, this.getNoUndoData(), null, this._string("backup_sessions"), true, null, this.mClosingWindowState);
 					log(state, "STATE");
