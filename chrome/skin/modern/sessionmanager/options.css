@@ -31,3 +31,8 @@ radio[pane=sessionstorePrefPane]:hover, radio[pane=sessionstorePrefPane][selecte
 radio[pane=loggingPrefPane] {
 	-moz-image-region:rect(0px,160px,32px,128px);
 }
+
+menulist[warn="true"]  {
+	background-color: yellow;
+	-moz-appearance: none;
+}
