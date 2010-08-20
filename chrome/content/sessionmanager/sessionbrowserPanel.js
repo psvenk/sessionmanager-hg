@@ -76,6 +76,13 @@ with (com.morac) {
 			}
 		},
 		
+		// used to copy "hidden" attribute to "_hidden" for persisting.  We can't persist "hidden" since that's 
+		// explicitly set to true for Firefox 3.6 and lower.
+		hiddenTabgroupChange: function(aEvent) {
+			if (aEvent.attrName == "hidden") 
+				aEvent.target.setAttribute("_hidden", (aEvent.target.hidden ? "true" : "false"));
+		},
+		
 		initTreeView: function() {
 			// Initialize common values
 			if (!this.gTabTree) {
@@ -113,6 +120,18 @@ with (com.morac) {
 			// Save new state
 			this.gStateObject = state;
 			
+			// Tab groups only exist in Firefox 4.0 and higher
+			if ((Application.name.toUpperCase() == "FIREFOX") && (VERSION_COMPARE_SERVICE.compare(Application.version, "4.0b4pre") >= 0)) {
+				var tabgroup = document.getElementById("tabgroup_panel");
+				var hidden = document.getElementById("hidden_panel");
+				var hidden_hidden = hidden.getAttribute("_hidden");
+				var tabgroup_hidden = tabgroup.getAttribute("_hidden");
+				tabgroup.hidden = (tabgroup_hidden == "true");
+				hidden.hidden = (hidden_hidden == "true");
+				tabgroup.removeAttribute("ignoreincolumnpicker");
+				hidden.removeAttribute("ignoreincolumnpicker");
+			}
+			
 			// Create or re-create the Tree
 			this.createTree();
 			
@@ -128,10 +147,22 @@ with (com.morac) {
 		
 			this.gStateObject.windows.forEach(function(aWinData, aIx) {
 				var windowSessionName = null;
+				// Try to find tab group nanes if they exists, 0 is the default group and has no name
+				var tab_groups = { 0:"" };
+				if (aWinData.extData && aWinData.extData["tabview-group"]) {
+					var tabview_groups = gSessionManager.JSON_decode(aWinData.extData["tabview-group"], true);
+					if (tabview_groups && !tabview_groups._JSON_decode_failed) {
+						for (var id in tabview_groups) {
+							if (!tab_groups) tab_groups = {};
+							tab_groups[id] = tabview_groups[id].title;
+						}
+					}
+				}
 				var winState = {
 					label: this.gWinLabel.replace("%S", (aIx + 1)),
 					open: true,
-					ix: aIx
+					ix: aIx,
+					tabGroups: tab_groups
 				};
 				winState.tabs = aWinData.tabs.map(function(aTabData) {
 					var entry = aTabData.entries[aTabData.index - 1] || { url: "about:blank" };
@@ -140,6 +171,13 @@ with (com.morac) {
 					if (!iconURL && aTabData.xultab) {
 						iconURL = /image=(\S*)(\s)?/i.exec(aTabData.xultab);
 						if (iconURL) iconURL = iconURL[1];
+					}
+					// Try to find tab group ID if it exists, 0 is default group
+					var groupID = 0;
+					if (aTabData.extData && aTabData.extData["tabview-tab"]) {
+						var tabview_data = gSessionManager.JSON_decode(aTabData.extData["tabview-tab"], true);
+						if (tabview_data && !tabview_data._JSON_decode_failed) 
+							groupID = tabview_data.groupID;
 					}
 					// Trying to display a favicon for an https with an invalid certificate will throw up an exception box, so don't do that
 					// Firefox's about:sessionrestore also fails with authentication requests, but Session Manager seems okay with that so just
@@ -150,6 +188,9 @@ with (com.morac) {
 						label: entry.title || entry.url,
 						url: entry.url,
 						src: iconURL,
+						hidden: aTabData.hidden,
+						group: groupID,
+						groupName: winState.tabGroups[groupID] || (groupID ? groupID : ""),
 						parent: winState
 					};
 				});
@@ -186,9 +227,13 @@ with (com.morac) {
 			get rowCount()                     { return gSessionManagerSessionBrowserPanel.gTreeData.length; },
 			setTree: function(treeBox)         { this.treeBox = treeBox; },
 			getCellText: function(idx, column) { 
-			if (column.id == "locationPanel") {
+				if (column.id == "locationPanel") 
 					return gSessionManagerSessionBrowserPanel.gTreeData[idx].url ? gSessionManagerSessionBrowserPanel.gTreeData[idx].url : "";
-				}
+				
+				else if (column.id == "hidden_panel") 
+					return gSessionManagerSessionBrowserPanel.gTreeData[idx].hidden ? "     *" : "";
+				else if (column.id == "tabgroup_panel") 
+					return gSessionManagerSessionBrowserPanel.gTreeData[idx].groupName || "";
 				else return gSessionManagerSessionBrowserPanel.gTreeData[idx].label; 
 			},
 			isContainer: function(idx)         { return "open" in gSessionManagerSessionBrowserPanel.gTreeData[idx]; },
@@ -242,6 +287,8 @@ with (com.morac) {
 			getCellProperties: function(idx, column, prop) {
 				if (column.id == "titlePanel") 
 					prop.AppendElement(this._getAtom(this.getImageSrc(idx, column) ? "icon" : "noicon"));
+				if (this.getCellText(idx, this.treeBox.columns.getColumnFor(document.getElementById("hidden_panel"))))
+					prop.AppendElement(this._getAtom("disabled"));
 			},
 
 			getRowProperties: function(idx, prop) {},

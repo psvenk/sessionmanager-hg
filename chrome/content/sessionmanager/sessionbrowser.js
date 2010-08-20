@@ -135,6 +135,13 @@ with (com.morac) {
 			}
 		},
 		
+		// used to copy "hidden" attribute to "_hidden" for persisting.  We can't persist "hidden" since that's 
+		// explicitly set to true for Firefox 3.6 and lower.
+		hiddenTabgroupChange: function(aEvent) {
+			if (aEvent.attrName == "hidden") 
+				aEvent.target.setAttribute("_hidden", (aEvent.target.hidden ? "true" : "false"));
+		},
+		
 		initTreeView: function(aFileName, aDeleting, aStartupPrompt, aSaving, aUpdate) {
 		
 			// Initialize common values
@@ -152,6 +159,18 @@ with (com.morac) {
 				var state = null, currentSession = false;
 				this.oneWindow = gSessionManagerSessionPrompt.gParams.callbackData && gSessionManagerSessionPrompt.gParams.callbackData.oneWindow;
 			
+				// Tab groups only exist in Firefox 4.0 and higher
+				if ((Application.name.toUpperCase() == "FIREFOX") && (VERSION_COMPARE_SERVICE.compare(Application.version, "4.0b4pre") >= 0)) {
+					var tabgroup = document.getElementById("tabgroup");
+					var hidden = document.getElementById("hidden");
+					var hidden_hidden = hidden.getAttribute("_hidden");
+					var tabgroup_hidden = tabgroup.getAttribute("_hidden");
+					tabgroup.hidden = (tabgroup_hidden == "true");
+					hidden.hidden = (hidden_hidden == "true");
+					tabgroup.removeAttribute("ignoreincolumnpicker");
+					hidden.removeAttribute("ignoreincolumnpicker");
+				}
+				
 				// Save deleting and saving parameters
 				this.gDeleting = aDeleting;
 				this.gSaving = aSaving;
@@ -240,12 +259,24 @@ with (com.morac) {
 				windowSessionName = (aWinData.extData) ? aWinData.extData["_sm_window_session_values"] : null;
 				windowSessionName = (windowSessionName) ? (gSessionManager._string("window_session") + "   " + windowSessionName.split("\n")[0]) : null;
 			}
+			// Try to find tab group nanes if they exists, 0 is the default group and has no name
+			var tab_groups = { 0:"" };
+			if (aWinData.extData && aWinData.extData["tabview-group"]) {
+				var tabview_groups = gSessionManager.JSON_decode(aWinData.extData["tabview-group"], true);
+				if (tabview_groups && !tabview_groups._JSON_decode_failed) {
+					for (var id in tabview_groups) {
+						if (!tab_groups) tab_groups = {};
+						tab_groups[id] = tabview_groups[id].title;
+					}
+				}
+			}
 			var winState = {
 				label: this.gWinLabel.replace("%S", (aIx + 1)),
 				open: true,
 				checked: true,
 				sessionName: windowSessionName,
-				ix: aIx
+				ix: aIx,
+				tabGroups: tab_groups
 			};
 			winState.tabs = aWinData.tabs.map(function(aTabData) {
 				return this.addTabStateObjectToTree(aTabData, winState);
@@ -263,6 +294,13 @@ with (com.morac) {
 				iconURL = /image=(\S*)(\s)?/i.exec(aTabData.xultab);
 				if (iconURL) iconURL = iconURL[1];
 			}
+			// Try to find tab group ID if it exists, 0 is default group
+			var groupID = 0;
+			if (aTabData.extData && aTabData.extData["tabview-tab"]) {
+				var tabview_data = gSessionManager.JSON_decode(aTabData.extData["tabview-tab"], true);
+				if (tabview_data && !tabview_data._JSON_decode_failed) 
+					groupID = tabview_data.groupID;
+			}
 			// Trying to display a favicon for an https with an invalid certificate will throw up an exception box, so don't do that
 			// Firefox's about:sessionrestore also fails with authentication requests, but Session Manager seems okay with that so just
 			// use the work around for https.
@@ -272,6 +310,9 @@ with (com.morac) {
 				label: entry.title || entry.url,
 				url: entry.url,
 				checked: true,
+				hidden: aTabData.hidden,
+				group: groupID,
+				groupName: aWinParentState.tabGroups[groupID] || (groupID ? groupID : ""),
 				src: iconURL,
 				parent: aWinParentState
 			};
@@ -649,16 +690,22 @@ with (com.morac) {
 			get rowCount()                     { return gSessionManagerSessionBrowser.gTreeData.length; },
 			setTree: function(treeBox)         { this.treeBox = treeBox; },
 			getCellText: function(idx, column) { 
-			if (column.id == "location") {
+				if (column.id == "location") {
 					if (gSessionManagerSessionBrowser.gTreeData[idx].sessionName) return gSessionManagerSessionBrowser.gTreeData[idx].sessionName;
 					return gSessionManagerSessionBrowser.gTreeData[idx].url ? gSessionManagerSessionBrowser.gTreeData[idx].url : "";
 				}
+				else if (column.id == "hidden") 
+					return gSessionManagerSessionBrowser.gTreeData[idx].hidden ? "     *" : "";
+				else if (column.id == "tabgroup") 
+					return gSessionManagerSessionBrowser.gTreeData[idx].groupName || "";
 				else return gSessionManagerSessionBrowser.gTreeData[idx].label; 
 			},
 			isContainer: function(idx)         { return "open" in gSessionManagerSessionBrowser.gTreeData[idx]; },
 			getCellValue: function(idx, column){ 
 				if (this.isContainer(idx) && ((column.id == "title") || (column.id == "location"))) 
 					return gSessionManagerSessionBrowser.gTreeData[idx].sessionName;
+				else if (this.isContainer(idx) && (column.id == "tabgroup"))
+					return gSessionManagerSessionBrowser.gTreeData[idx].sessionName
 				else 
 					return gSessionManagerSessionBrowser.gTreeData[idx].checked;
 			},
@@ -715,9 +762,9 @@ with (com.morac) {
 					prop.AppendElement(this._getAtom(this.getImageSrc(idx, column) ? "icon" : "noicon"));
 				if (this.isContainer(idx) && ((column.id == "title") || (column.id == "location")) && this.getCellValue(idx, column))
 					prop.AppendElement(this._getAtom("sessionName"));
+				if (this.getCellText(idx, this.treeBox.columns.getColumnFor(document.getElementById("hidden"))))
+					prop.AppendElement(this._getAtom("disabled"));
 			},
-
-			getRowProperties: function(idx, prop) {},
 
 			getImageSrc: function(idx, column) {
 				if (column.id == "title")
@@ -740,7 +787,8 @@ with (com.morac) {
 			selectionChanged: function() { },
 			performAction: function(action) { },
 			performActionOnCell: function(action, index, column) { },
-			getColumnProperties: function(column, prop) { }
+			getColumnProperties: function(column, prop) {},
+			getRowProperties: function(idx, prop) {}
 		}
 	}
 }
