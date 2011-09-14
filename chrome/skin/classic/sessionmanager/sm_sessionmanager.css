@@ -1,16 +1,7 @@
-#sessionmanager-undo {
-	list-style-image: url("chrome://sessionmanager/skin/sm_toolbar.png");
-}
-#sessionmanager-undo {
-	-moz-image-region: rect(-1px, 61px, 31px, 29px);
-}
-toolbar[iconsize="small"] #sessionmanager-undo {
-	-moz-image-region: rect(30px, 50px, 50px, 30px);
-}
+/*
+	This file is here because it needs to be for modern theme
 
-#sessionmanager-toolbar {
-	-moz-image-region: rect(0px, 32px, 32px, 0px);
-}
-toolbar[iconsize="small"] #sessionmanager-toolbar {
-	-moz-image-region: rect(13px, 75px, 33px, 55px);
-}
+	icons should be 29x29 for large, 19x19 for small icons 
+	ours are 24x24 for large and 16x16 for small, which isn't great, 
+	but looks better than scaling it to correct size
+*/

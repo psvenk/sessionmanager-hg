@@ -1,17 +1,19 @@
 // Create a namespace so as not to polute the global namespace
 if(!com) var com={};
 if(!com.morac) com.morac={};
+if(!com.morac.SessionManagerAddon) com.morac.SessionManagerAddon={};
 
 Components.utils.import("resource://sessionmanager/modules/logger.jsm");
 Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm");
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
 
 // use the namespace
-with (com.morac) {
-	com.morac.gSessionManagerSessionPrompt = {
+with (com.morac.SessionManagerAddon) {
+	com.morac.SessionManagerAddon.gSessionManagerSessionPrompt = {
 
 		gParams: null,
 		gSessionTree: null,
+		gSearchTextBox: null,
 		gTextBox: null,
 		gTextBoxVisible: false,
 		ggMenuList: null,
@@ -22,11 +24,13 @@ with (com.morac) {
 		gCtrlClickNote: null,
 		gAcceptButton: null,
 		gExtraButton: null,
+		gExistingSessionNames: {},
 		gSessionNames: {},
 		gGroupNames: [],
 		gBackupGroupName: null,
 		gBannedNames: [],
 		gBackupNames: [],
+		gBannedFileNames: [],
 		gSessionTreeData: null,
 		gOriginalSessionTreeData: null,
 		// gExistingName is the index of the item with the name in the text field.  -1 means no match
@@ -35,6 +39,16 @@ with (com.morac) {
 		gInvalidTime: false,
 		gFinishedLoading: false,
 		gReDrawWindow: true,
+		gReadSQLCache: 0,
+		
+		gLastSearchText: "",
+		
+		// searching shortcuts
+		gSearchTitle: gPreferenceManager.get("browser.urlbar.match.title", "#", true),
+		gSearchURL: gPreferenceManager.get("browser.urlbar.match.url", "@", true),
+		gSearchName: gPreferenceManager.get("browser.urlbar.match.bookmark", "*", true),
+		gSearchGroup: gPreferenceManager.get("browser.urlbar.match.tag", "+", true),
+		gSearchHistroy: gPreferenceManager.get("browser.urlbar.match.history", "^", true),
 		
 		// For saving last selected row so it can be restored
 		gLastSelectedRow: null,
@@ -54,16 +68,21 @@ with (com.morac) {
 		modal: false,
 
 		sortedBy: { column: null, direction: 0 },
+		
+		// search variables
+		gSearchTimer: null,
+		gSearching: false,
+		getSessionsSearchOverride: null,
+		gSessionCache: null,
 
 		// Input parameters stored in gSessionManager.sessionPromptData:
 		// acceptExistingLabel  - Okay button label when overwriting existing session
 		// acceptLabel          - Okay Button label for normal accept
 		// addCurrentSession    - True when recovering from crash
 		// allowNamedReplace    - True if double clicking a session name on save will replace existing session, but use default session name.
-		//                        (This is currently only settable via a hidden preference - allowNamedReplace).
 		// append_replace       - True if displaying the append/replace radio group, false otherwise
 		// autoSaveable         - Displays autosave checkbox if true
-		// callbackData         - Data to pass back to the gSessionManager.sessionPromptCallBack function.  Window will be modal if not set (or if oneWindow callback set)
+		// callbackData         - Data to pass back to the gSessionManager.sessionPromptCallBack function.  Window will be modal if not set
 		// crashCount           - Count String for current crashed session
 		// defaultSessionName   - Default value comes from page title
 		// filename             - Filename of session save file
@@ -77,6 +96,8 @@ with (com.morac) {
 		// sessionLabel         - Label at top of window
 		// startupPrompt        - True if displayed when browser is first starting up, but not recovering from crash
 		// textLabel            - Label above text box
+		// modal                - True if window is modal (when there's no callbackData, saving a window or first window prompt (crash or normal))
+		// startup              - True if prompting for startup (crash or normal)
 
 		// Output parameters, stored in gSessionManager.sessionPromptReturnData
 		// append               - True if append session, false if not
@@ -95,13 +116,30 @@ with (com.morac) {
 		// Used to disable saving if user switches to private browsing mode.
 		observe: function(aSubject, aTopic, aData)
 		{
+			log("session_prompt.observe: aTopic = " + aTopic + ", aData = " + aData + ", Subject = " + aSubject, "INFO");
 			switch (aTopic)
 			{
 			case "private-browsing":
 				this.checkPrivateBrowsingMode(aData == "enter", this.gParams.autoSaveable);
 				break;
 			case "sessionmanager:update-session-tree":
-				this.updateWindow(true);
+				this.updateWindow();
+				break;
+			case "sessionmanager:sql-cache-updated":
+				gSQLManager.readSessionDataFromSQLCache(this.sessionCacheCallback);
+				break;
+			case "nsPref:changed":
+				if (aData == "extensions.tabmix.singleWindow") {
+					if (gPreferenceManager.get("extensions.tabmix.singleWindow", false, true)) {
+						if (!this._("radio_append_replace").selectedIndex) this._("radio_append_replace").selectedIndex = 2;
+						this._("radio_append").hidden = true;
+					}
+					else {
+						if (this._("radio_append_replace").selectedIndex == 2 &&  !gPreferenceManager.get("overwrite", false) && !gPreferenceManager.get("append_by_default", false))
+							this._("radio_append_replace").selectedIndex = 0;
+						this._("radio_append").hidden = false;
+					}
+				}
 				break;
 			}
 		},
@@ -111,19 +149,35 @@ with (com.morac) {
 			aObj.setAttribute(aAttr, aValue);
 			document.persist(aObj.id, aAttr);
 		},
+		
+		leaveWindowOpenChange: function(aChecked) {
+			// save leave_window_open preference.
+			let pref = gPreferenceManager.get("leave_prompt_window_open","").split(",");
+			let index = pref.indexOf(this._("actionButton").label);
+			if (aChecked != (index != -1)) {
+				if (aChecked)
+					pref.push(this._("actionButton").label)
+				else
+					pref.splice(index, 1);
+				gPreferenceManager.set("leave_prompt_window_open", pref.toString().replace(/^,/,""));
+			}
+		},
 
 		onLoad: function() {
 			OBSERVER_SERVICE.addObserver(this, "private-browsing", false);
 			OBSERVER_SERVICE.addObserver(this, "sessionmanager:update-session-tree", false);
+			OBSERVER_SERVICE.addObserver(this, "sessionmanager:sql-cache-updated", false);
+			if (gSessionManager.tabMixPlusEnabled)
+				gPreferenceManager.observe("extensions.tabmix.singleWindow", this, false, true);
 
 			// Set "accept" value to false for modal windows
 			window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock).SetInt(0, 0);
 			
-			// Window is modal if no callback data or if oneWindow is set
-			this.modal = (!gSessionManager.sessionPromptData.callbackData || gSessionManager.sessionPromptData.callbackData.oneWindow);
+			// Window is modal if no callback data or if first window opened (crash or restore prompt)
+			this.modal = gSessionManager.sessionPromptData.modal;
 			
 			// Remove windowtype from modal windows to prevent them from being re-used
-			if (this.modal) {
+			if (this.modal && !gSessionManager.sessionPromptData.startup) {
 				this._("sessionmanagerPrompt").removeAttribute("windowtype");
 			}
 			
@@ -133,6 +187,7 @@ with (com.morac) {
 			this.gExtraButton = document.documentElement.getButton("extra1");
 
 			// Store XUL references
+			this.gSearchTextBox = this._("search");
 			this.gTextBox = this._("text_box");
 			this.ggMenuList = this._("group_menu_list");
 			this.gTabTree = this._("tabTree");
@@ -149,9 +204,6 @@ with (com.morac) {
 			
 			// Show selection menu if window is not modal
 			if (!this.modal) this._("menuBox").hidden = false;
-			
-			// Check/uncheck leave window open checkbox based on preference
-			this._("leave_window_open").checked = gPreferenceManager.get("leave_prompt_window_open", true);
 			
 			// Display the window
 			this.drawWindow();
@@ -195,10 +247,22 @@ with (com.morac) {
 			this.gSelectSessionTreeActive = false;
 			OBSERVER_SERVICE.removeObserver(this, "private-browsing");
 			OBSERVER_SERVICE.removeObserver(this, "sessionmanager:update-session-tree");
+			OBSERVER_SERVICE.removeObserver(this, "sessionmanager:sql-cache-updated");
+			if (gSessionManager.tabMixPlusEnabled)
+				gPreferenceManager.unobserve("extensions.tabmix.singleWindow", this, true);
 
 			// Clear any currently stored functions
 			if (this.gParams) {
 				delete this.gParams.getSessionsOverride;
+			}
+			
+			// Cleanup saved window if it exists
+			gSessionManagerSessionBrowser.oneWindow = null;
+
+			// if windows are watching for page loads and tab moves tell them to stop
+			if (gSessionManager.savingTabTreeVisible) {
+				gSessionManager.savingTabTreeVisible = false;
+				OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:save-tab-tree-change", "close");
 			}
 			
 			if (window.opener && !this.modal)
@@ -209,18 +273,26 @@ with (com.morac) {
 			
 			this.persistTreeHeights();
 			
+			// In Firefox 4 and up copy "hidden" attribute for tab group items to "_hidden" for persisting.  We can't persist "hidden" 
+			// since that's explicitly set to true for Firefox 3.6 and lower. Do this here so we don't need to use a DOM Mutation event
+			// which is not allowed.
+			if ((Application.name.toUpperCase() == "FIREFOX") && (VERSION_COMPARE_SERVICE.compare(Application.version, "4.0b4pre") >= 0)) {
+				var tabgroup = document.getElementById("tabgroup");
+				var hidden = document.getElementById("hidden");
+				hidden.setAttribute("_hidden", hidden.getAttribute("hidden"));
+				tabgroup.setAttribute("_hidden", tabgroup.getAttribute("hidden"));
+			}
+			
 			// The following line keeps the window width from increasing when sizeToContent is called.
 			this._("sessionmanagerPrompt").width = window.innerWidth - 1;
-			
-			// save leave_window_open preference.
-			if (gPreferenceManager.get("leave_prompt_window_open", true) != this._("leave_window_open").checked)
-				gPreferenceManager.set("leave_prompt_window_open", this._("leave_window_open").checked);
 			
 			// Handle case if user closes window without click Okay.  Only used for modal windows, specifically
 			// startup session prompt.  Object is initialized in session_manager.jsm because initializing it here
 			// would result in a memory leak for non-modal windows, where gSessionManager.sessionPromptReturnData isn't cleared out
 			// on return.
 			if (gSessionManager.sessionPromptReturnData) gSessionManager.sessionPromptReturnData.ignore = this._("checkbox_ignore").checked;
+			
+			log("Session Manager window done unloading", "INFO");
 		},
 
 		// Draw the window using parameters from gSessionManager.sessionPromptData
@@ -258,13 +330,16 @@ with (com.morac) {
 				getSessionsOverride: gSessionManager.sessionPromptData.getSessionsOverride
 			};
 			
+			let save_to_save = false;
 			// Update selection menu if not modal
 			if (!this.modal) {
 				let label = null;
+				let save = false;
 				// Remove private attribute if changing since can't change to save when in private browsing
 				this._("actionButton").removeAttribute("private");
 				switch(this.gParams.callbackData.type) {
 					case "save":
+						save = true;
 						label = this.gParams.callbackData.oneWindow ? this._("saveWin").label : this._("save").label;
 						break;
 					case "load": 
@@ -280,10 +355,26 @@ with (com.morac) {
 						label = this._("remove").label;
 						break;
 				}
-				// don't update window if same command used
-				if (this._("actionButton").label == label) return;
+				let saving_window = (this._("actionButton").label == this._("saveWin").label);
+				// If save window changing to save window
+				if (save && (saving_window || (this._("actionButton").label == this._("save").label))) {
+					save_to_save = true;
+				}
+				// don't update window if same command used except for saving current window
+				if (!saving_window && (this._("actionButton").label == label)) {
+					// update session name if saving
+					if (this.gParams.defaultSessionName) {
+						this.ggMenuList.value = "";
+						this.gTextBox.value = "";
+						this.populateDefaultSessionName(this.gParams.defaultSessionName);
+					}
+					return;
+				}
 				this._("actionButton").label = label;
 			}
+			
+			// Check/uncheck leave window open checkbox based on preference
+			this._("leave_window_open").checked = (gPreferenceManager.get("leave_prompt_window_open","").split(",").indexOf(this._("actionButton").label) != -1);
 			
 			// Clear any passed functions and parameters from global variable to prevent leaking
 			delete gSessionManager.sessionPromptData.getSessionsOverride;
@@ -293,6 +384,11 @@ with (com.morac) {
 			this.gSessionTree.selType = (this.gParams.multiSelect)?"multiple":"single";
 
 			var currentSessionTreeHeight = this.gSessionTree.treeBoxObject.height;
+			
+			// clear the text boxes here since for some reason in Firefox 4, they won't clear when set to "" in updateWindow 
+			// when called from drawWindow (bug in FF4 having to do something with hidden textboxes, but I can't create a simple test case)
+			this.ggMenuList.value = "";
+			this.gTextBox.value = "";
 			
 			// if not initial window load
 			if (this.gFinishedLoading) {
@@ -314,19 +410,29 @@ with (com.morac) {
 			this.gReDrawWindow = true;
 			this.updateWindow();
 			this.gReDrawWindow = false;
-
+			
 			// Display Tab Tree if saving session otherwise adjust height if not initial load
 			if (this.gParams.autoSaveable) {
-				this.displayTabTree();
+				this.displayTabTree(save_to_save);
 			}
 			else if (this.gFinishedLoading) {
 				// Fix session tree height to prevent it from changing
 				this.adjustSessionTreeHeight(currentSessionTreeHeight);
 			}
+			
+			// If Saving and wasn't previously saving, notify windows to listen for tab moves and page loads
+			// If not saving and was previously, notify windows to not listen for tab moves and page loads
+			var wasTabTreeVisible = gSessionManager.savingTabTreeVisible;
+			gSessionManager.savingTabTreeVisible = this.gParams.autoSaveable;
+
+			// If status changed, notifiy windows
+			if (wasTabTreeVisible != gSessionManager.savingTabTreeVisible) {
+				OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:save-tab-tree-change", gSessionManager.savingTabTreeVisible ? "open" : "close");
+			}
 		},
 
 		// Update window without re-reading parameters
-		updateWindow: function(aRefreshOnly) {
+		updateWindow: function(aSelectedFileName) {
 			var oldSessionTreeRowCount = 0;
 		
 			// If already loaded
@@ -336,9 +442,11 @@ with (com.morac) {
 				oldSessionTreeRowCount = this.sessionTreeView.rowCount;
 				
 				// Reset variables
+				this.gExistingSessionNames = {};
 				this.gSessionNames = {};
 				this.gGroupNames = [];
 				this.gBannedNames = [];
+				this.gBannedFileNames = [];
 				this.gBackupNames = [];
 				this.gExistingName = -1;
 				this.gInvalidTime = false;
@@ -346,11 +454,12 @@ with (com.morac) {
 				// Remove old descriptions
 				this.removeDescriptions();
 
-				if (!aRefreshOnly) {
+				// If not called from searching function
+				if (!aSelectedFileName) {
 					// unselect any selected session
 					this.gSessionTree.view.selection.clearSelection();
 					this.gLastSelectedRow = null;
-						
+
 					// clean up text boxes
 					this.ggMenuList.removeAllItems();
 					this.ggMenuList.value = "";
@@ -370,8 +479,41 @@ with (com.morac) {
 
 			this.setDescription(this._("session_label"), this.gParams.sessionLabel);
 			
-			var sessions = null;
-			if (this.gParams.getSessionsOverride) {
+			// Get all sessions by default
+			var sessions = gSessionManager.getSessions();
+			var groupCount = 0;
+			
+			// save database for all sessions in case we try to save over an existing session
+			sessions.forEach(function(aSession) {
+				var trimName = aSession.name.trim().toLowerCase();
+				this.gExistingSessionNames[trimName] = { group: aSession.group, autosave: false, autosave_time: 0 };
+				// Break out Autosave variables
+				if (aSession.autosave) {
+					var autosave = aSession.autosave.split("/");
+					this.gExistingSessionNames[trimName].autosave = autosave[0];
+					this.gExistingSessionNames[trimName].autosave_time = autosave[1];
+				}
+				
+				// Build group menu list
+				if (aSession.group && !aSession.backup) {
+					// Don't treat special chars in group as regular expression characters
+					let groupRegExp = aSession.group.replace(/([\(\)\[\]\^\$\*\+\|\.\\\/])/g,"\\$1");
+					let regExp = new RegExp("^" + groupRegExp + "|," + groupRegExp + "$|," + groupRegExp + ",");
+					if (!regExp.test(this.gGroupNames.toString())) {
+						this.gGroupNames[groupCount++] = aSession.group.trim();
+					}
+				}
+			}, this);
+			
+			// Get override or search session list if there are any
+			if (this.getSessionsSearchOverride && (typeof this.getSessionsSearchOverride == "function")) {
+					try {
+						sessions = this.getSessionsSearchOverride();
+					} catch (ex) { 
+						logError(ex); 
+					}
+			}
+			else if (this.gParams.getSessionsOverride) {
 				if (typeof this.gParams.getSessionsOverride == "function") {
 					try {
 						sessions = this.gParams.getSessionsOverride();
@@ -387,9 +529,6 @@ with (com.morac) {
 					return;
 				}
 			}
-			else {
-				sessions = gSessionManager.getSessions();
-			}
 
 			if (this.gParams.addCurrentSession) // add a "virtual" current session
 			{
@@ -398,10 +537,10 @@ with (com.morac) {
 			
 			// Do not allow overwriting of open window or browser sessions (clone it so we don't overwrite the global variable)
 			for (let i in gSessionManager.mActiveWindowSessions) {
-				this.gBannedNames[i] = gSessionManager.mActiveWindowSessions[i];
+				this.gBannedFileNames[i] = gSessionManager.mActiveWindowSessions[i];
 			}
-			var currentSession = gPreferenceManager.get("_autosave_values", "").split("\n")[0];
-			if (currentSession) this.gBannedNames[currentSession.trim().toLowerCase()] = true;
+			var currentSessionFileName = gPreferenceManager.get("_autosave_values", "").split("\n")[0];
+			if (currentSessionFileName) this.gBannedFileNames[currentSessionFileName] = true;
 			
 			// hide/show the "Don't show [...] again" checkbox
 			this._("checkbox_ignore").hidden = !(this.gParams.ignorable);
@@ -413,7 +552,7 @@ with (com.morac) {
 			// hide/show the append/replace radio buttons
 			this._("radio_append_replace").hidden = !(this.gParams.append_replace);
 			this._("radio_append_replace").selectedIndex = gPreferenceManager.get("overwrite", false) ? 1 : (gPreferenceManager.get("append_by_default", false) ? 2 : 0);
-			if (window.opener && (typeof(window.opener.gSingleWindowMode) != "undefined") && window.opener.gSingleWindowMode) {
+			if (gSessionManager.tabMixPlusEnabled && gPreferenceManager.get("extensions.tabmix.singleWindow", false, true)) {
 				if (!this._("radio_append_replace").selectedIndex) this._("radio_append_replace").selectedIndex = 2;
 				this._("radio_append").hidden = true;
 			}
@@ -424,16 +563,18 @@ with (com.morac) {
 			var saving = (this.gParams.autoSaveable);
 			var grouping = (this.gParams.grouping);
 			var loading = (this.gParams.append_replace);  // not true for crash or start session prompt
-			var preselect = (this.gParams.preselect);
-			var groupCount = 0;
+			var preselect = (this.gParams.preselect) && !aSelectedFileName;
 			var selected;
+			var selected_time = 0;
 			this.gSessionTreeData = [];
 			sessions.forEach(function(aSession) {
 				var trimName = aSession.name.trim().toLowerCase();
 				// ban backup session names
 				if (aSession.backup) this.gBackupNames[trimName] = true;
+				// Don't allow using same name as active auto or window session - Currently allow all names since active sessions are now referenced by filename.
+				//if (this.gBannedFileNames[aSession.fileName]) this.gBannedNames[aSession.name] = true;
 				// Don't display loaded sessions in list for load or save or backup items in list for save or grouping
-				if (!((aSession.backup && (saving || grouping)) || ((this.gBannedNames[trimName]) && (saving || loading || (this.gParams.addCurrentSession)))))
+				if (!((aSession.backup && (saving || grouping)) || ((this.gBannedFileNames[aSession.fileName]) && (saving || loading || (this.gParams.addCurrentSession)))))
 				{
 					// get window and tab counts and group name for crashed session
 					if (aSession.fileName == "*") {
@@ -451,7 +592,7 @@ with (com.morac) {
 					}
 					
 					// Mark if session loaded
-					aSession.loaded = this.gBannedNames[trimName] || null;
+					aSession.loaded = this.gBannedFileNames[aSession.fileName] || null;
 					
 					// Flag latest session
 					if ((sessions.latestTime && (sessions.latestTime == aSession.timestamp) && !(this.gParams.addCurrentSession)) || (aSession.fileName == "*")) {
@@ -459,8 +600,17 @@ with (com.morac) {
 					}
 					
 					// Select previous session if requested to do so and no session name passed
-					if (preselect && aSession.backup && !this.gParams.filename && (sessions.latestBackUpTime == aSession.timestamp)) {
+					if (preselect && !this.gParams.filename && ((aSession.autosave && aSession.latest) || (aSession.backup  && (sessions.latestBackUpTime == aSession.timestamp)))) {
+						if (selected_time < aSession.timestamp) {
+							selected = this.gSessionTreeData.length;
+							selected_time = aSession.timestamp;
+						}
+					}
+					
+					// When searching make sure previous selected session is selected, if it's still listed
+					if (aSelectedFileName && aSelectedFileName == aSession.fileName) {
 						selected = this.gSessionTreeData.length;
+						preselect = false;
 					}
 
 					// select passed in item (if any)
@@ -501,11 +651,18 @@ with (com.morac) {
 				this.gSessionTree.treeBoxObject.rowCountChanged(0, this.sessionTreeView.rowCount - oldSessionTreeRowCount);
 			}
 			
-			// select passed in item (if any)
-			if (typeof(selected) != "undefined") this.gSessionTree.view.selection.select(selected);
+			// select passed in item (if any) and scroll to it
+			if (typeof(selected) != "undefined") {
+				this.gSessionTree.view.selection.select(selected);
+				this.gSessionTree.treeBoxObject.scrollToRow(selected);
+			}
 			
 			if ((this.gParams.selectAll)) this.gSessionTree.view.selection.selectAll()
 
+			// Default to focusing on Session List.  If gTextBox is focused this does nothing for some reason, but that's good.
+			// This also causes session list to refresh when updated.
+			gSessionManagerSessionPrompt.gSessionTree.focus();
+			
 			// If there is a text box label, enable text boxes
 			if (this.gParams.textLabel)
 			{
@@ -532,9 +689,10 @@ with (com.morac) {
 				{
 					this.gTextBoxVisible = !(this._("session-text-container").hidden = false);
 				
-					// If not refreshing, pre-populate the text box with default session name if saving and the name is not banned or already existing.
+					// Pre-populate the text box with default session name if saving and the name is not banned or already existing.
 					// Otherwise disable accept button
-					if (!aRefreshOnly) this.populateDefaultSessionName(this.gParams.defaultSessionName);
+					this.populateDefaultSessionName(this.gParams.defaultSessionName);
+					if (saving) this.gTextBox.focus();
 				}
 			}
 			
@@ -546,17 +704,10 @@ with (com.morac) {
 				
 				// If renaming and rename pre-selected, put focus on text box
 				if (this.gParams.callbackData && (this.gParams.callbackData.type == "rename") && this.gParams.filename) {
-					setTimeout(function() { gSessionManagerSessionPrompt.gTextBox.select(); gSessionManagerSessionPrompt.gTextBox.focus(); }, 0);
+					this.gTextBox.focus();
 				}
 			}
 			else this.isAcceptable();
-			
-			// If refreshing session list, update save buttons in case session name now exists, otherwise
-			// default to focusing on Session List.  If gTextBox is focused this does nothing for some reason, but that's good.
-			if (aRefreshOnly) {
-				this.onTextboxInput()
-			}
-			else gSessionManagerSessionPrompt.gSessionTree.focus()
 		},
 		
 		populateDefaultSessionName: function(aName, aTabSelect) {
@@ -638,14 +789,195 @@ with (com.morac) {
 			}
 		},
 		
-		displayTabTree: function()
+		clearSearch: function()
+		{
+			// Clear search box on first search box click
+			if (this.gSearchTextBox.getAttribute("searching") == "false") {
+				if (!this.originalSearchValue)
+					this.originalSearchValue = this.gSearchTextBox.value;
+				this.getSessionsSearchOverride = null;
+				this.gSearchTextBox.value = '';
+				this.gSearchTextBox.setAttribute("searching", "true");
+			}
+		},
+		
+		resetSearch: function() {
+			if (!this.gSearching) {
+				this.getSessionsSearchOverride = null;
+				this.gSearchTextBox.setAttribute("searching", "false");
+				this.gSearchTextBox.value = this.originalSearchValue;
+			}
+		},
+		
+		// Don't search immediately, add delay so we don't need to search needlessly over and over
+		// while user is typing
+		doSearch: function()
+		{
+			if (this.gSearchTimer)
+				window.clearTimeout(this.gSearchTimer);
+				
+			if (this.gSearchTextBox.value == '')
+				this.doSearch2();
+			else if (this.gSearchTextBox.getAttribute("searching") == "true") {
+				this.gSearchTimer = window.setTimeout(gSessionManagerSessionPrompt.doSearch2, 450);
+			}
+		},
+		
+		doSearch2: function()
+		{
+			gSessionManagerSessionPrompt.gSearchTimer = null;
+			var selectedFileName = ((gSessionManagerSessionPrompt.gSessionTree.view.selection.count == 1) && (gSessionManagerSessionPrompt.gSessionTree.currentIndex != -1)) ?
+									gSessionManagerSessionPrompt.gSessionTreeData[gSessionManagerSessionPrompt.gSessionTree.currentIndex].fileName : null;
+			
+			// If no search text, set values back to default
+			if (gSessionManagerSessionPrompt.gSearchTextBox.value == '') {
+				gSessionManagerSessionPrompt.gSearching = false;
+				gSessionManagerSessionPrompt.resetSearch();
+			}
+			else {
+				gSessionManagerSessionPrompt.gSearching = true;
+				
+				// if SQL cache is enabled, but hasn't been read, read it now, when cache is done reading it will call doSearch2.
+				if (!gSessionManagerSessionPrompt.gReadSQLCache && gSessionManager.mPref["use_SQLite_cache"]) {
+					gSQLManager.readSessionDataFromSQLCache(gSessionManagerSessionPrompt.sessionCacheCallback);
+					gSessionManagerSessionPrompt.gReadSQLCache = 1;
+				}
+				else {
+					// If nothing changed don't search again unless we are waiting for cache results to return
+					if (gSessionManagerSessionPrompt.gSearchTextBox.value == gSessionManagerSessionPrompt.gLastSearchText)
+						return;
+					gSessionManagerSessionPrompt.gLastSearchText = gSessionManagerSessionPrompt.gSearchTextBox.value;
+				}
+			
+				gSessionManagerSessionPrompt.getSessionsSearchOverride = function() {
+					let search_value = gSessionManagerSessionPrompt.gSearchTextBox.value;
+					let search_keyword = search_value.slice(0,2);
+					let search_type = 15;
+					// Use key shortcuts for searching based on Awesome bar shortcuts:
+					// * = Session Name, + = Group name, # = Tab title, @ = Tab url, ^ = Tab history
+					if (search_keyword[1] == " ") {
+						let found = true;
+						switch(search_keyword[0]) {
+							case this.gSearchTitle:
+								search_type = 1;
+								break;
+							case this.gSearchURL:
+								search_type = 2;
+								break;
+							case this.gSearchName:
+								search_type = 4;
+								break;
+							case this.gSearchGroup:
+								search_type = 8;
+								break;
+							case this.gSearchHistroy:
+								search_type = 16;
+								break;
+							default:
+								found = false;
+								break;
+						}
+						if (found)
+							search_value = search_value.slice(2);
+					}
+					
+					let regex_arg = ((search_value.length < 2) || (search_value[0] != '"') || (search_value[search_value.length-1] != '"')) ? "i" : "";
+					// remote quotes from search string if surrounds by quotes (i.e, regex_arg is not "i")
+					if (regex_arg != "i")
+						search_value = search_value.substr(1, search_value.length-2);
+					// reg expresion can't end in "\"
+					if (search_value[search_value.length-1] == "\\" && search_value[search_value.length-2] != "\\")
+						search_value = search_value.slice(0,search_value.length-1);
+					let regexp = new RegExp(search_value, regex_arg);
+					let sessions = null;
+					
+					// Get true sessions (use override if set)
+					if (gSessionManagerSessionPrompt.gParams.getSessionsOverride && typeof gSessionManagerSessionPrompt.gParams.getSessionsOverride == "function") {
+						try {
+							sessions = gSessionManagerSessionPrompt.gParams.getSessionsOverride();
+						} catch (ex) { 
+							logError(ex);
+							sessions = gSessionManager.getSessions();
+						}
+					}
+					else {
+						sessions = gSessionManager.getSessions();
+					}
+
+					// Get tab data as an array of file names indicating whether the tab data matches the regular expression.
+					let tabData = (search_type & 19 ) ? gSessionManagerSessionPrompt.searchTitlesUrls(regexp, search_type) : null;
+					sessions = sessions.filter(function(aSession) {
+						return (((search_type & 4 ) && regexp.test(aSession.name)) || ((search_type & 8 ) && regexp.test(aSession.group)) || (tabData && tabData[aSession.fileName]));
+					});
+					return sessions;
+				}
+			}
+			// Update window
+			gSessionManagerSessionPrompt.updateWindow(selectedFileName);
+			// Keep focus on search box	
+			gSessionManagerSessionPrompt.gSearchTextBox.focus();
+		},
+		
+		searchTitlesUrls: function(regexp, search_type) {
+			if (!gSessionManagerSessionPrompt.gSessionCache) return null;
+			
+			let tabData = [];
+			gSessionManagerSessionPrompt.gSessionCache.forEach(function(element) {
+				// Match title and urls when searching for everything or specifically for titles or urls.  Only match tab history when searching history.
+				if (((search_type & 1) && (element.titles.search(regexp) != -1)) || ((search_type & 2) && (element.urls.search(regexp) != -1)) ||
+				        ((search_type & 16) && (element.history.search(regexp) != -1)))
+					tabData[element.fileName] = true;
+			});
+			return tabData;
+		},
+		
+		sessionCacheCallback: function(sessionData, aFileNames, aFailedToDecrypt) {
+			// If decryption failed, user didn't enter master password so bug him again :)
+			if (aFailedToDecrypt) {
+				gSessionManagerSessionPrompt.gReadSQLCache = 0;
+				return;
+			}
+		
+			gSessionManagerSessionPrompt.gSessionCache = [];
+			sessionData.forEach(function(aSession) {
+				if (aSession.state) {
+					let window_state = gSessionManager.JSON_decode(aSession.state);
+					let history = [], titles = [], urls = [];
+					window_state.forEach(function(aWindow) {
+						aWindow.tabData.forEach(function(aTabData) {
+							aTabData.history.forEach(function(aEntry) {
+								if (aEntry.current) {
+									titles.push(aEntry.title);
+									urls.push(aEntry.url);
+								}
+								else {
+									history.push(aEntry.title);
+									history.push(aEntry.url);
+								}
+							});
+						});
+					});
+					gSessionManagerSessionPrompt.gSessionCache.push({ fileName: aSession.fileName, history: history.toString(), titles: titles.toString(), urls: urls.toString() });
+				}
+			});
+			let old_cache_state = gSessionManagerSessionPrompt.gReadSQLCache;
+			gSessionManagerSessionPrompt.gReadSQLCache = 2;
+			// if started searching while cache was being read, do search now
+			if (old_cache_state == 1) {
+				if (gSessionManagerSessionPrompt.gSearchTimer)
+					window.clearTimeout(gSessionManagerSessionPrompt.gSearchTimer);
+				gSessionManagerSessionPrompt.doSearch2();
+			}
+		},
+		
+		displayTabTree: function(saveToSave)
 		{
 				// save current session tree height before doing any unhiding (subtract one if called initiall since height is off by one in that case)
 				var currentSessionTreeHeight = this.gSessionTree.treeBoxObject.height - (!this.gFinishedLoading ? 0 : 1);
 				var tabTreeWasHidden = this.gTabTreeBox.hidden;
-				
+
 				// hide tab tree and splitter if more or less than one item is selected or muliple selection is enabled, but not deleting (used for converting sessions)
-				// hide the click note if append/replace buttons are displayed (manual load)
+				// hide the click note if append/replace buttons are displayed (manual load).  Don't hide when searching unless there are no sessions.
 				var hideTabTree = !this.gParams.autoSaveable && !!((this.gSessionTree.view.selection.count != 1) || ((this.gParams.multiSelect) && !(this.gParams.remove)));
 				this.gTreeSplitter.hidden = this.gTabTreeBox.hidden = hideTabTree;
 				this.gCtrlClickNote.hidden = hideTabTree || !(this.gParams.append_replace) || this.gParams.autoSaveable;
@@ -654,18 +986,18 @@ with (com.morac) {
 				// resize the window based on the current persisted height of the tab tree and the
 				// current session tree height.  
 				if (!hideTabTree) {
-					// if deleting, change column label
-					if (this.gParams.remove) {
+					// Change column label to correct value
+					if (this.gParams.remove)
 						this._("restore").setAttribute("label", gSessionManager._string("remove_session_ok"));
-					}
-					else if (this.gParams.autoSaveable) {
-						this._("restore").setAttribute("label", this._("save_label").getAttribute("value"));
-					}
+					else if (this.gParams.autoSaveable) 
+						this._("restore").setAttribute("label", gSessionManager._string("save"));
+					else 
+						this._("restore").setAttribute("label", gSessionManager._string("load_session_ok"));
 					gSessionManagerSessionBrowser.initTreeView(this.gParams.autoSaveable ? "" : this.gSessionTreeData[this.gSessionTree.currentIndex].fileName, this.gParams.remove, this.gParams.startupPrompt, this.gParams.autoSaveable);
 				}
 				
-				// If tab tree was displayed or hidden, adjust session tree height
-				if (this.gFinishedLoading && tabTreeWasHidden != hideTabTree) {
+				// If tab tree was displayed or hidden or now saving, adjust session tree height
+				if (this.gFinishedLoading && (tabTreeWasHidden != hideTabTree || (this.gParams.autoSaveable && !saveToSave))) {
 					if (!hideTabTree && this.gTabTree.hasAttribute("height"))
 					{
 						this.gTabTree.height = this.gTabTree.getAttribute("height");
@@ -692,12 +1024,12 @@ with (com.morac) {
 			}
 			else
 			{
-				if (this.gTextBoxVisible) this.onTextboxInput();
+				if (this.gTextBoxVisible) this.onTextboxInput(null, false, true);
 				else this.isAcceptable();
 			}
 		},
 
-		onTextboxInput: function(aNewValue, aDontTakeFocus)
+		onTextboxInput: function(aNewValue, aDontTakeFocus, aTreeSelect)
 		{
 			if (aNewValue)
 			{
@@ -710,17 +1042,34 @@ with (com.morac) {
 				if (!aDontTakeFocus) setTimeout(function() { gSessionManagerSessionPrompt.gTextBox.select(); gSessionManagerSessionPrompt.gTextBox.focus(); }, 0);
 			}
 			
+			var check_for_existing_sessions = true;
 			var input = this.gTextBox.value.trim().toLowerCase();
 			var oldWeight = !!this.gAcceptButton.style.fontWeight;
+			var newWeight = false;
 			
-			this.gExistingName = (this.gSessionNames[input] != undefined) ? this.gSessionNames[input] : -1;
-			var newWeight = !!((this.gExistingName >= 0) || ((this.gParams.allowNamedReplace) && this.gSessionTree.view.selection.count > 0));
-			
+			// Only consider the existing name when selecting from session tree or wehn value is passed in (not when typing)
+			if (gSessionManager.mPref["allow_duplicate_session_names"] && !(aNewValue || aTreeSelect)) {
+				this.gExistingName = -1;
+				check_for_existing_sessions = false;
+			}
+			else {
+				this.gExistingName = (this.gSessionNames[input] != undefined) ? this.gSessionNames[input] : -1;
+				newWeight = !!((this.gExistingName >= 0) || ((this.gParams.allowNamedReplace) && this.gSessionTree.view.selection.count > 0) || this.gExistingSessionNames[input]);
+			}
+				
 			if (!this._("checkbox_autosave").hidden) {
 				var currentChecked = this._("checkbox_autosave").checked;
 				if (this.gExistingName >= 0) {
 					this._("checkbox_autosave").checked = this.gSessionTreeData[this.gExistingName].autosave != "false";
 					this._("autosave_time").value = this.gSessionTreeData[this.gExistingName].autosave_time || "";
+				}
+				else if (this.gExistingSessionNames[input] && check_for_existing_sessions) {
+					this._("checkbox_autosave").checked = this.gExistingSessionNames[input].autosave != "false";
+					this._("autosave_time").value = this.gExistingSessionNames[input].autosave_time || "";
+				}
+				else if (this.gParams.allowNamedReplace && check_for_existing_sessions && (this.gSessionTree.view.selection.count == 1)) {
+					this._("checkbox_autosave").checked = this.gSessionTreeData[this.gSessionTree.view.selection.currentIndex].autosave != "false";
+					this._("autosave_time").value = this.gSessionTreeData[this.gSessionTree.view.selection.currentIndex].autosave_time || "";
 				}
 				else {
 					this._("checkbox_autosave").checked = false;
@@ -749,7 +1098,10 @@ with (com.morac) {
 				// if not overwriting session with new name, select the session based on the entered name
 				if (!this.gParams.allowNamedReplace) this.gSessionTree.view.selection.select(this.gExistingName);
 				// use selected session's group
-				if (this.ggMenuListVisible) this.ggMenuList.value = this.gSessionTreeData[this.gSessionTree.view.selection.currentIndex].group;
+				if (this.ggMenuListVisible && (this.gSessionTree.view.selection.currentIndex >= 0))
+					this.ggMenuList.value = this.gSessionTreeData[this.gSessionTree.view.selection.currentIndex].group;
+				else if (this.gExistingSessionNames[input])
+					this.ggMenuList.value = this.gExistingSessionNames[input].group;
 			}
 				
 			this.isAcceptable();
@@ -768,10 +1120,11 @@ with (com.morac) {
 			
 			if (this.gTextBoxVisible) {
 				var input = this.gTextBox.value.trim().toLowerCase();
-				this.gTextBox.setAttribute("badname", this.gBackupNames[input]);
-				badSessionName = !input || this.gBackupNames[input] || this.gBannedNames[input];
+				var backupSessionName = BACKUP_SESSION_REGEXP.test(input + ".session");
+				this.gTextBox.setAttribute("badname", this.gBackupNames[input] || backupSessionName);
+				badSessionName = !input || this.gBackupNames[input] || this.gBannedNames[input] || backupSessionName;
 			}
-			
+
 			this.gAcceptButton.disabled = this.gExtraButton.disabled = aNotAcceptable ||
 				this.gInvalidTime || badSessionName || badGroupName || (this.gParams.autoSaveable && gSessionManager.isPrivateBrowserMode()) ||
 				(this.gParams.autoSaveable && (gSessionManagerSessionBrowser.gNoTabsChecked || (gSessionManagerSessionBrowser.treeView.treeBox && gSessionManagerSessionBrowser.treeView.rowCount == 0))) ||
@@ -784,9 +1137,10 @@ with (com.morac) {
 			// Put up warning prompt if deleting
 			if (this.gParams.remove) {
 				var dontPrompt = { value: false };
-				if (gPreferenceManager.get("no_delete_prompt") || PROMPT_SERVICE.confirmEx(window, gSessionManager.mTitle, gSessionManager._string("delete_confirm"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0) {
+				var partial = gSessionManagerSessionBrowser.gAllTabsChecked ? "" : "partial_";
+				if (gPreferenceManager.get("no_" + partial + "delete_prompt") || PROMPT_SERVICE.confirmEx(window, gSessionManager.mTitle, gSessionManager._string(partial + "delete_confirm"), PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1, null, null, null, gSessionManager._string("prompt_not_again"), dontPrompt) == 0) {
 					if (dontPrompt.value) {
-						gPreferenceManager.set("no_delete_prompt", true);
+						gPreferenceManager.set("no_" + partial + "delete_prompt", true);
 					}
 				}
 				else return false;
@@ -857,9 +1211,11 @@ with (com.morac) {
 				sessionName: this._("text_box").value.trim()
 			};
 			
+			// Writing to a file is asynchronous so we don't want to refresh until write is finished.
+			let writing_file = false;
 			if (!this.modal) {
 				try {
-					gSessionManager.sessionPromptCallBack(this.gParams.callbackData);
+					writing_file = gSessionManager.sessionPromptCallBack(this.gParams.callbackData);
 				} catch(ex) {
 					logError(ex);
 				}
@@ -869,7 +1225,7 @@ with (com.morac) {
 				// if user wants to close window, do it
 				if (!this._("leave_window_open").checked)
 					window.close();
-				else 
+				else if (!writing_file)
 					this.updateWindow();
 				return false;
 			}
@@ -884,13 +1240,16 @@ with (com.morac) {
 		
 		onSelectMenu: function(aEvent) {
 			if (this._("actionButton").label == aEvent.explicitOriginalTarget.label) return;
-				
+
+			// Cleanup saved window if it exists
+			gSessionManagerSessionBrowser.oneWindow = null;
+			
 			switch(aEvent.explicitOriginalTarget.id) {
 				case "save":
 					gSessionManager.save();
 					break;
 				case "saveWin":
-					gSessionManager.saveWindow();  // TODO figure this out later - currently menu item is hidden so it can't be selected
+					gSessionManager.saveWindow(gSessionManager.getMostRecentWindow("navigator:browser"));
 					break;
 				case "load": 
 					gSessionManager.load();
@@ -905,6 +1264,9 @@ with (com.morac) {
 					gSessionManager.remove();
 					break;
 			}
+			
+			// Disable saving if no windows
+			this.checkForNoWindows();
 		},
 		
 		sortSessions: function() {
@@ -995,7 +1357,7 @@ with (com.morac) {
 			
 			// Adjust window so it's not offscreen
 			this.adjustWindowSizeAndPosition();
-			log("onSessionTreeSelect: window.screenY = " + window.screenY + ", window.screen.availHeight = " + window.screen.availHeight + ", window.outerHeight = " + window.outerHeight, "DATA");
+			log("adjustSessionTreeHeight: window.screenY = " + window.screenY + ", window.screen.availHeight = " + window.screen.availHeight + ", window.outerHeight = " + window.outerHeight, "DATA");
 		},
 		
 		adjustWindowSizeAndPosition: function() {
@@ -1013,8 +1375,9 @@ with (com.morac) {
 		updateForPrivateBrowsingMode: function() 
 		{
 			let inPrivateBrowsing = gSessionManager.isPrivateBrowserMode();
-			gSessionManager.setDisabled(this._("save"), inPrivateBrowsing);
-			gSessionManager.setDisabled(this._("saveWin"), inPrivateBrowsing);
+			let no_windows = !gSessionManager.getBrowserWindows().length;
+			gSessionManager.setDisabled(this._("save"), inPrivateBrowsing || no_windows);
+			gSessionManager.setDisabled(this._("saveWin"), inPrivateBrowsing || no_windows);
 		},
 		
 		checkPrivateBrowsingMode: function(inPrivateBrowsing, aSaving, aJustOpened)
@@ -1031,6 +1394,14 @@ with (com.morac) {
 				}
 				else if (!aJustOpened) this.isAcceptable();
 			}
+		},
+		
+		checkForNoWindows: function()
+		{
+			// disable menu if saving
+			let no_windows = !gSessionManager.getBrowserWindows().length;
+			let menu = this._("actionButton");
+			menu.setAttribute("nowindows", (no_windows && ((menu.label == this._("save").label) || (menu.label == this._("saveWin").label))) ? "true" : "false");
 		},
 
 		_: function(aId)
@@ -1122,19 +1493,21 @@ with (com.morac) {
 			get rowCount()                     { return gSessionManagerSessionPrompt.gSessionTreeData.length; },
 			setTree: function(treeBox)         { this.treeBox = treeBox; },
 			getCellText: function(idx, column) { 
-				switch(column.id) {
-					case "name":
-						return gSessionManagerSessionPrompt.gSessionTreeData[idx].name;
-						break;
-					case "group":
-						return gSessionManagerSessionPrompt.gSessionTreeData[idx].group;
-						break;
-					case "win_count":
-						return gSessionManagerSessionPrompt.gSessionTreeData[idx].windows;
-						break;
-					case "tab_count":
-						return gSessionManagerSessionPrompt.gSessionTreeData[idx].tabs;
-						break;
+				if (gSessionManagerSessionPrompt.gSessionTreeData[idx]) {
+					switch(column.id) {
+						case "name":
+							return gSessionManagerSessionPrompt.gSessionTreeData[idx].name;
+							break;
+						case "group":
+							return gSessionManagerSessionPrompt.gSessionTreeData[idx].group;
+							break;
+						case "win_count":
+							return gSessionManagerSessionPrompt.gSessionTreeData[idx].windows;
+							break;
+						case "tab_count":
+							return gSessionManagerSessionPrompt.gSessionTreeData[idx].tabs;
+							break;
+					}
 				}
 				return null;
 			},
@@ -1186,11 +1559,4 @@ with (com.morac) {
 			getColumnProperties: function(column, prop) { }
 		},
 	}
-}
-
-// String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
-if (typeof(String.trim) != "function") {
-	String.prototype.trim = function() {
-		return this.replace(/^\s+|\s+$/g, "");
-	};
 }

@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "Yükle(Şimdiki Pencereye Ekle)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Bu pencereyi açmaya dön">
+<!ENTITY clearTabList.label "Kapatılan'Sekme Listesini'Temizle...">
+<!ENTITY clearTabList.accesskey "T">
+<!ENTITY clearWindowList.label "Kapatılan'Pencere Listesini'Temizle..">
+<!ENTITY clearWindowList.accesskey "W">
+<!ENTITY hidden.label "Gizli">
+<!ENTITY contribute.label "Katkıda bulunanlar">
+<!ENTITY support.label "Bu eklentiyi destekle">
+<!ENTITY session_group_verb.label "Gurup">
+<!ENTITY deleted_sessions.label "Silinmiş Oturumlar">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Silinen tüm oturumları kaldır">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "Oturumu kalıcı olarak sil">
+<!ENTITY permanently_delete.accesskey "P">
+<!ENTITY search.label "Ara..">
+<!ENTITY edit.label "Oturum Düzenle..">
+<!ENTITY edit.accesskey "E">
+<!ENTITY addtab.label "Oturuma sekme ekle">
+<!ENTITY addtab.accesskey "A">
+<!ENTITY viewcontents.label "Oturum içeriğini göster">
+<!ENTITY viewcontents.accesskey "V">
+<!ENTITY export_to_html.label "Oturum içeriğini bir HTML dosyasına çıkar">
+<!ENTITY export_to_html.accesskey "E">

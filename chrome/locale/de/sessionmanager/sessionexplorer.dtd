@@ -10,18 +10,18 @@
 <!ENTITY session_open_append.label "Öffnen (hinzufügen)">
 <!ENTITY session_open_append.accesskey "h">
 <!ENTITY session_open_append.tooltip "Ausgewählte Sitzung öffnen">
-<!ENTITY session_rename.label "Umbenennen...">
+<!ENTITY session_rename.label "Umbenennen…">
 <!ENTITY session_rename.accesskey "U">
 <!ENTITY session_rename.tooltip "Ausgewählte Sitzung umbenennen">
 <!ENTITY session_rename_ok.label "Umbenennen">
 <!ENTITY session_delete.label "Löschen">
 <!ENTITY session_delete.accesskey "L">
 <!ENTITY session_delete.tooltip "Ausgewählte Sitzungen löschen">
-<!ENTITY session_save.label "Sichern...">
+<!ENTITY session_save.label "Sichern…">
 <!ENTITY session_save.accesskey "S">
 <!ENTITY session_save.tooltip "Aktuelle Fenster als neue Sitzung sichern">
 <!ENTITY session_save_ok.label "Sichern">
-<!ENTITY session_save_w.label "Fenster sichern...">
+<!ENTITY session_save_w.label "Fenster sichern…">
 <!ENTITY session_save_w.accesskey "F">
 <!ENTITY session_save_w.tooltip "Aktuelles Fenster als neue Sitzung sichern">
 <!ENTITY session_save_w_ok.label "Fenster sichern">
@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Abbrechen">
 <!ENTITY done.label "Fertig">
 <!ENTITY done.tooltip "Sitzungs-Explorer schließen">
+<!ENTITY session_load.label "Laden">
+<!ENTITY session_load.accesskey "L">

@@ -136,3 +136,63 @@
 <!ENTITY prepend.label "Ajouter au début">
 <!ENTITY append.label "Ajouter à la fin">
 <!ENTITY donotadd.label "Ne pas ajouter">
+<!ENTITY use_browser_crash_prompt.label "Utiliser la fenêtre de restauration après plantage intégrée au navigateur">
+<!ENTITY use_browser_crash_prompt.accesskey "U">
+<!ENTITY reset_warnings.label "Réinitialiser les notifications">
+<!ENTITY reset_warnings.accesskey "R">
+<!ENTITY export_settings.label "Exporter les paramètres">
+<!ENTITY export_settings.accesskey "X">
+<!ENTITY import_settings.label "Importer les paramètres">
+<!ENTITY import_settings.accesskey "I">
+<!ENTITY settingsImportExport.caption "Importer/Exporter des paramètres">
+<!ENTITY keyboard.caption "Raccourcis clavier">
+<!ENTITY keyboard.desc "Pour associer un raccourci clavier à une action, veuillez l'indiquer ici, sinon laissez le champ vide. Les modifications ne seront pas appliquez aux fenêtres existantes.">
+<!ENTITY clear.label "Effacer">
+<!ENTITY clear.accesskey "f">
+<!ENTITY clear_tab_list.label "Effacer les onglets fermés">
+<!ENTITY clear_tab_list.accesskey "a">
+<!ENTITY clear_window_list.label "Effacer les fenêtres fermées">
+<!ENTITY clear_window_list.accesskey "n">
+<!ENTITY backup_on_restart.label "Enregistrer la sauvegarde au démarrage du navigateur">
+<!ENTITY backup_on_restart.accesskey "v">
+<!ENTITY keep_deleted_sessions.label "Nombre de jours à garder temporairement les sessions supprimées :">
+<!ENTITY keep_deleted_sessions.accesskey "j">
+<!ENTITY concurrent.label "Nombre d'onglets à restaurer en même temps">
+<!ENTITY concurrent.accesskey "o">
+<!ENTITY do_not_color_toolbar_button.label "Ne pas colorer le bouton de la barre d'outils lorsque les sessions se chargent">
+<!ENTITY do_not_color_toolbar_button.accesskey "p">
+<!ENTITY preserve_app_tabs.label "Ne pas remplacer les onglets des applications épinglées">
+<!ENTITY preserve_app_tabs.accesskey "p">
+<!ENTITY logging_to_console.label "Également inscrire dans le journal de la console d'erreur">
+<!ENTITY logging_to_console.accesskey "E">
+<!ENTITY update_message.label "Afficher la page de mise à jour après mise à jour">
+<!ENTITY update_message.accesskey "A">
+<!ENTITY double_click_session.label "En double-cliquant sur une session existante, cela remplace la session et">
+<!ENTITY double_click_session.accesskey "d">
+<!ENTITY replace_with_name_replace.label "remplace le nom de la session existante par celui de la zone de texte">
+<!ENTITY replace_with_name_keep.label "conserve le nom de session existante">
+<!ENTITY show_icon_in_menu.label "Afficher l'icône dans le menu « outils »">
+<!ENTITY show_icon_in_menu.accesskey "i">
+<!ENTITY set_encryption_password.label "Indiquer un mot de passe pour protéger votre clé de chiffrement de session">
+<!ENTITY set_encryption_password.accesskey "c">
+<!ENTITY change_encryption_key_password.label "Modifier le mot de passe de la clé de chiffrement">
+<!ENTITY change_encryption_key_password.accesskey "M">
+<!ENTITY save_encryption_key.label "Enregistrer le mot de passe de la clé de chiffrement dans le gestionnaire de mots de passe du navigateur">
+<!ENTITY save_encryption_key.accesskey "E">
+<!ENTITY restore_hidden_tabs.label "Rétablir les onglets masqués">
+<!ENTITY restore_hidden_tabs.accesskey "m">
+<!ENTITY display_menus_in_submenu.label "Afficher les éléments de menu du gestionnaire de session dans le sous-menu">
+<!ENTITY display_menus_in_submenu.accesskey "f">
+<!ENTITY use_sql_cache.label "Placer les données de session basiques dans le cache disque. Active la recherche dans les sessions">
+<!ENTITY use_sql_cache.accesskey "C">
+<!ENTITY rebuild_cache.label "Reconstruire les données du cache">
+<!ENTITY rebuild_cache.accesskey "R">
+<!ENTITY log_level_error.label "Journal des erreurs">
+<!ENTITY log_level_error.accesskey "e">
+<!ENTITY allow_duplicates.label "Autoriser l'enregistrement d'une session avec le même nom qu'une session existante">
+<!ENTITY allow_duplicates.accesskey "A">
+<!ENTITY backup_every.label "Créer une nouvelle sauvegarde de session toutes les">
+<!ENTITY backup_every.accesskey "C">
+<!ENTITY minutes "minutes">
+<!ENTITY restore_on_demand.label "Rétablir les onglets à la demande">
+<!ENTITY restore_on_demand.accesskey "R">

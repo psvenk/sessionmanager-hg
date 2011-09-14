@@ -20,7 +20,7 @@
 <!ENTITY session_save.label "Enregistrer…">
 <!ENTITY session_save.accesskey "E">
 <!ENTITY session_save.tooltip "Enregistrer les fenêtres courantes dans une nouvelle session">
-<!ENTITY session_save_ok.label "Enregsitrer">
+<!ENTITY session_save_ok.label "Enregistrer">
 <!ENTITY session_save_w.label "Enregistrer la fenêtre">
 <!ENTITY session_save_w.accesskey "f">
 <!ENTITY session_save_w.tooltip "Enregistrer la fenêtre courante dans une nouvelle session">
@@ -39,4 +39,6 @@
 <!ENTITY column_name.label "Nom">
 <!ENTITY cancel.label "Annuler">
 <!ENTITY done.label "Valider">
-<!ENTITY done.tooltip "Fermer l&apos;explorateur de sessions">
+<!ENTITY done.tooltip "Fermer l'explorateur de sessions">
+<!ENTITY session_load.label "Charger">
+<!ENTITY session_load.accesskey "C">

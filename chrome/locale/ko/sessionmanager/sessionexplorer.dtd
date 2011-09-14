@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "취소">
 <!ENTITY done.label "완료">
 <!ENTITY done.tooltip "세션 탐색기 창 닫기">
+<!ENTITY session_load.label "불러오기">
+<!ENTITY session_load.accesskey "L">

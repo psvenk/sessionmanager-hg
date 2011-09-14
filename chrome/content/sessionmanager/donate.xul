@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-
+<!DOCTYPE overlay SYSTEM "chrome://sessionmanager/locale/sessionmanager.dtd">
 <overlay id="sessionManagerAddonDonateOverlay"
 		 xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 		 
@@ -8,8 +8,8 @@
 	<window id="extensionsManager">
 		<spacer id="session_manager_donateSpacer" class="session_manager_donate" flex="1" hidden="true"/>
 		<hbox id="session_manager_donateContainer" class="session_manager_donate" hidden="true">
-			<label id="session_manager_donateTextNode1" value="Support this add-on:" />
-			<label id="session_manager_donateTextNode2" value="Contribute" style="text-decoration:underline; cursor:pointer;"
+			<label id="session_manager_donateTextNode1" value="&support.label;" />
+			<label id="session_manager_donateTextNode2" value="&contribute.label;" style="text-decoration:underline; cursor:pointer;"
 			       onclick="gSessionManagerDonate.link('https://addons.mozilla.org/en-US/firefox/addons/contribute/2324?source=addon-detail')" />
 		</hbox>
 	</window>

@@ -6,42 +6,46 @@ category command-line-handler SessionManagerHelperComponent @morac/sessionmanage
 
 # Shared Resources
 resource sessionmanager ./
-content	sessionmanager	jar:chrome/sessionmanager.jar!/content/sessionmanager/
-skin	sessionmanager	classic/1.0	jar:chrome/sessionmanager.jar!/skin/classic/sessionmanager/
+content	sessionmanager	chrome/content/sessionmanager/
+skin	sessionmanager	classic/1.0	chrome/skin/classic/sessionmanager/
 skin	sessionmanager	modern/1.0	chrome/skin/modern/sessionmanager/
 
-locale	sessionmanager	en-US	jar:chrome/sessionmanager.jar!/locale/en-US/sessionmanager/
-locale	sessionmanager	ca		jar:chrome/sessionmanager.jar!/locale/ca/sessionmanager/
-locale	sessionmanager	cs		jar:chrome/sessionmanager.jar!/locale/cs/sessionmanager/
-locale	sessionmanager	da		jar:chrome/sessionmanager.jar!/locale/da/sessionmanager/
-locale	sessionmanager	de		jar:chrome/sessionmanager.jar!/locale/de/sessionmanager/
-locale	sessionmanager	es-ES	jar:chrome/sessionmanager.jar!/locale/es-ES/sessionmanager/
-locale	sessionmanager	fi		jar:chrome/sessionmanager.jar!/locale/fi/sessionmanager/
-locale	sessionmanager	fr		jar:chrome/sessionmanager.jar!/locale/fr/sessionmanager/
-locale	sessionmanager	hu		jar:chrome/sessionmanager.jar!/locale/hu/sessionmanager/
-locale	sessionmanager	it		jar:chrome/sessionmanager.jar!/locale/it/sessionmanager/
-locale	sessionmanager	ja		jar:chrome/sessionmanager.jar!/locale/ja/sessionmanager/
-locale	sessionmanager	ko		jar:chrome/sessionmanager.jar!/locale/ko/sessionmanager/
-locale	sessionmanager	lt		jar:chrome/sessionmanager.jar!/locale/lt/sessionmanager/
-locale	sessionmanager	mk		jar:chrome/sessionmanager.jar!/locale/mk/sessionmanager/
-locale	sessionmanager	nl		jar:chrome/sessionmanager.jar!/locale/nl/sessionmanager/
-locale	sessionmanager	pl		jar:chrome/sessionmanager.jar!/locale/pl/sessionmanager/
-locale	sessionmanager	pt-PT	jar:chrome/sessionmanager.jar!/locale/pt-PT/sessionmanager/
-locale	sessionmanager	pt-BR	jar:chrome/sessionmanager.jar!/locale/pt-BR/sessionmanager/
-locale	sessionmanager	ro		jar:chrome/sessionmanager.jar!/locale/ro/sessionmanager/
-locale	sessionmanager	ru		jar:chrome/sessionmanager.jar!/locale/ru/sessionmanager/
-locale	sessionmanager	sk		jar:chrome/sessionmanager.jar!/locale/sk/sessionmanager/
-locale	sessionmanager	sv-SE	jar:chrome/sessionmanager.jar!/locale/sv-SE/sessionmanager/
-locale	sessionmanager	tr		jar:chrome/sessionmanager.jar!/locale/tr/sessionmanager/
-locale	sessionmanager	uk		jar:chrome/sessionmanager.jar!/locale/uk/sessionmanager/
-locale	sessionmanager	zh-CN	jar:chrome/sessionmanager.jar!/locale/zh-CN/sessionmanager/
-locale	sessionmanager	zh-TW	jar:chrome/sessionmanager.jar!/locale/zh-TW/sessionmanager/
+locale	sessionmanager	en-US	chrome/locale/en-US/sessionmanager/
+locale	sessionmanager	ca		chrome/locale/ca/sessionmanager/
+locale	sessionmanager	cs		chrome/locale/cs/sessionmanager/
+locale	sessionmanager	da		chrome/locale/da/sessionmanager/
+locale	sessionmanager	de		chrome/locale/de/sessionmanager/
+locale	sessionmanager	el		chrome/locale/el/sessionmanager/
+locale	sessionmanager	es-ES	chrome/locale/es-ES/sessionmanager/
+locale	sessionmanager	fi		chrome/locale/fi/sessionmanager/
+locale	sessionmanager	fr		chrome/locale/fr/sessionmanager/
+locale	sessionmanager	hu		chrome/locale/hu/sessionmanager/
+locale	sessionmanager	it		chrome/locale/it/sessionmanager/
+locale	sessionmanager	ja		chrome/locale/ja/sessionmanager/
+locale	sessionmanager	ko		chrome/locale/ko/sessionmanager/
+locale	sessionmanager	lt		chrome/locale/lt/sessionmanager/
+locale	sessionmanager	mk		chrome/locale/mk/sessionmanager/
+locale	sessionmanager	nl		chrome/locale/nl/sessionmanager/
+locale	sessionmanager	pl		chrome/locale/pl/sessionmanager/
+locale	sessionmanager	pt-BR	chrome/locale/pt-BR/sessionmanager/
+locale	sessionmanager	pt-PT	chrome/locale/pt-PT/sessionmanager/
+locale	sessionmanager	ro		chrome/locale/ro/sessionmanager/
+locale	sessionmanager	ru		chrome/locale/ru/sessionmanager/
+locale	sessionmanager	sk		chrome/locale/sk/sessionmanager/
+locale	sessionmanager	sl		chrome/locale/sl/sessionmanager/
+locale	sessionmanager	sv-SE	chrome/locale/sv-SE/sessionmanager/
+locale	sessionmanager	tr		chrome/locale/tr/sessionmanager/
+locale	sessionmanager	uk		chrome/locale/uk/sessionmanager/
+locale	sessionmanager	vi		chrome/locale/vi/sessionmanager/
+locale	sessionmanager	zh-CN	chrome/locale/zh-CN/sessionmanager/
+locale	sessionmanager	zh-TW	chrome/locale/zh-TW/sessionmanager/
 
 # Firefox
 overlay	chrome://browser/content/preferences/preferences.xul	chrome://sessionmanager/content/preferencesOverlay.xul	application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 overlay chrome://browser/content/preferences/sanitize.xul		chrome://sessionmanager/content/overlaySanitizeUI.xul	application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 overlay chrome://browser/content/sanitize.xul					chrome://sessionmanager/content/overlaySanitizeUI.xul	application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 overlay	chrome://browser/content/browser.xul					chrome://sessionmanager/content/sessionmanager.xul		application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
+overlay	chrome://browser/content/hiddenWindow.xul					chrome://sessionmanager/content/sessionmanager.xul		application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 overlay chrome://sessionmanager/content/options.xul				chrome://sessionmanager/content/ff-options.xul			application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}
 overlay chrome://mozapps/content/extensions/extensions.xul		chrome://sessionmanager/content/donate.xul				application={ec8030f7-c20a-464f-9b0e-13a3a9e97384}	appversion<3.7
 
@@ -60,6 +64,7 @@ overlay chrome://sessionmanager/content/options.xul				chrome://sessionmanager/c
 # Shared Styles (needs to be below any other styles)
 style	chrome://sessionmanager/content/session_prompt.xul		chrome://sessionmanager/skin/tabWin.css
 style	chrome://global/content/customizeToolbar.xul			chrome://sessionmanager/skin/sessionmanager.css
+style	chrome://global/content/sessionmanager.xul			chrome://sessionmanager/skin/sessionmanager.css
 
-# SeaMonkey - overrides above line
+# SeaMonkey
 style	chrome://global/content/customizeToolbar.xul			chrome://sessionmanager/skin/sm_sessionmanager.css		application={92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}

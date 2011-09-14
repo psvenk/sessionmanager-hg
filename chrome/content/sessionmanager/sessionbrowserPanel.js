@@ -38,12 +38,13 @@
 // Create a namespace so as not to polute the global namespace
 if(!com) var com={};
 if(!com.morac) com.morac={};
+if(!com.morac.SessionManagerAddon) com.morac.SessionManagerAddon={};
 
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
 
 // use the namespace
-with (com.morac) {
-	com.morac.gSessionManagerSessionBrowserPanel = {
+with (com.morac.SessionManagerAddon) {
+	com.morac.SessionManagerAddon.gSessionManagerSessionBrowserPanel = {
 
 		gPanel: null,
 		gTabTree: null,
@@ -59,6 +60,16 @@ with (com.morac) {
 		},
 		
 		restoreSelection: function() {
+			// In Firefox 4 and up copy "hidden" attribute for tab group items to "_hidden" for persisting.  We can't persist "hidden" 
+			// since that's explicitly set to true for Firefox 3.6 and lower. Do this here so we don't need to use a DOM Mutation event
+			// which is not allowed.
+			if ((Application.name.toUpperCase() == "FIREFOX") && (VERSION_COMPARE_SERVICE.compare(Application.version, "4.0b4pre") >= 0)) {
+				var tabgroup = document.getElementById("tabgroup_panel");
+				var hidden = document.getElementById("hidden_panel");
+				hidden.setAttribute("_hidden", hidden.getAttribute("hidden"));
+				tabgroup.setAttribute("_hidden", tabgroup.getAttribute("hidden"));
+			}
+		
 			// Restore previously selected row
 			if (gSessionManagerSessionPrompt.gLastSelectedRow != null) {
 				gSessionManagerSessionPrompt.gSessionTree.view.selection.select(gSessionManagerSessionPrompt.gLastSelectedRow);
@@ -74,13 +85,6 @@ with (com.morac) {
 				var elem = gSessionManagerSessionPrompt.gTabTreeBox.hidden ? gSessionManagerSessionPrompt.gSessionTree : gSessionManagerSessionPrompt.gTabTreeBox;
 				document.getElementById("sessionContentPanel").openPopup(elem, (gSessionManagerSessionPrompt.gTabTreeBox.hidden ? "after_start" : "overlap"), 3, 0, false, false);
 			}
-		},
-		
-		// used to copy "hidden" attribute to "_hidden" for persisting.  We can't persist "hidden" since that's 
-		// explicitly set to true for Firefox 3.6 and lower.
-		hiddenTabgroupChange: function(aEvent) {
-			if (aEvent.attrName == "hidden") 
-				aEvent.target.setAttribute("_hidden", (aEvent.target.hidden ? "true" : "false"));
 		},
 		
 		initTreeView: function() {
@@ -153,7 +157,6 @@ with (com.morac) {
 					var tabview_groups = gSessionManager.JSON_decode(aWinData.extData["tabview-group"], true);
 					if (tabview_groups && !tabview_groups._JSON_decode_failed) {
 						for (var id in tabview_groups) {
-							if (!tab_groups) tab_groups = {};
 							tab_groups[id] = tabview_groups[id].title;
 						}
 					}

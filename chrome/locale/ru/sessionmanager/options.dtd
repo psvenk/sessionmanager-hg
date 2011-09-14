@@ -78,7 +78,7 @@
 <!ENTITY selectSession.accesskey "В">
 <!ENTITY cookies.label "Сохранять сессию вместе с cookies">
 <!ENTITY cookies.accesskey "k">
-<!ENTITY sessionImport.caption "Импортировать сессии из...">
+<!ENTITY sessionImport.caption "Импортировать сессии из…">
 <!ENTITY importSS.label "Session Saver">
 <!ENTITY importSS.accesskey "I">
 <!ENTITY importTMP.label "Tab Mix Plus">
@@ -103,7 +103,7 @@
 <!ENTITY closed_windows.accesskey "с">
 <!ENTITY open_as_tabs.label "Открыть как вкладки в текущем окне">
 <!ENTITY open_as_tabs.accesskey "в">
-<!ENTITY last_window_shutdown.label "Считать закрытие последнего открытого окна браузера выходом из него">
+<!ENTITY last_window_shutdown.label "Считать закрытие последнего открытого окна броузера выходом из него">
 <!ENTITY last_window_shutdown.accesskey "з">
 <!ENTITY preselect_previous_session.label "Выбрать предыдущую сессию">
 <!ENTITY preselect_previous_session.accesskey "п">
@@ -122,7 +122,7 @@
 <!ENTITY log_level_data.accesskey "п">
 <!ENTITY log_level_info.label "Записывать информационные сообщения">
 <!ENTITY log_level_info.accesskey "и">
-<!ENTITY log_level_extra.label "Записывать дополнительные данные для дебага">
+<!ENTITY log_level_extra.label "Записывать дополнительные данные для отладки">
 <!ENTITY log_level_extra.accesskey "д">
 <!ENTITY reload.label "Обновить все восстановленные окна">
 <!ENTITY reload.accesskey "б">
@@ -135,4 +135,43 @@
 <!ENTITY session_name_in_titlebar.accesskey "н">
 <!ENTITY prepend.label "Добавлять в начало">
 <!ENTITY append.label "Добавлять в конец">
-<!ENTITY donotadd.label "Не добавлять в">
+<!ENTITY donotadd.label "Не добавлять у">
+<!ENTITY use_browser_crash_prompt.label "Использовать встроенный в броузер диалог восстановления сессии">
+<!ENTITY use_browser_crash_prompt.accesskey "в">
+<!ENTITY reset_warnings.label "Сбросить предупреждающие запросы">
+<!ENTITY reset_warnings.accesskey "С">
+<!ENTITY export_settings.label "Экспортировать настройки">
+<!ENTITY export_settings.accesskey "Э">
+<!ENTITY import_settings.label "Импортировать настройки">
+<!ENTITY import_settings.accesskey "И">
+<!ENTITY settingsImportExport.caption "Импорт/экспорт настроек">
+<!ENTITY keyboard.caption "Горячие клавиши">
+<!ENTITY keyboard.desc "Задайте горячую клавишу для какого-либо действия, либо оставьте поле пустым. Изменения не будут применены к уже открытым окнам.">
+<!ENTITY clear.label "Очистить">
+<!ENTITY clear.accesskey "О">
+<!ENTITY clear_tab_list.label "Очистить список закрытых вкладок">
+<!ENTITY clear_tab_list.accesskey "в">
+<!ENTITY clear_window_list.label "Очистить список закрытых окон">
+<!ENTITY clear_window_list.accesskey "к">
+<!ENTITY backup_on_restart.label "Сохранять резервную копию при перезапуске броузера">
+<!ENTITY backup_on_restart.accesskey "х">
+<!ENTITY keep_deleted_sessions.label "Число дней для временного хранения удалённых сессий:">
+<!ENTITY keep_deleted_sessions.accesskey "Д">
+<!ENTITY concurrent.label "Число одновременно восстанавливаемых вкладок:">
+<!ENTITY concurrent.accesskey "О">
+<!ENTITY preserve_app_tabs.label "Не заменять прикреплённые вкладки">
+<!ENTITY preserve_app_tabs.accesskey "Н">
+<!ENTITY logging_to_console.label "Дублировать вывод в Консоль ошибок">
+<!ENTITY logging_to_console.accesskey "о">
+<!ENTITY double_click_session.label "Двойной щелчок по существующей сессии перезапишет её и">
+<!ENTITY double_click_session.accesskey "в">
+<!ENTITY replace_with_name_replace.label "заменит имя на предлагаемое имя из текстового поля">
+<!ENTITY replace_with_name_keep.label "оставит старое имя">
+<!ENTITY show_icon_in_menu.label "Показывать пиктограмму в меню «Инструменты»">
+<!ENTITY show_icon_in_menu.accesskey "П">
+<!ENTITY set_encryption_password.label "Введите пароль для защиты ключа шифрования сессии:">
+<!ENTITY set_encryption_password.accesskey "В">
+<!ENTITY change_encryption_key_password.label "Изменить пароль ключа шифрования:">
+<!ENTITY change_encryption_key_password.accesskey "И">
+<!ENTITY save_encryption_key.label "Сохранить пароль ключа шифрования в системе управления паролями броузера">
+<!ENTITY save_encryption_key.accesskey "С">

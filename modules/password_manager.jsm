@@ -1,40 +1,23 @@
+var EXPORTED_SYMBOLS = ["PasswordManager"];
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
 const Cr = Components.results;
 
-// import logger function
-Cu.import("resource://sessionmanager/modules/logger.jsm");
-
-// Get lazy getter functions from XPCOMUtils or define them if they don't exist (only defined in Firefox 3.6 and up)
-Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-if (typeof XPCOMUtils.defineLazyGetter == "undefined") {
-	XPCOMUtils.defineLazyGetter = function XPCU_defineLazyGetter(aObject, aName, aLambda)
-	{
-		aObject.__defineGetter__(aName, function() {
-			delete aObject[aName];
-			return aObject[aName] = aLambda.apply(aObject);
-		});
-	}
-}
-if (typeof XPCOMUtils.defineLazyServiceGetter == "undefined") {
-	XPCOMUtils.defineLazyServiceGetter = function XPCU_defineLazyServiceGetter(aObject, aName, aContract, aInterfaceName)
-	{
-		this.defineLazyGetter(aObject, aName, function XPCU_serviceLambda() {
-			return Cc[aContract].getService(Ci[aInterfaceName]);
-		});
-	}
-}
-
 const HOSTNAME = "chrome://sessionmanager";
 const USERNAME = "private-key-password";
 const REALM = "Passphrase";
 
+// Get lazy getter functions from XPCOMUtils
+Cu.import("resource://gre/modules/XPCOMUtils.jsm");
+
+// import logger module
+Cu.import("resource://sessionmanager/modules/logger.jsm");
+
 // Lazily define services
 XPCOMUtils.defineLazyServiceGetter(this, "LOGIN_MANAGER", "@mozilla.org/login-manager;1", "nsILoginManager");
 XPCOMUtils.defineLazyServiceGetter(this, "SECRET_DECODER_RING_SERVICE", "@mozilla.org/security/sdr;1", "nsISecretDecoderRing");
-
-var EXPORTED_SYMBOLS = ["PasswordManager"];
 
 var PasswordManager = {
 	get password() 

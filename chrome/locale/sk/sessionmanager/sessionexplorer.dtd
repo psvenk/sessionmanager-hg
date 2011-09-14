@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Zrušiť">
 <!ENTITY done.label "Hotovo">
 <!ENTITY done.tooltip "Zavrieť okno Prieskumníka relácií">
+<!ENTITY session_load.label "Načítať">
+<!ENTITY session_load.accesskey "N">

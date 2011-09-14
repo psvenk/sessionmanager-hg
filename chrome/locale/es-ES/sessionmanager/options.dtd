@@ -136,3 +136,63 @@
 <!ENTITY prepend.label "Poner antes">
 <!ENTITY append.label "Añadir">
 <!ENTITY donotadd.label "No añadir">
+<!ENTITY use_browser_crash_prompt.label "Usar el diálogo de recuperación del navegador">
+<!ENTITY use_browser_crash_prompt.accesskey "U">
+<!ENTITY reset_warnings.label "Reiniciar los avisos">
+<!ENTITY reset_warnings.accesskey "R">
+<!ENTITY export_settings.label "Exportar opciones">
+<!ENTITY export_settings.accesskey "X">
+<!ENTITY import_settings.label "Importar opciones">
+<!ENTITY import_settings.accesskey "I">
+<!ENTITY settingsImportExport.caption "Importar/Exportar opciones">
+<!ENTITY keyboard.caption "Atajos de teclado">
+<!ENTITY keyboard.desc "Para usar un atajo de teclado para una acción, hágalo aquí. En otro caso, deje en blanco. Los cambios no se aplicarán a las ventanas existentes.">
+<!ENTITY clear.label "Borrar">
+<!ENTITY clear.accesskey "B">
+<!ENTITY clear_tab_list.label "Borrar las pestañas cerradas">
+<!ENTITY clear_tab_list.accesskey "a">
+<!ENTITY clear_window_list.label "Borrar las ventanas cerradas">
+<!ENTITY clear_window_list.accesskey "r">
+<!ENTITY backup_on_restart.label "Guardar una copia de seguridad al reiniciar el navegador">
+<!ENTITY backup_on_restart.accesskey "g">
+<!ENTITY keep_deleted_sessions.label "Número de días para mantener temporalmente las sesiones borradas:">
+<!ENTITY keep_deleted_sessions.accesskey "d">
+<!ENTITY concurrent.label "Número de pestañas a restaurar concurrentemente">
+<!ENTITY concurrent.accesskey "T">
+<!ENTITY do_not_color_toolbar_button.label "No colorear el botón de la barra al cargar la sesión">
+<!ENTITY do_not_color_toolbar_button.accesskey "N">
+<!ENTITY preserve_app_tabs.label "No reemplazar las pestañas fijas">
+<!ENTITY preserve_app_tabs.accesskey "N">
+<!ENTITY logging_to_console.label "Registrar en la consola de errores">
+<!ENTITY logging_to_console.accesskey "R">
+<!ENTITY update_message.label "Actualizar la página web tras actualizar">
+<!ENTITY update_message.accesskey "A">
+<!ENTITY double_click_session.label "Doble clic en una sesión sobreescribe la sesión y">
+<!ENTITY double_click_session.accesskey "D">
+<!ENTITY replace_with_name_replace.label "reemplaza el nombre con el del cuadro de texto">
+<!ENTITY replace_with_name_keep.label "mantiene el nombre">
+<!ENTITY show_icon_in_menu.label "Mostrar icono en el menú Herramientas">
+<!ENTITY show_icon_in_menu.accesskey "I">
+<!ENTITY set_encryption_password.label "Introduzca una contraseña para proteger la clave de cifrado">
+<!ENTITY set_encryption_password.accesskey "I">
+<!ENTITY change_encryption_key_password.label "Cambiar la clave de cifrado">
+<!ENTITY change_encryption_key_password.accesskey "C">
+<!ENTITY save_encryption_key.label "Guardar la clave de cifrado en el administrador de contraseñas del navegador">
+<!ENTITY save_encryption_key.accesskey "G">
+<!ENTITY restore_hidden_tabs.label "Restaurar pestañas ocultas">
+<!ENTITY restore_hidden_tabs.accesskey "o">
+<!ENTITY display_menus_in_submenu.label "Mostrar elementos de menú de Administrador de sesiones en un submenú">
+<!ENTITY display_menus_in_submenu.accesskey "M">
+<!ENTITY use_sql_cache.label "Guardar en caché los datos básicos de la sesión. Habilita la búsqueda en sesiones">
+<!ENTITY use_sql_cache.accesskey "C">
+<!ENTITY rebuild_cache.label "Regenerar la caché">
+<!ENTITY rebuild_cache.accesskey "R">
+<!ENTITY log_level_error.label "Registro de errores">
+<!ENTITY log_level_error.accesskey "e">
+<!ENTITY allow_duplicates.label "Permitir guardar una sesión con el mismo nombre que otra ya existente">
+<!ENTITY allow_duplicates.accesskey "a">
+<!ENTITY backup_every.label "Crear una nueva sesión de copia cada">
+<!ENTITY backup_every.accesskey "C">
+<!ENTITY minutes "minutos">
+<!ENTITY restore_on_demand.label "Restaurar pestañas bajo demanda">
+<!ENTITY restore_on_demand.accesskey "R">

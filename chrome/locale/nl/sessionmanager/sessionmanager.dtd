@@ -20,21 +20,21 @@
 <!ENTITY undoClosed.accesskey "p">
 <!ENTITY closedWindows "Gesloten vensters:">
 <!ENTITY closedTabs "Gesloten tabs:">
-<!ENTITY clearList.label "&apos;Gesloten&apos;-lijst leegmaken...">
+<!ENTITY clearList.label "'Gesloten'-lijst wissen...">
 <!ENTITY clearList.accesskey "l">
 <!ENTITY toolbar.tooltip "De huidige browsersessie opslaan...">
 <!ENTITY toolbar.undo.label "Sluiten ongedaan maken">
-<!ENTITY toolbar.undo.tooltip "Heropen de laatst gesloten tab">
-<!ENTITY prompt.ignore.label "Toon dit dialoogvenster niet meer">
+<!ENTITY toolbar.undo.tooltip "De laatst gesloten tab heropenen">
+<!ENTITY prompt.ignore.label "Dit dialoogvenster niet meer tonen">
 <!ENTITY prompt.autosave.label "Deze sessie automatisch opslaan">
-<!ENTITY prompt.tabprompt.label "Prompt for tabs to restore">
-<!ENTITY load_replace.label "Laden (Huidige sessie vervangen)">
+<!ENTITY prompt.tabprompt.label "Vraag voor tabs die hersteld moeten worden">
+<!ENTITY load_replace.label "Laden (en huidige sessie vervangen)">
 <!ENTITY load_replace.accesskey "L">
-<!ENTITY load_append.label "Laden (Aan huidige sessie toevoegen)">
+<!ENTITY load_append.label "Laden (en aan huidige sessie toevoegen)">
 <!ENTITY load_append.accesskey "A">
-<!ENTITY replace_all.label "Sessie met huidige sessie vervangen">
+<!ENTITY replace_all.label "Sessie door huidige sessie vervangen">
 <!ENTITY replace_all.accesskey "s">
-<!ENTITY replace_window.label "Sessie met huidig venster vervangen">
+<!ENTITY replace_window.label "Sessie door huidig venster vervangen">
 <!ENTITY replace_window.accesskey "v">
 <!ENTITY remove_one.label "Sessie verwijderen...">
 <!ENTITY set_startup.label "Als opstartsessie instellen">
@@ -59,24 +59,48 @@
 <!ENTITY prompt.save_every1.label "Opslaan elke">
 <!ENTITY prompt.save_every2.label "minuten (uitgeschakeld indien blanco)">
 <!ENTITY winTabTree.restoreHeader "Herstellen">
-<!ENTITY winTabTree.listHeader "Vensters en Tabs">
+<!ENTITY winTabTree.listHeader "Vensters en tabs">
 <!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "Venster &#37;S">
 <!ENTITY load.label "Sessie laden...">
 <!ENTITY load.accesskey "l">
 <!ENTITY prompt.append.label "Aan sessie toevoegen">
 <!ENTITY prompt.replace.label "Sessie vervangen">
-<!ENTITY ctrl_click_note.label "Opmerking: als u de CTRL-knop ingedrukt houdt wanneer u op een tab-item klikt, zal die tab openen in het bestaande venster.">
+<!ENTITY ctrl_click_note.label "Opmerking: als u de CTRL-toets ingedrukt houdt wanneer u op een tab-item uit de lijst klikt, zal die tab openen in het bestaande venster.">
 <!ENTITY select_all.label "Alles selecteren">
 <!ENTITY select_none.label "Niets selecteren">
 <!ENTITY toggle_selection.label "Selectie omdraaien">
 <!ENTITY winTabTree.urlHeader "Locatie">
 <!ENTITY prompt.append_window.label "Aan het huidige venster toevoegen">
-<!ENTITY session_explorer.label "Sessie-verkenner">
+<!ENTITY session_explorer.label "Sessieverkenner">
 <!ENTITY session_explorer.accesskey "v">
 <!ENTITY closeWindowSession.label "Venstersessie opslaan en sluiten">
 <!ENTITY closeWindowSession.accesskey "l">
 <!ENTITY abandonWindowSession.label "Venstersessie stoppen">
 <!ENTITY abandonWindowSession.accesskey "p">
-<!ENTITY load_append_window.label "Laden (toevoegen aan het huidige venster)">
+<!ENTITY load_append_window.label "Laden (en toevoegen aan het huidige venster)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Dit venster open laten">
+<!ENTITY clearTabList.label "De lijst van 'gesloten' tabs wissen...">
+<!ENTITY clearTabList.accesskey "T">
+<!ENTITY clearWindowList.label "De lijst van 'gesloten' vensters wissen...">
+<!ENTITY clearWindowList.accesskey "V">
+<!ENTITY hidden.label "Verborgen">
+<!ENTITY contribute.label "Meehelpen">
+<!ENTITY support.label "Steun deze extensie:">
+<!ENTITY session_group_verb.label "Groep">
+<!ENTITY deleted_sessions.label "Verwijderde sessies">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Wis alle verwijderde sessies">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "Verwijder sessie permanent">
+<!ENTITY permanently_delete.accesskey "P">
+<!ENTITY search.label "Zoeken…">
+<!ENTITY edit.label "Sessie bewerken…">
+<!ENTITY edit.accesskey "e">
+<!ENTITY addtab.label "Tab toevoegen aan sessie…">
+<!ENTITY addtab.accesskey "a">
+<!ENTITY viewcontents.label "Inhoud van sessie bekijken">
+<!ENTITY viewcontents.accesskey "v">
+<!ENTITY export_to_html.label "Inhoud van sessie exporteren naar een HTML-bladwijzerbestand">
+<!ENTITY export_to_html.accesskey "e">

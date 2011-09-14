@@ -35,8 +35,8 @@ restorePrompt = function() {
 		}
 	}
 	
-	// Always show crash prompt in Firefox 3.0 otherwise use preference
-	var show_crash_prompt = !gPreferenceManager.get("use_browser_crash_prompt", false) || (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.1a1pre") < 0);
+	// Don't show crash prompt if user doesn't want it.
+	var show_crash_prompt = !gPreferenceManager.get("use_browser_crash_prompt", false);
 	
 	var params = window.arguments[0].QueryInterface(Components.interfaces.nsIDialogParamBlock);
 	params.SetInt(0, 0);
@@ -56,11 +56,12 @@ restorePrompt = function() {
 		if (show_crash_prompt) params.SetInt(0, 1); // don't recover the crashed session
 	}
 	
-	gSessionManager.mPref_encrypt_sessions = gPreferenceManager.get("encrypt_sessions", false);
+	gSessionManager.mPref["encrypt_sessions"] = gPreferenceManager.get("encrypt_sessions", false);
 	// actually save the crashed session
 	if (session && backupFile) {
 		gSessionManager.writeFile(backupFile, session);
-		if (gSessionManager.mPref_encrypt_sessions) gSessionManager._encrypt_file = backupFile.leafName;
+		gSessionManager._crash_backup_session_file = backupFile.leafName;
+		if (gSessionManager.mPref["encrypt_sessions"]) gSessionManager._encrypt_file = backupFile.leafName;
 	}
 	
 	log("restorePrompt: _encrypt_file = " + gSessionManager._encrypt_file, "DATA");
@@ -78,53 +79,42 @@ restorePrompt = function() {
 	log("restorePrompt: _recovering = " + (gSessionManager._recovering ? gSessionManager._recovering.fileName : "null"), "DATA");
 	
 	var autosave_values = gPreferenceManager.get("_autosave_values", "").split("\n");
-	var autosave_name = autosave_values[0];
-	if (autosave_name)
+	var autosave_filename = autosave_values[0];
+	// Note that if the crashed session was an autosave session, it won't show up as a choice in the crash prompt so 
+	// the user can never choose it
+	if (autosave_filename)
 	{
-		// if not recovering last session (does not including recovering last session, but selecting tabs)
+		// if not recovering last session or recovering last session, but selecting tabs, always save autosave session
 		if (fileName != "*")
 		{
-			// Get name of chosen session
-			var chosen_name = null;
-			if (fileName && (/^(\[SessionManager v2\])(?:\nname=(.*))?/m.test(gSessionManager.readSessionFile(gSessionManager.getSessionDir(fileName), true)))) {
-				chosen_name = RegExp.$2;
+			// delete autosave preferences
+			gPreferenceManager.delete("_autosave_values");
+
+			// Clear any stored auto save session preferences
+			gSessionManager.getAutoSaveValues();
+			
+			log("Saving crashed autosave session " + autosave_filename, "DATA");
+			var temp_state = gSessionManager.readFile(file);
+			// encrypt if encryption enabled
+			if (gSessionManager.mPref["encrypt_sessions"]) {
+				gSessionManager.mPref["encrypted_only"] = gPreferenceManager.get("encrypted_only", false);
+				temp_state = gSessionManager.decryptEncryptByPreference(temp_state);
 			}
 			
-			// not recovering autosave session or current session (selecting tabs), save the autosave session first
-			if (values.sessionState || ((chosen_name != autosave_name) && (fileName != backupFile.leafName)))
-			{
-				// delete autosave preferences
-				gPreferenceManager.delete("_autosave_values");
-
-				// Clear any stored auto save session preferences
-				gSessionManager.getAutoSaveValues();
-				
-				log("Saving crashed autosave session " + autosave_name, "DATA");
-				var temp_state = gSessionManager.readFile(file);
-				// encrypt if encryption enabled
-				if (gSessionManager.mPref_encrypt_sessions) {
-					gSessionManager.mPref_encrypted_only = gPreferenceManager.get("encrypted_only", false);
-					temp_state = gSessionManager.decryptEncryptByPreference(temp_state);
-				}
-				
-				if (temp_state) {
-					var autosave_time = isNaN(autosave_values[2]) ? 0 : autosave_values[2];
-					var autosave_state = gSessionManager.nameState("timestamp=" + file.lastModifiedTime + "\nautosave=session/" + autosave_time +
-					                                               "\tcount=" + count.windows + "/" + count.tabs + (autosave_values[1] ? ("\tgroup=" + autosave_values[1]) : "") +
-					                                               "\tscreensize=" + screensize + "\n" + temp_state, autosave_name);
-					gSessionManager.writeFile(gSessionManager.getSessionDir(gSessionManager.makeFileName(autosave_name)), autosave_state);
-				}
-			}
-			// choose to recover autosave session so just recover last session
-			else 
-			{
-				// we could delete the autosave preferences here, but it doesn't matter (actually it saves us from saving prefs.js file again)
-				gSessionManager._recovering =  null;
-				params.SetInt(0, 0);
+			if (temp_state) {
+				var autosave_time = isNaN(autosave_values[3]) ? 0 : autosave_values[3];
+				var autosave_state = gSessionManager.nameState("timestamp=" + file.lastModifiedTime + "\nautosave=session/" + autosave_time +
+																											 "\tcount=" + count.windows + "/" + count.tabs + (autosave_values[2] ? ("\tgroup=" + autosave_values[2]) : "") +
+																											 "\tscreensize=" + screensize + "\n" + temp_state, autosave_values[1]);
+				gSessionManager.writeFile(gSessionManager.getSessionDir(autosave_filename), autosave_state);
 			}
 		}
 	}
 	
+	// If browser is not doing the restore, save any autosave windows
+	if (params.GetInt(0) == 1)
+		gSessionManager._save_crashed_autosave_windows = true;
+
 	// Don't prompt for a session again if user cancels crash prompt
 	gSessionManager._no_prompt_for_session = true;
 	log("restorePrompt end", "INFO");

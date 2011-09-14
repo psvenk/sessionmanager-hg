@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Vazgeç">
 <!ENTITY done.label "Tamam">
 <!ENTITY done.tooltip "Oturum Gezgini Penceresini Kapat">
+<!ENTITY session_load.label "Yükle">
+<!ENTITY session_load.accesskey "L">

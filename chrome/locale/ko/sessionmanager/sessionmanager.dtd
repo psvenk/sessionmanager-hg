@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "B">
 <!ENTITY load_append_window.label "불러오기 (현재 창에 붙여넣기)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "이 창을 열린 상태로 두기">
+<!ENTITY clearTabList.label "&apos;닫은&apos; 탭 목록 비우기...">
+<!ENTITY clearTabList.accesskey "T">
+<!ENTITY clearWindowList.label "&apos;닫은&apos; 창 목록 비우기...">
+<!ENTITY clearWindowList.accesskey "W">
+<!ENTITY hidden.label "숨은">
+<!ENTITY contribute.label "기부하기">
+<!ENTITY support.label "이 확장 기능을 지원해주세요:">
+<!ENTITY session_group_verb.label "그룹">
+<!ENTITY deleted_sessions.label "삭제된 세션">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "삭제된 모든 세션 제거">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "세션 영구 삭제">
+<!ENTITY permanently_delete.accesskey "P">
+<!ENTITY search.label "찾아보기…">
+<!ENTITY edit.label "세션 편집…">
+<!ENTITY edit.accesskey "E">
+<!ENTITY addtab.label "세션에 탭 추가…">
+<!ENTITY addtab.accesskey "A">
+<!ENTITY viewcontents.label "세션 내용 보기">
+<!ENTITY viewcontents.accesskey "V">
+<!ENTITY export_to_html.label "북마크 HTML 파일로 세션 내용 내보내기">
+<!ENTITY export_to_html.accesskey "E">

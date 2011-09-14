@@ -136,3 +136,63 @@
 <!ENTITY prepend.label "Додати на початку">
 <!ENTITY append.label "Додати в кінці">
 <!ENTITY donotadd.label "Не додавати">
+<!ENTITY use_browser_crash_prompt.label "Використовувати браузерний діалог відновлення при краху">
+<!ENTITY use_browser_crash_prompt.accesskey "В">
+<!ENTITY reset_warnings.label "Скинути діалоги попередження">
+<!ENTITY reset_warnings.accesskey "С">
+<!ENTITY export_settings.label "Експорт налаштувань">
+<!ENTITY export_settings.accesskey "к">
+<!ENTITY import_settings.label "Імпорт налаштувань">
+<!ENTITY import_settings.accesskey "м">
+<!ENTITY settingsImportExport.caption "Імпорт/експорт налаштувань">
+<!ENTITY keyboard.caption "Клавіатурні скорочення">
+<!ENTITY keyboard.desc "Щоб використовувати клавіатурні скорочення для дій натисніть тут, інакше залиште поле пустим. Зміни не торкнуться вже відкритих вікон.">
+<!ENTITY clear.label "Очистити">
+<!ENTITY clear.accesskey "О">
+<!ENTITY clear_tab_list.label "Очистити закриті вкладки">
+<!ENTITY clear_tab_list.accesskey "ч">
+<!ENTITY clear_window_list.label "Очистити закриті вікна">
+<!ENTITY clear_window_list.accesskey "в">
+<!ENTITY backup_on_restart.label "Зберегти бекап при перезапуску браузера">
+<!ENTITY backup_on_restart.accesskey "б">
+<!ENTITY keep_deleted_sessions.label "Кількість днів для тимчасового зберігання вилучених сесій:">
+<!ENTITY keep_deleted_sessions.accesskey "м">
+<!ENTITY concurrent.label "Кількість закладок для одночасного відновлення">
+<!ENTITY concurrent.accesskey "о">
+<!ENTITY do_not_color_toolbar_button.label "Не включати колір панелі, коли завантажується сеанс">
+<!ENTITY do_not_color_toolbar_button.accesskey "к">
+<!ENTITY preserve_app_tabs.label "Не заміщати вкладки прикріплених Додатків">
+<!ENTITY preserve_app_tabs.accesskey "з">
+<!ENTITY logging_to_console.label "Також писати до консолі помилок">
+<!ENTITY logging_to_console.accesskey "Т">
+<!ENTITY update_message.label "Показати оновлену веб-сторінку після оновлення">
+<!ENTITY update_message.accesskey "П">
+<!ENTITY double_click_session.label "Подвійне клацання на існуючому сеансі перезаписує сеанси та">
+<!ENTITY double_click_session.accesskey "д">
+<!ENTITY replace_with_name_replace.label "заміщає існуючий сеанс                   ь">
+<!ENTITY replace_with_name_keep.label "зберегти існуючу назву сеансу">
+<!ENTITY show_icon_in_menu.label "Показувати іконки в меню інструментів">
+<!ENTITY show_icon_in_menu.accesskey "і">
+<!ENTITY set_encryption_password.label "Введіть пароль для захисту ключа шифрування сеансу">
+<!ENTITY set_encryption_password.accesskey "к">
+<!ENTITY change_encryption_key_password.label "Змінити пароль ключа шифрування">
+<!ENTITY change_encryption_key_password.accesskey "ш">
+<!ENTITY save_encryption_key.label "Зберегти ключ шифрування в менеджері паролів браузера">
+<!ENTITY save_encryption_key.accesskey "м">
+<!ENTITY restore_hidden_tabs.label "Відновити приховані вкладки">
+<!ENTITY restore_hidden_tabs.accesskey "п">
+<!ENTITY display_menus_in_submenu.label "Показувати елементи меню Менеджера Сеансів в підменю">
+<!ENTITY display_menus_in_submenu.accesskey "е">
+<!ENTITY use_sql_cache.label "Кешувати дані базового сеансу на диск. Дозволяє пошук в сеансах">
+<!ENTITY use_sql_cache.accesskey "К">
+<!ENTITY rebuild_cache.label "Перебудувати дані кешу">
+<!ENTITY rebuild_cache.accesskey "П">
+<!ENTITY log_level_error.label "Журналювати помилки">
+<!ENTITY log_level_error.accesskey "Ж">
+<!ENTITY allow_duplicates.label "Дозволити зберігати сеанси з тією ж назвою як у існуючого">
+<!ENTITY allow_duplicates.accesskey "Д">
+<!ENTITY backup_every.label "Створювати новий бекап сеансу кожні">
+<!ENTITY backup_every.accesskey "С">
+<!ENTITY minutes "хвилин">
+<!ENTITY restore_on_demand.label "Відновлювати закладки на вимогу">
+<!ENTITY restore_on_demand.accesskey "В">

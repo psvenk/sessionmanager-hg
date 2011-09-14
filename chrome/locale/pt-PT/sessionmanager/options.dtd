@@ -136,3 +136,26 @@
 <!ENTITY prepend.label "Prepend">
 <!ENTITY append.label "Anexar">
 <!ENTITY donotadd.label "Não adicionar">
+<!ENTITY use_browser_crash_prompt.label "Utilizar o aviso de recuperação de erros do navegador">
+<!ENTITY use_browser_crash_prompt.accesskey "U">
+<!ENTITY reset_warnings.label "Reiniciar avisos">
+<!ENTITY reset_warnings.accesskey "R">
+<!ENTITY export_settings.label "Exportar configurações">
+<!ENTITY export_settings.accesskey "x">
+<!ENTITY import_settings.label "Importar configurações">
+<!ENTITY import_settings.accesskey "I">
+<!ENTITY settingsImportExport.caption "Importar/Exportar configurações">
+<!ENTITY keyboard.caption "Atalhos do teclado">
+<!ENTITY keyboard.desc "Para usar os atalhos do teclado numa acção escreva-a aqui, caso contrário deixe-a em branco. As alterações não serão aplicadas às janelas actuais.">
+<!ENTITY clear.label "Limpar">
+<!ENTITY clear.accesskey "a">
+<!ENTITY clear_tab_list.label "Limpar separadores fechados">
+<!ENTITY clear_tab_list.accesskey "a">
+<!ENTITY clear_window_list.label "Limpar janelas fechadas">
+<!ENTITY clear_window_list.accesskey "i">
+<!ENTITY backup_on_restart.label "Guardar backup ao reiniciar navegador">
+<!ENTITY backup_on_restart.accesskey "b">
+<!ENTITY keep_deleted_sessions.label "Número de dias para guardar temporariamente as sessões eliminadas:">
+<!ENTITY keep_deleted_sessions.accesskey "d">
+<!ENTITY concurrent.label "Número de separadores a restaurar actualmente">
+<!ENTITY concurrent.accesskey "t">

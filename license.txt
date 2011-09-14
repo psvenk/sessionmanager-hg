@@ -17,36 +17,43 @@
  *
  * The Initial Developer of the Original Code is
  * Morac (http://sessionmanager.mozdev.org/).
- * Portions created by the Initial Developer are Copyright (C) 2007
+ * Portions created by the Initial Developer are Copyright (C) 2007-2011
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
  * * Zeniko (Original Author)
- * * Danil Ivanov (Cache Fixer)
  * * dougeeebear (Session Manager icon)
+ * * Icon Design at ReadyIcons.com (options icons)
  *   &
  * - BabelZilla translators:
- * * Andrea (Italian)
- * * Rick Cart (Chinese [zh-CN])
- * * Teboga (Portuguese)
- * * jojaba (French)
- * * Edgaras Janušauskas (Lithuanian)
- * * Proyecto Nave (Spanish)
- * * Leszek (teo) Życzkowski (Polish)
- * * Haebaru (Japanese)
- * * stoneflash (Russian)
- * * JW_00000 (Dutch)
- * * Ossipoff (Danish)
- * * SerdarSahin (Turkish)
- * * Wladow (Slovak)
- * * Team erweiterungen.de, ReinekeFux (German)
- * * Mikes Kaszmán István (Cashman) (Hungarian)
- * * Kape123 (Serbian)
- * * lloco (Portuguese)
+ * * dplanella (Catalan)
  * * PetrTwo (Czech)
+ * * Ossipoff (Danish)
+ * * Team erweiterungen.de, ReinekeFux (German)
+ * * Proyecto Nave, chuzo (Spanish)
  * * Kenmooda (Finish)
- * * Ivan Jonoski (Macedonian)
+ * * jojaba (French)
+ * * cielattique (Greek)
+ * * Mikes Kaszmán István (Hungarian)
+ * * Andrea (Italian)
+ * * Haebaru (Japanese)
  * * Elapsem (Korean)
+ * * Edgaras JanuÅ¡auskas, garas (Lithuanian)
+ * * Ivan Jonoski (Macedonian)
+ * * JW_00000 (Dutch)
+ * * Leszek (teo) Å»yczkowski (Polish)
+ * * Teboga (Portuguese - Brazillian)
+ * * lloco (Portuguese)
+ * * Cătălin Zamfirescu (Romanian)
+ * * stoneflash (Russian)
+ * * Wladow (Slovak)
+ * * Hrastovec (Slovenian)
+ * * Natanael_L01 (Swedish)
+ * * SerdarSahin (Turkish)
+ * * Zhouck (Ukrainian)
+ * * kimkha (Vietnamese)
+ * * Rick Cart (Chinese [zh-CN])
+ * * Tsprajna (Chinese [zh-TW])
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either the GNU General Public License Version 2 or later (the "GPL"), or

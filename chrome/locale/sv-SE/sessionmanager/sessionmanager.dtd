@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "Ladda (lägg till i nuvarande fönster)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Lämna detta fönster öppet">
+<!ENTITY clearTabList.label "Töm listan över &apos;stängda&apos; flikar">
+<!ENTITY clearTabList.accesskey "T">
+<!ENTITY clearWindowList.label "Töm listan över &apos;stängda&apos; fönster">
+<!ENTITY clearWindowList.accesskey "W">
+<!ENTITY hidden.label "Dold">
+<!ENTITY contribute.label "Bidra">
+<!ENTITY support.label "Stöd detta tillägg:">
+<!ENTITY session_group_verb.label "Grupp">
+<!ENTITY deleted_sessions.label "Raderade sessioner">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Ta bort alla raderade sessioner">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "Ta bort raderade sessioner permanent">
+<!ENTITY permanently_delete.accesskey "P">
+<!ENTITY search.label "Sök…">
+<!ENTITY edit.label "Redigera session…">
+<!ENTITY edit.accesskey "E">
+<!ENTITY addtab.label "Lägg till flik till session…">
+<!ENTITY addtab.accesskey "A">
+<!ENTITY viewcontents.label "Visa innehållet i sessionen">
+<!ENTITY viewcontents.accesskey "V">
+<!ENTITY export_to_html.label "Exportera sessionsinnehållet till HTML-fil">
+<!ENTITY export_to_html.accesskey "V">

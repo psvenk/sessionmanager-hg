@@ -1,17 +1,21 @@
 // Create a namespace so as not to polute the global namespace
 if(!com) var com={};
 if(!com.morac) com.morac={};
+if(!com.morac.SessionManagerAddon) com.morac.SessionManagerAddon={};
 
 // import into the namespace
-Components.utils.import("resource://sessionmanager/modules/logger.jsm", com.morac);
-Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm", com.morac);
-Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac);
+Components.utils.import("resource://sessionmanager/modules/logger.jsm", com.morac.SessionManagerAddon);
+Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm", com.morac.SessionManagerAddon);
+Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac.SessionManagerAddon);
+Components.utils.import("resource://sessionmanager/modules/session_convert.jsm", com.morac.SessionManagerAddon);
 
 // use the namespace
-with (com.morac) {
+with (com.morac.SessionManagerAddon) {
 	var originalOverwriteLabel = null;
 	var keyNames=[];
+	var keysInitialized = false;
 	var gLocaleKeys;
+	var buttonsDisabled = false;
 	var gPlatformKeys = new Object();
 	
 	var observer = {
@@ -22,6 +26,50 @@ with (com.morac) {
 			case "sessionmanager:encryption-change":
 				_("encrypt_sessions").disabled = (aData == "start");
 				break;
+			case "private-browsing":
+				updatePrivateBrowsing();
+				break;
+			case "nsPref:changed":
+				switch (aData)
+				{
+				case "extensions.tabmix.singleWindow":
+					if (gPreferenceManager.get("extensions.tabmix.singleWindow", false, true)) {
+						_("overwrite").label = gSessionManager._string("overwrite_tabs");
+						_("open_as_tabs").style.visibility = "collapse";
+					}
+					else {
+						_("overwrite").label = originalOverwriteLabel;
+						_("open_as_tabs").style.visibility = "visible";
+					}
+					break;
+				case "append_by_default":
+					changeOverwriteLabel(_("preference.append_by_default").valueFromPreferences);
+					break;
+				case "use_SS_closed_window_list":
+					checkClosedWindowList(_("preference.use_SS_closed_window_list").valueFromPreferences);
+					break;
+				case "encrypt_sessions":
+					var encrypting = _("preference.encrypt_sessions").valueFromPreferences;
+					_("encrypted_only").hidden = !encrypting;
+					
+					// When animating preferences the window can get cut off so just refresh the window size here
+					if (encrypting && gPreferenceManager.get("browser.preferences.animateFadeIn", false, true))
+						window.sizeToContent();
+					break;
+				case "logging":
+					updateLogCheckboxes(_("preference.logging").valueFromPreferences);
+					break;
+				case "logging_level":
+					readLogLevel();
+					break;
+				case "hide_tools_menu":
+					_("show_icon_in_menu").disabled = _("preference.hide_tools_menu").valueFromPreferences;
+					break;
+				case "use_SQLite_cache":
+					_("rebuild_cache_button").disabled = !_("preference.use_SQLite_cache").valueFromPreferences;
+					break;
+				}
+				break;
 			}
 		}
 	};
@@ -30,17 +78,104 @@ with (com.morac) {
 		this.removeEventListener("load", onLoad, false);
 		this.addEventListener("unload", onUnload, false);
 
-		// listen for encryption change start/stop
+		// listen for encryption change start/stop and private browsing change
 		OBSERVER_SERVICE.addObserver(observer, "sessionmanager:encryption-change", false);
+		OBSERVER_SERVICE.addObserver(observer, "private-browsing", false);
+		gPreferenceManager.observe("", observer, false);
+		if (gSessionManager.tabMixPlusEnabled)
+			gPreferenceManager.observe("extensions.tabmix.singleWindow", observer, false, true);
 
 		// If instant Apply is on, hide the apply button
 		if (gPreferenceManager.get("browser.preferences.instantApply", false, true)) {
 			_("sessionmanagerOptions").getButton("extra1").style.visibility = "collapse";
 		}
 		
+		// Restore selected indexes
+		_("generalPrefsTab").selectedIndex = _("preference.options_selected_tab").valueFromPreferences;
+		
+		// Only show preserve app tabs if app tabs exists (Firefox 4.0 and up)
+		if ((Application.name != "Firefox" || Application.version[0] < "4")) {
+			_("preserve_app_tabs").parentNode.style.visibility = "collapse";
+		}
+		
+		// Only show option to restore hidden tabs if default value exists for it (Firefox 7 and up)
+		// Preference exists in Firefox 6, but doesn't do anything
+		if ((_("browser.sessionstore.restore_hidden_tabs").defaultValue == null) || (Application.name == "Firefox" && Application.version[0] == "6")) {
+			_("restore_hidden_tab").style.visibility = "collapse";
+		}
+
+		// Firefox 8 and up removes the concurrent tab setting and replaces it with an on demand setting
+		if (_("browser.sessionstore.restore_on_demand").defaultValue != null) {
+			_("concurrent_tabs").style.visibility = "collapse";
+			_("restore_on_demand").style.visibility = "visible";
+		}
+		else {
+			_("restore_on_demand").style.visibility = "collapse";
+			// Only show concurrent tab setting if a default value exists for it (Firefox 4.0 and up)
+			if (_("browser.sessionstore.max_concurrent_tabs").defaultValue == null) {
+				_("concurrent_textbox").parentNode.style.visibility = "collapse";
+			}
+		}
+		
+		// Hide option to use built in SessionStore closed window list if not supported
+		if (typeof(SessionStore.getClosedWindowCount) != "function") {
+			_("closed_window_list").style.visibility = "collapse";
+		}
+		
+		// Hide mid-click preference if Tab Mix Plus or Tab Clicking Options is enabled
+		var browser = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow("navigator:browser");
+		if ((browser && typeof(browser.tabClicking) != "undefined") || gSessionManager.tabMixPlusEnabled) {
+			_("midClickPref").style.visibility = "collapse";
+		}
+		
+		if (gSessionManager.tabMixPlusEnabled && gPreferenceManager.get("extensions.tabmix.singleWindow", false, true)) {
+			_("overwrite").label = gSessionManager._string("overwrite_tabs");
+			_("open_as_tabs").style.visibility = "collapse";
+		}
+		
+		// Disable Apply Button by default
+		_("sessionmanagerOptions").getButton("extra1").disabled = true;
+		
+		// Disable clear undo list button if no browser window since SessionStore needs one to update the closed window list
+		_("clear_undo_button").hidden = (typeof(SessionStore.forgetClosedWindow) == "undefined") && !gSessionManager.getMostRecentWindow("navigator:browser");
+		
+		// Disable encryption button if change in progress
+		_("encrypt_sessions").disabled = gSessionManager.mEncryptionChangeInProgress;
+		
+		// Disable show icon in menu button if menu hidden
+		_("show_icon_in_menu").disabled = _("preference.hide_tools_menu").valueFromPreferences;
+		
+		// Disabled enabled button based on checkbox
+		_("rebuild_cache_button").disabled = !_("preference.use_SQLite_cache").valueFromPreferences;
+		
+		// Disable backup every text field if disabled
+		_('backup_every').disabled = !_("preference.backup_every").valueFromPreferences;
+
+		updateSpecialPreferences();
+		
+		adjustContentHeight();
+	};
+	
+	var onUnload = function(aEvent) {
+		this.removeEventListener("unload", onUnload, false);
+		OBSERVER_SERVICE.removeObserver(observer, "sessionmanager:encryption-change");		
+		OBSERVER_SERVICE.removeObserver(observer, "private-browsing");
+		gPreferenceManager.unobserve("", observer);
+		if (gSessionManager.tabMixPlusEnabled)
+			gPreferenceManager.unobserve("extensions.tabmix.singleWindow", observer, true);
+		_("preference.options_selected_tab").valueFromPreferences = _("generalPrefsTab").selectedIndex;
+	};
+
+	// Preferences that can change are here so we can update options window
+	function updateSpecialPreferences(aUpdateSessionsOnly) {
+		// hide/show menus for startup options
+		startupSelect(_("startupOption").selectedIndex = _("preference.startup").valueFromPreferences);
+	
 		// Populate select session list and select previously selected session
 		var resume_session = _("resume_session");
 		var sessions = gSessionManager.getSessions();
+		// remove any existing items
+		resume_session.removeAllItems();
 		resume_session.appendItem(gSessionManager._string("startup_resume"), BACKUP_SESSION_FILENAME, "");
 		var maxWidth = window.getComputedStyle(_("startEndGroupbox"), null).width;
 		sessions.forEach(function(aSession) {
@@ -60,72 +195,31 @@ with (com.morac) {
 			_("preference.resume_session").valueFromPreferences = resume_session.value;
 			// change option to none if select session was selected
 			if (_("startupOption").selectedIndex==2) {
-				_("startupOption").selectedIndex = 0;
+				startupSelect(_("startupOption").selectedIndex = 0);
 				_("preference.startup").valueFromPreferences = _("startupOption").selectedIndex;
 			}
 		}
 		
-		// Restore selected indexes and hide/show menus for startup options
-		_("generalPrefsTab").selectedIndex = _("preference.options_selected_tab").valueFromPreferences;
-		startupSelect(_("startupOption").selectedIndex = _("preference.startup").valueFromPreferences);
-		
-		// Hide close tab restoration preferences in SeaMonkey 2.0.x since it doesn't work
-		if ((Application.name.toUpperCase() == "SEAMONKEY") && (VERSION_COMPARE_SERVICE.compare(Application.version, "2.1a1pre") < 0)) {
-			_("save_closed_tabs").parentNode.style.visibility = "collapse";
-		}
-		
-		// Hide option to use built in SessionStore closed window list if not supported
-		if (typeof(SessionStore.getClosedWindowCount) != "function") {
-			_("closed_window_list").style.visibility = "collapse";
-		}
-		checkClosedWindowList(_("preference.use_SS_closed_window_list").valueFromPreferences);
-		
-		// Change overwrite label to tabs if append to window as tab preference set
-		originalOverwriteLabel = _("overwrite").label;
-		changeOverwriteLabel(_("preference.append_by_default").valueFromPreferences);
-		
-		// Hide mid-click preference if Tab Mix Plus or Tab Clicking Options is enabled
-		var browser = WINDOW_MEDIATOR_SERVICE.getMostRecentWindow("navigator:browser");
-		if (browser) {
-			if ((typeof(browser.tabClicking) != "undefined") || (typeof(browser.TM_checkClick) != "undefined")) {
-				_("midClickPref").style.visibility = "collapse";
-			}
+		if (!aUpdateSessionsOnly) {
+			// Update displayed options based on preference
+			checkClosedWindowList(_("preference.use_SS_closed_window_list").valueFromPreferences);
 			
-			if (browser.gSingleWindowMode) {
-				_("overwrite").label = gSessionManager._string("overwrite_tabs");
-				_("open_as_tabs").style.visibility = "collapse";
-			}
+			// Change overwrite label to tabs if append to window as tab preference set
+			originalOverwriteLabel = _("overwrite").label;
+			changeOverwriteLabel(_("preference.append_by_default").valueFromPreferences);
+		
+			// Update Logging Level checkboxes
+			readLogLevel();
+			
+			// Initialize and read keys
+			initKeys()
+			
+			// Enable/Disable log checkboxes
+			updateLogCheckboxes(_("enable_logging").checked);
+			
+			// Change styling if in permanent private browsing mode
+			updatePrivateBrowsing();
 		}
-		
-		// Update Logging Level checkboxes
-		readLogLevel();
-		
-		// Initialize and read keys
-		initKeys()
-		
-		// Enable/Disable log checkboxes
-		updateLogCheckboxes(_("enable_logging").checked);
-		
-		// Change styling if in permanent private browsing mode
-		checkPrivateBrowsing(_("backup_session"));
-		checkPrivateBrowsing(_("resume_session"));
-		
-		// Hide setting to use browser crash prompt under Firefox 3.0
-		_("use_browser_crash_prompt").hidden = (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion, "1.9.1a1pre") < 0);
-
-		// Disable Apply Button by default
-		_("sessionmanagerOptions").getButton("extra1").disabled = true;
-		
-		// Disable clear undo list button if no browser window since SessionStore needs one to update the closed window list
-		_("clear_undo_button").hidden = (typeof(SessionStore.forgetClosedWindow) == "undefined") && !gSessionManager.getMostRecentWindow("navigator:browser");
-
-		adjustContentHeight();
-	};
-
-	var onUnload = function(aEvent) {
-		this.removeEventListener("unload", onUnload, false);
-		OBSERVER_SERVICE.removeObserver(observer, "sessionmanager:encryption-change");		
-		_("preference.options_selected_tab").valueFromPreferences = _("generalPrefsTab").selectedIndex;
 	};
 
 	var _disable = gSessionManager.setDisabled;
@@ -322,6 +416,10 @@ with (com.morac) {
 		_("sessionmanagerOptions").getButton("extra1").disabled = false;
 	}
 
+	function disableApply() {
+		_("sessionmanagerOptions").getButton("extra1").disabled = true;
+	}
+	
 	function goHelp() {
 		var link = "http://sessionmanager.mozdev.org/options.html#";
 		
@@ -450,24 +548,27 @@ with (com.morac) {
 	
 	// Key stuff - originally comes from keyconfig add-on
 	function initKeys() {
-		for (var property in KeyEvent) {
-			keyNames[KeyEvent[property]] = property.replace("DOM_","");
-		}
-		keyNames[8] = "VK_BACK";
+		if (!keysInitialized) {
+			for (var property in KeyEvent) {
+				keyNames[KeyEvent[property]] = property.replace("DOM_","");
+			}
+			keyNames[8] = "VK_BACK";
 
-		gLocaleKeys = document.getElementById("localeKeys");
+			gLocaleKeys = document.getElementById("localeKeys");
 
-		var platformKeys = document.getElementById("platformKeys");
-		gPlatformKeys.shift = platformKeys.getString("VK_SHIFT");
-		gPlatformKeys.meta  = platformKeys.getString("VK_META");
-		gPlatformKeys.alt   = platformKeys.getString("VK_ALT");
-		gPlatformKeys.ctrl  = platformKeys.getString("VK_CONTROL");
-		gPlatformKeys.sep   = platformKeys.getString("MODIFIER_SEPARATOR");
-		switch (gPreferenceManager.get("ui.key.accelKey", 0, true)){
-			case 17:  gPlatformKeys.accel = gPlatformKeys.ctrl; break;
-			case 18:  gPlatformKeys.accel = gPlatformKeys.alt; break;
-			case 224: gPlatformKeys.accel = gPlatformKeys.meta; break;
-			default:  gPlatformKeys.accel = (window.navigator.platform.search("Mac") == 0 ? gPlatformKeys.meta : gPlatformKeys.ctrl);
+			var platformKeys = document.getElementById("platformKeys");
+			gPlatformKeys.shift = platformKeys.getString("VK_SHIFT");
+			gPlatformKeys.meta  = platformKeys.getString("VK_META");
+			gPlatformKeys.alt   = platformKeys.getString("VK_ALT");
+			gPlatformKeys.ctrl  = platformKeys.getString("VK_CONTROL");
+			gPlatformKeys.sep   = platformKeys.getString("MODIFIER_SEPARATOR");
+			switch (gPreferenceManager.get("ui.key.accelKey", 0, true)){
+				case 17:  gPlatformKeys.accel = gPlatformKeys.ctrl; break;
+				case 18:  gPlatformKeys.accel = gPlatformKeys.alt; break;
+				case 224: gPlatformKeys.accel = gPlatformKeys.meta; break;
+				default:  gPlatformKeys.accel = (window.navigator.platform.search("Mac") == 0 ? gPlatformKeys.meta : gPlatformKeys.ctrl);
+			}
+			keysInitialized = true;
 		}
 		
 		readKeyConfig();
@@ -532,15 +633,31 @@ with (com.morac) {
 	}
 	
 	function keyPress(element, event) {
-		event.preventDefault();
-		event.stopPropagation(); 
-
 		var modifiers = [];
 		if(event.altKey) modifiers.push("alt");
 		if(event.ctrlKey) modifiers.push("control");
 		if(event.metaKey) modifiers.push("meta");
 		if(event.shiftKey) modifiers.push("shift");
 
+		// prevent key commands without a modifier or with only 1 modifier, but not CTRL
+		if ((modifiers.length == 0) || ((modifiers.length == 1) && (modifiers[0] != "control"))) {
+			// Allow tab, shift-tab, escape, enter/return and F1 (help)
+			if ((event.keyCode != KeyEvent.DOM_VK_TAB) && (event.keyCode != KeyEvent.DOM_VK_ESCAPE) && 
+			    (event.keyCode != KeyEvent.DOM_VK_RETURN)  && (event.keyCode != KeyEvent.DOM_VK_ENTER) && (event.keyCode != KeyEvent.DOM_VK_F1)) {
+				event.preventDefault();
+				event.stopPropagation(); 
+				
+				// clear on delete or backspace
+				if ((event.keyCode == KeyEvent.DOM_VK_BACK_SPACE) ||  (event.keyCode == KeyEvent.DOM_VK_DELETE))
+					clearKey(element.nextSibling);
+			}
+		
+			return;
+		}
+
+		event.preventDefault();
+		event.stopPropagation(); 
+			
 		modifiers = modifiers.join(" ");
 
 		var key = null; var keycode = null;
@@ -564,10 +681,40 @@ with (com.morac) {
 		else enableApply();
 	}
 	
-	function disableButtons(aValue) {
+	// Disable buttons and labels to prevent accesskey from kicking off when ALT is pressed.
+	// Only start disabling if ALT pressed, but keep disabling until keys released.
+	function disableButtons(aEvent) {
+		var disable = (aEvent.type == "keydown") && (aEvent.keyCode == KeyEvent.DOM_VK_ALT);
+		var enable = (aEvent.type == "keyup");
+		
 		var buttons = _("sessionmanagerOptions").getElementsByTagName("button");
-		for (var i=0; i < buttons.length; i++) buttons[i].disabled = aValue;
-		_("sessionmanagerOptions").getButton("help").disabled = aValue;
+		var labels = _("key_rows").getElementsByTagName("label");
+		
+		if (disable && !buttonsDisabled) {
+			buttonsDisabled = true;
+			for (var i=0; i < buttons.length; i++) buttons[i].disabled = true;
+			_("sessionmanagerOptions").getButton("help").disabled = true;
+			for (var i=0; i < labels.length; i++) {
+				// save old attribute
+				labels[i].setAttribute("saved_accesskey", labels[i].getAttribute("accesskey"));
+				labels[i].removeAttribute("accesskey");
+			}
+		}
+		else if (enable && buttonsDisabled) {
+			buttonsDisabled = false;
+			for (var i=0; i < buttons.length; i++) buttons[i].disabled = false;
+			_("sessionmanagerOptions").getButton("help").disabled = false;
+			for (var i=0; i < labels.length; i++) {
+				// save old attribute
+				labels[i].setAttribute("accesskey", labels[i].getAttribute("saved_accesskey"));
+				labels[i].removeAttribute("saved_accesskey");
+			}
+		}
+	}
+	
+	function updatePrivateBrowsing() {
+		checkPrivateBrowsing(_("backup_session"));
+		checkPrivateBrowsing(_("resume_session"));
 	}
 	
 	function checkPrivateBrowsing(aElem) {
@@ -580,6 +727,17 @@ with (com.morac) {
 		else {
 			aElem.removeAttribute("warn");
 			aElem.removeAttribute("tooltiptext");
+		}
+	}
+	
+	// Disable periodic backup if time specified is invalid
+	function checkBackupTime(time) {
+		if (!(parseInt(time) > 0)) {
+			_("backup_every_cb").checked = false;
+			_("preference.backup_every").value = false;
+			_("backup_every").value = 0;
+			_("preference.backup_every_time").value = 0;
+			_("backup_every").disabled = true;
 		}
 	}
 }

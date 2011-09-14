@@ -136,3 +136,26 @@
 <!ENTITY prepend.label "Pridať">
 <!ENTITY append.label "Pripojiť">
 <!ENTITY donotadd.label "Nepridávať">
+<!ENTITY use_browser_crash_prompt.label "Použiť hlásenie obnovenia zabudované v prehliadači">
+<!ENTITY use_browser_crash_prompt.accesskey "P">
+<!ENTITY reset_warnings.label "Vynulovať upozornenia">
+<!ENTITY reset_warnings.accesskey "u">
+<!ENTITY export_settings.label "Exportovať nastavenia">
+<!ENTITY export_settings.accesskey "x">
+<!ENTITY import_settings.label "Importovať nastavenia">
+<!ENTITY import_settings.accesskey "I">
+<!ENTITY settingsImportExport.caption "Import/export nastavení">
+<!ENTITY keyboard.caption "Klávesové skratky">
+<!ENTITY keyboard.desc "Ak chcete pre akciu používať klávesovú skratku, zadajte ju sem. Inak nechajte pole prázdne. Zmeny sa neprejavia v existujúcich oknách.">
+<!ENTITY clear.label "Vymazať">
+<!ENTITY clear.accesskey "V">
+<!ENTITY clear_tab_list.label "Vymazať zoznam zatvorených kariet">
+<!ENTITY clear_tab_list.accesskey "k">
+<!ENTITY clear_window_list.label "Vymazať zoznam zatvorených okien">
+<!ENTITY clear_window_list.accesskey "o">
+<!ENTITY backup_on_restart.label "Uložiť zálohu pri reštarte prehliadača">
+<!ENTITY backup_on_restart.accesskey "U">
+<!ENTITY keep_deleted_sessions.label "Počet dní, počas ktorých dočasne uchovávať odstránené relácie:">
+<!ENTITY keep_deleted_sessions.accesskey "d">
+<!ENTITY concurrent.label "Počet kariet, ktoré obnovovať súčasne">
+<!ENTITY concurrent.accesskey "k">

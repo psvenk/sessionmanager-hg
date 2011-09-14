@@ -86,3 +86,21 @@
 <!ENTITY clearWindowList.label "Clear &apos;Closed&apos; Window List...">
 <!ENTITY clearWindowList.accesskey "W">
 <!ENTITY hidden.label "Hidden">
+<!ENTITY contribute.label "Contribute">
+<!ENTITY support.label "Support this add-on:">
+<!ENTITY session_group_verb.label "Group">
+<!ENTITY deleted_sessions.label "Deleted Sessions">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Remove all deleted sessions">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "Permanently delete session">
+<!ENTITY permanently_delete.accesskey "P">
+<!ENTITY search.label "Search...">
+<!ENTITY edit.label "Edit Session...">
+<!ENTITY edit.accesskey "E">
+<!ENTITY addtab.label "Add tab to session...">
+<!ENTITY addtab.accesskey "A">
+<!ENTITY viewcontents.label "View contents of session">
+<!ENTITY viewcontents.accesskey "V">
+<!ENTITY export_to_html.label "Export contents of session to bookmark HTML file">
+<!ENTITY export_to_html.accesskey "E">

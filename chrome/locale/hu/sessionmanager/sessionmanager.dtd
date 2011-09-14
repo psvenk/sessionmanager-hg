@@ -11,7 +11,7 @@
 <!ENTITY rename.label "Munkamenet átnevezése...">
 <!ENTITY rename.accesskey "n">
 <!ENTITY remove.label "Munkamenet törlése...">
-<!ENTITY remove.accesskey "t">
+<!ENTITY remove.accesskey "k">
 <!ENTITY openFolder.label "Munkamenetek mappájának megnyitása">
 <!ENTITY openFolder.accesskey "e">
 <!ENTITY options.label "&sessionManager; - beállítások">
@@ -63,7 +63,7 @@
 <!--    -->
 <!ENTITY winTabTree.windowLabel "Ablak &#37;S">
 <!ENTITY load.label "Munkamenet betöltése...">
-<!ENTITY load.accesskey "s">
+<!ENTITY load.accesskey "l">
 <!ENTITY prompt.append.label "Hozzáfűzés a jelenlegi munkamenethez">
 <!ENTITY prompt.replace.label "Jelenlegi munkamenet felülírása">
 <!ENTITY ctrl_click_note.label "Megjegyzés: az aktuális ablakban nyílik meg, ha a bejegyzésre kattintás közben a CTRL billentyű le van nyomva.">
@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "v">
 <!ENTITY load_append_window.label "Betöltés (hozzáadás a jelenlegi ablakhoz)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Az ablak maradjon nyitva">
+<!ENTITY clearTabList.label "A 'Bezárt' lapok listájának törlése...">
+<!ENTITY clearTabList.accesskey "l">
+<!ENTITY clearWindowList.label "A 'Bezárt' ablakok listájának törlése...">
+<!ENTITY clearWindowList.accesskey "a">
+<!ENTITY hidden.label "Rejtett">
+<!ENTITY contribute.label "Közreműködők">
+<!ENTITY support.label "Kiterjesztés támogatása:">
+<!ENTITY session_group_verb.label "Csoport">
+<!ENTITY deleted_sessions.label "Törölt munkamenetek">
+<!ENTITY deleted_sessions.accesskey "r">
+<!ENTITY empty_trash.label "Mindegyik törölt munkamenet eltávolítása">
+<!ENTITY empty_trash.accesskey "M">
+<!ENTITY permanently_delete.label "Munkamenet végleges törlése">
+<!ENTITY permanently_delete.accesskey "v">
+<!ENTITY search.label "Keresés…">
+<!ENTITY edit.label "Munkamenet szerkesztése…">
+<!ENTITY edit.accesskey "k">
+<!ENTITY addtab.label "Lap hozzáadása a munkamenethez…">
+<!ENTITY addtab.accesskey "h">
+<!ENTITY viewcontents.label "Munkamenet tartalmának megtekintése">
+<!ENTITY viewcontents.accesskey "t">
+<!ENTITY export_to_html.label "Munkamenet tartalmának exportálása könyvjelző HTML fájlba">
+<!ENTITY export_to_html.accesskey "e">

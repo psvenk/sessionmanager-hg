@@ -1,15 +1,16 @@
 // Create a namespace so as not to polute the global namespace
 if(!com) var com={};
 if(!com.morac) com.morac={};
+if(!com.morac.SessionManagerAddon) com.morac.SessionManagerAddon={};
 
 // import the session_manager.jsm into the namespace
-Components.utils.import("resource://sessionmanager/modules/logger.jsm", com.morac);
+Components.utils.import("resource://sessionmanager/modules/logger.jsm", com.morac.SessionManagerAddon);
 Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm");
-Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac);
+Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac.SessionManagerAddon);
 
 // use the namespace
-with (com.morac) {
-	com.morac.gSessionManagerWindowObject = {
+with (com.morac.SessionManagerAddon) {
+	com.morac.SessionManagerAddon.gSessionManagerWindowObject = {
 		mFullyLoaded: false,
 		
 		// SessionManager Window ID
@@ -21,7 +22,10 @@ with (com.morac) {
 
 		// window state
 		_backup_window_sesion_data: null,
+		__window_session_filename: null,
 		__window_session_name: null,
+		__window_session_time: 0,
+		__window_session_group: null,
 		mClosingWindowState: null,
 		mCleanBrowser: null,
 		mClosedWindowName: null,
@@ -30,7 +34,7 @@ with (com.morac) {
 
 		// Listener for changes to tabs - See https://developer.mozilla.org/En/Listening_to_events_on_all_tabs
 		// Only care about location and favicon changes
-		// This is only registered when tab tree is visiable in session prompt window while saving
+		// This is only registered when tab tree is visible in session prompt window while saving
 		tabProgressListener: {
 		
 			findTabIndexForBrowser: function(aBrowser) {
@@ -49,7 +53,7 @@ with (com.morac) {
 			
 			onLinkIconAvailable: function(aBrowser) {
 				var index = this.findTabIndexForBrowser(aBrowser);
-				if (index != null) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "iconChange " + index);
+				if (index != null) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", "iconChange " + index + "  " + encodeURIComponent(aBrowser.contentDocument.title));
 			},
 
 			onProgressChange: function() {},
@@ -57,6 +61,42 @@ with (com.morac) {
 			onStateChange: function() {},
 			onStatusChange: function() {},
 			onRefreshAttempted: function() { return true; }
+		},
+		
+		// Listener to detect load progress for browser.  Used to trigger cache bypass when loading sessions
+		tabbrowserProgressListener: {
+			QueryInterface: function(aIID)
+			{
+				if (aIID.equals(Components.interfaces.nsIWebProgressListener) ||
+				    aIID.equals(Components.interfaces.nsISupportsWeakReference) ||
+				    aIID.equals(Components.interfaces.nsISupports))
+					return this;
+				throw Components.results.NS_NOINTERFACE;
+			},
+
+			onStateChange: function(aWebProgress, aRequest, aFlag, aStatus)
+			{
+				let wpl = Components.interfaces.nsIWebProgressListener;
+
+				// If load starts, bypass cache.  If network stops removes listener (this should handle all cases
+				// such as closing tab/window, stopping load or changing url).
+				if (aFlag & wpl.STATE_START)
+				{
+					// Force load to bypass cache
+					aRequest.loadFlags = aRequest.loadFlags | aRequest.LOAD_BYPASS_CACHE;
+				}
+				else if ((aFlag & wpl.STATE_STOP) && (aFlag & wpl.STATE_IS_NETWORK)) {
+					// remove listener
+					try {
+						aWebProgress.chromeEventHandler.removeProgressListener(gSessionManagerWindowObject.tabbrowserProgressListener);
+					} catch(ex) { logError(ex); }
+				}
+			},
+
+			onLocationChange: function(aProgress, aRequest, aURI) { },
+			onProgressChange: function(aWebProgress, aRequest, curSelf, maxSelf, curTot, maxTot) { },
+			onStatusChange: function(aWebProgress, aRequest, aStatus, aMessage) { },
+			onSecurityChange: function(aWebProgress, aRequest, aState) { }
 		},
 
 		observe: function(aSubject, aTopic, aData)
@@ -71,10 +111,11 @@ with (com.morac) {
 					this.watchForMiddleMouseClicks();
 					break;
 				case "hide_tools_menu":
+				case "show_icon_in_menu":
 					this.showHideToolsMenu();
 					break;
 				case "reload":
-					if (gSessionManager.mPref_reload) {
+					if (gSessionManager.mPref["reload"]) {
 						gBrowser.tabContainer.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 					}
 					else {
@@ -85,45 +126,57 @@ with (com.morac) {
 				case "use_SS_closed_window_list":
 					this.updateUndoButton();
 					break;
+				case "do_not_color_toolbar_button":
+					this.updateToolbarButton();
+					break;
 				case "session_name_in_titlebar":
 				case "_autosave_values":
 					gBrowser.updateTitlebar();
+					this.updateToolbarButton();
+					break;
+				case "display_menus_in_submenu":
+					this.updateMenus();
+					break;
+				case "keys":
+					this.setKeys();
 					break;
 				}
 				break;
+			case "sessionmanager:middle-click-update":
+				this.watchForMiddleMouseClicks();
+				break;
 			case "sessionmanager:save-tab-tree-change":
-				// In Firefox 3.0 and 3.5 the gBrowser.tabContainer "load" event always fires (multiple times) for any page load, even when reading cached pages.
-				// In Firefox 3.6 and above, it won't fire for cached pages where the favicon doesn't change. For example going back and forth on Google's site pages.
+				// In Firefox 3.6 and above, the "load" event won't fire for cached pages where the favicon doesn't change. For example going back and forth on Google's site pages.
 				// Using addTabsProgressListener instead of "load" works in this case.  It doesn't return the tab, but we can easily get it by
 				// searching all tabs to find the one that contains the event's target (getBrowserForTab()).  
-				// Since this is slower, than the "load" method only do it if needed (Firefox 3.6 and above) and only do either if save window's tab tree is visible.
+				// Since this is slower, than the "load" method only do it if save window's tab tree is visible.
 				switch (aData) {
 					case "open":
 						gBrowser.tabContainer.addEventListener("TabMove", this.onTabMove, false);
-						// For Firefox 3.5 and lower use tabbrowser "load" event otherwise use browser "addTabsProgressListener" notification
-						if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") < 0) {
-							gBrowser.tabContainer.addEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
-						}
-						else {
-							gBrowser.addTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
-						}
+						gBrowser.addTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+						// For Firefox 4.0 and higher need to listen for "tabviewhidden" event to handle tab group changes
+						if ((Application.name == "Firefox") &&  (VERSION_COMPARE_SERVICE.compare(Application.version,"4.0b6") >= 0))
+						  window.addEventListener("tabviewhidden", gSessionManagerWindowObject.onTabViewHidden, false);
 						break;
 					case "close":
 						gBrowser.tabContainer.removeEventListener("TabMove", this.onTabMove, false);
-						if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") < 0) {
-							gBrowser.tabContainer.removeEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
-						}
-						else {
-							gBrowser.removeTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
-						}
+						gBrowser.removeTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+						// For Firefox 4.0 and higher need to listen for "tabviewhidden" event to handle tab group changes
+						if ((Application.name == "Firefox") &&  (VERSION_COMPARE_SERVICE.compare(Application.version,"4.0b6") >= 0))
+						  window.removeEventListener("tabviewhidden", gSessionManagerWindowObject.onTabViewHidden, false);
 						break;
 				}
 				break;
 			case "sessionmanager:close-windowsession":
+				// if entering private browsing mode store a copy of the current window session name for use when exiting pbm
+				let pb_window_session_data = null;
+				if (gSessionManager.mAboutToEnterPrivateBrowsing && this.__window_session_filename) 
+					pb_window_session_data = SessionStore.getWindowValue(window,"_sm_window_session_values");
+					
 				// notification will either specify specific window session name or be null for all window sessions
-				if (this.__window_session_name && (!aData || (this.__window_session_name == aData))) {
+				if (this.__window_session_filename && (!aData || (this.__window_session_filename == aData))) {
 					let abandon = aSubject.QueryInterface(Components.interfaces.nsISupportsPRBool).data;
-					log((abandon ? "Abandoning" : "Closing") + " window session " + this.__window_session_name);
+					log((abandon ? "Abandoning" : "Closing") + " window session " + this.__window_session_filename);
 					if (abandon) {
 						gSessionManager.abandonSession(window);
 					}
@@ -131,20 +184,15 @@ with (com.morac) {
 						gSessionManager.closeSession(window);
 					}
 				}
+				
+				// if entering private browsing mode store a copy of the current window session name in the window state for use when exiting pbm
+				// Do this after we save the window
+				if (gSessionManager.mAboutToEnterPrivateBrowsing) {
+					SessionStore.setWindowValue(window, "_sm_pb_window_session_data", pb_window_session_data);
+				}
 				break;
 			case "sessionmanager:initial-windows-restored":
-				// check both the backup and current window value just in case
-				let window_values = this._backup_window_sesion_data || SessionStore.getWindowValue(window,"_sm_window_session_values");
-				if (window_values) gSessionManager.getAutoSaveValues(window_values, window);
-				log("observe: Restore new window done, window session = " + this.__window_session_name, "DATA");
-				this._backup_window_sesion_data = null;
-				this.updateUndoButton();
-
-				// Update the __SessionManagerWindowId if it's not set (this should only be for the first browser window).
-				if (!this.__SessionManagerWindowId) {
-					this.__SessionManagerWindowId = window.__SSi;
-					SessionStore.setWindowValue(window, "__SessionManagerWindowId", window.__SSi);
-				}
+				this.restoreWindowSession();
 				break;
 			case "sessionmanager:update-undo-button":
 				// only update all windows if window state changed.
@@ -167,7 +215,7 @@ with (com.morac) {
 					this.mCleanBrowser = null;
 					this.mClosedWindowName = null;
 					WIN_OBSERVING2.forEach(function(aTopic) {
-						// This will throw an error for if observers already removed so catch
+						// This will throw an error if observers already removed so catch
 						try {
 							OBSERVER_SERVICE.removeObserver(this, aTopic);
 						}
@@ -177,7 +225,10 @@ with (com.morac) {
 				}
 				break;
 			case "sessionmanager:updatetitlebar":
-				gBrowser.updateTitlebar();
+				if (!aSubject || aSubject == window) {
+					gBrowser.updateTitlebar();
+					this.updateToolbarButton();
+				}
 				break;
 			case "browser:purge-session-history":
 				this.updateUndoButton(false);
@@ -202,7 +253,7 @@ with (com.morac) {
 				// If not restarting or if this window doesn't have a window session open, 
 				// hurry and wipe out the window session value before Session Store stops allowing 
 				// window values to be updated.
-				if (!gSessionManager._restart_requested || !this.__window_session_name) {
+				if (!gSessionManager._restart_requested || !this.__window_session_filename) {
 					log("observe: Clearing window session data", "INFO");
 					// this throws if it doesn't exist so try/catch it
 					try { 
@@ -230,10 +281,16 @@ with (com.morac) {
 			case "private-browsing":
 				var button = document.getElementById("sessionmanager-toolbar");
 				if (button) {
-					if (aData == "enter") 
+					if (aData == "enter") {
 						button.setAttribute("private", "true"); 
-					else 
+						// abandon any open window sessions.  They will already have been saved by the Session Manager component
+						gSessionManager.abandonSession(window, true);
+					}
+					else {
 						button.removeAttribute("private"); 
+						// delay because the SessionStore values are wrong at this point
+						setTimeout(gSessionManagerWindowObject.restoreWindowSession, 0, true);
+					}
 				}
 				break;
 			}
@@ -247,6 +304,7 @@ with (com.morac) {
 			this.removeEventListener("load", gSessionManagerWindowObject.onLoad_proxy, false);
 			
 			if (gSessionManager._initialized) {
+				gSessionManagerWindowObject.updateMenus(true);
 				gSessionManagerWindowObject.setKeys();
 				gSessionManagerWindowObject.onLoad();
 			}
@@ -263,26 +321,30 @@ with (com.morac) {
 		onLoad: function() {
 			log("onLoad start, window = " + document.title, "TRACE");
 			
+			// Set the flag indicating that a browser window displayed
+			gSessionManager._browserWindowDisplayed = true;
+
 			// The close event fires when the window is either manually closed or when the window.close() function is called.  It does not fire on shutdown or when
 			// windows close from loading sessions.  The unload event fires any time the window is closed, but fires too late to use SessionStore's setWindowValue.
 			// We need to listen to both of them so that the window session window value can be cleared when the window is closed manually.
 			// The window value is also cleared on a "quit-application-granted", but that doesn't fire when the last browser window is manually closed.
 			window.addEventListener("close", this.onClose_proxy, false);		
 			window.addEventListener("unload", this.onUnload_proxy, false);
+			
+			// Add an event listener to check if user finishes customizing the toolbar so we can tweak the button tooltips.
+			// This only works in Gecko2 (Firefox 4+ and SeaMonkey 2.1+, but since it should be a one time thing, don't sweat it for older browsers
+			window.addEventListener("aftercustomization", this.tweakToolbarTooltips, false);
 
-			// Hook into Tab Mix Plus to handle session conversion
+			// Hook into older versions of Tab Mix Plus (0.3.8.4 and earlier) to handle session conversion 
+			// Later versions (0.3.8.5 and up) call Session Manager directly to do conversions
 			if (typeof(convertSession) == "object" && typeof(convertSession.doConvert) == "function") {
 				convertSession.doConvert = this.doTMPConvert;
 				convertSession.convertFile = this.doTMPConvertFile;
 			}
 		
 			// Fix tooltips for toolbar buttons
-			let buttons = [document.getElementById("sessionmanager-toolbar"), document.getElementById("sessionmanager-undo")];
-			for (let i=0; i < buttons.length; i++) {
-				if (buttons[i] && buttons[i].boxObject && buttons[i].boxObject.firstChild)
-					buttons[i].boxObject.firstChild.tooltipText = buttons[i].getAttribute("buttontooltiptext");
-			}
-
+			this.tweakToolbarTooltips();
+			
 			// If the shutdown on last window closed preference is not set, set it based on the O/S.
 			// Enable for Macs, disable for everything else
 			if (!gPreferenceManager.has("shutdown_on_last_window_close")) {
@@ -307,19 +369,16 @@ with (com.morac) {
 			}, this);
 			gBrowser.tabContainer.addEventListener("TabClose", this.onTabOpenClose, false);
 			gBrowser.tabContainer.addEventListener("TabOpen", this.onTabOpenClose, false)
-			if (gSessionManager.mPref_reload) {
+			if (gSessionManager.mPref["reload"]) {
 				gBrowser.tabContainer.addEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			}
 			// If saving tab tree currently open, add event listeners
 			if (gSessionManager.savingTabTreeVisible) {
 				gBrowser.tabContainer.addEventListener("TabMove", this.onTabMove, false);
-				// For Firefox 3.5 and lower use tabbrowser "load" event otherwise use browser "addTabsProgressListener" notification
-				if (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.2a1pre") < 0) {
-					gBrowser.tabContainer.addEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
-				}
-				else {
-					gBrowser.addTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
-				}
+				gBrowser.addTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+				// For Firefox 4.0 and higher need to listen for "tabviewhidden" event to handle tab group changes
+				if ((Application.name == "Firefox") &&  (VERSION_COMPARE_SERVICE.compare(Application.version,"4.0b6") >= 0))
+					window.addEventListener("tabviewhidden", gSessionManagerWindowObject.onTabViewHidden, false);
 			}
 					
 			// Hide Session Manager toolbar item if option requested
@@ -361,7 +420,7 @@ with (com.morac) {
 				} catch (ex) { logError(ex); }
 
 				// If we did a temporary restore, set it to false			
-				if (gSessionManager.mPref_restore_temporary) gPreferenceManager.set("restore_temporary", false)
+				if (gSessionManager.mPref["restore_temporary"]) gPreferenceManager.set("restore_temporary", false)
 
 				// Force saving the preferences
 				OBSERVER_SERVICE.notifyObservers(null,"sessionmanager-preference-save",null);
@@ -371,19 +430,17 @@ with (com.morac) {
 			// DOMTitleChanged doesn't fire every time the title changes in the titlebar.
 			// If Firefox we can watch gBrowser.ownerDocument since that changes when the title changes, in SeaMonkey it doesn't change
 			// and there's nothing else to watch so we need to do a hook.
-			if (Application.name != "SeaMonkey" ) {
+			if (Application.name != "SeaMonkey") {
 				gBrowser.ownerDocument.watch("title", gSessionManagerWindowObject.updateTitlebar);
 			}
 			else {
-				eval("gBrowser.updateTitlebar = " + gBrowser.updateTitlebar.toString().replace('window.QueryInterface(nsIInterfaceRequestor)', 'newTitle = gSessionManagerWindowObject.updateTitlebar("title", "", newTitle); $&'));
+				this.hookSeaMonkeyUpdateTitlebar();
 			}
 			gBrowser.updateTitlebar();
-
-			// Workaround for bug 366986
-			// TabClose event fires too late to use SetTabValue to save the "image" attribute value and have it be saved by SessionStore
-			// so make the image tag persistant so it can be read later from the xultab variable.
-			SessionStore.persistTabAttribute("image");
 			
+			// update toolbar button if auto-save session is loaded and watch titlebar if it exists to see if we should update
+			this.updateToolbarButton();
+
 			// SeaMonkey doesn't have an undoCloseTab function so create one
 			if (typeof(undoCloseTab) == "undefined") {
 				undoCloseTab = function(aIndex) { gSessionManagerWindowObject.undoCloseTabSM(aIndex); }
@@ -391,18 +448,24 @@ with (com.morac) {
 			
 			// add call to gSessionManager_Sanitizer (code take from Tab Mix Plus)
 			// nsBrowserGlue.js use loadSubScript to load Sanitizer so we need to add this here for the case
-			// where the user disabled option to prompt before clearing data 
-			// This only executes for Firefox 3.0 and SeaMonkey 2.0.
+			// where the user disabled option to prompt before clearing data  (only used in SeaMonkey)
 			let cmd = document.getElementById("Tools:Sanitize");
-			if (cmd) cmd.setAttribute("oncommand", "com.morac.gSessionManager.tryToSanitize();" + cmd.getAttribute("oncommand"));
+			if (cmd && (Application.name == "SeaMonkey")) 
+				cmd.addEventListener("command", com.morac.SessionManagerAddon.gSessionManager.tryToSanitize, false);
 			
 			// Clear current window value setting if shouldn't be set.  Need try catch because first browser window will throw an exception.
 			try {
-				if (!this.__window_session_name) {
-					// Backup _sm_window_session_values first in case this is actually a restart or crash restore 
-					if (!this._backup_window_sesion_data) this._backup_window_sesion_data = SessionStore.getWindowValue(window,"_sm_window_session_values");
-					log("onLoad: Removed window session name from window: " + this._backup_window_sesion_data, "DATA");
-					if (this._backup_window_sesion_data) gSessionManager.getAutoSaveValues(null, window);
+				if (!this.__window_session_filename) {
+					// Remove window session if not restoring from private browsing mode otherwise restore window session
+					if (!SessionStore.getWindowValue(window, "_sm_pb_window_session_data")) {
+						// Backup _sm_window_session_values first in case this is actually a restart or crash restore 
+						if (!this._backup_window_sesion_data) this._backup_window_sesion_data = SessionStore.getWindowValue(window,"_sm_window_session_values");
+						log("onLoad: Removed window session name from window: " + this._backup_window_sesion_data, "DATA");
+						if (this._backup_window_sesion_data) gSessionManager.getAutoSaveValues(null, window);
+					}
+					else {
+						this.restoreWindowSession(true);
+					}
 				}
 			} catch(ex) {}
 			
@@ -446,6 +509,7 @@ with (com.morac) {
 			log("onUnload Fired", "INFO");
 			this.removeEventListener("close", gSessionManagerWindowObject.onClose_proxy, false);
 			this.removeEventListener("unload", gSessionManagerWindowObject.onUnload_proxy, false);
+			this.removeEventListener("aftercustomization", gSessionManagerWindowObject.tweakToolbarTooltips, false);
 			gSessionManagerWindowObject.onUnload();
 		},
 
@@ -466,14 +530,19 @@ with (com.morac) {
 			gBrowser.tabContainer.removeEventListener("TabMove", this.onTabMove, false)
 			gBrowser.tabContainer.removeEventListener("SSTabRestoring", this.onTabRestoring_proxy, false);
 			gBrowser.tabContainer.removeEventListener("click", this.onTabBarClick, false);
-			gBrowser.tabContainer.removeEventListener("load", gSessionManagerWindowObject.onTabLoad, true);
+			// Only remove this event in Firefox 4 or higher
+			if ((Application.name == "Firefox") &&  (VERSION_COMPARE_SERVICE.compare(Application.version,"4.0b6") >= 0))
+			  window.removeEventListener("tabviewhidden", gSessionManagerWindowObject.onTabViewHidden, false);
 			// Only remove this if the function exists (Firefox 3.5 and up)
-			if (typeof gBrowser.removeTabsProgressListener == "function")
-				gBrowser.removeTabsProgressListener(gSessionManagerWindowObject.tabProgressListener);
+			if (typeof gBrowser.removeTabsProgressListener == "function") {
+				// SeaMonkey 2.1 throws an exception on this if not listening so catch it
+				try {
+					gBrowser.removeTabsProgressListener(this.tabProgressListener);
+				} catch(ex) {}
+			}
 
 			// stop watching for titlebar changes
 			gBrowser.ownerDocument.unwatch("title");
-			
 			
 			// Last window closing will leaks briefly since mObserving2 observers are not removed from it 
 			// until after shutdown is run, but since browser is closing anyway, who cares?
@@ -486,6 +555,11 @@ with (com.morac) {
 					catch(ex) {}
 				}, this);
 			}
+			
+			// Remove event listener from sanitize command
+			let cmd = document.getElementById("Tools:Sanitize");
+			if (cmd && (Application.name == "SeaMonkey")) 
+				cmd.removeEventListener("command", com.morac.SessionManagerAddon.gSessionManager.tryToSanitize, false);
 			
 			// Stop Session timer if last window closed
 			if (gSessionManager._timer && (numWindows == 0)) { 
@@ -505,7 +579,7 @@ with (com.morac) {
 				gSessionManager.mTitle += " - " + document.getElementById("bundle_brand").getString("brandFullName");
 
 				// This will run the shutdown processing if the preference is set and the last browser window is closed manually
-				if (gSessionManager.mPref_shutdown_on_last_window_close && !gSessionManager._stopping) {
+				if (gSessionManager.mPref["shutdown_on_last_window_close"] && !gSessionManager._stopping) {
 					WIN_OBSERVING2.forEach(function(aTopic) {
 						// This will throw an error for if observers already removed so catch
 						try {
@@ -541,7 +615,7 @@ with (com.morac) {
 			
 			try {
 				// Store closing state if it will be needed later
-				if (this.__window_session_name || !gSessionManager.mUseSSClosedWindowList || (gSessionManager.getBrowserWindows().length == 1)) {
+				if (this.__window_session_filename || !gSessionManager.mUseSSClosedWindowList || (gSessionManager.getBrowserWindows().length == 1)) {
 					log("onWindowCloseRequest saved closing state", "INFO");
 					this.mClosingWindowState = gSessionManager.getSessionState(null, window, null, null, null, true); 
 					// Only need to save closed window data is not using browser's closed window list
@@ -571,7 +645,7 @@ with (com.morac) {
 			}
 			
 			// if there is a window session save it (leave it open if browser is restarting)
-			if (this.__window_session_name) 
+			if (this.__window_session_filename) 
 			{
 				gSessionManager.closeSession(window, false, gSessionManager._restart_requested);
 			}
@@ -605,10 +679,14 @@ with (com.morac) {
 		
 /* ........ Tab Listeners .............. */
 
+		onTabViewHidden: function(aEvent)
+		{
+			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type);
+		},
+
 		onTabOpenClose: function(aEvent)
 		{
-			// Give browser a chance to update count closed tab count.  Only SeaMonkey currently needs this, but it doesn't hurt Firefox.
-			setTimeout(gSessionManagerWindowObject.updateUndoButton, 0);
+			gSessionManagerWindowObject.updateUndoButton();
 			
 			// Update tab tree when tab is opened or closed. For open
 			if (gSessionManager.savingTabTreeVisible) OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + gSessionManagerWindowObject.findTabIndex(aEvent.target));
@@ -620,32 +698,24 @@ with (com.morac) {
 			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + gSessionManagerWindowObject.findTabIndex(aEvent.target) + " " + aEvent.detail);
 		},
 
-		// This is only registered when tab tree is visiable in session prompt window while saving
-		onTabLoad: function(aEvent) {
-			// Update tab tree if it's open
-			OBSERVER_SERVICE.notifyObservers(window, "sessionmanager:update-tab-tree", aEvent.type + " " + gSessionManagerWindowObject.findTabIndex(aEvent.target) + " " + aEvent.target.image);
-		},
-		
 		onTabRestoring_proxy: function(aEvent)
 		{
 			gSessionManagerWindowObject.onTabRestoring(aEvent);
 		},
 		
-		// This is to try and prevent tabs that are closed during the restore preocess from actually reloading.  
-		// It not 100% fool-proof, but it's better than nothing.
+		// This will set up tabs that are loaded during a session load to bypass the cache
 		onTabRestoring: function(aEvent)
 		{
 			// If tab reloading enabled and not offline
-			if (gSessionManager.mPref_reload && !IO_SERVICE.offline) 
+			if (gSessionManager.mPref["reload"] && !IO_SERVICE.offline) 
 			{	
 				// This is a load and not restoring a closed tab or window
 				let tab_time = SessionStore.getTabValue(aEvent.originalTarget, "session_manager_allow_reload");
-				let reload_delay = SessionStore.getTabValue(aEvent.originalTarget, "session_manager_delay_reload") ? 100 : 0;
+				
 				if (tab_time) 
 				{
 					// Delete the tab value
 					SessionStore.deleteTabValue(aEvent.originalTarget, "session_manager_allow_reload");
-					if (reload_delay) SessionStore.deleteTabValue(aEvent.originalTarget, "session_manager_delay_reload");
 					
 					// Compare the times to make sure this really was loaded recently and wasn't a tab that was loading, but then closed and reopened later
 					tab_time = parseInt(tab_time);
@@ -654,37 +724,12 @@ with (com.morac) {
 					current_time = current_time.getTime();
 					
 					log("onTabRestoring: Tab age is " + ((current_time - tab_time)/1000) + " seconds.", "EXTRA");
-					log("onTabRestoring: Reload delay is " + reload_delay, "EXTRA");
 					
 					// Don't reload a tab older than the specified preference (defaults to 1 minute)
-					if (current_time - tab_time < gSessionManager.mPref_reload_timeout) 
+					if (current_time - tab_time < gSessionManager.mPref["reload_timeout"]) 
 					{
-						// This originally came from Tab Mix Plus.  It reloads the tabs without having to wait for them to finishing loading.
-						// The problem with this is that it will always load the last (most "forward") entry in a tab's history because the index hasn't
-						// loaded yet so if this isn't the case, a delay is required.  So delay loading any tabs that have a forward history.
-						function reload_tab(browser)  {
-							const nsIWebNavigation = Components.interfaces.nsIWebNavigation;
-							let _webNav = browser.webNavigation;
-							try {
-								let sh = _webNav.sessionHistory;
-								if (sh)
-									_webNav = sh.QueryInterface(nsIWebNavigation);
-							} catch (e) { logError(e); }
-			
-							try {
-								const flags = nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY | nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE;
-								if (_webNav.canGoForward || !reload_delay) {
-									_webNav.reload(flags);
-								}
-								else {
-									log("onTabRestoring: History for " + _webNav.currentURI.spec + " not yet ready when reloading, trying again.", "EXTRA");
-									// if we delayed, but there's no forward history then it hasn't loaded yet so try again.
-									setTimeout( reload_tab, reload_delay, aEvent.originalTarget.linkedBrowser);
-								}
-							} catch (e) { logError(e); }
-						}
-						
-						setTimeout( reload_tab, reload_delay, aEvent.originalTarget.linkedBrowser);
+						// List for load requests to set to ignore cache
+						aEvent.originalTarget.linkedBrowser.addProgressListener(gSessionManagerWindowObject.tabbrowserProgressListener);
 					}
 				}
 			}
@@ -695,7 +740,11 @@ with (com.morac) {
 			//undo close tab on middle click on tab bar
 			if (aEvent.button == 1 && aEvent.target.localName != "tab")
 			{
-				undoCloseTab();
+				// If tab restored, prevent default since Firefox 4.0 opens a new tab in middle click
+				if (undoCloseTab()) {
+					aEvent.preventDefault();
+					aEvent.stopPropagation();
+				}
 			}
 		},
 
@@ -704,10 +753,10 @@ with (com.morac) {
 		watchForMiddleMouseClicks: function() 
 		{
 			var tabBar = gBrowser.tabContainer;
-			if (gSessionManager.mPref_click_restore_tab && (typeof(tabClicking) == "undefined") && (typeof(TM_checkClick) == "undefined")) {
-				tabBar.addEventListener("click", this.onTabBarClick, false);
+			if (gSessionManager.mPref["click_restore_tab"] && (typeof(tabClicking) == "undefined") && !gSessionManager.tabMixPlusEnabled) {
+				tabBar.addEventListener("click", this.onTabBarClick, true);
 			}
-			else tabBar.removeEventListener("click", this.onTabBarClick, false);
+			else tabBar.removeEventListener("click", this.onTabBarClick, true);
 		},
 
 		onToolbarClick: function(aEvent, aButton)
@@ -743,7 +792,7 @@ with (com.morac) {
 		appendClosedWindow: function(aState)
 		{
 			let cleanBrowser = (this.mCleanBrowser != null) ? this.mCleanBrowser : Array.every(gBrowser.browsers, gSessionManager.isCleanBrowser);
-			if (gSessionManager.mPref_max_closed_undo == 0 || gSessionManager.isPrivateBrowserMode() || cleanBrowser)
+			if (gSessionManager.mPref["max_closed_undo"] == 0 || gSessionManager.isPrivateBrowserMode() || cleanBrowser)
 			{
 				return;
 			}
@@ -752,28 +801,145 @@ with (com.morac) {
 			let windows = gSessionManager.getClosedWindows_SM();
 			
 			// encrypt state if encryption preference set
-			if (gSessionManager.mPref_encrypt_sessions) {
+			if (gSessionManager.mPref["encrypt_sessions"]) {
 				aState = gSessionManager.decryptEncryptByPreference(aState);
 				if (!aState) return;
 			}
 					
 			aState = aState.replace(/^\n+|\n+$/g, "").replace(/\n{2,}/g, "\n");
 			windows.unshift({ name: name, state: aState });
-			gSessionManager.storeClosedWindows_SM(windows.slice(0, gSessionManager.mPref_max_closed_undo));
+			gSessionManager.storeClosedWindows_SM(windows.slice(0, gSessionManager.mPref["max_closed_undo"]));
 		},
 
 		checkWinTimer: function()
 		{
 			// only act if timer already started
-			if ((this._win_timer && ((this.__window_session_time <=0) || !this.__window_session_name))) {
+			if ((this._win_timer && ((this.__window_session_time <=0) || !this.__window_session_filename))) {
 				this._win_timer.cancel();
 				this._win_timer = null;
 				log("checkWinTimer: Window Timer stopped", "INFO");
 			}
-			else if (!this._win_timer && (this.__window_session_time > 0) && this.__window_session_name) {
-				this._win_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
-				this._win_timer.init(gSessionManagerWindowObject, this.__window_session_time * 60000, Components.interfaces.nsITimer.TYPE_REPEATING_PRECISE);
+			else if ((this.__window_session_time > 0) && this.__window_session_filename) {
+				if (this._win_timer)
+					this._win_timer.cancel();
+				else
+					this._win_timer = Components.classes["@mozilla.org/timer;1"].createInstance(Components.interfaces.nsITimer);
+				// Firefox bug 325418 causes PRECISE timers to not fire correctly when canceled and re-initialized so use SLACK instead - https://bugzilla.mozilla.org/show_bug.cgi?id=325418
+				this._win_timer.init(gSessionManagerWindowObject, this.__window_session_time * 60000, Components.interfaces.nsITimer.TYPE_REPEATING_SLACK);
 				log("checkWinTimer: Window Timer started for " + this.__window_session_time + " minutes", "INFO");
+			}
+			
+			// Since this is called when starting/stoping a window session use it to set the attribute
+			// on the toolbar button which changes it's color.
+			this.updateToolbarButton();
+		},
+		
+		updateToolbarButton: function()
+		{
+			let windowTitleName = (gSessionManagerWindowObject.__window_session_name) ? (gSessionManager._string("window_session") + " " + gSessionManagerWindowObject.__window_session_name) : "";
+			let sessionTitleName = (gSessionManager.mPref["_autosave_name"]) ? (gSessionManager._string("current_session2") + " " + gSessionManager.mPref["_autosave_name"]) : "";
+			
+			// Update toolbar button and tooltip
+			let button = document.getElementById("sessionmanager-toolbar");
+			// SeaMonkey keeps button in BrowserToolbarPalette which is in browser window.  The boxObject
+			// only has a firstchild if the element is actually displayed so check that.
+			if (button) {
+			
+				if (!gSessionManager.mPref["do_not_color_toolbar_button"]) {
+					if (windowTitleName)
+						button.setAttribute("windowsession", "true");
+					else
+						button.removeAttribute("windowsession");
+						
+					if (sessionTitleName)
+						button.setAttribute("autosession", "true");
+					else
+						button.removeAttribute("autosession");
+				} else {
+						button.removeAttribute("windowsession");
+						button.removeAttribute("autosession");
+				}
+			}
+			
+			// Titlebar only exists in Firefox 4 and higher
+			let titlebar = document.getElementById("titlebar");
+			if (titlebar) {
+				let toolbar_title_label = document.getElementById("sessionmanager-titlebar-label");
+				if (toolbar_title_label) {
+					if (gSessionManager.mPref["session_name_in_titlebar"] == 0 || gSessionManager.mPref["session_name_in_titlebar"] == 1) {
+						toolbar_title_label.value = windowTitleName + ((windowTitleName && sessionTitleName) ? ",   " : "") + sessionTitleName;
+						toolbar_title_label.removeAttribute("hidden");
+					}
+					else 
+						toolbar_title_label.setAttribute("hidden", "true");
+				}
+			}
+		},
+		
+		tweakToolbarTooltips: function(aEvent) {
+			let buttons = [document.getElementById("sessionmanager-toolbar"), document.getElementById("sessionmanager-undo")];
+			for (let i=0; i < buttons.length; i++) {
+				if (buttons[i] && buttons[i].boxObject && buttons[i].boxObject.firstChild) {
+					buttons[i].boxObject.firstChild.setAttribute("tooltip",( i ? "sessionmanager-undo-button-tooltip" : "sessionmanager-button-tooltip"));
+				}
+			}
+			
+			// Update menus as well in case toolbar button was just added
+			gSessionManagerWindowObject.updateMenus();
+		},
+		
+		buttonTooltipShowing: function(aEvent, tooltip) {
+			let windowTitleName = (gSessionManagerWindowObject.__window_session_name) ? (gSessionManager._string("window_session") + " " + gSessionManagerWindowObject.__window_session_name) : "";
+			let sessionTitleName = (gSessionManager.mPref["_autosave_name"]) ? (gSessionManager._string("current_session2") + " " + gSessionManager.mPref["_autosave_name"]) : "";
+		
+			let value1 = sessionTitleName || windowTitleName;
+			let value2 = sessionTitleName ? windowTitleName : "";
+
+			if (value1) {
+				tooltip.childNodes[1].value = value1;
+				tooltip.childNodes[1].hidden = false;
+				// Auto-session always on top.
+				if (sessionTitleName) 
+					tooltip.childNodes[1].setAttribute("autosession", "true");
+				else 
+					tooltip.childNodes[1].removeAttribute("autosession");
+				if (value2) {
+					tooltip.childNodes[2].value = value2;
+					tooltip.childNodes[2].hidden = false;
+				}
+				else 
+					tooltip.childNodes[2].hidden = true;
+			}
+			else {
+				tooltip.childNodes[1].hidden = true;
+				tooltip.childNodes[2].hidden = true;
+			}
+		},
+		
+		undoTooltipShowing: function(aEvent,tooltip) {
+			let name = null;
+			let url = null;
+			if (SessionStore.getClosedTabCount(window)) {
+				let closedTabs = SessionStore.getClosedTabData(window);
+				closedTabs = gSessionManager.JSON_decode(closedTabs);
+				name = closedTabs[0].title
+				url = closedTabs[0].state.entries[closedTabs[0].state.entries.length - 1].url;
+			}
+			if (name) {
+				tooltip.childNodes[1].value = name;
+				tooltip.childNodes[1].hidden = false;
+				
+				if (url) {
+					tooltip.childNodes[2].value = url;
+					tooltip.childNodes[2].hidden = false;
+					aEvent.view.XULBrowserWindow.setOverLink(url);
+				}
+				else 
+					tooltip.childNodes[2].hidden = true;
+			}
+			else {
+				tooltip.childNodes[1].hidden = true;
+				tooltip.childNodes[2].hidden = true;
 			}
 		},
 		
@@ -794,6 +960,29 @@ with (com.morac) {
 			}
 		},
 		
+		// Replace SeaMonkey's gBrowser.updateTitlebar function with our own which is used
+		// to update the title bar with auto session names after SeaMonkey changes the title.
+		hookSeaMonkeyUpdateTitlebar: function() {
+			var _original = gBrowser.updateTitlebar; // Reference to the original function
+			gBrowser.updateTitlebar = function() {
+				// Execute before
+				var rv = _original.apply(gBrowser, arguments);
+				// execute afterwards
+				try {
+					var title = window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					                  .getInterface(Components.interfaces.nsIWebNavigation)
+					                  .QueryInterface(Components.interfaces.nsIBaseWindow).title;
+					title = gSessionManagerWindowObject.updateTitlebar("title", "", title)
+					window.QueryInterface(Components.interfaces.nsIInterfaceRequestor)
+					      .getInterface(Components.interfaces.nsIWebNavigation)
+					      .QueryInterface(Components.interfaces.nsIBaseWindow).title = title;
+				} catch (ex) {}
+
+				// return the original result
+				return rv;
+			};
+		},
+		
 		// Put current session name in browser titlebar
 		// This is a watch function which is called any time the titlebar text changes
 		// See https://developer.mozilla.org/en/Core_JavaScript_1.5_Reference/Global_Objects/Object/watch
@@ -803,12 +992,12 @@ with (com.morac) {
 				// Don't kill browser if something goes wrong
 				try {
 					let windowTitleName = (gSessionManagerWindowObject.__window_session_name) ? (gSessionManager._string("window_session") + " " + gSessionManagerWindowObject.__window_session_name) : "";
-					let sessionTitleName = (gSessionManager.mPref__autosave_name) ? (gSessionManager._string("current_session2") + " " + gSessionManager.mPref__autosave_name) : "";
+					let sessionTitleName = (gSessionManager.mPref["_autosave_name"]) ? (gSessionManager._string("current_session2") + " " + gSessionManager.mPref["_autosave_name"]) : "";
 					let title = ((windowTitleName || sessionTitleName) ? "(" : "") + windowTitleName + ((windowTitleName && sessionTitleName) ? ", " : "") + sessionTitleName + ((windowTitleName || sessionTitleName) ? ")" : "")
 					
 					if (title) {
 						// Add window and browser session titles
-						switch(gSessionManager.mPref_session_name_in_titlebar) {
+						switch(gSessionManager.mPref["session_name_in_titlebar"]) {
 							case 0:
 								newVal = newVal + " - " + title;
 								break;
@@ -824,11 +1013,117 @@ with (com.morac) {
 			}
 			return newVal;
 		},
-	
+
+		updateMenus: function(aForceUpdateAppMenu)
+		{
+				function get_(a_parent, a_id) { return a_parent.getElementsByAttribute("_id", a_id)[0] || null; }					
+		
+				// Need to get menus and popups this way since once cloned they would have same id.
+				var toolsmenu_popup = document.getElementById("sessionmanager-menu-popup");
+				var toolsmenu_submenu = get_(toolsmenu_popup,"_sessionmanager-management-menu-popup");
+				var toolsmenu_menu = get_(toolsmenu_popup,"sessionmanager-tools-menu");
+				var toolsmenu_splitmenu = get_(toolsmenu_popup,"sessionmanager-tools-splitmenu");
+				var toolsmenu_submenus_hidden = toolsmenu_splitmenu.hidden && toolsmenu_menu.hidden;
+				
+				var toolbar_popup = document.getElementById("sessionmanager-toolbar-popup");
+				var toolbar_button_menu = toolbar_popup ? document.getElementById("sessionmanager-toolbar-menu") : null;
+				var toolbar_button_splitmenu = toolbar_popup ? document.getElementById("sessionmanager-toolbar-splitmenu") : null;
+				var toolbar_button_submenus_hidden = toolbar_popup ? (toolbar_button_splitmenu.hidden && toolbar_button_menu.hidden) : false;
+
+				var update_app_menu = false || aForceUpdateAppMenu;
+
+				// Display in submenu
+				if (gSessionManager.mPref["display_menus_in_submenu"]) {
+					// Find any added menu items not in submenu and remove them.  They will have the "_sm_menu_to_remove" attribute set to "true"
+					var added_menuitems = toolsmenu_popup.getElementsByAttribute("_sm_menu_to_remove", "true");
+					if (added_menuitems.length) {
+						update_app_menu = true;
+						while (added_menuitems.length) 
+							toolsmenu_popup.removeChild(added_menuitems[0]);
+					}
+					if (toolbar_popup) {
+						added_menuitems = toolbar_popup.getElementsByAttribute("_sm_menu_to_remove", "true");
+						while (added_menuitems.length) 
+							toolbar_popup.removeChild(added_menuitems[0]);
+					}
+				
+					// Popup menu is under the normal menu item by default.  In Firefox 4 and up on Windows and Linux move it to the splitmenu
+					if ((Application.name == "Firefox") &&  (VERSION_COMPARE_SERVICE.compare(Application.version,"4.0b6") >= 0) && (!/mac|darwin/i.test(navigator.platform))) {
+						if (!toolsmenu_splitmenu.firstChild) {
+							var menupopup = toolsmenu_menu.removeChild(toolsmenu_menu.menupopup);
+							toolsmenu_splitmenu.appendChild(menupopup);
+						}
+						toolsmenu_splitmenu.hidden = false;
+						toolsmenu_menu.hidden = true;
+						if (toolbar_button_splitmenu) {
+							if (!toolbar_button_splitmenu.firstChild) {
+								var menupopup = toolbar_button_menu.removeChild(toolbar_button_menu.menupopup);
+								toolbar_button_splitmenu.appendChild(menupopup);
+							}
+							toolbar_button_splitmenu.hidden = false;
+							toolbar_button_menu.hidden = true;
+						}
+					}
+					else {
+						toolsmenu_menu.hidden = false;
+						if (toolbar_button_menu) 
+							toolbar_button_menu.hidden = false;
+					}
+				}
+				else if (!toolsmenu_submenus_hidden || !toolbar_button_submenus_hidden) {
+					// Clone the menu items into the Session Manager menu (quick and dirty, but it works)
+					// Since the toolbar can be added and removed and it's state might not be known, check its state before re-adding menuitems.
+					toolsmenu_menu.hidden = true;
+					toolsmenu_splitmenu.hidden = true;
+					var change_toolbar_button = (toolbar_button_menu && !toolbar_button_submenus_hidden);
+					if (change_toolbar_button) {
+						toolbar_button_menu.hidden = true;
+						toolbar_button_splitmenu.hidden = true;
+					}
+
+					// Copy the menuitems from the tools menu popup.  Can do this for the button menu since it's the same as the tools menu
+					for (var i=0; i<toolsmenu_submenu.childNodes.length; i++) {
+						if (!toolsmenu_submenus_hidden) {
+							var menuitem = toolsmenu_submenu.childNodes[i].cloneNode(true);
+							menuitem.setAttribute("_sm_menu_to_remove", "true");
+							toolsmenu_menu.parentNode.insertBefore(menuitem,toolsmenu_menu);
+							update_app_menu = true;
+						}
+						if (change_toolbar_button) {
+							var menuitem = toolsmenu_submenu.childNodes[i].cloneNode(true);
+							menuitem.setAttribute("_sm_menu_to_remove", "true");
+							toolbar_button_menu.parentNode.insertBefore(menuitem,toolbar_button_menu);
+						}
+					}
+				}
+				
+				// There's a problem where sometimes switching menu styles causes toolbar button menupopup to no longer open
+				// until any other menupopup (even in another window) is opened.  Calling the hidePopup() method seems to work around that.
+				if (toolbar_popup) {
+					toolbar_popup.hidePopup();
+				}
+
+				// clone popup menu for app menu menu
+				if (document.getElementById("sessionmanager-appmenu") && update_app_menu) {
+					var popup_menu = toolsmenu_popup.cloneNode(true);
+					document.getElementById("sessionmanager-appmenu").replaceChild(popup_menu, document.getElementById("sessionmanager-appmenu-popup"));
+					popup_menu.setAttribute("id", "sessionmanager-appmenu-popup");
+				}
+		},
+		
 		showHideToolsMenu: function()
 		{
-			let sessionMenu = document.getElementById("sessionmanager-menu");
-			if (sessionMenu) sessionMenu.hidden = gSessionManager.mPref_hide_tools_menu;
+			// app menu is only in FF 4 and up
+			for (var i=0; i<2; i++) {
+				let sessionMenu = i ? document.getElementById("sessionmanager-appmenu") : document.getElementById("sessionmanager-menu");
+				if (sessionMenu) {
+					sessionMenu.hidden = gSessionManager.mPref["hide_tools_menu"];
+					if (gSessionManager.mPref["show_icon_in_menu"])
+						sessionMenu.setAttribute("icon", "true");
+					else
+						sessionMenu.removeAttribute("icon");
+				}
+			}
 		},
 
 		setKeys: function()
@@ -846,10 +1141,55 @@ with (com.morac) {
 								keysets[i].setAttribute("key", keys[keyname[1]].key || keys[keyname[1]].keycode);
 								keysets[i].setAttribute("modifiers", keys[keyname[1]].modifiers);
 							}
+							else {
+								keysets[i].setAttribute("key", "");
+								keysets[i].setAttribute("modifiers", "");
+							}
 						}
 					}
 				}
 			} catch(ex) { logError(ex); }
+		},
+		
+		restoreWindowSession: function(aPrivateBrowsingRestore)
+		{
+			let pb_window_session_data = SessionStore.getWindowValue(window,"_sm_pb_window_session_data");
+			if (aPrivateBrowsingRestore && !pb_window_session_data)
+				return;
+		
+			// check both the backup and current window value just in case
+			let window_values = aPrivateBrowsingRestore ? pb_window_session_data : (gSessionManagerWindowObject._backup_window_sesion_data || SessionStore.getWindowValue(window,"_sm_window_session_values"));
+			if (window_values) {
+				// Check to see if window session still exists and if it does, read it autosave data from file in case it was modified after backup
+				let values = window_values.split("\n");
+				// build regular expression, escaping all special characters
+				let escaped_name = values[0].replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+				let regexp = new RegExp("^" + escaped_name + "$");
+				let sessions = gSessionManager.getSessions(regexp,null,true);
+				// If filenames and session names match consider it a match
+				if ((sessions.length == 1) && (sessions[0].fileName == values[0]) && (sessions[0].name == values[1])) {
+					// If session is no longer an autosave session don't restore it.
+					if (/^(window|session)\/?(\d*)$/.test(sessions[0].autosave)) {
+						let time = parseInt(RegExp.$2);
+						// use new group and time if they changed
+						window_values = gSessionManager.mergeAutoSaveValues(sessions[0].fileName, sessions[0].name, sessions[0].group, time)
+						gSessionManager.getAutoSaveValues(window_values, window);
+					}
+				}
+			}
+			log("restoreWindowSession: Restore new window after " + (aPrivateBrowsingRestore ? "exit private browsing" : "startup") + " done, window session = " + gSessionManagerWindowObject.__window_session_filename, "DATA");
+			if (aPrivateBrowsingRestore && pb_window_session_data) 
+				SessionStore.deleteWindowValue(window, "_sm_pb_window_session_data");
+			else
+				gSessionManagerWindowObject._backup_window_sesion_data = null;
+				
+			gSessionManagerWindowObject.updateUndoButton();
+
+			// Update the __SessionManagerWindowId if it's not set (this should only be for the first browser window).
+			if (!gSessionManagerWindowObject.__SessionManagerWindowId) {
+				gSessionManagerWindowObject.__SessionManagerWindowId = window.__SSi;
+				SessionStore.setWindowValue(window, "__SessionManagerWindowId", window.__SSi);
+			}
 		},
 		
 /* ........ Auxiliary Functions .............. */
@@ -862,14 +1202,12 @@ with (com.morac) {
 		
 		doTMPConvertFile: function(aFileUri, aSilent)
 		{
-			Components.classes["@mozilla.org/moz/jssubscript-loader;1"].getService(Components.interfaces.mozIJSSubScriptLoader).loadSubScript("chrome://sessionmanager/content/sessionconvert.js");
-			delete(gSessionSaverConverter);
+			Components.utils.import("resource://sessionmanager/modules/session_convert.jsm", com.morac.SessionManagerAddon);
 			gConvertTMPSession.init(true);
 			if (!gConvertTMPSession.convertFile(aFileUri, aSilent) && !aSilent) {
 				gConvertTMPSession._prompt.alert(null, gSessionManager._string("sessionManager"), gSessionManager._string("ss_none"));
 			}
 			gConvertTMPSession.cleanup();
-			delete(gConvertTMPSession);
 		},
 		
 		// Undo closed tab function for SeaMonkey
@@ -888,6 +1226,6 @@ with (com.morac) {
 // For Tab Mix Plus until the author changes his code
 if (!gSessionManager) var gSessionManager = {
 	openOptions: function() {
-		com.morac.gSessionManager.openOptions();
+		com.morac.SessionManagerAddon.gSessionManager.openOptions();
 	}
 }

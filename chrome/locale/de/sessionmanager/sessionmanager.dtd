@@ -1,28 +1,28 @@
 <!ENTITY sessionManager "Sitzungs-Manager">
 <!ENTITY toolsmenu.accesskey "M">
-<!ENTITY save.label "Sitzung sichern...">
+<!ENTITY save.label "Sitzung sichern…">
 <!ENTITY save.accesskey "S">
-<!ENTITY saveOne.label "Aktuelles Fenster sichern...">
+<!ENTITY saveOne.label "Aktuelles Fenster sichern…">
 <!ENTITY saveOne.accesskey "F">
 <!ENTITY closeSession.label "Aktuelle Sitzung sichern und schließen">
 <!ENTITY closeSession.accesskey "k">
 <!ENTITY abandonSession.label "Aktuelle Sitzung verlassen">
 <!ENTITY abandonSession.accesskey "v">
-<!ENTITY rename.label "Sitzung umbenennen...">
+<!ENTITY rename.label "Sitzung umbenennen…">
 <!ENTITY rename.accesskey "u">
-<!ENTITY remove.label "Sitzung(en) löschen...">
-<!ENTITY remove.accesskey "l">
-<!ENTITY openFolder.label "Sitzungs-Ordner öffnen...">
+<!ENTITY remove.label "Sitzung(en) löschen…">
+<!ENTITY remove.accesskey "c">
+<!ENTITY openFolder.label "Sitzungs-Ordner öffnen…">
 <!ENTITY openFolder.accesskey "O">
-<!ENTITY options.label "&sessionManager;-Einstellungen...">
+<!ENTITY options.label "&sessionManager;-Einstellungen…">
 <!ENTITY options.accesskey "E">
 <!ENTITY undoClosed.label "Kürzlich geschlossene Fenster/Tabs">
 <!ENTITY undoClosed.accesskey "G">
 <!ENTITY closedWindows "Geschlossene Fenster:">
 <!ENTITY closedTabs "Geschlossene Tabs:">
-<!ENTITY clearList.label "Liste löschen">
+<!ENTITY clearList.label "Listen löschen…">
 <!ENTITY clearList.accesskey "L">
-<!ENTITY toolbar.tooltip "Aktuelle Sitzung sichern...">
+<!ENTITY toolbar.tooltip "Aktuelle Sitzung sichern…">
 <!ENTITY toolbar.undo.label "Wiederherstellen">
 <!ENTITY toolbar.undo.tooltip "Zuletzt geschlossenen Tab wiederherstellen">
 <!ENTITY prompt.ignore.label "Diesen Dialog nicht mehr anzeigen">
@@ -36,7 +36,7 @@
 <!ENTITY replace_all.accesskey "S">
 <!ENTITY replace_window.label "Sitzung durch aktuelles Fenster ersetzen">
 <!ENTITY replace_window.accesskey "F">
-<!ENTITY remove_one.label "Sitzung löschen...">
+<!ENTITY remove_one.label "Sitzung löschen…">
 <!ENTITY set_startup.label "Als Startsitzung festlegen">
 <!ENTITY set_startup.accesskey "f">
 <!ENTITY openSessionManagerSidebar.commandkey "S">
@@ -48,11 +48,11 @@
 <!ENTITY remove_item.label "Eintrag löschen">
 <!ENTITY remove_item.accesskey "l">
 <!ENTITY session_group.label "Gruppe">
-<!ENTITY rename_group.label "Gruppe umbenennen...">
-<!ENTITY remove_group.label "Gruppe löschen...">
-<!ENTITY change_group.label "Gruppe ändern...">
+<!ENTITY rename_group.label "Gruppe umbenennen…">
+<!ENTITY remove_group.label "Gruppe löschen…">
+<!ENTITY change_group.label "Gruppe ändern…">
 <!ENTITY change_group.accesskey "d">
-<!ENTITY group.label "Sitzung(en) gruppieren...">
+<!ENTITY group.label "Sitzung(en) gruppieren…">
 <!ENTITY group.accesskey "g">
 <!ENTITY toolbar.menu.tooltip "Menü zur Sitzungs-Verwaltung öffnen">
 <!ENTITY toolbar.undo.menu.tooltip "Menü für kürzlich geschlossene Fenster und Tabs öffnen">
@@ -80,3 +80,18 @@
 <!ENTITY abandonWindowSession.accesskey "v">
 <!ENTITY load_append_window.label "Sitzung laden (Zu aktuellem Fenster hinzufügen)">
 <!ENTITY load_append_window.accesskey "f">
+<!ENTITY leave_window_open.label "Dieses Fenster geöffnet lassen">
+<!ENTITY clearTabList.label "Liste geschlossener Tabs löschen…">
+<!ENTITY clearTabList.accesskey "T">
+<!ENTITY clearWindowList.label "Liste geschlossener Fenster löschen…">
+<!ENTITY clearWindowList.accesskey "F">
+<!ENTITY hidden.label "Ausgeblendet">
+<!ENTITY contribute.label "Mitwirken">
+<!ENTITY support.label "Dieses Add-on unterstützen:">
+<!ENTITY session_group_verb.label "Gruppieren">
+<!ENTITY deleted_sessions.label "Gelöschte Sitzungen">
+<!ENTITY deleted_sessions.accesskey "t">
+<!ENTITY empty_trash.label "Alle gelöschten Sitzungen entfernen">
+<!ENTITY empty_trash.accesskey "A">
+<!ENTITY permanently_delete.label "Sitzung unwiderruflich löschen">
+<!ENTITY permanently_delete.accesskey "u">

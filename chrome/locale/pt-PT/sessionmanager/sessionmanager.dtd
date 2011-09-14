@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "Carregar (anexar à janela actual)">
 <!ENTITY load_append_window.accesskey "x">
+<!ENTITY leave_window_open.label "Deixar esta janela aberta">
+<!ENTITY clearTabList.label "Limpar a lista de separadores &apos;fechados&apos;...">
+<!ENTITY clearTabList.accesskey "s">
+<!ENTITY clearWindowList.label "Limpar a lista de janelas &apos;fechadas&apos;...">
+<!ENTITY clearWindowList.accesskey "j">
+<!ENTITY hidden.label "Oculto">
+<!ENTITY contribute.label "Contribuir">
+<!ENTITY support.label "Ajude este extra:">
+<!ENTITY session_group_verb.label "Grupo">
+<!ENTITY deleted_sessions.label "Sessões eliminadas">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Remover todas as sessões eliminadas">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "Eliminar sessão permanentemente">
+<!ENTITY permanently_delete.accesskey "P">
+<!ENTITY search.label "Pesquisar...">
+<!ENTITY edit.label "Editar Sessão...">
+<!ENTITY edit.accesskey "E">
+<!ENTITY addtab.label "Adicionar separador à sessão ...">
+<!ENTITY addtab.accesskey "A">
+<!ENTITY viewcontents.label "Ver conteúdo da sessão">
+<!ENTITY viewcontents.accesskey "V">
+<!ENTITY export_to_html.label "Exportar o conteúdo da sessão para adicionar o arquivo HTML aos marcadores">
+<!ENTITY export_to_html.accesskey "E">

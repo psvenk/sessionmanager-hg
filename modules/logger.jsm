@@ -1,7 +1,11 @@
+// Exported functions
+var EXPORTED_SYMBOLS = ["log", "logError", "deleteLogFile", "openLogFile", "logging_level"];
+
 // Configuration Constant Settings - addon specific
 const ADDON_NAME = "Session Manager";
 const FILE_NAME = "sessionmanager_log.txt";
 const LOG_ENABLE_PREFERENCE_NAME = "extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging";
+const LOG_CONSOLE_PREFERENCE_NAME = "extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging_to_console";
 const LOG_LEVEL_PREFERENCE_NAME = "extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.logging_level";
 const BUNDLE_URI = "chrome://sessionmanager/locale/sessionmanager.properties";
 const ERROR_STRING_NAME = "file_not_found";
@@ -12,25 +16,8 @@ const Ci = Components.interfaces
 const Cu = Components.utils;
 const report = Components.utils.reportError;
 
-// Get lazy getter functions from XPCOMUtils or define them if they don't exist (only defined in Firefox 3.6 and up)
+// Get lazy getter functions from XPCOMUtils
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-if (typeof XPCOMUtils.defineLazyGetter == "undefined") {
-	XPCOMUtils.defineLazyGetter = function XPCU_defineLazyGetter(aObject, aName, aLambda)
-	{
-		aObject.__defineGetter__(aName, function() {
-			delete aObject[aName];
-			return aObject[aName] = aLambda.apply(aObject);
-		});
-	}
-}
-if (typeof XPCOMUtils.defineLazyServiceGetter == "undefined") {
-	XPCOMUtils.defineLazyServiceGetter = function XPCU_defineLazyServiceGetter(aObject, aName, aContract, aInterfaceName)
-	{
-		this.defineLazyGetter(aObject, aName, function XPCU_serviceLambda() {
-			return Cc[aContract].getService(Ci[aInterfaceName]);
-		});
-	}
-}
 
 // Lazily define services
 XPCOMUtils.defineLazyServiceGetter(this, "mPromptService", "@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
@@ -44,9 +31,6 @@ else if (Cc["@mozilla.org/smile/application;1"]) {
 	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/smile/application;1", "smileIApplication");
 }
   
-// Exported functions
-var EXPORTED_SYMBOLS = ["log", "logError", "deleteLogFile", "openLogFile", "logging_level"];
-
 // logging level
 var logging_level = {};
 logging_level["STATE"] = 1;
@@ -63,6 +47,7 @@ var _initialized = false;		// Logger module initialized
 var _logFile = null;			// Current log file
 var _logged_Addons = false;		// Set to true, when the current enabled add-ons have been logged (once per browsing session)
 var _logEnabled = false;		// Set to true if logging is enabled
+var _logToConsole = false;  // Set to true if also logging to console when logging is enabled
 var _logLevel = 0;				// Set to the current logging level (see above)
 var _printedHeader = false;		// Printed header to log file
 
@@ -79,7 +64,7 @@ var buffer = [];
 function logError(e, force) {
 	// If not an exception, just log it.
 	if (!e.message) {
-		log(e, force);
+		log(e, "ERROR", force);
 		return;
 	}
 	
@@ -114,7 +99,7 @@ function log(aMessage, level, force) {
 			buffer.push({ functionName: "log", args: arguments});
 		}
 		else if (force || (_logEnabled && (logging_level[level] & _logLevel))) {
-			mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + aMessage);
+			if (force || _logToConsole) mConsoleService.logStringMessage(ADDON_NAME + " (" + (new Date).toGMTString() + "): " + aMessage);
 			if (_logEnabled) write_log((new Date).toGMTString() + ": " + aMessage + "\n");
 		}
 	}
@@ -255,28 +240,53 @@ function logExtensions(aExtensions) {
 	// Set to initialized.  Do this here so the addons are always logged first
 	_initialized = true;
 	
-	// Log OS and browser version
-	log("OS = " + _os, "INFO");
-	log("Browser = " + Application.id + " - " + Application.name + " " + Application.version, "INFO");
+	// Log OS, browser version and locale
+	let logString = "\n\tOS = " + _os + "\n\tBrowser = " + Application.id + " - " + Application.name + " " + Application.version;
+	logString += "\n\tLocale = " + Application.prefs.getValue("general.useragent.locale", "unknown");
 	
-	// Log Addons
+	// Log Addons - This takes quite a long time per add-on under Firefox 3.6.x.  For 50 addons it takes 10 seconds.  This should probably log using a setTimeout or
+	//            - I should switch back to using RDF. It loads very quickly under Firefox 4.0 and up so don't need to do anything there.
 	if (extensions.all.length) {
-		log("Extensions installed and enabled:");
+		logString += "\n\tExtensions installed and enabled:\n\t   ";
+		let extString = [];
 		for (let i=0; i<extensions.all.length; i++) {
 			if (extensions.all[i].enabled) {
-				log("   " + extensions.all[i].name + " " + extensions.all[i].version, "INFO");
+				extString.push(extensions.all[i].name + " " + extensions.all[i].version);
 			}
 		}
+		logString += extString.sort().join("\n\t   ");
 	}
 	
-	// Log prefrences
+	// Log related Firefox prefences
+	logString += "\n\tFirefox preferences:";
+	logString += "\n\t   browser.startup.page = " + Application.prefs.getValue("browser.startup.page","");
+	logString += "\n\t   browser.sessionstore.interval = " + Application.prefs.getValue("browser.sessionstore.interval","");
+	logString += "\n\t   browser.sessionstore.max_concurrent_tabs = " + Application.prefs.getValue("browser.sessionstore.max_concurrent_tabs","");
+	logString += "\n\t   browser.sessionstore.max_resumed_crashes = " + Application.prefs.getValue("browser.sessionstore.max_resumed_crashes","");
+	logString += "\n\t   browser.sessionstore.max_tabs_undo = " + Application.prefs.getValue("browser.sessionstore.max_tabs_undo","");
+	logString += "\n\t   browser.sessionstore.max_windows_undo = " + Application.prefs.getValue("browser.sessionstore.max_windows_undo","");
+	logString += "\n\t   browser.sessionstore.postdata = " + Application.prefs.getValue("browser.sessionstore.postdata","");
+	logString += "\n\t   browser.sessionstore.privacy_level = " + Application.prefs.getValue("browser.sessionstore.privacy_level","");
+	logString += "\n\t   browser.sessionstore.privacy_level_deferred = " + Application.prefs.getValue("browser.sessionstore.privacy_level_deferred","");
+	logString += "\n\t   browser.sessionstore.resume_from_crash = " + Application.prefs.getValue("browser.sessionstore.resume_from_crash","");
+	logString += "\n\t   browser.sessionstore.restore_hidden_tabs = " + Application.prefs.getValue("browser.sessionstore.restore_hidden_tabs","");
+	logString += "\n\t   browser.sessionstore.resume_session_once = " + Application.prefs.getValue("browser.sessionstore.resume_session_once","");
+	logString += "\n\t   browser.tabs.warnOnClose = " + Application.prefs.getValue("browser.tabs.warnOnClose","");
+	logString += "\n\t   browser.warnOnQuit = " + Application.prefs.getValue("browser.warnOnQuit","");
+  
+	// Log preferences
 	let prefs = extensions.get(UUID).prefs.all
 	if (prefs.length) {
-		log("Add-on preferences:");
+		logString += "\n\tAdd-on preferences:\n\t   ";
+		let prefStrings = [];
 		for (let i=0; i<prefs.length; i++) {
-			log("   " + prefs[i].name + " = " + prefs[i].value, "INFO");
+			prefStrings.push(prefs[i].name + " = " + prefs[i].value);
 		}
+		logString += prefStrings.sort().join("\n\t   ");
 	}
+	
+	// Actually log the logString.  This speeds up logging by a few 1000%.
+	log(logString, "INFO");
 
 	// Log anything stored in the buffer
 	logStoredBuffer();
@@ -310,6 +320,9 @@ var observer = {
 				case LOG_ENABLE_PREFERENCE_NAME:
 					_logEnabled = Application.prefs.get(LOG_ENABLE_PREFERENCE_NAME).value;
 					break;
+				case LOG_CONSOLE_PREFERENCE_NAME:
+					_logToConsole = Application.prefs.get(LOG_CONSOLE_PREFERENCE_NAME).value;
+					break;
 				case LOG_LEVEL_PREFERENCE_NAME:
 					_logLevel = Application.prefs.get(LOG_LEVEL_PREFERENCE_NAME).value;
 					break;
@@ -324,6 +337,7 @@ var observer = {
 			mPreferenceBranch.addObserver(LOG_ENABLE_PREFERENCE_NAME, this, false);
 			
 			_logEnabled = Application.prefs.get(LOG_ENABLE_PREFERENCE_NAME).value;
+			_logToConsole = Application.prefs.get(LOG_CONSOLE_PREFERENCE_NAME).value;
 			_logLevel = Application.prefs.get(LOG_LEVEL_PREFERENCE_NAME).value;
 			
 			// Do a conditional delete of the log file each time the application starts

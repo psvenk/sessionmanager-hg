@@ -1,14 +1,15 @@
 // Create a namespace so as not to polute the global namespace
 if(!com) var com={};
 if(!com.morac) com.morac={};
+if(!com.morac.SessionManagerAddon) com.morac.SessionManagerAddon={};
 
 // import into the namespace
-Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm", com.morac);
-Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac);
+Components.utils.import("resource://sessionmanager/modules/preference_manager.jsm", com.morac.SessionManagerAddon);
+Components.utils.import("resource://sessionmanager/modules/session_manager.jsm", com.morac.SessionManagerAddon);
 
 // use the namespace
-with (com.morac) {
-	com.morac.gSessionManager_preferencesOverlay = {
+with (com.morac.SessionManagerAddon) {
+	com.morac.SessionManagerAddon.gSessionManager_preferencesOverlay = {
 		mSanitizePreference: "privacy.item.extensions-sessionmanager",
 
 		init: function() {
@@ -102,10 +103,10 @@ with (com.morac) {
 	/* ........ panePrivacy .............. */
 
 		onPanePrivacyLoad: function (aPaneID)	{
-			// The Clear Now button only exists in Firefox 3.0 and SeaMonkey 2.0
+			// The Clear Now button only exists in SeaMonkey
 			var clearNowBn = document.getElementById("clearDataNow");
-			if (clearNowBn && clearNowBn.getAttribute("oncommand").indexOf("gSessionManager") == -1) { 
-				clearNowBn.setAttribute("oncommand", "com.morac.gSessionManager_preferencesOverlay.tryToSanitize(); " + clearNowBn.getAttribute("oncommand"));
+			if (clearNowBn) { 
+				clearNowBn.addEventListener("command", com.morac.SessionManagerAddon.gSessionManager_preferencesOverlay.tryToSanitize, false);
 				// SeaMonkey needs to have Session Manager added directly to preferences window
 				if (aPaneID == "security_pane") {
 					gSessionManager_preferencesOverlay.addMenuItem(aPaneID);
@@ -114,20 +115,26 @@ with (com.morac) {
 		},
 
 	/* ....... Sanitizing funnctions ....... */
+		addItems: function() {
+			window.removeEventListener('load', gSessionManager_preferencesOverlay.addItems, true);
+
+			gSessionManager_preferencesOverlay.addMenuItem();
+			gSessionManager_preferencesOverlay.addSanitizeItem();
+		},
+	
 		addSanitizeItem: function () {
-			window.removeEventListener('load', gSessionManager_preferencesOverlay.addSanitizeItem, true);
-		
 			var sessionManagerItem = {
 				clear : function() {
 					try {
-						gSessionManager.sanitize(this.mSanitizePreference);
+						gSessionManager.sanitize(this.range);
 					} catch (ex) {
 						try { Components.utils.reportError(ex); } catch(ex) {}
 					}
 				},
 				get canClear() {
 					return true;
-				}
+				},
+				willClear: false
 			}
 			
 			// Firefox
@@ -140,7 +147,30 @@ with (com.morac) {
 				// Sanitizer will execute this
 				Sanitizer.items['extensions-sessionmanager'] = sessionManagerItem;
 			}
+
+			// don't leak
+			sessionManagerItem = null;
+			
+			// Try to fix window height now or do it later if listbox is collapsed;
+			var itemList = document.getElementById("itemList");
+			if (itemList) {
+				if (itemList.collapsed) { 
+					var detailsExpander = document.getElementById("detailsExpander");
+					if (detailsExpander)
+						detailsExpander.addEventListener("command", gSessionManager_preferencesOverlay.fixWindowHeight, true);
+				}
+				else
+					this.fixWindowHeight();
+			}
+		},
 		
+		fixWindowHeight: function(aEvent) {
+			if (aEvent) {
+				var detailsExpander = document.getElementById("detailsExpander");
+				if (detailsExpander)
+					detailsExpander.removeEventListener("command", gSessionManager_preferencesOverlay.fixWindowHeight, true);
+			}
+			
 			// fix window height so we can see our entry
 			var smlb = document.getElementById("sessionmanager_listbox");
 			if (smlb) {
@@ -160,10 +190,9 @@ with (com.morac) {
 				if (currentHeight < (boxHeight * index)) {
 					smlb.parentNode.height = currentHeight + boxHeight * (index - 6);
 				}
+				
+				window.sizeToContent();
 			}
-			
-			// don't leak
-			sessionManagerItem = null;
 		},
 
 		addMenuItem: function (aPaneID) {
@@ -174,11 +203,11 @@ with (com.morac) {
 			var listboxes = doc.getElementsByTagName('listitem');
 			var lastCheckbox = (checkboxes.length) ? checkboxes[checkboxes.length -1] : null;
 			var lastListbox = (listboxes.length) ? listboxes[listboxes.length -1] : null;
-			if (prefs && (lastCheckbox || lastListbox)) // if this isn't true we are lost :)
+			if (lastCheckbox || lastListbox) 
 			{
-				var pref = document.createElement('preference');
-				// Firefox 3.5 and above only
-				if (!isSeaMonkey && VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.1a1pre") >= 0) {
+				var pref = null;
+				// Firefox only since SeaMonkey does not have separate preferences for on demand and on shutdown sanitation.
+				if (!isSeaMonkey) {
 					if (window.location == "chrome://browser/content/sanitize.xul") {
 						// Preference for "Clear Recent History" window (tools menu)
 						this.mSanitizePreference = "privacy.cpd.extensions-sessionmanager";
@@ -191,11 +220,16 @@ with (com.morac) {
 						this.mSanitizePreference = "privacy.clearOnShutdown.extensions-sessionmanager";
 					}
 				}
-				pref.setAttribute('id', this.mSanitizePreference);
-				pref.setAttribute('name', this.mSanitizePreference);
-				pref.setAttribute('type', 'bool');
-				prefs.appendChild(pref);
 
+				// SeaMonkey Sanitize.xul window does not contain preferences
+				if (prefs) {
+					pref = document.createElement('preference');
+					pref.setAttribute('id', this.mSanitizePreference);
+					pref.setAttribute('name', this.mSanitizePreference);
+					pref.setAttribute('type', 'bool');
+					prefs.appendChild(pref);
+				}
+				
 				if (lastListbox) {
 					var listitem = document.createElement('listitem');
 					listitem.setAttribute('label', this.sanitizeLabel.label);
@@ -203,7 +237,7 @@ with (com.morac) {
 					listitem.setAttribute('type', 'checkbox');
 					listitem.setAttribute('accesskey', this.sanitizeLabel.accesskey);
 					listitem.setAttribute('preference', this.mSanitizePreference);
-					listitem.setAttribute('oncommand', "com.morac.gSessionManager_preferencesOverlay.confirm(this)");
+					listitem.addEventListener("command", com.morac.SessionManagerAddon.gSessionManager_preferencesOverlay.confirm, true);
 					if (typeof(gSanitizePromptDialog) == 'object') {
 						listitem.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
 					}
@@ -212,9 +246,11 @@ with (com.morac) {
 				else if (lastCheckbox) {
 					var check = document.createElement('checkbox');
 					check.setAttribute('label', this.sanitizeLabel.label);
+					check.setAttribute('name', "extensions-sessionmanager");  // For SeaMonkey
+					check.setAttribute('id', "sessionmanager_checkbox");
 					check.setAttribute('accesskey', this.sanitizeLabel.accesskey);
 					check.setAttribute('preference', this.mSanitizePreference);
-					check.setAttribute('oncommand', "com.morac.gSessionManager_preferencesOverlay.confirm(this)");
+					check.addEventListener("command", com.morac.SessionManagerAddon.gSessionManager_preferencesOverlay.confirm, true);
 					if (typeof(gSanitizePromptDialog) == 'object') {
 						check.setAttribute('onsyncfrompreference', 'return gSanitizePromptDialog.onReadGeneric();');
 					}
@@ -229,18 +265,13 @@ with (com.morac) {
 					}
 				}
 
-				// Firefox 3 only
-				if ((typeof(gSanitizePromptDialog) == 'object') && (VERSION_COMPARE_SERVICE.compare(gSessionManager.mPlatformVersion,"1.9.1a1pre") < 0))
-				{
-					pref.setAttribute('readonly', 'true');
-				}
-			
-				// SeaMonkey needs to sync preference when display pref window
-				if (isSeaMonkey) pref.updateElements();
+				// If user is setting preference for clearing on shutdown (SeaMonkey only uses one preference so include it if preferences exist)  
+				if (pref && (isSeaMonkey || this.mSanitizePreference == "privacy.clearOnShutdown.extensions-sessionmanager")) 
+					pref.updateElements();
 			}
 		},
 
-		// This function is only ever called in Firefox 3.0 and SeaMonkey 2.0
+		// This function is only ever called in SeaMonkey
 		tryToSanitize: function () {
 			var prefService = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefBranch);
 			try {
@@ -262,8 +293,8 @@ with (com.morac) {
 			return true;
 		},
 
-		confirm: function (aElem) {
-			if (!aElem.checked) return;
+		confirm: function (aEvent) {
+			if (!aEvent.target.checked) return;
 
 			var timeframe = document.getElementById("sanitizeDurationChoice");
 			var txt = gSessionManager._string("delete_all_confirm") + (timeframe ? (" - " + timeframe.label) : "");
@@ -271,7 +302,7 @@ with (com.morac) {
 			var okay = PROMPT_SERVICE.confirmEx(null, gSessionManager._string("sessionManager"), txt, 
 												PROMPT_SERVICE.BUTTON_TITLE_YES * PROMPT_SERVICE.BUTTON_POS_0 + PROMPT_SERVICE.BUTTON_TITLE_NO * PROMPT_SERVICE.BUTTON_POS_1,
 												null, null, null, null, {});
-			aElem.checked = !okay;
+			aEvent.target.checked = !okay;
 		},
 		
 		unload: function() {

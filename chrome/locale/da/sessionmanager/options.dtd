@@ -94,3 +94,45 @@
 <!ENTITY hide_tools_menu.accesskey "V">
 <!ENTITY disable_cache_fixer.label "Deaktiver cache-fikser muligheden">
 <!ENTITY disable_cache_fixer.accesskey "D">
+<!ENTITY encrypted_only.label "Hvis kryptering slår fejl, gem IKKE data ukrypteret.">
+<!ENTITY encrypted_only.accesskey "n">
+<!ENTITY encrypt2.desc "Advarsel: Hvis dette felt er markeret og sessionen eller vindue-data ikke kan krypteres, går dataene tabt uden mulighed for genetablering. Kryptering vil slå fejl hvis hovedkodeordet ikke indtastes, så overvej det nøje før markering af denne boks.">
+<!ENTITY closed_window_list.label "Brug browserens indbyggede lukkede vinduer-liste">
+<!ENTITY closed_window_list.accesskey "u">
+<!ENTITY closed_windows.label "Genetabler listen over lukkede vinduer der kan åbnes igen:">
+<!ENTITY closed_windows.accesskey "s">
+<!ENTITY open_as_tabs.label "Åbn som faneblade i nuværende vindue">
+<!ENTITY open_as_tabs.accesskey "Å">
+<!ENTITY last_window_shutdown.label "Behandle lukning af sidste åbne browser-vindue som nedlukning">
+<!ENTITY last_window_shutdown.accesskey "t">
+<!ENTITY preselect_previous_session.label "For-vælg foregående session">
+<!ENTITY preselect_previous_session.accesskey "r">
+<!ENTITY logging.caption "Logning">
+<!ENTITY enable_logging.label "Aktiver logning">
+<!ENTITY enable_logging.accesskey "e">
+<!ENTITY open_log.label "Åbn logfil">
+<!ENTITY open_log.accesskey "o">
+<!ENTITY delete_log.label "Slet logfil">
+<!ENTITY delete_log.accesskey "g">
+<!ENTITY log_level_state.label "Log nedlukningstilstand">
+<!ENTITY log_level_state.accesskey "s">
+<!ENTITY log_level_trace.label "Log sporingsdata">
+<!ENTITY log_level_trace.accesskey "t">
+<!ENTITY log_level_data.label "Log variabeldata">
+<!ENTITY log_level_data.accesskey "v">
+<!ENTITY log_level_info.label "Log informationsmeddelelser">
+<!ENTITY log_level_info.accesskey "i">
+<!ENTITY log_level_extra.label "Log ekstra debugging-data">
+<!ENTITY log_level_extra.accesskey "e">
+<!ENTITY reload.label "Genindlæs alle genetablerede vinduer">
+<!ENTITY reload.accesskey "l">
+<!ENTITY overwrite.label "Erstat eksisterende vinduer">
+<!ENTITY overwrite.accesskey "r">
+<!ENTITY allow_saving_during_pbm.label "Tillad gem under Privat browsing-tilstand">
+<!ENTITY allow_saving_during_pbm.label2 "Kræver at kryptering er slået til">
+<!ENTITY allow_saving_during_pbm.accesskey "s">
+<!ENTITY session_name_in_titlebar.label "navnet på aktive sessioner i titellinjen">
+<!ENTITY session_name_in_titlebar.accesskey "n">
+<!ENTITY prepend.label "Foranstil">
+<!ENTITY append.label "Bagvedstil">
+<!ENTITY donotadd.label "Tilføj ikke">

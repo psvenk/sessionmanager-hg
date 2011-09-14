@@ -61,7 +61,7 @@
 <!ENTITY winTabTree.restoreHeader "Obnovit">
 <!ENTITY winTabTree.listHeader "Okna a panely">
 <!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
-<!ENTITY winTabTree.windowLabel "Okno &#37;S">
+<!ENTITY winTabTree.windowLabel "Okno č. &#37;S">
 <!ENTITY load.label "Načíst relaci...">
 <!ENTITY load.accesskey "l">
 <!ENTITY prompt.append.label "Připojit k relaci">
@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "Načíst (přidat k aktuálnímu oknu)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Ponechat toto okno otevřené">
+<!ENTITY clearTabList.label "Vyčistit seznam 'zavřených' panelů...">
+<!ENTITY clearTabList.accesskey "t">
+<!ENTITY clearWindowList.label "Vyčistit seznam 'zavřených' oken...">
+<!ENTITY clearWindowList.accesskey "v">
+<!ENTITY hidden.label "Skrytý">
+<!ENTITY contribute.label "Přispět">
+<!ENTITY support.label "Podpořte tento doplněk:">
+<!ENTITY session_group_verb.label "Skupina">
+<!ENTITY deleted_sessions.label "Smazané relace">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Odstranit všechny smazané relace">
+<!ENTITY empty_trash.accesskey "r">
+<!ENTITY permanently_delete.label "Trvale odstranit relaci">
+<!ENTITY permanently_delete.accesskey "T">
+<!ENTITY search.label "Hledat...">
+<!ENTITY edit.label "Upravit relaci...">
+<!ENTITY edit.accesskey "e">
+<!ENTITY addtab.label "Přidat do relace panel...">
+<!ENTITY addtab.accesskey "a">
+<!ENTITY viewcontents.label "Zobrazit obsah relace">
+<!ENTITY viewcontents.accesskey "V">
+<!ENTITY export_to_html.label "Exportovat obsah relace jako záložku ve formátu HTML">
+<!ENTITY export_to_html.accesskey "E">

@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Avbryt">
 <!ENTITY done.label "Färdig">
 <!ENTITY done.tooltip "Stäng sessionshanterarfönster">
+<!ENTITY session_load.label "Ladda">
+<!ENTITY session_load.accesskey "L">

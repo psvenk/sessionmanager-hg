@@ -43,8 +43,8 @@
 <!ENTITY session_name.label "Nome">
 <!ENTITY session_windows.label "Janelas">
 <!ENTITY session_tabs.label "Abas">
-<!ENTITY backup_sessions.label "Backup das Sessões">
-<!ENTITY backup_sessions.accesskey "B">
+<!ENTITY backup_sessions.label "Cópia de Segurança das Sessões">
+<!ENTITY backup_sessions.accesskey "C">
 <!ENTITY remove_item.label "Apagar item">
 <!ENTITY remove_item.accesskey "A">
 <!ENTITY session_group.label "Grupo">
@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "Carregar (Acrescenta à janela em Uso)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Mantenha esta janela aberta">
+<!ENTITY clearTabList.label "Limpar Lista de Abas 'Encerradas'">
+<!ENTITY clearTabList.accesskey "A">
+<!ENTITY clearWindowList.label "Limpar Lista de Janelas 'Encerradas'">
+<!ENTITY clearWindowList.accesskey "J">
+<!ENTITY hidden.label "Escondido">
+<!ENTITY contribute.label "Contribuir">
+<!ENTITY support.label "Apóie este complemento:">
+<!ENTITY session_group_verb.label "Grupo">
+<!ENTITY deleted_sessions.label "Sessões Apagadas">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Remove todas as sessões apagadas">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "Excluir permanentemente a sessão">
+<!ENTITY permanently_delete.accesskey "P">
+<!ENTITY search.label "Busca...">
+<!ENTITY edit.label "Editar Sessão...">
+<!ENTITY edit.accesskey "E">
+<!ENTITY addtab.label "Acrescentar aba à sessão...">
+<!ENTITY addtab.accesskey "A">
+<!ENTITY viewcontents.label "Ver o conteúdo da sessão">
+<!ENTITY viewcontents.accesskey "V">
+<!ENTITY export_to_html.label "Exportar o conteúdo da sessão para o arquivo HTML de favoritos">
+<!ENTITY export_to_html.accesskey "E">

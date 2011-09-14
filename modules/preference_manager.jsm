@@ -1,3 +1,5 @@
+var EXPORTED_SYMBOLS = ["gPreferenceManager"];
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cu = Components.utils;
@@ -5,30 +7,13 @@ const Cu = Components.utils;
 // import modules
 Cu.import("resource://sessionmanager/modules/logger.jsm");
 
-// Get lazy getter functions from XPCOMUtils or define them if they don't exist (only defined in Firefox 3.6 and up)
+// Get lazy getter functions from XPCOMUtils
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
-if (typeof XPCOMUtils.defineLazyGetter == "undefined") {
-	XPCOMUtils.defineLazyGetter = function XPCU_defineLazyGetter(aObject, aName, aLambda)
-	{
-		aObject.__defineGetter__(aName, function() {
-			delete aObject[aName];
-			return aObject[aName] = aLambda.apply(aObject);
-		});
-	}
-}
-if (typeof XPCOMUtils.defineLazyServiceGetter == "undefined") {
-	XPCOMUtils.defineLazyServiceGetter = function XPCU_defineLazyServiceGetter(aObject, aName, aContract, aInterfaceName)
-	{
-		this.defineLazyGetter(aObject, aName, function XPCU_serviceLambda() {
-			return Cc[aContract].getService(Ci[aInterfaceName]);
-		});
-	}
-}
 
 // Lazily define services
 XPCOMUtils.defineLazyServiceGetter(this, "mObserverService", "@mozilla.org/observer-service;1", "nsIObserverService");
 XPCOMUtils.defineLazyServiceGetter(this, "mPreferenceBranch", "@mozilla.org/preferences-service;1", "nsIPrefBranch2");
-XPCOMUtils.defineLazyServiceGetter(this, "NATIVE_JSON", "@mozilla.org/dom/json;1", "nsIJSON");
+XPCOMUtils.defineLazyServiceGetter(this, "VERSION_COMPARE_SERVICE", "@mozilla.org/xpcom/version-comparator;1", "nsIVersionComparator");
 if (Cc["@mozilla.org/fuel/application;1"]) {
 	XPCOMUtils.defineLazyServiceGetter(this, "Application", "@mozilla.org/fuel/application;1", "fuelIApplication");
 }
@@ -40,8 +25,6 @@ else if (Cc["@mozilla.org/smile/application;1"]) {
 const OLD_PREFERENCE_ROOT = "extensions.sessionmanager.";
 const PREFERENCE_ROOT = "extensions.{1280606b-2510-4fe0-97ef-9b5a22eafe30}.";
 const SM_UUID = "{1280606b-2510-4fe0-97ef-9b5a22eafe30}";
-
-var EXPORTED_SYMBOLS = ["gPreferenceManager"];
 
 var smPreferenceBranch = null;
 var _initialized = false;
@@ -60,6 +43,24 @@ var gPreferenceManager = {
 			movePreferenceRoot();
 			_initialized = true;
 		}
+	},
+	
+	getAllPrefs: function() {
+		let count = {}, prefs = [];
+		let children = smPreferenceBranch.getChildList("",count);
+		// Firefix 3.6 and earlier don't like the "extension.{GUID}" string and complaing about "overlarge minimum"
+		// so cut off the "extensions." part which works just as well.
+		let regex = new RegExp(PREFERENCE_ROOT.replace(/extensions./,"") + "(.*)");
+		for (let i=0; i < children.length; i++) {
+			try {
+				let pref = Application.prefs.get(PREFERENCE_ROOT + children[i]);
+				let match = pref.name.match(regex);
+				if (match) prefs.push({ name: match[1], value: pref.value });
+			} catch(ex) {
+				logError(ex);
+			}
+		}
+		return prefs;
 	},
 
 	has: function(aName, aUseRootBranch) 
@@ -140,6 +141,9 @@ var gPreferenceManager = {
 		let file = chooseFile(false);
 		if (!file) return;
 	
+		// save current version 
+		let currentVersion = this.get("version", "");
+	
 		let prefsString = "";  
 		let success = true;
 		let reason = "";
@@ -158,7 +162,7 @@ var gPreferenceManager = {
 			}  
 			cstream.close(); // this closes fstream  		
 		
-			let prefs = NATIVE_JSON.decode(prefsString);
+			let prefs = JSON.parse(prefsString);
 			if (prefs.length) {
 				for (let i=0; i<prefs.length; i++) {
 					this.set(prefs[i].name, prefs[i].value);
@@ -171,7 +175,30 @@ var gPreferenceManager = {
 			logError(ex); 
 		}
 		
+		// Correct any inconsistencies do to updating restoring old version number (see session_manager.jsm::checkForUpdate
+		let restoreVersion = this.get("version", "");
+		// these aren't used anymore so delete if they exist
+		if (VERSION_COMPARE_SERVICE.compare(restoreVersion, "0.6.2.5") < 0) this.delete("_no_reload");
+		if (VERSION_COMPARE_SERVICE.compare(restoreVersion, "0.7.6") < 0) this.delete("disable_cache_fixer");
+		// New version doesn't automatically append "sessions" to user chosen directory so
+		// convert existing preference to point to that folder.
+		if (VERSION_COMPARE_SERVICE.compare(restoreVersion, "0.7") < 0) {
+			if (this.get("sessions_dir", null)) {
+				let dir = this.getUserDir("sessions");
+				this.set("sessions_dir", dir.path)
+			}
+		}
+		this.set("version", currentVersion);
+		
 		let window = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator).getMostRecentWindow("SessionManager:Options");
+		
+		// update options window for preferences that don't automatically update window
+		if (success) {
+			window.updateSpecialPreferences();
+			window.disableApply();
+		}
+
+		// put up alert
 		let bundle = Cc["@mozilla.org/intl/stringbundle;1"].getService(Ci.nsIStringBundleService).createBundle("chrome://sessionmanager/locale/sessionmanager.properties");
 		let text = success ? bundle.GetStringFromName("import_successful") :  (bundle.GetStringFromName("import_failed") + " - " + reason);
 		Cc["@mozilla.org/embedcomp/prompt-service;1"].getService(Ci.nsIPromptService).alert(window, bundle.GetStringFromName("import_prompt"), text);
@@ -200,7 +227,7 @@ var gPreferenceManager = {
 				for (let i=0; i<prefs.length; i++) {
 					myprefs.push({ name: prefs[i].name, value: prefs[i].value });
 				}
-				prefsString = NATIVE_JSON.encode(myprefs);
+				prefsString = JSON.stringify(myprefs);
 				
 				// file is nsIFile, prefsString is a string
 				let foStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
@@ -296,9 +323,10 @@ function chooseFile(aSave)
 	let window = Cc['@mozilla.org/appshell/window-mediator;1'].getService(Ci.nsIWindowMediator).getMostRecentWindow("SessionManager:Options");
 	
 	filepicker.init(window, bundle.GetStringFromName((aSave ? "export" : "import") + "_prompt"), (aSave ? nsIFilePicker.modeSave : nsIFilePicker.modeOpen));
-	filepicker.appendFilter(bundle.GetStringFromName("settings_file_extension_description"), "*.session_manager_settings");
+	filepicker.appendFilter(bundle.GetStringFromName("settings_file_extension_description"), "*." + bundle.GetStringFromName("session_manager_settings_file_extension"));
 	filepicker.defaultString = bundle.GetStringFromName("default_settings_file_name");
 	filepicker.defaultExtension = bundle.GetStringFromName("settings_file_extension");
+    if (!aSave) filepicker.appendFilters(nsIFilePicker.filterAll);
 	var ret = filepicker.show();
 	if (ret == nsIFilePicker.returnOK || ret == nsIFilePicker.returnReplace) {
 		return filepicker.file;

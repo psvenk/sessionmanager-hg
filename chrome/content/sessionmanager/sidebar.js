@@ -71,7 +71,6 @@ var treeView = {
 	updateList: function() {
 		if (!this.allowUpdate) return;
 		this.allowUpdate = false;
-		var windowSessions = this.gSessionManager.getWindowSessions();
 		var sessions = this.gSessionManager.getSessions();
 
 		// clear out existing items from tree
@@ -104,7 +103,7 @@ var treeView = {
 			if ((sessions.latestBackUpTime == aSession.timestamp) || (sessions.latestTime == aSession.timestamp)) {
 				property = property + "latest ";
 			}
-			if ((aSession.name == this.gSessionManager.mPref__autosave_name) || (windowSessions[aSession.name.trim().toLowerCase()])) {
+			if ((aSession.fileName == this.gSessionManager.mPref["_autosave_filename"]) || (this.gSessionManager.mActiveWindowSessions[aSession.fileName])) {
 				property = property + "disabled";
 			}
 			if (property) name.setAttribute("properties", property);
@@ -159,13 +158,6 @@ var treeView = {
 		
 		//this.gSessionManager.load(filename, (event.shiftKey && (event.ctrlKey || event.metaKey))?"overwrite":(event.shiftKey)?"newwindow":(event.ctrlKey || event.metaKey)?"append":"");
 	}
-}
-
-// String.trim is not defined in Firefox 3.0, so define it here if it isn't already defined.
-if (typeof(String.trim) != "function") {
-	String.prototype.trim = function() {
-		return this.replace(/^\s+|\s+$/g, "");
-	};
 }
 
 window.addEventListener("load", onLoad, false);

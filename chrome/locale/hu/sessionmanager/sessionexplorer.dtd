@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Mégse">
 <!ENTITY done.label "Kész">
 <!ENTITY done.tooltip "A munkamenet-intéző ablak bezárása">
+<!ENTITY session_load.label "Betöltés">
+<!ENTITY session_load.accesskey "B">

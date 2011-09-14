@@ -5,7 +5,7 @@
 <!ENTITY session_open_overwrite.accesskey "T">
 <!ENTITY session_open_overwrite.tooltip "Otworzyć wybraną sesję?">
 <!ENTITY session_open_newwindow.label "Otwórz (w nowym oknie)">
-<!ENTITY session_open_newwindow.accesskey "W">
+<!ENTITY session_open_newwindow.accesskey "N">
 <!ENTITY session_open_newwindow.tooltip "Otworzyć wybraną sesję?">
 <!ENTITY session_open_append.label "Otwórz (dołącz)">
 <!ENTITY session_open_append.accesskey "R">
@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Anuluj">
 <!ENTITY done.label "Wykonano">
 <!ENTITY done.tooltip "Zamyka okno eksploratora sesji">
+<!ENTITY session_load.label "Wczytaj">
+<!ENTITY session_load.accesskey "W">

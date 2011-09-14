@@ -10,18 +10,18 @@
 <!ENTITY session_open_append.label "Открыть (добавить)">
 <!ENTITY session_open_append.accesskey "д">
 <!ENTITY session_open_append.tooltip "Открыть выбранную сессию">
-<!ENTITY session_rename.label "Переименовать...">
+<!ENTITY session_rename.label "Переименовать…">
 <!ENTITY session_rename.accesskey "П">
 <!ENTITY session_rename.tooltip "Переименовать выбранную сессию">
 <!ENTITY session_rename_ok.label "Переименовать">
 <!ENTITY session_delete.label "Удалить">
 <!ENTITY session_delete.accesskey "У">
 <!ENTITY session_delete.tooltip "Удалить выбранную сессию">
-<!ENTITY session_save.label "Сохранить...">
+<!ENTITY session_save.label "Сохранить…">
 <!ENTITY session_save.accesskey "С">
 <!ENTITY session_save.tooltip "Сохранить открытые окна в новую сессию">
 <!ENTITY session_save_ok.label "Сохранить">
-<!ENTITY session_save_w.label "Сохранить окно...">
+<!ENTITY session_save_w.label "Сохранить окно…">
 <!ENTITY session_save_w.accesskey "О">
 <!ENTITY session_save_w.tooltip "Сохранить текущее окно в новую сессию">
 <!ENTITY session_save_w_ok.label "Сохранить окно">
@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Отменить">
 <!ENTITY done.label "Готово">
 <!ENTITY done.tooltip "Закрыть окно обозревателя сессий">
+<!ENTITY session_load.label "Загрузить">
+<!ENTITY session_load.accesskey "З">

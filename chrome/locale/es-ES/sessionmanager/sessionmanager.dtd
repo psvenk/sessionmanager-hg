@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "Cargar (Añadir a la ventana actual)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Dejar esta ventana abierta">
+<!ENTITY clearTabList.label "Borrar la lista de las pestañas &apos;cerradas&apos;">
+<!ENTITY clearTabList.accesskey "B">
+<!ENTITY clearWindowList.label "Borrar la lista de las ventanas &apos;cerradas&apos;">
+<!ENTITY clearWindowList.accesskey "v">
+<!ENTITY hidden.label "Oculto">
+<!ENTITY contribute.label "Colaborar">
+<!ENTITY support.label "Colaboran con este complemento:">
+<!ENTITY session_group_verb.label "Grupo">
+<!ENTITY deleted_sessions.label "Sesiones borradas">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Borrar todas las sesiones borradas">
+<!ENTITY empty_trash.accesskey "B">
+<!ENTITY permanently_delete.label "Borrar permanentemente la sesión">
+<!ENTITY permanently_delete.accesskey "P">
+<!ENTITY search.label "Buscar...">
+<!ENTITY edit.label "Editar sesión...">
+<!ENTITY edit.accesskey "E">
+<!ENTITY addtab.label "Añadir pestaña a la sesión...">
+<!ENTITY addtab.accesskey "A">
+<!ENTITY viewcontents.label "Ver contenido de la sesión">
+<!ENTITY viewcontents.accesskey "V">
+<!ENTITY export_to_html.label "Exportar el contenido de la sesión a un archivo de marcadores HTML">
+<!ENTITY export_to_html.accesskey "E">

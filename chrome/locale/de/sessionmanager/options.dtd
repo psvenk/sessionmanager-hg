@@ -1,7 +1,7 @@
 <!ENTITY options.title "&sessionManager; - Einstellungen">
 <!ENTITY general.caption "Allgemein">
-<!ENTITY startNend.caption "Starten &amp; Beenden">
-<!ENTITY resume_sess.label "Beim Starten des Browsers folgende Sitzung laden:">
+<!ENTITY startNend.caption "Start &amp; Beenden">
+<!ENTITY resume_sess.label "Beim Start des Browsers folgende Sitzung laden:">
 <!ENTITY resume_sess.accesskey "S">
 <!ENTITY backup_sess.label "Beim Beenden:">
 <!ENTITY backup_sess.accesskey "B">
@@ -19,8 +19,8 @@
 <!ENTITY orderList.label1 "alphabetisch">
 <!ENTITY orderList.label2 "nach Alter (absteigend)">
 <!ENTITY orderList.label_2 "nach Alter (aufsteigend)">
-<!ENTITY max_backup.label "Anzahl vorhergehender (abgestürzter) Sitzungs-Backups:">
-<!ENTITY max_backup.accesskey "K">
+<!ENTITY max_backup.label "Anzahl vorhergehender (abgestürzter) Sitzungs-Sicherungen:">
+<!ENTITY max_backup.accesskey "c">
 <!ENTITY undoClose.caption "Wiederherstellen">
 <!ENTITY windowsNtabs.caption "Geschlossene Fenster &amp; Tabs">
 <!ENTITY max_closed.label "Maximale Anzahl wiederherstellbarer geschlossener Fenster:">
@@ -30,14 +30,14 @@
 <!ENTITY submenu.label "Alle geschlossenen Fenster und Tabs in Untermenü anzeigen">
 <!ENTITY submenu.accesskey "U">
 <!ENTITY persistence.caption "Beständigkeit der Liste">
-<!ENTITY closed_tabs.label "Liste der geschlossenen Tabs für alle Fenster wiederherstellen:">
+<!ENTITY closed_tabs.label "Liste geschlossener Tabs für alle Fenster wiederherstellen:">
 <!ENTITY closed_tabs.accesskey "g">
 <!ENTITY closed_tabs.label0 "nie">
 <!ENTITY closed_tabs.label1 "beim Start">
 <!ENTITY closed_tabs.label2 "immer">
-<!ENTITY window_list.label "Die Liste der geschlossenen Fenster beim Beenden nicht löschen">
+<!ENTITY window_list.label "Die Liste geschlossener Fenster beim Beenden nicht löschen">
 <!ENTITY window_list.accesskey "L">
-<!ENTITY clear_list.label "Liste jetzt löschen">
+<!ENTITY clear_list.label "Listen jetzt löschen">
 <!ENTITY clear_list.accesskey "e">
 <!ENTITY advanced.caption "Erweitert">
 <!ENTITY name_format.caption "Sitzungs-Namen">
@@ -62,7 +62,7 @@
 <!ENTITY encrypt.desc "Warnung: Verschlüsselte Sitzungsdaten können nur in Profilen mit identischen key3.db- und cert8.db-Dateien geöffnet werden! Wenn zudem ein Master-Passwort gesetzt wurde, können die Sitzungen nicht ohne Eingabe des Master-Passworts ver- oder entschlüsselt werden.">
 <!ENTITY encrypt.label "Gesicherte Sitzungen und Daten für geschlossene Fenster verschlüsseln">
 <!ENTITY encrypt.accesskey "v">
-<!ENTITY change_dir.label "Ändern...">
+<!ENTITY change_dir.label "Ändern…">
 <!ENTITY change_dir.accesskey "Ä">
 <!ENTITY default_dir.label "Standard wiederherstellen">
 <!ENTITY default_dir.accesskey "w">
@@ -78,11 +78,11 @@
 <!ENTITY selectSession.accesskey "S">
 <!ENTITY cookies.label "Sitzungs-Cookies sichern">
 <!ENTITY cookies.accesskey "C">
-<!ENTITY sessionImport.caption "Sitzungen importieren von...">
+<!ENTITY sessionImport.caption "Sitzungen importieren von…">
 <!ENTITY importSS.label "SessionSaver">
-<!ENTITY importSS.accesskey "I">
+<!ENTITY importSS.accesskey "o">
 <!ENTITY importTMP.label "Tab Mix Plus">
-<!ENTITY importTMP.accesskey "I">
+<!ENTITY importTMP.accesskey "P">
 <!ENTITY apply.label "Übernehmen">
 <!ENTITY save_and_restore.caption "Sichern &amp; Wiederherstellen">
 <!ENTITY display.caption "Anzeige">
@@ -99,7 +99,7 @@
 <!ENTITY encrypt2.desc "Warnung: Alle Daten gehen unwiederbringlich verloren, wenn diese Option aktiviert wird und Sitzungs- oder Fensterdaten nicht verschlüsselt werden können. Dies ist der Fall, wenn das Master-Passwort verlangt aber nicht eingegeben wird. Überlegen Sie also gut, ob sie diese Option aktivieren!">
 <!ENTITY closed_window_list.label "Liste der Bowser-Chronik für geschlossene Fenster verwenden">
 <!ENTITY closed_window_list.accesskey "w">
-<!ENTITY closed_windows.label "Liste der geschlossenen Fenster wiederherstellen:">
+<!ENTITY closed_windows.label "Liste geschlossener Fenster wiederherstellen:">
 <!ENTITY closed_windows.accesskey "s">
 <!ENTITY open_as_tabs.label "Als Tabs im aktuellen Fenster öffnen">
 <!ENTITY open_as_tabs.accesskey "T">
@@ -131,8 +131,47 @@
 <!ENTITY allow_saving_during_pbm.label "Sichern im Privaten Modus erlauben">
 <!ENTITY allow_saving_during_pbm.label2 "Erfordert aktivierte Verschlüsselung, siehe &quot;Erweitert&quot;">
 <!ENTITY allow_saving_during_pbm.accesskey "S">
-<!ENTITY session_name_in_titlebar.label "Namen der aktiven Sitzung in der Titelzeile anzeigen">
+<!ENTITY session_name_in_titlebar.label "des Namens der aktiven Sitzungen in der Titelzeile">
 <!ENTITY session_name_in_titlebar.accesskey "N">
 <!ENTITY prepend.label "Voranstellen">
 <!ENTITY append.label "Anfügen">
-<!ENTITY donotadd.label "Nicht hinzufügen">
+<!ENTITY donotadd.label "Keine Anzeige">
+<!ENTITY use_browser_crash_prompt.label "Browser-eigene Sitzungswiederherstellungs-Aufforderung nach Absturz verwenden">
+<!ENTITY use_browser_crash_prompt.accesskey "v">
+<!ENTITY reset_warnings.label "Warnmeldungen zurücksetzen">
+<!ENTITY reset_warnings.accesskey "r">
+<!ENTITY export_settings.label "Einstellungen exportieren">
+<!ENTITY export_settings.accesskey "X">
+<!ENTITY import_settings.label "Einstellungen importieren">
+<!ENTITY import_settings.accesskey "I">
+<!ENTITY settingsImportExport.caption "Einstellungen importieren/exportieren">
+<!ENTITY keyboard.caption "Tastaturkürzel">
+<!ENTITY keyboard.desc "Um ein Tastaturkürzel für eine Aktion zu verwenden, geben Sie es hier ein, andernfalls lassen Sie das Feld leer. Änderungen werden nicht auf bestehende Fenster angewendet.">
+<!ENTITY clear.label "Löschen">
+<!ENTITY clear.accesskey "C">
+<!ENTITY clear_tab_list.label "Geschlossene Tabs löschen">
+<!ENTITY clear_tab_list.accesskey "a">
+<!ENTITY clear_window_list.label "Geschlossene Fenster löschen">
+<!ENTITY clear_window_list.accesskey "r">
+<!ENTITY backup_on_restart.label "Sitzungs-Backup anlegen beim Browser-Neustart">
+<!ENTITY backup_on_restart.accesskey "N">
+<!ENTITY keep_deleted_sessions.label "Tage, die gelöschte Sitzungen vorläufig behalten werden sollen:">
+<!ENTITY keep_deleted_sessions.accesskey "b">
+<!ENTITY concurrent.label "Anzahl gleichzeitig wiederherzustellender Tabs:">
+<!ENTITY concurrent.accesskey "g">
+<!ENTITY do_not_color_toolbar_button.label "Schaltfläche nicht einfärben, wenn Sitzungen geladen wurden">
+<!ENTITY do_not_color_toolbar_button.accesskey "S">
+<!ENTITY preserve_app_tabs.label "Angepinnte App-Tabs nicht ersetzen">
+<!ENTITY preserve_app_tabs.accesskey "z">
+<!ENTITY logging_to_console.label "Auch in die Fehlerkonsole schreiben">
+<!ENTITY logging_to_console.accesskey "k">
+<!ENTITY update_message.label "Update-Webseite anzeigen nach einem Update">
+<!ENTITY update_message.accesskey "S">
+<!ENTITY show_icon_in_menu.label "Symbol im Menü &quot;Extras&quot; anzeigen">
+<!ENTITY show_icon_in_menu.accesskey "S">
+<!ENTITY set_encryption_password.label "Geben Sie ein Passwort ein, um Ihren Sitzungs-Schlüssel zu schützen">
+<!ENTITY set_encryption_password.accesskey "z">
+<!ENTITY change_encryption_key_password.label "Verschlüsselungs-Passwort ändern">
+<!ENTITY change_encryption_key_password.accesskey "P">
+<!ENTITY save_encryption_key.label "Verschlüsselungs-Passwort im Browser-Passwort-Manager speichern">
+<!ENTITY save_encryption_key.accesskey "M">

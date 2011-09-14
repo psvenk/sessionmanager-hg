@@ -38,6 +38,7 @@
 // Create a namespace so as not to polute the global namespace
 if(!com) var com={};
 if(!com.morac) com.morac={};
+if(!com.morac.SessionManagerAddon) com.morac.SessionManagerAddon={};
 
 Components.utils.import("resource://sessionmanager/modules/logger.jsm");
 Components.utils.import("resource://sessionmanager/modules/session_manager.jsm");
@@ -46,8 +47,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 // use the namespace
-with (com.morac) {
-	com.morac.gSessionManagerSessionBrowser = {
+with (com.morac.SessionManagerAddon) {
+	com.morac.SessionManagerAddon.gSessionManagerSessionBrowser = {
 
 		gTabTree: null,
 		gWinLabel: null,
@@ -65,31 +66,11 @@ with (com.morac) {
 		aShowWindowSessions: false,
 		
 		updateData: null,
-		oneWindow: false,
+		oneWindow: null,
 		
-		// If auto-save checkbox is visible, this means we are saving so notify windows to listen for tab moves and page loads, otherwise tell them not to listen
-		// Only send notification if tab tree is also visible and not saving window
-		autoSaveCheckBoxChange: function(aEvent) {
-			if ((aEvent.attrName == "hidden") && gSessionManagerSessionPrompt.gParams.callbackData && !gSessionManagerSessionPrompt.gParams.callbackData.oneWindow) {
-				var wasTabTreeVisible = gSessionManager.savingTabTreeVisible;
-				gSessionManager.savingTabTreeVisible = (aEvent.newValue != "true");
-
-				// If status changed, notifiy windows
-				if (wasTabTreeVisible != gSessionManager.savingTabTreeVisible) {
-					OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:save-tab-tree-change", gSessionManager.savingTabTreeVisible ? "open" : "close");
-				}
-			}
-		},
-
 		onUnload_proxy: function(aEvent) {
 			this.removeEventListener("unload", gSessionManagerSessionBrowser.onUnload_proxy, false);
 			OBSERVER_SERVICE.removeObserver(gSessionManagerSessionBrowser, "sessionmanager:update-tab-tree");
-			
-			// if windows are watching for page loads and tab moves tell them to stop
-			if (gSessionManager.savingTabTreeVisible) {
-				gSessionManager.savingTabTreeVisible = false;
-				OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:save-tab-tree-change", "close");
-			}
 		},
 		
 		// Used to update tree when session data changes
@@ -111,7 +92,7 @@ with (com.morac) {
 					var data = aData.split(" ");
 					if ((data[0] == "load") || (data[0] == "pageshow")) {
 						timeout = 200;
-						var id = aSubject.com.morac.gSessionManagerWindowObject.__SessionManagerWindowId + " " + data[1] + " " + data[2];
+						var id = aSubject.com.morac.SessionManagerAddon.gSessionManagerWindowObject.__SessionManagerWindowId + " " + data[1] + " " + data[2];
 						// If timer already set for a load on thie tab, clear it and start the timer again.  This can result
 						// in loads getting out of sync with other tab events since other events have a 100 ms wait time.
 						if (this.gTimerId && this.gLastLoadedTab == id) {
@@ -135,32 +116,33 @@ with (com.morac) {
 			}
 		},
 		
-		// used to copy "hidden" attribute to "_hidden" for persisting.  We can't persist "hidden" since that's 
-		// explicitly set to true for Firefox 3.6 and lower.
-		hiddenTabgroupChange: function(aEvent) {
-			if (aEvent.attrName == "hidden") 
-				aEvent.target.setAttribute("_hidden", (aEvent.target.hidden ? "true" : "false"));
-		},
-		
 		initTreeView: function(aFileName, aDeleting, aStartupPrompt, aSaving, aUpdate) {
+			var firstTime = false;
 		
 			// Initialize common values
 			if (!this.gTabTree) {
 				this.gTabTree = document.getElementById("tabTree");
 				this.gWinLabel = this.gTabTree.getAttribute("_window_label");
+				firstTime = true;
 			}
 			this.aShowWindowSessions = false;
-		
+
 			// If updating call updateTree function otherwise wipe out old tree data and repopulate it
 			if (aUpdate) {
-				this.updateTree();
+				// If saving one window and update isn't for that window, don't do anything
+				if (!this.oneWindow || (this.updateData.window == this.oneWindow)) {
+					this.updateTree();
+					// update menu if no windows open
+					gSessionManagerSessionPrompt.checkForNoWindows();
+				}
 			}
 			else {
 				var state = null, currentSession = false;
-				this.oneWindow = gSessionManagerSessionPrompt.gParams.callbackData && gSessionManagerSessionPrompt.gParams.callbackData.oneWindow;
+				// Save off current window if saving one window so we can tell if it gets updated
+				this.oneWindow = (gSessionManagerSessionPrompt.gParams.callbackData && gSessionManagerSessionPrompt.gParams.callbackData.oneWindow) ? gSessionManager.getMostRecentWindow("navigator:browser") : null;
 			
-				// Tab groups only exist in Firefox 4.0 and higher
-				if ((Application.name.toUpperCase() == "FIREFOX") && (VERSION_COMPARE_SERVICE.compare(Application.version, "4.0b4pre") >= 0)) {
+				// Tab groups only exist in Firefox 4.0 and higher (only do once per session manager window open)
+				if (firstTime && (Application.name.toUpperCase() == "FIREFOX") && (VERSION_COMPARE_SERVICE.compare(Application.version, "4.0b4pre") >= 0)) {
 					var tabgroup = document.getElementById("tabgroup");
 					var hidden = document.getElementById("hidden");
 					var hidden_hidden = hidden.getAttribute("_hidden");
@@ -179,8 +161,8 @@ with (com.morac) {
 				this.gAllTabsChecked = true;
 				this.treeView.initialize();
 				
-				// Watch for session changes when saving sessions (not windows)
-				if (aSaving && !this.gObserving && !this.oneWindow) {
+				// Watch for session changes when saving sessions
+				if (aSaving && !this.gObserving) {
 					window.addEventListener("unload", gSessionManagerSessionBrowser.onUnload_proxy, false);
 					this.gObserving = true;
 					OBSERVER_SERVICE.addObserver(gSessionManagerSessionBrowser, "sessionmanager:update-tab-tree", false);
@@ -192,7 +174,7 @@ with (com.morac) {
 				// If Saving show current session in tabs
 				if (aSaving) {
 					try {
-						state = this.oneWindow ? SessionStore.getWindowState(this.getBrowserWindow()) : SessionStore.getBrowserState();
+						state = this.oneWindow ? SessionStore.getWindowState(this.oneWindow) : SessionStore.getBrowserState();
 					} catch(ex) { 
 						logError(ex);
 						return; 
@@ -239,6 +221,23 @@ with (com.morac) {
 				if (!state) return;
 				state = gSessionManager.JSON_decode(state);
 				if (!state || state._JSON_decode_failed) return;
+				
+				// If the invalid session flag is set resave with valid data (do this here since it's the only
+				// place where we know the filename while decoding the data
+				if (state._fixed_bad_JSON_data) {
+					delete state._fixed_bad_JSON_data;
+					// read the header
+					var file = gSessionManager.getSessionDir(aFileName);
+					var new_state = gSessionManager.readSessionFile(file, true);
+					new_state = new_state.split("\n");
+					new_state[4] = gSessionManager.JSON_encode(state);
+					new_state[4] = gSessionManager.decryptEncryptByPreference(new_state[4], true);
+					if (new_state[4] && (typeof(new_state[4]) == "string")) {
+						new_state = new_state.join("\n");
+						gSessionManager.writeFile(file, new_state);
+						log("Fixed invalid session file " + aFileName, "INFO");
+					}
+				}
 
 				// Save new state
 				this.gStateObject = state;
@@ -257,7 +256,7 @@ with (com.morac) {
 			var windowSessionName = null;
 			if (this.aShowWindowSessions) {
 				windowSessionName = (aWinData.extData) ? aWinData.extData["_sm_window_session_values"] : null;
-				windowSessionName = (windowSessionName) ? (gSessionManager._string("window_session") + "   " + windowSessionName.split("\n")[0]) : null;
+				windowSessionName = (windowSessionName) ? (gSessionManager._string("window_session") + "   " + windowSessionName.split("\n")[1]) : null;
 			}
 			// Try to find tab group nanes if they exists, 0 is the default group and has no name
 			var tab_groups = { 0:"" };
@@ -265,7 +264,6 @@ with (com.morac) {
 				var tabview_groups = gSessionManager.JSON_decode(aWinData.extData["tabview-group"], true);
 				if (tabview_groups && !tabview_groups._JSON_decode_failed) {
 					for (var id in tabview_groups) {
-						if (!tab_groups) tab_groups = {};
 						tab_groups[id] = tabview_groups[id].title;
 					}
 				}
@@ -286,6 +284,17 @@ with (com.morac) {
 				this.gTreeData.push(tab);
 		},
 		
+		findGroupID: function(aTabData) {
+			// Try to find tab group ID if it exists, 0 is default group
+			var groupID = 0;
+			if (aTabData.extData && aTabData.extData["tabview-tab"]) {
+				var tabview_data = gSessionManager.JSON_decode(aTabData.extData["tabview-tab"], true);
+				if (tabview_data && !tabview_data._JSON_decode_failed) 
+					groupID = tabview_data.groupID;
+			}
+			return groupID;
+		},
+		
 		addTabStateObjectToTree: function(aTabData, aWinParentState) {
 			var entry = aTabData.entries[aTabData.index - 1] || { url: "about:blank" };
 			var iconURL = aTabData.attributes && aTabData.attributes.image || null;
@@ -295,12 +304,7 @@ with (com.morac) {
 				if (iconURL) iconURL = iconURL[1];
 			}
 			// Try to find tab group ID if it exists, 0 is default group
-			var groupID = 0;
-			if (aTabData.extData && aTabData.extData["tabview-tab"]) {
-				var tabview_data = gSessionManager.JSON_decode(aTabData.extData["tabview-tab"], true);
-				if (tabview_data && !tabview_data._JSON_decode_failed) 
-					groupID = tabview_data.groupID;
-			}
+			var groupID = this.findGroupID(aTabData);
 			// Trying to display a favicon for an https with an invalid certificate will throw up an exception box, so don't do that
 			// Firefox's about:sessionrestore also fails with authentication requests, but Session Manager seems okay with that so just
 			// use the work around for https.
@@ -312,7 +316,7 @@ with (com.morac) {
 				checked: true,
 				hidden: aTabData.hidden,
 				group: groupID,
-				groupName: aWinParentState.tabGroups[groupID] || (groupID ? groupID : ""),
+				groupName: (aWinParentState && aWinParentState.tabGroups && aWinParentState.tabGroups[groupID]) || (groupID ? groupID : ""),
 				src: iconURL,
 				parent: aWinParentState
 			};
@@ -333,8 +337,11 @@ with (com.morac) {
 		// This is called any time there is an updated tab event or window event.  In all cases:
 		//    - updateData.window contains window object that is opening or closing or that contains the tab.
 		//    - data[0] contains a string of what happened (TabOpen, TabClose, TabMove, load, pageshow, locationChange, iconChange, windowOpen or windowClose)
+		//              In Firefox 4 or higher it can also be tabviewhidden to indicate that the tab candy screen was closed.  
+		//              In that case data[1] and data[2] are null.
 		//    - data[1] contains the tab position for tabs or the extData.__SessionManagerWindowId window value for windows
 		//    - data[2] contains the original tab position for TabMove.  It contains the favicon URL for load (or pageshow). It is undefined for all other events.
+		//    - data[3] contains the label of the tab if data[0] is iconChange.  This is needed because the label isn't always set correctly in SeaMonkey in the window state.
 		//
 		// Note: Currently "load" is only used in Firefox 3.5 and lower and locationChange and iconChange is only used in Firefox 3.6 and higher.  
 		//       pageshow isn't currently used, but left here for compatibility reasons.
@@ -348,24 +355,71 @@ with (com.morac) {
 				if (!new_window_state || new_window_state._JSON_decode_failed) return;
 			}
 
+			switch(data[0]) {
 			// If window is opening add it's state to end of current state since open windows are added to the end of the session
-			if (data[0] == "windowOpen") {
+			// If SeaMonkey opens with multiple tabs, it includes them here, but also fires a "TabOpen" event.  As such there will be an
+			// extra blank tab in our list.  I'm not sure what I can do about that really.
+			case "windowOpen":
 				var row = this.treeView.rowCount;
+				//dump(new_window_state.windows[0].toSource() + "\n");
 				this.addWindowStateObjectToTree(new_window_state.windows[0], this.gStateObject.windows.length);
 				this.gTabTree.treeBoxObject.rowCountChanged(row, new_window_state.windows[0].tabs.length + 1);
 				this.gStateObject.windows.push(new_window_state.windows[0]);
 				this.gStateObject.windows.selectedWindow = this.gStateObject.windows.length - 1;
-			}
-			else {
+				break;
+			// If tab view was hidden replace window data since states of tabs may have changed.  Do this by adding updated
+			// window to end of gTreeData and then moving it into the correct position, replacing the existing data
+			case "tabviewhidden":
+				// Look for updated window and replace it
+				var window_id = SessionStore.getWindowValue(this.updateData.window,"__SessionManagerWindowId");
+				for (var i=0; i<this.gStateObject.windows.length; i++) {
+					// find matching window in gStateObject
+					if (this.gStateObject.windows[i].extData && (this.gStateObject.windows[i].extData.__SessionManagerWindowId == window_id)) {
+						// find matching window in gTreeData
+						for (var j=0; j<this.gTreeData.length; j++) {
+							// if window found
+							if (this.gTreeData[j].ix == i) {
+								var windowOpen = this.gTreeData[j].open;;
+								var current_length = this.gTreeData.length;
+								this.addWindowStateObjectToTree(new_window_state.windows[0], i);
+								var winTabLength = this.gTreeData.length - current_length;
+								// Remove added window and update opened variable.
+								var winState = this.gTreeData.splice(current_length, winTabLength);
+								if (!windowOpen) {
+									winState.splice(1, winTabLength - 1);
+									winState[0].open = false;
+								}
+								// splice in new window, need to do it this way because winState is an array.
+								var k = 0;
+								while (winState.length) {
+									this.gTreeData.splice(j + k++, 1, winState.shift());
+								}
+								// update view
+								if (windowOpen)
+									this.treeView.treeBox.invalidateRange(j, j + winTabLength - 1);
+								break;
+							}
+						}
+						this.gStateObject.windows[i] = new_window_state.windows[0];
+						break;
+					}
+				}
+				break;
+			default:
 				var isWindow = (data[0] == "windowClose");
 				var adding = (data[0] == "TabOpen");
 				var loading = (data[0] == "load") || (data[0] == "pageshow") || (data[0] == "locationChange") || (data[0] == "iconChange");
 			
-				var window_id = isWindow ? data[1] : SessionStore.getWindowValue(this.updateData.window,"__SessionManagerWindowId");
 				var tab_position = !isWindow ? parseInt(data[1]) : null;
 				var old_tab_position = parseInt(data[2]);
 				var moving = !isNaN(old_tab_position) ? (tab_position - old_tab_position) : 0;
-			
+				
+				// If moving tab to same position, don't do anything (SeaMonkey does this when opening a new tab)
+				if ((data[0] == "TabMove") && (tab_position == old_tab_position))
+					break;
+
+				var window_id = isWindow ? data[1] : SessionStore.getWindowValue(this.updateData.window,"__SessionManagerWindowId");
+					
 				// Look for closed window and remove it
 				for (var i=0; i<this.gStateObject.windows.length; i++) {
 					// find matching window in gStateObject
@@ -383,19 +437,37 @@ with (com.morac) {
 								}
 								// Get tab tree state - don't bother copying parent window if loading since we don't use that
 								var tabData = (removing || moving) ? null : this.addTabStateObjectToTree(new_window_state.windows[0].tabs[tab_position], loading ? null : this.gTreeData[j]);
+								//if (tabData) dump(tabData.toSource() + "\n");
 								var pos = isWindow ? j : (j + tab_position + 1);
 								var windowOpen = this.treeView.isContainerOpen(j);
 								if (loading && this.gTreeData[j].tabs.length > 0) {
 									// Just update gTreeData for window object and if windowOpen update 
 									// the gTreeData for the tab and invalidate the row
-									this.gTreeData[j].tabs[tab_position].label = tabData.label;
+									this.gTreeData[j].tabs[tab_position].label = data[3] ? decodeURIComponent(data[3]) : tabData.label;
 									this.gTreeData[j].tabs[tab_position].url = tabData.url;
 									this.gTreeData[j].tabs[tab_position].src = tabData.src;
 									
+									// The group ID is only set on a load so read it here
+									if (this.gTreeData[j].tabs[tab_position].group == 0) {
+										var groupID = this.findGroupID(new_window_state.windows[0].tabs[tab_position]);
+										this.gTreeData[j].tabs[tab_position].group = groupID;
+										this.gTreeData[j].tabs[tab_position].groupName = this.gTreeData[j].tabs[tab_position].parent.tabGroups[groupID] || (groupID ? groupID : "");
+										
+										// update other tabs if needed
+										if (groupID != 0) {
+											for (var tab in new_window_state.windows[0].tabs) {
+												if ((tab != tab_position) && (this.gTreeData[j].tabs[tab].group == 0) && (this.findGroupID(new_window_state.windows[0].tabs[tab]) == groupID)) {
+													this.gTreeData[j].tabs[tab].group = groupID;
+													this.gTreeData[j].tabs[tab].groupName = this.gTreeData[j].tabs[tab].parent.tabGroups[groupID] || (groupID ? groupID : "");
+													if (windowOpen) {
+														this.treeView.treeBox.invalidateRow(j + tab + 1);
+													}
+												}
+											}
+										}
+									}
+
 									if (windowOpen) {
-										this.gTreeData[pos].label = tabData.label;
-										this.gTreeData[pos].url = tabData.url;
-										this.gTreeData[pos].src = tabData.src;
 										this.treeView.treeBox.invalidateRow(pos);
 									}
 								}
@@ -416,6 +488,9 @@ with (com.morac) {
 									if (!isWindow) {
 										if (tabData) this.gTreeData[j].tabs.splice(tab_position, 0, tabData);
 										else {
+											// If moving a tab that doesn't exist (SeaMonkey frequently does this when opening tabs), get out of here
+											if (this.gTreeData[j].tabs.length <= (tab_position - moving))
+												break;
 											var splicedTab = this.gTreeData[j].tabs.splice(tab_position - moving, 1);
 											if (moving) this.gTreeData[j].tabs.splice(tab_position, 0, splicedTab[0]);
 										}
@@ -453,6 +528,11 @@ with (com.morac) {
 							// If changing tabs, simply replace the old window state with the new one to make things simpler
 							case "windowClose":
 								this.gStateObject.windows.splice(i, 1);
+								// clear out saved window and switch to "save" if window is saved since if it is, this is only called if window is closed
+								if (this.oneWindow) {
+									this.oneWindow = null;
+									gSessionManager.save();
+								}
 								break;
 							case "TabClose":
 								this.gStateObject.windows[i].tabs.splice(tab_position, 1);
@@ -469,6 +549,7 @@ with (com.morac) {
 						break;
 					}
 				}
+				break;
 			}
 		},
 		
@@ -476,7 +557,7 @@ with (com.morac) {
 
 		storeSession: function(aSaving) {
 			// If saving make sure we have the most up to date session data
-			if (aSaving && !this.oneWindow) this.gStateObject = gSessionManager.JSON_decode(SessionStore.getBrowserState());
+			if (aSaving) this.gStateObject = gSessionManager.JSON_decode(this.oneWindow ? SessionStore.getWindowState(this.oneWindow) : SessionStore.getBrowserState());
 		
 			// remove all unselected tabs from the state before restoring it
 			// remove all selected tabs from state when deleting
@@ -518,7 +599,7 @@ with (com.morac) {
 				}
 				else if (col.value.id == "restore")
 					this.toggleRowChecked(row.value);
-				else if (!this.treeView.isContainer(row.value))
+				else if (this.gSaving && !this.treeView.isContainer(row.value))
 					this.populateSessionNameFromTabLabel(row.value);
 			}
 		},
@@ -537,7 +618,7 @@ with (com.morac) {
 					else
 						this.restoreSingleTab(ix, aEvent.shiftKey);
 				}
-				else if (!this.treeView.isContainer(ix)) {
+				else if (this.gSaving && !this.treeView.isContainer(ix)) {
 					this.populateSessionNameFromTabLabel(ix);
 				}
 				// Don't submit if hit enter on tab tree
@@ -635,8 +716,8 @@ with (com.morac) {
 				else return;
 			}
 
-			// gSingleWindowMode is set if Tab Mix Plus's single window mode is enabled
-			var TMP_SingleWindowMode = !useWindow && typeof(win.gSingleWindowMode) != "undefined" && win.gSingleWindowMode;
+			// Tab Mix Plus's single window mode is enabled and we want to open a new window
+			var TMP_SingleWindowMode = !useWindow && gSessionManager.tabMixPlusEnabled && gPreferenceManager.get("extensions.tabmix.singleWindow", false, true)
 
 			var item = this.gTreeData[aIx];
 			var winState = { windows : new Array(1) };

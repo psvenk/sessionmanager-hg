@@ -80,3 +80,18 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "载入 (添加到当前窗口)">
 <!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "保持此窗口打开">
+<!ENTITY clearTabList.label "清空 &apos;Closed&apos; 标签页列表...">
+<!ENTITY clearTabList.accesskey "T">
+<!ENTITY clearWindowList.label "清空 &apos;Closed&apos; 窗口列表...">
+<!ENTITY clearWindowList.accesskey "W">
+<!ENTITY hidden.label "隐藏">
+<!ENTITY contribute.label "捐助">
+<!ENTITY support.label "支持该扩展:">
+<!ENTITY session_group_verb.label "组">
+<!ENTITY deleted_sessions.label "删除会话">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "移除全部已删除会话">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "永远删除会话">
+<!ENTITY permanently_delete.accesskey "P">

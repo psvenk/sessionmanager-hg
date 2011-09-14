@@ -47,7 +47,10 @@ var gSessionManagerDonate = {
 		var wmed = wm.QueryInterface(Components.interfaces.nsIWindowMediator);
 		var win = wmed.getMostRecentWindow("navigator:browser");
 		if (!win) {
-			alert("Cannot open a new tab!");
+			var watcher = Components.classes["@mozilla.org/embedcomp/window-watcher;1"].getService(Components.interfaces.nsIWindowWatcher);
+			var argstring = Components.classes["@mozilla.org/supports-string;1"].createInstance(Components.interfaces.nsISupportsString);
+			argstring.data = url;
+			watcher.openWindow(null, "chrome://browser/content/browser.xul", "_blank", "chrome,all,dialog=no", argstring);
 		}
 		else {
 			var content = win.document.getElementById("content");

@@ -39,4 +39,6 @@
 <!ENTITY column_name.label "Název">
 <!ENTITY cancel.label "Zrušit">
 <!ENTITY done.label "Dokončit">
-<!ENTITY done.tooltip "Zavře okno Průzkumník relací">
+<!ENTITY done.tooltip "Zavře okno Průzkumníka relací">
+<!ENTITY session_load.label "Načíst">
+<!ENTITY session_load.accesskey "N">

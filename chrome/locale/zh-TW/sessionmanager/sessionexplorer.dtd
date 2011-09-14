@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "取消">
 <!ENTITY done.label "完成">
 <!ENTITY done.tooltip "關閉「瀏覽頁組內容」視窗">
+<!ENTITY session_load.label "載入">
+<!ENTITY session_load.accesskey "L">

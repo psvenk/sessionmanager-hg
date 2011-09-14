@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Відміна">
 <!ENTITY done.label "Так">
 <!ENTITY done.tooltip "Закрити вікно Оглядача Сеансів">
+<!ENTITY session_load.label "Завантажити">
+<!ENTITY session_load.accesskey "З">

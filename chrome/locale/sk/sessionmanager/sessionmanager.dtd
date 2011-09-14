@@ -79,3 +79,18 @@
 <!ENTITY abandonWindowSession.accesskey "u">
 <!ENTITY load_append_window.label "Načítať (pripojiť do aktuálneho okna)">
 <!ENTITY load_append_window.accesskey "t">
+<!ENTITY leave_window_open.label "Ponechať toto okno prázdne">
+<!ENTITY clearTabList.label "Vymazať zoznam zatvorených kariet...">
+<!ENTITY clearTabList.accesskey "k">
+<!ENTITY clearWindowList.label "Vymazať zoznam zatvorených okien...">
+<!ENTITY clearWindowList.accesskey "o">
+<!ENTITY hidden.label "Skryté">
+<!ENTITY contribute.label "Prispieť">
+<!ENTITY support.label "Podporiť tento doplnok:">
+<!ENTITY session_group_verb.label "Zoskupiť">
+<!ENTITY deleted_sessions.label "Odstránené relácie">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Odstrániť všetky odstránené relácie">
+<!ENTITY empty_trash.accesskey "d">
+<!ENTITY permanently_delete.label "Natrvalo odstrániť reláciu">
+<!ENTITY permanently_delete.accesskey "N">

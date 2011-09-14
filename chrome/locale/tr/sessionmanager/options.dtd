@@ -136,3 +136,63 @@
 <!ENTITY prepend.label "Prepend?">
 <!ENTITY append.label "Ekle">
 <!ENTITY donotadd.label "Ekleme">
+<!ENTITY use_browser_crash_prompt.label "Tarayıcının dahili çökme kurtarması sistemini kullan">
+<!ENTITY use_browser_crash_prompt.accesskey "U">
+<!ENTITY reset_warnings.label "Uyarıları sıfırla">
+<!ENTITY reset_warnings.accesskey "R">
+<!ENTITY export_settings.label "Ayarları dışarı aktar">
+<!ENTITY export_settings.accesskey "X">
+<!ENTITY import_settings.label "Ayarları içe aktar">
+<!ENTITY import_settings.accesskey "I">
+<!ENTITY settingsImportExport.caption "AL/Ver Ayarları">
+<!ENTITY keyboard.caption "Klavye Kısayolları">
+<!ENTITY keyboard.desc "Bir eylem için klavye kısayolu kullanmak istiyorsanız buraya girin, istemiyorsanız boş bırakın.  Değişiklikler şimdiki pencerede aktif olmaz.">
+<!ENTITY clear.label "Temizle">
+<!ENTITY clear.accesskey "C">
+<!ENTITY clear_tab_list.label "Kapatılan Sekmeleri Temizle">
+<!ENTITY clear_tab_list.accesskey "a">
+<!ENTITY clear_window_list.label "Kapatılan Pencereleri Temizle">
+<!ENTITY clear_window_list.accesskey "i">
+<!ENTITY backup_on_restart.label "Tarayıcı yeniden başlarken yedek kaydet">
+<!ENTITY backup_on_restart.accesskey "b">
+<!ENTITY keep_deleted_sessions.label "Silinmiş oturumların tutulacağı gün sayısı:">
+<!ENTITY keep_deleted_sessions.accesskey "d">
+<!ENTITY concurrent.label "Aynı anda geri alınacak sekme sayısı">
+<!ENTITY concurrent.accesskey "T">
+<!ENTITY do_not_color_toolbar_button.label "Oturumlar yüklendiğinde renk araç çubuğu düğmesi yok.">
+<!ENTITY do_not_color_toolbar_button.accesskey "D">
+<!ENTITY preserve_app_tabs.label "Tutturulmuş Programlar sekmesini değiştirme">
+<!ENTITY preserve_app_tabs.accesskey "D">
+<!ENTITY logging_to_console.label "Konsol hatalarını kaydet">
+<!ENTITY logging_to_console.accesskey "A">
+<!ENTITY update_message.label "Güncellemeden sonra güncelleme web sayfasını göster">
+<!ENTITY update_message.accesskey "S">
+<!ENTITY double_click_session.label "Var olan oturumdaki çift tıklama oturum üzerine yazılır.">
+<!ENTITY double_click_session.accesskey "D">
+<!ENTITY replace_with_name_replace.label "kayıtlı oturum ismi yazı kutusundaki ile değiştirilir">
+<!ENTITY replace_with_name_keep.label "mevcut oturum adını koru">
+<!ENTITY show_icon_in_menu.label "Araçlar menüsünde simge göster">
+<!ENTITY show_icon_in_menu.accesskey "I">
+<!ENTITY set_encryption_password.label "Oturum şifreleme anahtarınızı korumak için bir parola girin">
+<!ENTITY set_encryption_password.accesskey "E">
+<!ENTITY change_encryption_key_password.label "Şifreleme anahtarı parolasını değiştir.">
+<!ENTITY change_encryption_key_password.accesskey "C">
+<!ENTITY save_encryption_key.label "Şifreleme anahtarı parolasını tarayıcı şifre yöneticisinde sakla">
+<!ENTITY save_encryption_key.accesskey "S">
+<!ENTITY restore_hidden_tabs.label "Gizli sekmeleri geri yükle">
+<!ENTITY restore_hidden_tabs.accesskey "H">
+<!ENTITY display_menus_in_submenu.label "Oturum Yöneticisi menü öğelerini alt menüde göster">
+<!ENTITY display_menus_in_submenu.accesskey "D">
+<!ENTITY use_sql_cache.label "Temel oturum verilerini diskte önbellekle. Oturumlar içinde arayabilmeyi aktif eder">
+<!ENTITY use_sql_cache.accesskey "C">
+<!ENTITY rebuild_cache.label "Önbellek verisini yenile">
+<!ENTITY rebuild_cache.accesskey "R">
+<!ENTITY log_level_error.label "Hataları kaydet">
+<!ENTITY log_level_error.accesskey "e">
+<!ENTITY allow_duplicates.label "Varolan bir oturumla aynı ada sahip bir oturum kaydedilmesine izin ver">
+<!ENTITY allow_duplicates.accesskey "A">
+<!ENTITY backup_every.label "Yeni bir yedek oturum oluşturum">
+<!ENTITY backup_every.accesskey "C">
+<!ENTITY minutes "dakika">
+<!ENTITY restore_on_demand.label "İstenilen sekmeleri geri yükle">
+<!ENTITY restore_on_demand.accesskey "R">

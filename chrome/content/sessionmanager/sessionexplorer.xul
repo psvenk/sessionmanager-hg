@@ -15,7 +15,7 @@
 	title="&sessionManager;"
 	style="min-width: 60em; -moz-user-focus: ignore;"
 	persist="width,height"
-	onload="onLoad()"
+	onload="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onLoad()"
 >
 	<script
 		type="application/x-javascript"
@@ -42,7 +42,7 @@
 		<command
 			id="cmd_session_open"
 			observes="stdMode"
-			oncommand="onCmdOpen('');window.close()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdOpen('');window.close()"
 			label="&session_open.label;"
 			accesskey="&session_open.accesskey;"
 			tooltiptext="&session_open.tooltip;"
@@ -50,7 +50,7 @@
 		<command
 			id="cmd_session_open_overwrite"
 			observes="stdMode"
-			oncommand="onCmdOpen('overwrite');window.close()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdOpen('overwrite');window.close()"
 			label="&session_open_overwrite.label;"
 			accesskey="&session_open_overwrite.accesskey;"
 			tooltiptext="&session_open_overwrite.tooltip;"
@@ -58,7 +58,7 @@
 		<command
 			id="cmd_session_open_newwindow"
 			observes="stdMode"
-			oncommand="onCmdOpen('newwindow');window.close()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdOpen('newwindow');window.close()"
 			label="&session_open_newwindow.label;"
 			accesskey="&session_open_newwindow.accesskey;"
 			tooltiptext="&session_open_newwindow.tooltip;"
@@ -66,7 +66,7 @@
 		<command
 			id="cmd_session_open_append"
 			observes="stdMode"
-			oncommand="onCmdOpen('append');window.close()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdOpen('append');window.close()"
 			label="&session_open_append.label;"
 			accesskey="&session_open_append.accesskey;"
 			tooltiptext="&session_open_append.tooltip;"
@@ -74,7 +74,7 @@
 		<command
 			id="cmd_session_rename"
 			observes="stdMode"
-			oncommand="onCmdRename('&session_rename_ok.label;')"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdRename('&session_rename_ok.label;')"
 			label="&session_rename.label;"
 			accesskey="&session_rename.accesskey;"
 			tooltiptext="&session_rename.tooltip;"
@@ -82,7 +82,7 @@
 		<command
 			id="cmd_session_delete"
 			observes="stdMode"
-			oncommand="onCmdDelete()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdDelete()"
 			label="&session_delete.label;"
 			accesskey="&session_delete.accesskey;"
 			tooltiptext="&session_delete.tooltip;"
@@ -90,7 +90,7 @@
 		<command
 			id="cmd_session_save"
 			observes="stdMode"
-			oncommand="onCmdSave()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdSave()"
 			label="&session_save.label;"
 			accesskey="&session_save.accesskey;"
 			tooltiptext="&session_save.tooltip;"
@@ -98,7 +98,7 @@
 		<command
 			id="cmd_session_save_w"
 			observes="stdMode"
-			oncommand="onCmdSaveWindow()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdSaveWindow()"
 			label="&session_save_w.label;"
 			accesskey="&session_save_w.accesskey;"
 			tooltiptext="&session_save_w.tooltip;"
@@ -106,7 +106,7 @@
 		<command
 			id="cmd_session_open_folder"
 			observes="stdMode"
-			oncommand="onCmdOpenFolder()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCmdOpenFolder()"
 			label="&session_open_folder.label;"
 			accesskey="&session_open_folder.accesskey;"
 			tooltiptext="&session_open_folder.tooltip;"
@@ -147,7 +147,7 @@
 			id="key_input_mode_cancel"
 			keycode="VK_ESCAPE"
 			disabled="true"
-			oncommand="onCancel()"
+			oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCancel()"
 		/>
 	</keyset>
 
@@ -232,10 +232,10 @@
 				<hbox id="prompt" hidden="true">
 					<textbox
 						id="text_box"
-						oninput="onTextboxInput();"
+						oninput="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onTextboxInput();"
 						flex="1"
 					/>
-					<button label="&cancel.label;" oncommand="onCancel()" />
+					<button label="&cancel.label;" oncommand="com.morac.SessionManagerAddon.gSessionManagerSessionExplorer.onCancel()" />
 					<button id="ok_button" />
 				</hbox>
 				<!-- TODO

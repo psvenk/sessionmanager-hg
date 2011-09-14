@@ -29,7 +29,7 @@
 <!ENTITY session_open_folder.accesskey "F">
 <!ENTITY session_open_folder.tooltip "セッションマネージャのフォルダを開く">
 <!ENTITY column_autosave.label "A">
-<!ENTITY column_autosave.tooltip "自動セーブセッション">
+<!ENTITY column_autosave.tooltip "セッションの自動保存">
 <!ENTITY column_windows.label "W">
 <!ENTITY column_windows.tooltip "ウインドウ">
 <!ENTITY column_tabs.label "T">
@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "キャンセル">
 <!ENTITY done.label "完了">
 <!ENTITY done.tooltip "セッションエクスプローラのウインドウを閉じる">
+<!ENTITY session_load.label "読み込み">
+<!ENTITY session_load.accesskey "L">

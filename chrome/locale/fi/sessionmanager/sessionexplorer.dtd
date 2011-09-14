@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Peru">
 <!ENTITY done.label "Valmis">
 <!ENTITY done.tooltip "Sulje istuntojen selausikkuna">
+<!ENTITY session_load.label "Lataa">
+<!ENTITY session_load.accesskey "L">

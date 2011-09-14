@@ -1,28 +1,28 @@
 <!ENTITY sessionManager "Менеджер сессий">
 <!ENTITY toolsmenu.accesskey "М">
-<!ENTITY save.label "Сохранить сессию...">
+<!ENTITY save.label "Сохранить сессию…">
 <!ENTITY save.accesskey "С">
-<!ENTITY saveOne.label "Сохранить текущее окно...">
+<!ENTITY saveOne.label "Сохранить текущее окно…">
 <!ENTITY saveOne.accesskey "о">
 <!ENTITY closeSession.label "Закрыть и сохранить текущую сессию">
 <!ENTITY closeSession.accesskey "З">
 <!ENTITY abandonSession.label "Удалить эту сессию">
 <!ENTITY abandonSession.accesskey "У">
-<!ENTITY rename.label "Переименовать сессию">
+<!ENTITY rename.label "Переименовать сессию…">
 <!ENTITY rename.accesskey "П">
-<!ENTITY remove.label "Удалить сессии...">
+<!ENTITY remove.label "Удалить сессии…">
 <!ENTITY remove.accesskey "У">
 <!ENTITY openFolder.label "Открыть папку сессий">
 <!ENTITY openFolder.accesskey "т">
 <!ENTITY options.label "Настройки Менеджера сессий">
 <!ENTITY options.accesskey "Н">
-<!ENTITY undoClosed.label "Восстановить закрытое...">
+<!ENTITY undoClosed.label "Восстановить закрытое…">
 <!ENTITY undoClosed.accesskey "к">
 <!ENTITY closedWindows "Закрытые окна:">
 <!ENTITY closedTabs "Закрытые вкладки:">
-<!ENTITY clearList.label "Очистить список 'Закрытые'...">
+<!ENTITY clearList.label "Очистить список &apos;Закрытые&apos;…">
 <!ENTITY clearList.accesskey "ч">
-<!ENTITY toolbar.tooltip "Сохранить текущую сессию...">
+<!ENTITY toolbar.tooltip "Сохранить текущую сессию…">
 <!ENTITY toolbar.undo.label "Восстановить закрытую вкладку">
 <!ENTITY toolbar.undo.tooltip "Восстановить последнюю закрытую вкладку">
 <!ENTITY prompt.ignore.label "Не показывать это сообщение в дальнейшем">
@@ -36,7 +36,7 @@
 <!ENTITY replace_all.accesskey "З">
 <!ENTITY replace_window.label "Заменить сессию содержимым текущего окна">
 <!ENTITY replace_window.accesskey "О">
-<!ENTITY remove_one.label "Удалить сессию">
+<!ENTITY remove_one.label "Удалить сессию…">
 <!ENTITY set_startup.label "открывать при запуске">
 <!ENTITY set_startup.accesskey "З">
 <!ENTITY openSessionManagerSidebar.commandkey "С">
@@ -48,9 +48,9 @@
 <!ENTITY remove_item.label "Удалить строку">
 <!ENTITY remove_item.accesskey "У">
 <!ENTITY session_group.label "Группа">
-<!ENTITY rename_group.label "Переименовать группу...">
-<!ENTITY remove_group.label "Удалить группу...">
-<!ENTITY change_group.label "Переместить в группу...">
+<!ENTITY rename_group.label "Переименовать группу…">
+<!ENTITY remove_group.label "Удалить группу…">
+<!ENTITY change_group.label "Переместить в группу…">
 <!ENTITY change_group.accesskey "м">
 <!ENTITY group.label "Группировать сессию(ии)">
 <!ENTITY group.accesskey "Г">
@@ -62,11 +62,11 @@
 <!ENTITY winTabTree.listHeader "окна и вкладки">
 <!-- LOCALIZATION NOTE: &#37;S will be replaced with a number. -->
 <!ENTITY winTabTree.windowLabel "окно &#37;S">
-<!ENTITY load.label "Загрузить сессию...">
+<!ENTITY load.label "Загрузить сессию…">
 <!ENTITY load.accesskey "З">
 <!ENTITY prompt.append.label "Добавить к сессии">
 <!ENTITY prompt.replace.label "Заменить сессию">
-<!ENTITY ctrl_click_note.label "Внимание: щелчок по вкладке с нажатой клавишей &lt;CTRL&gt; добавит вкладку к содержимому существующего окна.">
+<!ENTITY ctrl_click_note.label "Внимание: щелчок по вкладке с нажатой клавишей CTRL добавит вкладку к содержимому существующего окна.">
 <!ENTITY select_all.label "Выбрать все">
 <!ENTITY select_none.label "Ничего не выбирать">
 <!ENTITY toggle_selection.label "Переключить выбор">
@@ -78,5 +78,20 @@
 <!ENTITY closeWindowSession.accesskey "к">
 <!ENTITY abandonWindowSession.label "выйти из сессии окна">
 <!ENTITY abandonWindowSession.accesskey "и">
-<!ENTITY load_append_window.label "Загрузить (Добавить к текущему окну)">
+<!ENTITY load_append_window.label "Загрузить (добавить к текущему окну)">
 <!ENTITY load_append_window.accesskey "щ">
+<!ENTITY leave_window_open.label "Не закрывать это окно">
+<!ENTITY clearTabList.label "Очистить список 'Закрытые вкладки'…">
+<!ENTITY clearTabList.accesskey "л">
+<!ENTITY clearWindowList.label "Очистить список 'Закрытые окна'…">
+<!ENTITY clearWindowList.accesskey "к">
+<!ENTITY hidden.label "Скрыто">
+<!ENTITY contribute.label "пожертвовать">
+<!ENTITY support.label "Поддержать это дополнение:">
+<!ENTITY session_group_verb.label "Группа">
+<!ENTITY deleted_sessions.label "Удалённые сессии">
+<!ENTITY deleted_sessions.accesskey "ё">
+<!ENTITY empty_trash.label "Окончательно стереть все удалённые сессии">
+<!ENTITY empty_trash.accesskey "р">
+<!ENTITY permanently_delete.label "Стереть сессию окончательно">
+<!ENTITY permanently_delete.accesskey "о">

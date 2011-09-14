@@ -80,3 +80,27 @@
 <!ENTITY abandonWindowSession.accesskey "b">
 <!ENTITY load_append_window.label "Charger (ajouter à la fenêtre courante)">
 <!ENTITY load_append_window.accesskey "t">
+<!ENTITY leave_window_open.label "Laisser cette fenêtre ouverte">
+<!ENTITY clearTabList.label "Effacer la liste des onglets « fermés »…">
+<!ENTITY clearTabList.accesskey "O">
+<!ENTITY clearWindowList.label "Effacer la liste des fenêtres « fermées »…">
+<!ENTITY clearWindowList.accesskey "F">
+<!ENTITY hidden.label "Masqué">
+<!ENTITY contribute.label "Contribuer">
+<!ENTITY support.label "Soutenir cette extension :">
+<!ENTITY session_group_verb.label "Groupe">
+<!ENTITY deleted_sessions.label "Sessions supprimées">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Supprimer toutes les sessions supprimées">
+<!ENTITY empty_trash.accesskey "S">
+<!ENTITY permanently_delete.label "Supprimer définitivement la session">
+<!ENTITY permanently_delete.accesskey "d">
+<!ENTITY search.label "Rechercher…">
+<!ENTITY edit.label "Modifier la session…">
+<!ENTITY edit.accesskey "M">
+<!ENTITY addtab.label "Ajouter l'onglet à la session…">
+<!ENTITY addtab.accesskey "A">
+<!ENTITY viewcontents.label "Afficher le contenu de session">
+<!ENTITY viewcontents.accesskey "A">
+<!ENTITY export_to_html.label "Exporter le contenu de session vers le fichier HTML des marque-pages">
+<!ENTITY export_to_html.accesskey "E">

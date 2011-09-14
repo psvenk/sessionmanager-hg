@@ -40,3 +40,5 @@
 <!ENTITY cancel.label "Cancelar">
 <!ENTITY done.label "Feito">
 <!ENTITY done.tooltip "Fechar janela do explorador de sessão">
+<!ENTITY session_load.label "Carregar">
+<!ENTITY session_load.accesskey "g">

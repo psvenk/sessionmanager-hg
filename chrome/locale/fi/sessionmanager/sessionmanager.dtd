@@ -70,3 +70,27 @@
 <!ENTITY select_none.label "Poista valinnat">
 <!ENTITY toggle_selection.label "Vaihda valinnat">
 <!ENTITY winTabTree.urlHeader "Sijainti">
+<!ENTITY prompt.append_window.label "Lisää nykyiseen ikkunaan">
+<!ENTITY session_explorer.label "Istuntojen selain">
+<!ENTITY session_explorer.accesskey "E">
+<!ENTITY closeWindowSession.label "Tallenna ja sulje ikkunan istunto">
+<!ENTITY closeWindowSession.accesskey "l">
+<!ENTITY abandonWindowSession.label "Hylkää ikkunan istunto">
+<!ENTITY abandonWindowSession.accesskey "b">
+<!ENTITY load_append_window.label "Lataa (liitä nykyiseen ikkunaan)">
+<!ENTITY load_append_window.accesskey "i">
+<!ENTITY leave_window_open.label "Jätä tämä ikkuna auki">
+<!ENTITY clearTabList.label "Tyhjennä suljettujen välilehtien lista...">
+<!ENTITY clearTabList.accesskey "T">
+<!ENTITY clearWindowList.label "Tyhjennä suljettujen ikkunoiden lista...">
+<!ENTITY clearWindowList.accesskey "W">
+<!ENTITY hidden.label "Piilotettu">
+<!ENTITY contribute.label "Lahjoita">
+<!ENTITY support.label "Tue tätä lisäosaa:">
+<!ENTITY session_group_verb.label "Ryhmä">
+<!ENTITY deleted_sessions.label "Poistetut istunnot">
+<!ENTITY deleted_sessions.accesskey "e">
+<!ENTITY empty_trash.label "Poista kaikki poistetut istunnot">
+<!ENTITY empty_trash.accesskey "R">
+<!ENTITY permanently_delete.label "Poista istunto pysyvästi">
+<!ENTITY permanently_delete.accesskey "P">
