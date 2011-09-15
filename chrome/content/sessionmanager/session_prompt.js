@@ -885,10 +885,15 @@ with (com.morac.SessionManagerAddon) {
 					// remote quotes from search string if surrounds by quotes (i.e, regex_arg is not "i")
 					if (regex_arg != "i")
 						search_value = search_value.substr(1, search_value.length-2);
-					// reg expresion can't end in "\"
-					if (search_value[search_value.length-1] == "\\" && search_value[search_value.length-2] != "\\")
-						search_value = search_value.slice(0,search_value.length-1);
-					let regexp = new RegExp(search_value, regex_arg);
+					// Catch any invalid regular expressions and treat them as if they are not regular expressions
+					let regexp = null;
+					try	{
+						regexp = new RegExp(search_value, regex_arg);
+					}
+					catch(ex) {
+						search_value = search_value.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+						regexp = new RegExp(search_value, regex_arg);
+					}
 					let sessions = null;
 					
 					// Get true sessions (use override if set)
@@ -904,11 +909,13 @@ with (com.morac.SessionManagerAddon) {
 						sessions = gSessionManager.getSessions();
 					}
 
-					// Get tab data as an array of file names indicating whether the tab data matches the regular expression.
-					let tabData = (search_type & 19 ) ? gSessionManagerSessionPrompt.searchTitlesUrls(regexp, search_type) : null;
-					sessions = sessions.filter(function(aSession) {
-						return (((search_type & 4 ) && regexp.test(aSession.name)) || ((search_type & 8 ) && regexp.test(aSession.group)) || (tabData && tabData[aSession.fileName]));
-					});
+					if (regexp) {
+						// Get tab data as an array of file names indicating whether the tab data matches the regular expression.
+						let tabData = (search_type & 19 ) ? gSessionManagerSessionPrompt.searchTitlesUrls(regexp, search_type) : null;
+						sessions = sessions.filter(function(aSession) {
+							return (((search_type & 4 ) && regexp.test(aSession.name)) || ((search_type & 8 ) && regexp.test(aSession.group)) || (tabData && tabData[aSession.fileName]));
+						});
+					}
 					return sessions;
 				}
 			}
