@@ -56,10 +56,10 @@ const SM_STARTUP_PREFERENCE = "startup";
 const SM_SHUTDOWN_ON_LAST_WINDOW_CLOSED_PREFERENCE = "shutdown_on_last_window_close";
 
 const HIGHEST_STARTUP_PROCESSING_VALUE = 4;
-const IDLE_TIME = 60; // How many seconds to wait before system is considered idle.
+const IDLE_TIME = 20; // How many seconds to wait before system is considered idle.  Can be low since processing will stop when no longer idle
 const PERIODIC_TIME = 86400000;  // Do background processing every 24 hours (when idle)
 const PROCESS_AT_STARTUP = false;  // Process background processing immediately upon startup if true, otherwise wait till system is idle or time below
-const STARTUP_TIMER = 900000; // Time (15 minutes) to wait for system to go idle before forcing background processing to start
+const STARTUP_TIMER = 600000; // Time (10 minutes) to wait for system to go idle before forcing background processing to start
 
 Cu.import("resource://gre/modules/XPCOMUtils.jsm");
 
@@ -94,6 +94,7 @@ SessionManagerHelperComponent.prototype = {
 	                    { category: "command-line-handler", entry: "SessionManagerHelperComponent" }],
 						
 	// State variables
+	_bug619249_already_checked: false,
 	_encryption_in_progress: false,
 	_encryption_in_progress_system_idle: false,
 	_encryption_stopped_because_system_no_longer_idle: false,
@@ -114,6 +115,7 @@ SessionManagerHelperComponent.prototype = {
 	// Timers
 	mTimer: null,
 	mStartupTimer: null,
+	mBug619249Timer: null,
 	
 	// interfaces supported
 	QueryInterface: XPCOMUtils.generateQI([Ci.nsIObserver, Ci.nsICommandLineHandler]),
@@ -435,10 +437,41 @@ SessionManagerHelperComponent.prototype = {
 				gEncryptionManager.stop();
 			}
 			break;
+		case "timer-callback":
+			if (aSubject == this.mBug619249Timer) {
+				log("Bug 619249 Timer fired, faking SessionStore window restore callback");
+				this.mBug619249Timer = null;
+				this._sessionStore_windows_restored = gSessionManager.getBrowserWindows().length;
+				this._check_for_window_restore_complete();
+			}
+			break;
 		}
 	},
 
 	/* ........ private methods .............. */
+
+	// If SessionStore generates a "The session file is invalid" error, it won't send a "sessionstore-windows-restored" notification in some versons of Firefox.
+	// From my testing 3.6 and 9.0a1 are okay, but 6 is not.  To work around, if SessionStore is set to restore windows, start a timer when the first window loads before 
+	// SessionStore has restored any windows.  The restore should occur shortly afterwards.  If it does cancel the timer, otherwise pretend as if a restore has occurred
+	// when the timer expires.  Only do this once (on startup).
+	testForBug619249: function() {
+		if (!this._bug619249_already_checked && (this._sessionStore_windows_restored == -1) && (this._sessionManager_windows_restored == -1) && (this._sessionManager_windows_loaded == 1)) {
+			this._bug619249_already_checked = true;
+			// We ignore SessionStore's notifications anyway if the following are set to don't do anything in those cases
+			if (!gSessionManager._crash_session_filename && !gSessionManager._restoring_backup_session && !gSessionManager._restoring_autosave_backup_session) {
+				var ss = Cc["@mozilla.org/browser/sessionstartup;1"].getService(Ci.nsISessionStartup);
+				try {
+					// If no windows, then SessionStore will throw a "this._initialState.windows[0] is undefined" error so start a 30 second timer (which is overkill really)
+					if (((ss.doRestore() || ss.sessionType == Ci.nsISessionStartup.DEFER_SESSION)) && (!ss.state.windows || (ss.state.windows.length == 0))) {
+						log("Bug 619249 timer started", "INFO");
+						this.mBug619249Timer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
+						this.mBug619249Timer.init(this, 30000, Ci.nsITimer.TYPE_ONE_SHOT);
+					}
+				}
+				catch(ex) { logError(ex); } 
+			}
+		}
+	},
 	
 	// This will send out notifications to Session Manager windows when the number of loaded windows equals the number of
 	// restored windows.  If SessionStore is restoring the windows or no windows are being restored, this happens once.
@@ -451,6 +484,13 @@ SessionManagerHelperComponent.prototype = {
 		let sessionstore_restored = (this._sessionManager_windows_loaded == this._sessionStore_windows_restored);
 		let sessionmanager_restored = (this._sessionManager_windows_loaded == this._sessionManager_windows_restored);
 		if (sessionstore_restored || sessionmanager_restored) {
+			// If the bug 619249 timer is running stop it now
+			if (this.mBug619249Timer) {
+				this.mBug619249Timer.cancel();
+				this.mBug619249Timer = null;
+				log("Bug 619249 timer canceled", "INFO");
+			}
+		
 			// Stop counting loaded windows and reset count
 			gSessionManager._countWindows = false;
 			this._sessionManager_windows_loaded = 0;
@@ -486,13 +526,17 @@ SessionManagerHelperComponent.prototype = {
 				// process next function
 				this._process_next_async_periodic_function();
 			else {
-				// Start a timer to force running of background processing after 15 minutes if system never goes idle
+				// Start a timer to force running of background processing after 10 minutes if system never goes idle
 				this.mStartupTimer = Cc["@mozilla.org/timer;1"].createInstance(Ci.nsITimer);
 				this.mStartupTimer.initWithCallback({
 					notify:function (aTimer) { OBSERVER_SERVICE.notifyObservers(null, "sessionmanager:startup-process-finished", "startup_timer"); }
 				}, STARTUP_TIMER, Ci.nsITimer.TYPE_ONE_SHOT);
 			}
 			
+		}
+		else {
+			// Try to work around Firefox bug 619249 which can prevent processing from occuring in Firefox 6 (and maybe other versions)
+			this.testForBug619249();
 		}
 	},
 	

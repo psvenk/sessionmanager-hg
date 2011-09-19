@@ -98,9 +98,8 @@ with (com.morac.SessionManagerAddon) {
 			_("preserve_app_tabs").parentNode.style.visibility = "collapse";
 		}
 		
-		// Only show option to restore hidden tabs if default value exists for it (Firefox 7 and up)
-		// Preference exists in Firefox 6, but doesn't do anything
-		if ((_("browser.sessionstore.restore_hidden_tabs").defaultValue == null) || (Application.name == "Firefox" && Application.version[0] == "6")) {
+		// Only show option to restore hidden tabs if default value exists for it
+		if (_("browser.sessionstore.restore_hidden_tabs").defaultValue == null) {
 			_("restore_hidden_tab").style.visibility = "collapse";
 		}
 
